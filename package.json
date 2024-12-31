@@ -1,0 +1,13 @@
+{
+  "name": "frc-2025",
+  "scripts": {
+    "format": "prettier --write **/*.java",
+    "check": "prettier --check **/*.java"
+  },
+  "author": "Ray-Pec Robotics \"System Meltdown\" FRC 2357",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-java": "^2.6.5"
+  }
+}
