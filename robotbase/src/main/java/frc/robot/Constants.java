@@ -4,6 +4,12 @@
 
 package frc.robot;
 
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoFactory.AutoBindings;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import java.util.function.BooleanSupplier;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -17,5 +23,37 @@ public final class Constants {
   public static class OperatorConstants {
 
     public static final int kDriverControllerPort = 0;
+  }
+
+  public static final class CHOREO {
+
+    public static final PIDController X_CONTROLLER = new PIDController(5, 0, 0);
+    public static final PIDController Y_CONTROLLER = new PIDController(5, 0, 0);
+    public static final PIDController ROTATION_CONTROLLER = new PIDController(
+      1,
+      0,
+      0
+    );
+
+    /**
+     * returns true if the alliance is red, false if it is blue
+     */
+    // public static final BooleanSupplier CHOREO_AUTO_MIRROR_PATHS =
+    //     new BooleanSupplier() {
+    //       @Override
+    //       public boolean getAsBoolean() {
+    //         return Robot.state.getAlliance() == Alliance.Red;
+    //       }
+    //     }; //TODO: uncomment once robot state is made.
+
+    public static final AutoBindings AUTO_BINDINGS = new AutoBindings();
+    // public static final AutoFactory AUTO_FACTORY =  new AutoFactory(
+    //   Robot.swerve::getPose2d,
+    //   Robot.swerve::setPose2d,
+    //   Robot.swerve::followChoreoPath,
+    //   true,
+    //   Robot.swerve,
+    //   AUTO_BINDINGS
+    // ); //TODO: uncomment this and related lines once Swerve Subsystem is made.
   }
 }

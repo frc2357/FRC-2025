@@ -4,9 +4,16 @@
 
 package frc.robot;
 
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoRoutine;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.auto.Autos;
+import java.util.Map;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -19,14 +26,44 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  public static AutoChooser autoChooser;
+
+  private Autos m_autos;
+
+  private Map<String, Command> m_autoCommandsToBind;
+  private Map<String, AutoRoutine> m_autoRoutinesToBind;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    autoChooser = new AutoChooser();
+
+    m_autos = new Autos();
+
+    SendableBuilderImpl autoChooserBuilder = new SendableBuilderImpl();
+    autoChooserBuilder.setTable(
+      NetworkTableInstance.getDefault().getTable("SmartDashboard/Auto chooser")
+    );
+    autoChooser.initSendable(autoChooserBuilder);
+    // The map of named commands we use in choreo
+    m_autoCommandsToBind = Map.of();
+
+    // The map of auto routines that will show up on the auto command chooser.
+    m_autoRoutinesToBind = Map.of();
+
+    m_autoCommandsToBind.forEach((String name, Command command) -> {
+      autoChooser.addCmd(name, () -> command);
+    });
+    m_autoRoutinesToBind.forEach((String name, AutoRoutine routine) -> {
+      autoChooser.addRoutine(name, () -> routine);
+    });
+
+    SmartDashboard.putData("Auto chooser", autoChooser);
+    SmartDashboard.putNumber("wait seconds", 0.0);
   }
 
   /**
@@ -57,7 +94,6 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
