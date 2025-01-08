@@ -35,25 +35,14 @@ public final class Constants {
       0
     );
 
-    /**
-     * returns true if the alliance is red, false if it is blue
-     */
-    // public static final BooleanSupplier CHOREO_AUTO_MIRROR_PATHS =
-    //     new BooleanSupplier() {
-    //       @Override
-    //       public boolean getAsBoolean() {
-    //         return Robot.state.getAlliance() == Alliance.Red;
-    //       }
-    //     }; //TODO: uncomment once robot state is made.
-
     public static final AutoBindings AUTO_BINDINGS = new AutoBindings();
-    // public static final AutoFactory AUTO_FACTORY =  new AutoFactory(
-    //   Robot.swerve::getPose2d,
-    //   Robot.swerve::setPose2d,
-    //   Robot.swerve::followChoreoPath,
-    //   true,
-    //   Robot.swerve,
-    //   AUTO_BINDINGS
-    // ); //TODO: uncomment this and related lines once Swerve Subsystem is made.
+    public static final AutoFactory AUTO_FACTORY = new AutoFactory(
+      Robot.swerve::getPose2d,
+      Robot.swerve::setPose2d,
+      Robot.swerve::followChoreoPath,
+      true,
+      Robot.swerve,
+      AUTO_BINDINGS
+    );
   }
 }
