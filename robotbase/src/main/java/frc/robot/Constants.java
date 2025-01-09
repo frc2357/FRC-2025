@@ -5,7 +5,6 @@
 package frc.robot;
 
 import choreo.auto.AutoFactory;
-import choreo.auto.AutoFactory.AutoBindings;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.function.BooleanSupplier;
@@ -35,14 +34,12 @@ public final class Constants {
       0
     );
 
-    public static final AutoBindings AUTO_BINDINGS = new AutoBindings();
     public static final AutoFactory AUTO_FACTORY = new AutoFactory(
       Robot.swerve::getPose2d,
       Robot.swerve::setPose2d,
       Robot.swerve::followChoreoPath,
       true,
-      Robot.swerve,
-      AUTO_BINDINGS
+      Robot.swerve
     );
   }
 }
