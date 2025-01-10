@@ -5,17 +5,13 @@
 package frc.robot;
 
 import choreo.auto.AutoChooser;
-import choreo.auto.AutoRoutine;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.auto.Autos;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import java.util.Map;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -26,45 +22,18 @@ public class Robot extends TimedRobot {
 
   private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
-
   public static CommandSwerveDrivetrain swerve;
   public static AutoChooser autoChooser;
-
-  private Autos m_autos;
-
-  private Map<String, Command> m_autoCommandsToBind;
-  private Map<String, AutoRoutine> m_autoRoutinesToBind;
+  public static Autos autos;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
-    m_robotContainer = new RobotContainer();
-
     swerve = TunerConstants.createDrivetrain();
-    autoChooser = new AutoChooser();
-
-    m_autos = new Autos();
-
-    SendableBuilderImpl autoChooserBuilder = new SendableBuilderImpl();
-    autoChooserBuilder.setTable(
-      NetworkTableInstance.getDefault().getTable("SmartDashboard/Auto chooser")
-    );
-    autoChooser.initSendable(autoChooserBuilder);
-    // The map of named commands we use in choreo
-    m_autoCommandsToBind = Map.of();
-
-    // The map of auto routines that will show up on the auto command chooser.
-    m_autoRoutinesToBind = Map.of("Cube test path", m_autos.cubeTestPath());
-
-    m_autoCommandsToBind.forEach((String name, Command command) -> {
-      autoChooser.addCmd(name, () -> command);
-    });
-    m_autoRoutinesToBind.forEach((String name, AutoRoutine routine) -> {
-      autoChooser.addRoutine(name, () -> routine);
-    });
+    autos = new Autos();
+    autoChooser = new AutoChooserSetup().makeAutochooser();
 
     SmartDashboard.putData("Auto chooser", autoChooser);
     SmartDashboard.putNumber("wait seconds", 0.0);
@@ -96,7 +65,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = autoChooser.selectedCommandScheduler();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
