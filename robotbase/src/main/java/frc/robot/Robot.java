@@ -23,7 +23,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   public static CommandSwerveDrivetrain swerve;
-  public static AutoChooser autoChooser;
+  public static AutoChooserManager autoChooserManager;
   public static Autos autos;
 
   /**
@@ -33,10 +33,7 @@ public class Robot extends TimedRobot {
   public Robot() {
     swerve = TunerConstants.createDrivetrain();
     autos = new Autos();
-    autoChooser = new AutoChooserSetup().makeAutochooser();
-
-    SmartDashboard.putData("Auto chooser", autoChooser);
-    SmartDashboard.putNumber("wait seconds", 0.0);
+    autoChooserManager = new AutoChooserManager();
   }
 
   /**
@@ -65,7 +62,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = autoChooser.selectedCommandScheduler();
+    m_autonomousCommand = autoChooserManager.getSelectedCommandScheduler();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
