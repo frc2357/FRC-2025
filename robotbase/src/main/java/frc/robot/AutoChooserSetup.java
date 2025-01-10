@@ -5,7 +5,6 @@ import choreo.auto.AutoRoutine;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.commands.auto.Autos;
 import java.util.Map;
 
 public class AutoChooserSetup {

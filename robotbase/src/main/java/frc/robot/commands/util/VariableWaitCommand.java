@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import java.util.function.DoubleSupplier;
 
 public class VariableWaitCommand extends WaitCommand {
+
   DoubleSupplier m_getSeconds;
 
   public VariableWaitCommand(DoubleSupplier getSeconds) {
