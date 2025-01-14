@@ -15,8 +15,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
-//import edu.wpi.first.math.controller.PIDController;
-
 public class Elevator extends SubsystemBase {
 
   private SparkMax m_motorLeft;
@@ -24,8 +22,6 @@ public class Elevator extends SubsystemBase {
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
-
-  // private PIDController m_PidController
 
   public Elevator() {
     m_motorLeft = new SparkMax(
