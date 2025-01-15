@@ -29,8 +29,8 @@ public final class Constants {
 
   public static class CAN_ID {
 
-    public static final int ELEVATOR_LEFT_MOTOR = 0;
-    public static final int ELEVATOR_RIGHT_MOTOR = 0;
+    public static final int ELEVATOR_LEFT_MOTOR = 9;
+    public static final int ELEVATOR_RIGHT_MOTOR = 10;
   }
 
   public static class OPERATOR_CONSTANTS {
@@ -68,19 +68,14 @@ public final class Constants {
         .idleMode(IdleMode.kBrake)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
-    public static final double LEFT_MOTOR_CLOSED_LOOP_P = 0;
-    public static final double LEFT_MOTOR_CLOSED_LOOP_I = 0;
-    public static final double LEFT_MOTOR_CLOSED_LOOP_D = 0;
-    public static final double LEFT_MOTOR_CLOSED_LOOP_F = 0;
+    public static final double LEFT_MOTOR_P = 0;
+    public static final double LEFT_MOTOR_I = 0;
+    public static final double LEFT_MOTOR_D = 0;
+    public static final double LEFT_MOTOR_F = 0;
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
-        .pidf(
-          LEFT_MOTOR_CLOSED_LOOP_P,
-          LEFT_MOTOR_CLOSED_LOOP_I,
-          LEFT_MOTOR_CLOSED_LOOP_D,
-          LEFT_MOTOR_CLOSED_LOOP_F
-        )
+        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
         .outputRange(-1, 1);
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
