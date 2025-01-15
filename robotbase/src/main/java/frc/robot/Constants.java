@@ -29,8 +29,8 @@ public final class Constants {
 
   public static class CAN_ID {
 
-    public static final int ELEVATOR_LEFT_MOTOR = 9;
-    public static final int ELEVATOR_RIGHT_MOTOR = 10;
+    public static final int ELEVATOR_LEFT_MOTOR = 23;
+    public static final int ELEVATOR_RIGHT_MOTOR = 24;
   }
 
   public static class OPERATOR_CONSTANTS {
