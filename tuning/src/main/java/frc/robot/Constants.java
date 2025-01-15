@@ -15,50 +15,22 @@ import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 
 import choreo.Choreo;
 import choreo.auto.AutoFactory;
-import choreo.auto.AutoFactory.AutoBindings;
+//import choreo.auto.AutoFactory.AutoBindings;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants.CAN_ID;
 
 public final class Constants {
 
   public static final class CAN_ID {
     public static final int ELEVATOR_LEFT_MOTOR = -1;
     public static final int ELEVATOR_RIGHT_MOTOR = -1;
-  }
-
-  public static final class ELEVATOR {
-
-    public static final double MAX_MOTION_ALLOWED_ERROR = 0;
-
-    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
-        .idleMode(IdleMode.kBrake)
-        .follow(CAN_ID.ELEVATOR_RIGHT_MOTOR, true);
-
-    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT = new SparkMaxConfig()
-        .idleMode(IdleMode.kBrake);
-
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_RIGHT = MOTOR_CONFIG_RIGHT.closedLoop
-        .pidf(0, 0, 0, 0)
-        .outputRange(-1, 1);
-
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT = MOTOR_CONFIG_LEFT.closedLoop
-        .pidf(0, 0, 0, 0)
-        .outputRange(-1, 1);
-
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_RIGHT = CLOSED_LOOP_CONFIG_RIGHT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR)
-        .maxAcceleration(0)
-        .maxVelocity(0);
-
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT = CLOSED_LOOP_CONFIG_LEFT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR)
-        .maxAcceleration(0)
-        .maxVelocity(0);
-
   }
 
   public static final class SWERVE {
@@ -87,20 +59,82 @@ public final class Constants {
     /**
      * returns true if the alliance is red, false if it is blue
      */
-    public static final BooleanSupplier CHOREO_AUTO_MIRROR_PATHS = new BooleanSupplier() {
-      @Override
-      public boolean getAsBoolean() {
-        return Robot.state.getAlliance() == Alliance.Red;
-      }
-    };
+    /*
+     * public static final BooleanSupplier CHOREO_AUTO_MIRROR_PATHS = new
+     * BooleanSupplier() {
+     * 
+     * @Override
+     * public boolean getAsBoolean() {
+     * return Robot.state.getAlliance() == Alliance.Red;
+     * }
+     * 
+     * };
+     * /*
+     * public static final AutoBindings AUTO_BINDINGS = new AutoBindings();
+     * public static final AutoFactory AUTO_FACTORY = new AutoFactory(
+     * Robot.swerve::getPose2d,
+     * Robot.swerve::setPose2d,
+     * Robot.swerve::followChoreoPath,
+     * true,
+     * Robot.swerve,
+     * AUTO_BINDINGS);
+     */
 
-    public static final AutoBindings AUTO_BINDINGS = new AutoBindings();
-    public static final AutoFactory AUTO_FACTORY = new AutoFactory(
-        Robot.swerve::getPose2d,
-        Robot.swerve::setPose2d,
-        Robot.swerve::followChoreoPath,
-        true,
-        Robot.swerve,
-        AUTO_BINDINGS);
   }
+
+  public static final class ELEVATOR {
+
+    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
+        .idleMode(IdleMode.kBrake)
+        .inverted(false);
+
+    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT = new SparkMaxConfig()
+        .idleMode(IdleMode.kBrake)
+        .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
+
+    public static final double LEFT_MOTOR_CLOSED_LOOP_P = 0;
+    public static final double LEFT_MOTOR_CLOSED_LOOP_I = 0;
+    public static final double LEFT_MOTOR_CLOSED_LOOP_D = 0;
+    public static final double LEFT_MOTOR_CLOSED_LOOP_F = 0;
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT = MOTOR_CONFIG_LEFT.closedLoop
+        .pidf(
+            LEFT_MOTOR_CLOSED_LOOP_P,
+            LEFT_MOTOR_CLOSED_LOOP_I,
+            LEFT_MOTOR_CLOSED_LOOP_D,
+            LEFT_MOTOR_CLOSED_LOOP_F)
+        .outputRange(-1, 1);
+
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+
+    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT = CLOSED_LOOP_CONFIG_LEFT.maxMotion
+        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+        .maxAcceleration(0)
+        .maxVelocity(0);
+
+    public static final int ENCODER_COUNTS_PER_REV = 8196;
+
+    public static final double GEAR_RATIO = 50 / 14;
+    public static final Distance MOTOR_PULLEY_PITCH_DIAMETER = Units.Inches.of(
+        2.256);
+
+    public static final double AXIS_MAX_SPEED = 0.1;
+
+    public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
+  }
+
+  public static final class CUSTOM_UNITS {
+
+    // These units are ONLY for the output shaft on the neo. Any pulley will require
+    // the addition of a gear ratio.
+    public static final Distance NEO_SHAFT_CIRCUMFERENCE = Units.Millimeters.of(
+        8 * Math.PI);
+    public static final AngleUnit NEO_ENCODER_TICK = Units.derive(
+        Units.Revolutions)
+        .splitInto(42)
+        .named("Neo Encoder Tick")
+        .symbol("NET")
+        .make();
+  }
+
 }
