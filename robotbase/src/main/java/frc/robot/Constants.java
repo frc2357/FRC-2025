@@ -6,6 +6,10 @@ package frc.robot;
 
 import choreo.auto.AutoFactory;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.function.BooleanSupplier;
 
@@ -41,5 +45,28 @@ public final class Constants {
       true,
       Robot.swerve
     );
+  }
+
+  public static final class PHOTON {
+
+    public static final String FRONT_CAMERA_NAME = "test";
+    public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
+      0,
+      0,
+      0,
+      new Rotation3d(0, 0, 0)
+    );
+
+    public static final String LOST_CONNECTION_ERROR_MESSAGE =
+      "**************LOST CONNECTION WITH ORANGE PI";
+    public static final String CONNECTION_REGAINED_MESSAGE =
+      "CONNECTION REGAINED WITH ORANGE PI*********";
+
+    public static final Angle BEST_TARGET_PITCH_TOLERANCE = Units.Degrees.of(4);
+
+    public static final Angle MAX_ANGLE = Units.Degrees.of(35);
+
+    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; //TODO: tune this to a reasonable degree.
+    public static final double MAX_AMBIGUITY_TOLERANCE = 4; //TODO: tune this until its reasonable.
   }
 }
