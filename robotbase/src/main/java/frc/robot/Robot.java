@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.auto.Autos;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Elevator;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -23,6 +24,8 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   public static CommandSwerveDrivetrain swerve;
+  public static Elevator elevator;
+
   public static AutoChooserManager autoChooserManager;
   public static Autos autos;
 
@@ -32,6 +35,8 @@ public class Robot extends TimedRobot {
    */
   public Robot() {
     swerve = TunerConstants.createDrivetrain();
+    elevator = new Elevator();
+
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
   }
