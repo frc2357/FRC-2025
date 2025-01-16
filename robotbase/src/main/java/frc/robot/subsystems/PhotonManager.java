@@ -81,7 +81,7 @@ public class PhotonManager extends SubsystemBase {
   /** Sets up everything about the class that is not done in the constructor. */
   public void configure() {
     m_poseEstimator = new PhotonPoseEstimator(
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape),
+      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField),
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
       PHOTON.FRONT_CAMERA_TRANSFORM
     );

@@ -10,8 +10,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import java.util.function.BooleanSupplier;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -23,7 +21,13 @@ import java.util.function.BooleanSupplier;
  */
 public final class Constants {
 
-  public static class OperatorConstants {
+  public static class CAN_ID {
+
+    public static final int ELEVATOR_LEFT_MOTOR = 23;
+    public static final int ELEVATOR_RIGHT_MOTOR = 24;
+  }
+
+  public static class OPERATOR_CONSTANTS {
 
     public static final int kDriverControllerPort = 0;
   }
