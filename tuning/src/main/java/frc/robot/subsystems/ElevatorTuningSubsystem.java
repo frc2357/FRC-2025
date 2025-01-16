@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Feet;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -10,24 +9,18 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.ELEVATOR;
-import java.util.Spliterators.AbstractLongSpliterator;
 
 //import edu.wpi.first.math.controller.PIDController;
 
-public class ElevatorTuningSubsystem extends SubsystemBase {
+public class ElevatorTuningSubsystem {
 
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
@@ -41,8 +34,6 @@ public class ElevatorTuningSubsystem extends SubsystemBase {
   private double kFF = 0;
   private double maxVel = 0;
   private double maxAcc = 0;
-
-  private double axisMaxSpeed = 0;
 
   private SparkBaseConfig motorconfig = Constants.ELEVATOR.MOTOR_CONFIG_LEFT;
 
@@ -77,7 +68,7 @@ public class ElevatorTuningSubsystem extends SubsystemBase {
   }
 
   public void updatePIDs() {
-    motorconfig.closedLoop.pidf(kP, kI, axisMaxSpeed, kFF);
+    motorconfig.closedLoop.pidf(kP, kI, kD, kFF);
 
     motorconfig.closedLoop.maxMotion
       .maxAcceleration(maxAcc)
