@@ -7,6 +7,8 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PHOTON;
@@ -50,7 +52,6 @@ public class PhotonManager extends SubsystemBase {
    * <p>Index 1-16 are the AprilTags that are on the field.
    */
   private final TargetInfo[] m_aprilTagInfo;
-  private final TargetInfo[] m_gamePeiceInfo;
 
   /**
    * The pose estimator for the subsystem.
@@ -70,13 +71,9 @@ public class PhotonManager extends SubsystemBase {
   public PhotonManager() {
     m_camera = new PhotonCamera(PHOTON.FRONT_CAMERA_NAME);
 
-    // 0-21 correspond to apriltag fiducial IDs, -1 to fit in the list.
-    m_aprilTagInfo = new TargetInfo[22];
+    // 1-22 correspond to apriltag fiducial IDs, 0 is for gamepeices.
+    m_aprilTagInfo = new TargetInfo[23];
     for (int i = 0; i < m_aprilTagInfo.length; i++) {
-      m_aprilTagInfo[i] = new TargetInfo();
-    }
-    m_gamePeiceInfo = new TargetInfo[5];
-    for (int i = 0; i < m_gamePeiceInfo.length; i++) {
       m_aprilTagInfo[i] = new TargetInfo();
     }
   }
@@ -91,7 +88,7 @@ public class PhotonManager extends SubsystemBase {
   }
 
   /**
-   * Fetches the latest pipeline result.
+   * Fetches the latest pipeline result. Dont call this unless you want to break everything.
    *
    * <p>
    *
@@ -107,19 +104,32 @@ public class PhotonManager extends SubsystemBase {
       );
       return;
     }
-    m_result = m_camera.getLatestResult();
+    List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
+
+    if (results.isEmpty()) {
+      return;
+    }
+    m_result = results.get(0);
+    for (int i = 0; i < results.size(); i++) {
+      if (
+        results.get(i).metadata.captureTimestampMicros >
+        m_result.metadata.captureTimestampMicros
+      ) { // getting the latest result, by finding the result with the highest capture timestamp.
+        m_result = results.get(i);
+      }
+    }
+
     if (m_result == null || !m_result.hasTargets()) {
       return;
     }
+
     m_bestTargetFiducialId = m_result.getBestTarget().getFiducialId();
-    int gamepeiceID = m_result.getBestTarget().objDetectId;
-    if (m_bestTargetFiducialId == -1) {
-      // the fact that the best tarets ID is -1 means its a gamepeice
-      // so we cache them differently.
+    if (m_bestTargetFiducialId == -1) { // -1 means the ID is not set, so its a gamepeice.
       cacheForGamepeices(m_result.targets);
     } else {
       cacheForAprilTags(m_result.targets);
     }
+
     if (m_connectionLost) {
       m_connectionLost = false;
       DriverStation.reportWarning(
@@ -135,12 +145,11 @@ public class PhotonManager extends SubsystemBase {
    * @param targetList The list of targets that it pulls data from to cache.
    */
   private void cacheForGamepeices(List<PhotonTrackedTarget> targetList) {
-    long now = System.currentTimeMillis();
     PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
     TargetInfo aprilTagInfo = m_aprilTagInfo[0];
     aprilTagInfo.yaw = bestTarget.getYaw();
     aprilTagInfo.pitch = bestTarget.getPitch();
-    aprilTagInfo.timestamp = now;
+    aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
   }
 
   /**
@@ -149,13 +158,12 @@ public class PhotonManager extends SubsystemBase {
    * @param targetList The list of targets that it pulls data from to cache.
    */
   private void cacheForAprilTags(List<PhotonTrackedTarget> targetList) {
-    long now = System.currentTimeMillis();
     for (PhotonTrackedTarget targetSeen : targetList) {
       int id = targetSeen.getFiducialId();
       TargetInfo aprilTagInfo = m_aprilTagInfo[id];
       aprilTagInfo.yaw = targetSeen.getYaw();
       aprilTagInfo.pitch = targetSeen.getPitch();
-      aprilTagInfo.timestamp = now;
+      aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
     }
   }
 
@@ -219,42 +227,13 @@ public class PhotonManager extends SubsystemBase {
    * @return If the camera has seen the target within the timeout given
    */
   public boolean isValidTarget(int targetId, long timeoutMs) {
-    return isValidTarget(targetId, timeoutMs, true);
-  }
-
-  /**
-   * Compares the current system time to the last cached timestamp, and sees if it is older than the
-   * passsed in timeout.
-   *
-   * @param targetId Fiducial ID of the desired target to valid the data of. Notes have a
-   *     fiducialId of 0
-   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return If the camera has seen the target within the timeout given
-   */
-  public boolean isValidTarget(
-    int targetId,
-    long timeoutMs,
-    boolean isAprilTag
-  ) {
     long now = System.currentTimeMillis();
     long then = now - timeoutMs;
 
-    if (isAprilTag) {
-      if (targetId >= m_aprilTagInfo.length) {
-        return false;
-      }
-      TargetInfo target = m_aprilTagInfo[targetId];
-
-      return (
-        target.timestamp > then ||
-        Math.abs(target.yaw) > PHOTON.MAX_ANGLE.in(Degrees) ||
-        Math.abs(target.pitch) > PHOTON.MAX_ANGLE.in(Degrees)
-      );
-    }
-    if (targetId >= m_gamePeiceInfo.length) {
+    if (targetId >= m_aprilTagInfo.length) {
       return false;
     }
-    TargetInfo target = m_gamePeiceInfo[targetId];
+    TargetInfo target = m_aprilTagInfo[targetId];
 
     return (
       target.timestamp > then ||
@@ -295,67 +274,55 @@ public class PhotonManager extends SubsystemBase {
   /**
    * @param fiducialId The fiducial ID of the target to get the yaw of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the desired targets yaw. <strong>Will be NaN if the cached data was invalid.
+   * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
    */
-  public double getTargetYaw(int targetId, long timeoutMs, boolean isAprilTag) {
-    if (isValidTarget(targetId, timeoutMs, isAprilTag)) {
-      return isAprilTag
-        ? m_aprilTagInfo[targetId].yaw
-        : m_gamePeiceInfo[targetId].yaw;
+  public Angle getTargetYaw(int targetId, long timeoutMs) {
+    if (isValidTarget(targetId, timeoutMs)) {
+      return Units.Degrees.of(m_aprilTagInfo[targetId].yaw);
     }
-    return Double.NaN;
+    return null;
   }
 
   /**
    * @param fiducialIds The list of fiducial IDs to check.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the yaw of the first valid target in the list, <strong>or NaN if none are valid.
+   * @return Returns the yaw of the first valid target in the list, <strong>or null if none are valid.
    */
-  public double getTargetYaw(
-    int[] targetIds,
-    long timeoutMs,
-    boolean areAprilTags
-  ) {
+  public Angle getTargetYaw(int[] targetIds, long timeoutMs) {
     for (int id : targetIds) {
-      double yaw = getTargetYaw(id, timeoutMs, areAprilTags);
-      if (!Double.isNaN(yaw)) {
+      Angle yaw = getTargetYaw(id, timeoutMs);
+      if (yaw != null) {
         return yaw;
       }
     }
-    return Double.NaN;
+    return null;
   }
 
   /**
    * @param id The ID of the target to get the pitch of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the desired targets pitch, <strong>will be NaN if the cached data was invalid.
+   * @return Returns the desired targets pitch, <strong>will be null if the cached data was invalid.
    */
-  public double getTargetPitch(
-    int targetId,
-    long timeoutMs,
-    boolean isAprilTag
-  ) {
-    if (isValidTarget(targetId, timeoutMs, isAprilTag)) {
-      return isAprilTag
-        ? m_aprilTagInfo[targetId].pitch
-        : m_gamePeiceInfo[targetId].pitch;
+  public Angle getTargetPitch(int targetId, long timeoutMs) {
+    if (isValidTarget(targetId, timeoutMs)) {
+      return Units.Degrees.of(m_aprilTagInfo[targetId].pitch);
     }
-    return Double.NaN;
+    return null;
   }
 
   /**
    * @param fiducialIds The list of fiducial IDs to check.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the pitch of the first id in the list, <strong>or NaN if none are valid.
+   * @return Returns the pitch of the first valid id in the list, <strong>or null if none are valid.
    */
-  public double getTargetPitch(int[] fiducialIds, long timeoutMs) {
+  public Angle getTargetPitch(int[] fiducialIds, long timeoutMs) {
     for (int id : fiducialIds) {
-      double pitch = getTargetPitch(id, timeoutMs);
-      if (!Double.isNaN(pitch)) {
+      Angle pitch = getTargetPitch(id, timeoutMs);
+      if (pitch != null) {
         return pitch;
       }
     }
-    return Double.NaN;
+    return null;
   }
 
   /**
@@ -365,7 +332,7 @@ public class PhotonManager extends SubsystemBase {
    * getPNPResult instead, as it is more accurate.
    *
    * @return The robots estimated pose, if it has any april tag targets. <strong>Returns null if
-   *     there are no targets.
+   *     there are no targets.</strong>
    */
   public EstimatedRobotPose getEstimatedPose() {
     Optional<EstimatedRobotPose> estimatedPose = m_poseEstimator.update(
@@ -375,7 +342,7 @@ public class PhotonManager extends SubsystemBase {
   }
 
   /**
-   * Gets the information of the multiple tag pose estimate if it exists.
+   * Gets the information of the multiple tag pose estimate if it exists. Be real careful with how you use this.
    *
    * <p>If the camera does not see more than 1 april tag, <strong> this will return null. </strong>
    *
