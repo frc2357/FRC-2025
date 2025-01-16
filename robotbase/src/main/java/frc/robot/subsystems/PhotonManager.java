@@ -1,23 +1,28 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static frc.robot.Constants.PHOTON;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.networktables.BooleanEntry;
+import edu.wpi.first.networktables.BooleanTopic;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.Topic;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.PHOTON;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.proto.Photon;
 import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -67,6 +72,11 @@ public class PhotonManager extends SubsystemBase {
    * <p>Used for methods that dont take in a fid ID but do some april tag stuff.
    */
   private int m_bestTargetFiducialId;
+
+  // experimental "turbo switch" that has the ability to increase FPS. Do not fidle with it.
+  private static BooleanEntry turboSwitch = NetworkTableInstance.create()
+    .getBooleanTopic("/photonvision/use_new_cscore_frametime")
+    .getEntry(PHOTON.ACTIVATE_TURBO_SWITCH);
 
   public PhotonManager() {
     m_camera = new PhotonCamera(PHOTON.FRONT_CAMERA_NAME);

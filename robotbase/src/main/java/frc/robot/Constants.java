@@ -127,5 +127,7 @@ public final class Constants {
 
     public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; //TODO: tune this to a reasonable degree.
     public static final double MAX_AMBIGUITY_TOLERANCE = 4; //TODO: tune this until its reasonable.
+
+    public static final boolean ACTIVATE_TURBO_SWITCH = false;
   }
 }
