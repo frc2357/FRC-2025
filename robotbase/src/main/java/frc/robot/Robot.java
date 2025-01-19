@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.auto.Autos;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.AlgaeRunner;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 
@@ -25,6 +26,7 @@ public class Robot extends TimedRobot {
 
   public static CommandSwerveDrivetrain swerve;
   public static Elevator elevator;
+  public static AlgaeRunner algaeRunner;
 
   public static AutoChooserManager autoChooserManager;
   public static Autos autos;
@@ -36,6 +38,7 @@ public class Robot extends TimedRobot {
   public Robot() {
     swerve = TunerConstants.createDrivetrain();
     elevator = new Elevator();
+    algaeRunner = new AlgaeRunner();
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();

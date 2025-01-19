@@ -4,18 +4,17 @@
 
 package frc.robot;
 
-import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import choreo.auto.AutoFactory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import java.util.function.BooleanSupplier;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -28,9 +27,9 @@ import java.util.function.BooleanSupplier;
 public final class Constants {
 
   public static class CAN_ID {
-
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
+    public static final int ALGAE_RUNNER_MOTOR = 25;
   }
 
   public static class OPERATOR_CONSTANTS {
@@ -96,6 +95,22 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.1;
 
     public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
+  }
+
+  public static final class ALGAE_RUNNER {
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IdleMode.kBrake)
+      .inverted(false);
+    
+    public static final double LEFT_MOTOR_P = 0;
+    public static final double LEFT_MOTOR_I = 0;
+    public static final double LEFT_MOTOR_D = 0;
+    public static final double LEFT_MOTOR_F = 0;
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
+      MOTOR_CONFIG.closedLoop
+        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
+        .outputRange(-1, 1);
   }
 
   public static final class CUSTOM_UNITS {
