@@ -6,24 +6,29 @@ import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVE_TO_POSE;
 import frc.robot.Robot;
 import frc.robot.util.Utility;
+import java.util.function.Supplier;
 
 public class DriveToPose extends Command {
 
-  private Pose2d m_targetPose;
+  private Pose2d[] m_waypoints;
+  private Supplier<Pose2d> m_targetPoseSupplier;
   private Pose2d m_currentPose;
+
+  private int m_currentWaypointIndex = 0;
 
   private PIDController m_xController;
   private PIDController m_yController;
   private PIDController m_rotationController;
 
-  public DriveToPose(Pose2d targetPose) {
+  public DriveToPose(Supplier<Pose2d> targetPose) {
     addRequirements(Robot.swerve);
-    m_targetPose = targetPose;
 
+    m_targetPoseSupplier = targetPose;
     m_xController = DRIVE_TO_POSE.VISION_X_TRANSLATION_PID_CONTROLLER;
     m_yController = DRIVE_TO_POSE.VISION_Y_TRANSLATION_PID_CONTROLLER;
     m_rotationController = DRIVE_TO_POSE.PIGEON_ROTATION_PID_CONTROLLER;
@@ -37,9 +42,11 @@ public class DriveToPose extends Command {
       DRIVE_TO_POSE.WAYPOINT_ROTATION_TOLERANCE.in(Radians)
     );
 
-    m_xController.setSetpoint(m_targetPose.getX());
-    m_yController.setSetpoint(m_targetPose.getY());
-    m_rotationController.setSetpoint(m_targetPose.getRotation().getRadians());
+    m_xController.setSetpoint(m_targetPoseSupplier.get().getX());
+    m_yController.setSetpoint(m_targetPoseSupplier.get().getY());
+    m_rotationController.setSetpoint(
+      m_targetPoseSupplier.get().getRotation().getRadians()
+    );
 
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -56,22 +63,22 @@ public class DriveToPose extends Command {
     m_currentPose = Robot.swerve.getPose2d();
     double xOutput = m_xController.calculate(
       m_currentPose.getX(),
-      m_targetPose.getX()
+      m_targetPoseSupplier.get().getX()
     );
     double yOutput = m_yController.calculate(
       m_currentPose.getY(),
-      m_targetPose.getY()
+      m_targetPoseSupplier.get().getY()
     );
     double rotationOutput =
       m_rotationController.calculate(
         m_currentPose.getRotation().getRadians(),
-        m_targetPose.getRotation().getRadians()
+        m_targetPoseSupplier.get().getRotation().getRadians()
       ) +
       DRIVE_TO_POSE.PIGEON_ROTATION_FEEDFORWARD;
     if (
       Utility.isWithinTolerance(
         m_currentPose.getX(),
-        m_targetPose.getX(),
+        m_targetPoseSupplier.get().getX(),
         m_xController.getErrorTolerance()
       )
     ) {
@@ -80,7 +87,7 @@ public class DriveToPose extends Command {
     if (
       Utility.isWithinTolerance(
         m_currentPose.getY(),
-        m_targetPose.getY(),
+        m_targetPoseSupplier.get().getY(),
         m_yController.getErrorTolerance()
       )
     ) {
@@ -89,7 +96,7 @@ public class DriveToPose extends Command {
     if (
       Utility.isWithinTolerance(
         m_currentPose.getRotation().getRadians(),
-        m_targetPose.getRotation().getRadians(),
+        m_targetPoseSupplier.get().getRotation().getRadians(),
         m_rotationController.getErrorTolerance()
       )
     ) {
@@ -97,15 +104,15 @@ public class DriveToPose extends Command {
     }
 
     Robot.swerve.driveFieldRelative(xOutput, yOutput, rotationOutput);
-    // System.out.println("POSE: " + m_currentPose);
   }
 
   @Override
   public boolean isFinished() {
+    var targetPose = m_targetPoseSupplier.get();
     if (
       !Utility.isWithinTolerance(
         m_currentPose.getX(),
-        m_targetPose.getX(),
+        targetPose.getX(),
         DRIVE_TO_POSE.WAYPOINT_X_TOLERANCE.in(Meters)
       )
     ) {
@@ -114,7 +121,7 @@ public class DriveToPose extends Command {
     if (
       !Utility.isWithinTolerance(
         m_currentPose.getY(),
-        m_targetPose.getY(),
+        targetPose.getY(),
         DRIVE_TO_POSE.WAYPOINT_Y_TOLERANCE.in(Meters)
       )
     ) {
@@ -123,7 +130,7 @@ public class DriveToPose extends Command {
     if (
       !Utility.isWithinTolerance(
         m_currentPose.getRotation().getRadians(),
-        m_targetPose.getRotation().getRadians(),
+        targetPose.getRotation().getRadians(),
         DRIVE_TO_POSE.WAYPOINT_ROTATION_TOLERANCE.in(Radians)
       )
     ) {
