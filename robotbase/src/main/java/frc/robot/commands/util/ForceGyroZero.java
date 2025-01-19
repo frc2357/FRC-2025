@@ -35,13 +35,23 @@ public class ForceGyroZero extends Command {
     if (interrupted) {
       System.out.println("[GYRO] GYRO ZERO INTERRUPTED\nGYRO ZERO BAD");
     } else {
-      System.out.println("*********************************************************************");
-      System.out.println("*********************************************************************");
+      System.out.println(
+        "*********************************************************************"
+      );
+      System.out.println(
+        "*********************************************************************"
+      );
       System.out.println("[GYRO] ZERO SET CORRECTLY");
-      System.out.println("*********************************************************************");
-      System.out.println("*********************************************************************");
+      System.out.println(
+        "*********************************************************************"
+      );
+      System.out.println(
+        "*********************************************************************"
+      );
       SmartDashboard.putBoolean(
-          "======================ROBOT ZEROED INDICATOR======================", true);
+        "======================ROBOT ZEROED INDICATOR======================",
+        true
+      );
     }
   }
 }

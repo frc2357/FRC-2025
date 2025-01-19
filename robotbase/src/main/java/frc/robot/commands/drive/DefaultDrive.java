@@ -8,8 +8,10 @@ import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 
 public class DefaultDrive extends Command {
-  
-  private static final double m_speedAt12VoltsMPS = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+
+  private static final double m_speedAt12VoltsMPS =
+    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+
   public DefaultDrive() {
     addRequirements(Robot.swerve);
   }
@@ -23,9 +25,10 @@ public class DefaultDrive extends Command {
       Robot.swerve.stopMotors();
     } else {
       Robot.swerve.driveFieldRelative(
-          y * m_speedAt12VoltsMPS,
-          x * m_speedAt12VoltsMPS,
-          rotation * Constants.SWERVE.MAX_ANGULAR_RATE_ROTATIONS_PER_SECOND);
+        y * m_speedAt12VoltsMPS,
+        x * m_speedAt12VoltsMPS,
+        rotation * Constants.SWERVE.MAX_ANGULAR_RATE_ROTATIONS_PER_SECOND
+      );
     }
   }
 
