@@ -5,11 +5,16 @@
 package frc.robot;
 
 import choreo.auto.AutoChooser;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.auto.Autos;
+import frc.robot.commands.drive.DefaultDrive;
+import frc.robot.commands.util.ForceGyroZero;
+import frc.robot.controls.DriverControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
@@ -28,17 +33,32 @@ public class Robot extends TimedRobot {
 
   public static AutoChooserManager autoChooserManager;
   public static Autos autos;
+  public static DriverControls driverControls;
+
+  private static Command m_forceGyroZero;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
+    DriverStation.silenceJoystickConnectionWarning(true); //TODO: turn this off at comp, just in case.
+
     swerve = TunerConstants.createDrivetrain();
-    elevator = new Elevator();
+    // elevator = new Elevator();
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
+
+    driverControls = new DriverControls(
+      new XboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
+      Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
+    );
+
+    m_forceGyroZero = new ForceGyroZero();
+    m_forceGyroZero.schedule();
+
+    swerve.setDefaultCommand(new DefaultDrive());
   }
 
   /**
