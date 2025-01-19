@@ -5,26 +5,27 @@ import frc.robot.Robot;
 import frc.robot.controls.util.AxisInterface;
 
 public class AlgaeRunnerAxis extends Command {
-    private AxisInterface m_axis;
 
-    public AlgaeRunnerAxis(AxisInterface axis) {
-        m_axis = axis;
-        addRequirements(Robot.algaeRunner);
-    }
+  private AxisInterface m_axis;
 
-    @Override
-    public void execute() {
-        double axisValue = m_axis.getValue();
-        Robot.algaeRunner.setAxisSpeed(axisValue);
-    }
+  public AlgaeRunnerAxis(AxisInterface axis) {
+    m_axis = axis;
+    addRequirements(Robot.algaeRunner);
+  }
 
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
+  @Override
+  public void execute() {
+    double axisValue = m_axis.getValue();
+    Robot.algaeRunner.setAxisSpeed(axisValue);
+  }
 
-    @Override
-    public void end(boolean interrupted) {
-        Robot.algaeRunner.stop();
-    }
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    Robot.algaeRunner.stop();
+  }
 }
