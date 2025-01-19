@@ -22,7 +22,6 @@ public class AlgaePivot extends SubsystemBase {
       CAN_ID.RIGHT_ALGAE_PIVOT_MOTOR,
       MotorType.kBrushless
     );
-
     m_leftMotor.configure(
       ALGAE_PIVOT.LEFT_MOTOR_CONFIG,
       ResetMode.kResetSafeParameters,

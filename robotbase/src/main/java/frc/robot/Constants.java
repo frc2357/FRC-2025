@@ -39,11 +39,6 @@ public final class Constants {
     public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
   }
 
-  public static class OPERATOR_CONSTANTS {
-
-    public static final int kDriverControllerPort = 0;
-  }
-
   public static final class CHOREO {
 
     public static final PIDController X_CONTROLLER = new PIDController(5, 0, 0);
@@ -151,6 +146,16 @@ public final class Constants {
       new SparkMaxConfig()
         .idleMode(IDLE_MODE)
         .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR);
+
+    public static final double LEFT_MOTOR_P = 0;
+    public static final double LEFT_MOTOR_I = 0;
+    public static final double LEFT_MOTOR_D = 0;
+    public static final double LEFT_MOTOR_F = 0;
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
+      LEFT_MOTOR_CONFIG.closedLoop
+        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
+        .outputRange(-1, 1);
   }
 
   public static final class CUSTOM_UNITS {

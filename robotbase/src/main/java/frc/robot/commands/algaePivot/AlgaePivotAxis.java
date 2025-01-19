@@ -10,7 +10,7 @@ public class AlgaePivotAxis extends Command {
 
   public AlgaePivotAxis(AxisInterface axis) {
     m_axis = axis;
-    addRequirements(Robot.algaeRunner);
+    addRequirements(Robot.algaePivot);
   }
 
   @Override
