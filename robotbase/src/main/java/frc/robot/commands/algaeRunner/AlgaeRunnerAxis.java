@@ -2,18 +2,20 @@ package frc.robot.commands.algaeRunner;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
+import frc.robot.controls.util.AxisInterface;
 
-public class AlgaeRunnerSetSpeed extends Command {
-    private double m_speed;
+public class AlgaeRunnerAxis extends Command {
+    private AxisInterface m_axis;
 
-    public AlgaeRunnerSetSpeed(double speed) {
-        m_speed = speed;
+    public AlgaeRunnerAxis(AxisInterface axis) {
+        m_axis = axis;
         addRequirements(Robot.algaeRunner);
     }
 
     @Override
-    public void initialize() {
-        Robot.algaeRunner.set(m_speed);
+    public void execute() {
+        double axisValue = m_axis.getValue();
+        Robot.algaeRunner.setAxisSpeed(axisValue);
     }
 
     @Override

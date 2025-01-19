@@ -1,19 +1,19 @@
-package frc.robot.commands.algaeRunner;
+package frc.robot.commands.algaePivot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
-public class AlgaeRunnerSetSpeed extends Command {
+public class AlgaePivotSetSpeed extends Command {
     private double m_speed;
 
-    public AlgaeRunnerSetSpeed(double speed) {
+    public AlgaePivotSetSpeed(double speed) {
         m_speed = speed;
-        addRequirements(Robot.algaeRunner);
+        addRequirements(Robot.algaePivot);
     }
 
     @Override
     public void initialize() {
-        Robot.algaeRunner.set(m_speed);
+        Robot.algaePivot.set(m_speed);
     }
 
     @Override
@@ -23,6 +23,6 @@ public class AlgaeRunnerSetSpeed extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        Robot.algaeRunner.stop();
+        Robot.algaePivot.stop();
     }
 }

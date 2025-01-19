@@ -21,7 +21,12 @@ public class AlgaeRunner extends SubsystemBase {
                 PersistMode.kPersistParameters);
     }
 
-    public void setAxisSpeed(double percentOutput) {
+    public void setAxisSpeed(double axisSpeed) {
+        axisSpeed *= ALGAE_RUNNER.AXIS_MAX_SPEED;
+        set(axisSpeed);
+    }
+
+    public void set(double percentOutput) {
         m_motor.set(percentOutput);
     }
 
