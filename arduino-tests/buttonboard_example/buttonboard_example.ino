@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_Keypad.h>
 #include <Joystick.h>
-#include <Adafruit_Neopixel.h>
+#include <Adafruit_NeoPixel.h>
 
 #define LOOP_DELAY_MS 10
 
@@ -18,20 +18,17 @@
 
 uint8_t rowPins[GRID_ROWS];
 uint8_t colPins[GRID_COLS];
-uint8_t keys[GRID_ROWS][GRID_COLS] = {
-    {0, 6, 12},
-    {1, 7, 13},
-    {2, 8, 14},
-    {3, 9, 15},
-    {4},
-    {5},
-};
+uint8_t reefsideKeys[6] = {0, 1, 2, 3, 4, 5};
+uint8_t scoringLevelKeys[4] = {6, 7, 8, 9};
+uint8_t scoringDirectionKeys[2] = {10, 11};
+// Not sure how necessary it is to fill this with values
+uint8_t keys[GRID_ROWS][GRID_COLS];
 
 Adafruit_Keypad keypad(makeKeymap(keys), rowPins, colPins, GRID_ROWS, GRID_COLS);
-Adafruit_Neopixel ledStrip(LED_COUNT, LED_PIN, NEO_GRB);
+Adafruit_NeoPixel ledStrip(LED_COUNT, LED_PIN, NEO_GRB);
 Joystick_ joystick;
 
-int selectedSideRow, selectedSideCol, selectedLevelRow, selectedLevelCol;
+int selectedReefSide, selectedScoringLevel, selectedScoringDirection;
 
 void setup()
 {
@@ -78,7 +75,7 @@ void onKeyPress(uint8_t row, uint8_t col)
     }
     else
     {
-        setScoringLevel(row, col);
+        setScoringLocation(row, col);
     }
     ledStrip.show();
 }
@@ -89,23 +86,23 @@ void onKeyRelease(uint8_t row, uint8_t col)
 
 void setReefSide(uint8_t row, uint8_t col)
 {
-    bool select = selectedSideRow == row && selectedSideCol == col;
+    bool select = selectedReefSide == row;
     uint32_t color = select ? COLOR_ON : COLOR_OFF;
 
-    selectedSideRow = select ? row : -1;
-    selectedSideCol = select ? col : -1;
-    joystick.setButton(keys[row][col], select);
+    selectedReefSide = select ? row : -1;
+    joystick.setButton(reefsideKeys[row], select);
     ledStrip.setPixelColor(getLEDIndex(row, col), color);
 }
 
-void setScoringLevel(uint8_t row, uint8_t col)
+void setScoringLocation(uint8_t row, uint8_t col)
 {
-    bool select = selectedLevelRow == row && selectedLevelCol == col;
+    bool select = selectedScoringLevel == row && selectedScoringDirection == col;
     uint32_t color = select ? COLOR_ON : COLOR_OFF;
 
-    selectedLevelRow = select ? row : -1;
-    selectedLevelCol = select ? col : -1;
-    joystick.setButton(keys[row][col], select);
+    selectedScoringLevel = select ? row : -1;
+    selectedScoringDirection = select ? col : -1;
+    joystick.setButton(scoringLevelKeys[row], select);
+    joystick.setButton(scoringDirectionKeys[col - 1], select);
     ledStrip.setPixelColor(getLEDIndex(row, col), color);
 }
 
