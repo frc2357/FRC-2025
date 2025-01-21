@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static frc.robot.Constants.PHOTON_VISION;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -13,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -162,6 +164,10 @@ public class PhotonVisionCamera extends SubsystemBase {
     // change pose estimator settings to be correct for the current camera
     m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
     m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
+    updatePose(); // update pose based on the new pose estimate
+  }
+
+  private void updatePose() {
     if (m_lastEstimatedPose != null) {
       double averageTargetDistance = 0;
       for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
@@ -170,16 +176,34 @@ public class PhotonVisionCamera extends SubsystemBase {
           .getMeasureX()
           .in(Meters);
       }
-      averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size() * 2; // average it and some extra stuff
+      averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
+
+      // the higher the confidence is, the less that coordinates measurment is trusted.
+
+      double xVelocityConf =
+        1 + Robot.swerve.getXVelocity().in(MetersPerSecond);
+      double yVelocityConf =
+        1 + Robot.swerve.getYVelocity().in(MetersPerSecond);
+      // we add 1 so that if were not moving, it does not impact the confidence, and the faster we move, the more it impact the confidence
+
+      double xCoordinateConfidence =
+        (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
+          (averageTargetDistance / 2) *
+          xVelocityConf) -
+        1;
+      double yCoordinateConfidence =
+        (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
+          (averageTargetDistance / 2) *
+          yVelocityConf) -
+        1;
+
       Robot.swerve.addVisionMeasurement(
         m_lastEstimatedPose.estimatedPose.toPose2d(),
         m_lastEstimatedPose.timestampSeconds,
         VecBuilder.fill(
-          Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-          averageTargetDistance, // X coordinate confidence
-          Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-          averageTargetDistance, // Y coordinate confidence
-          Double.MAX_VALUE // Theta confidence. should never change the gyro from a vision measurment, gyro is more accurate for now.
+          xCoordinateConfidence,
+          yCoordinateConfidence,
+          Double.MAX_VALUE
         )
       );
     }

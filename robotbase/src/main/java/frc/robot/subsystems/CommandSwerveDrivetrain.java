@@ -14,6 +14,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -352,5 +356,27 @@ public class CommandSwerveDrivetrain
 
   public void setPose2d(Pose2d poseToSet) {
     super.resetPose(poseToSet);
+  }
+
+  public ChassisSpeeds getCurrentChassisSpeeds() {
+    return super.getKinematics().toChassisSpeeds(super.getState().ModuleStates);
+  }
+
+  public LinearVelocity getXVelocity() {
+    return Units.MetersPerSecond.of(
+      getCurrentChassisSpeeds().vxMetersPerSecond
+    );
+  }
+
+  public LinearVelocity getYVelocity() {
+    return Units.MetersPerSecond.of(
+      getCurrentChassisSpeeds().vyMetersPerSecond
+    );
+  }
+
+  public AngularVelocity getThetaVelocity() {
+    return Units.RadiansPerSecond.of(
+      getCurrentChassisSpeeds().omegaRadiansPerSecond
+    );
   }
 }
