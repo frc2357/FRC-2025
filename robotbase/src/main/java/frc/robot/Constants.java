@@ -15,8 +15,6 @@ import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import java.util.function.BooleanSupplier;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean

@@ -5,12 +5,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.commands.drive.DriveToPose;
-import frc.robot.commands.util.ForceGyroZero;
 import frc.robot.controls.util.AxisInterface;
 import frc.robot.controls.util.AxisThresholdTrigger;
 
@@ -90,6 +91,10 @@ public class DriverControls {
 
     m_aButton.whileTrue(
       new DriveToPose(() -> new Pose2d(0, 0, new Rotation2d(0, 0)))
+    );
+
+    m_startButton.onTrue(
+      new InstantCommand(() -> Robot.swerve.seedFieldCentric())
     );
   }
 

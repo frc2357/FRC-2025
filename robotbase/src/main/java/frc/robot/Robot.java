@@ -4,16 +4,14 @@
 
 package frc.robot;
 
-import choreo.auto.AutoChooser;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
-import frc.robot.commands.util.ForceGyroZero;
 import frc.robot.controls.DriverControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -35,7 +33,7 @@ public class Robot extends TimedRobot {
   public static Autos autos;
   public static DriverControls driverControls;
 
-  private static Command m_forceGyroZero;
+  private static Command m_seedFieldRelative;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -55,8 +53,8 @@ public class Robot extends TimedRobot {
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
 
-    m_forceGyroZero = new ForceGyroZero();
-    m_forceGyroZero.schedule();
+    m_seedFieldRelative = new InstantCommand(() -> swerve.seedFieldCentric());
+    m_seedFieldRelative.schedule();
 
     swerve.setDefaultCommand(new DefaultDrive());
   }
