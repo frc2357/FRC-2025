@@ -18,6 +18,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -168,7 +169,7 @@ public final class Constants {
       .make();
   }
 
-  public static final class PHOTON {
+  public static final class PHOTON_VISION {
 
     public static final String FRONT_CAMERA_NAME = "test";
     public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
@@ -191,5 +192,10 @@ public final class Constants {
     public static final double MAX_AMBIGUITY_TOLERANCE = 4; //TODO: tune this until its reasonable.
 
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
+
+    public static final PoseStrategy PRIMARY_STRATEGY =
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+    public static final PoseStrategy FALLBACK_STRATEGY =
+      PoseStrategy.CLOSEST_TO_LAST_POSE;
   }
 }

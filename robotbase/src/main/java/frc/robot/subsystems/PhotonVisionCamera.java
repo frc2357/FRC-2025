@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static frc.robot.Constants.PHOTON;
+import static frc.robot.Constants.PHOTON_VISION;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -9,26 +9,23 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.BooleanEntry;
-import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.Topic;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** Controls the photon vision camera options. */
-public class PhotonManager extends SubsystemBase {
+public class PhotonVisionCamera extends SubsystemBase {
 
   /*
    * The class for the object we use to cache our target data
@@ -44,10 +41,10 @@ public class PhotonManager extends SubsystemBase {
   // which are only extended so we can control which pipelines we are using.
 
   /** The actual camera object that we get everything from. */
-  private PhotonCamera m_camera;
+  protected PhotonCamera m_camera;
 
   /** The result we fecth from PhotonLib each loop. */
-  private PhotonPipelineResult m_result;
+  protected PhotonPipelineResult m_result;
 
   /**
    * The list of TargetInfo objects where we cache all of the target data.
@@ -56,45 +53,47 @@ public class PhotonManager extends SubsystemBase {
    *
    * <p>Index 1-16 are the AprilTags that are on the field.
    */
-  private final TargetInfo[] m_aprilTagInfo;
+  protected final TargetInfo[] m_aprilTagInfo;
 
   /**
-   * The pose estimator for the subsystem.
+   * The pose estimator for all photon cameras.
    */
-  private PhotonPoseEstimator m_poseEstimator;
+  protected static final PhotonPoseEstimator m_poseEstimator =
+    new PhotonPoseEstimator(
+      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField),
+      PHOTON_VISION.PRIMARY_STRATEGY,
+      new Transform3d()
+    );
+
+  protected Transform3d m_robotToCameraTranform;
+
+  protected static EstimatedRobotPose m_lastEstimatedPose;
 
   /** Whether or not we have connection with the camera still */
-  private boolean m_connectionLost;
+  protected boolean m_connectionLost;
 
   /**
    * The fiducial ID of the best target we have.
    *
    * <p>Used for methods that dont take in a fid ID but do some april tag stuff.
    */
-  private int m_bestTargetFiducialId;
+  protected int m_bestTargetFiducialId;
 
   // experimental "turbo switch" that has the ability to increase FPS. Do not fidle with it.
   private static BooleanEntry turboSwitch = NetworkTableInstance.create()
     .getBooleanTopic("/photonvision/use_new_cscore_frametime")
-    .getEntry(PHOTON.ACTIVATE_TURBO_SWITCH);
+    .getEntry(PHOTON_VISION.ACTIVATE_TURBO_SWITCH);
 
-  public PhotonManager() {
-    m_camera = new PhotonCamera(PHOTON.FRONT_CAMERA_NAME);
+  public PhotonVisionCamera(String cameraName, Transform3d cameraTransform) {
+    m_camera = new PhotonCamera(cameraName);
 
     // 1-22 correspond to apriltag fiducial IDs, 0 is for gamepeices.
     m_aprilTagInfo = new TargetInfo[23];
     for (int i = 0; i < m_aprilTagInfo.length; i++) {
       m_aprilTagInfo[i] = new TargetInfo();
     }
-  }
 
-  /** Sets up everything about the class that is not done in the constructor. */
-  public void configure() {
-    m_poseEstimator = new PhotonPoseEstimator(
-      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField),
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-      PHOTON.FRONT_CAMERA_TRANSFORM
-    );
+    m_robotToCameraTranform = cameraTransform;
   }
 
   /**
@@ -109,7 +108,10 @@ public class PhotonManager extends SubsystemBase {
     if (!m_camera.isConnected() && !m_connectionLost) {
       m_connectionLost = true;
       DriverStation.reportError(
-        "[" + m_camera.getName() + "]\n" + PHOTON.LOST_CONNECTION_ERROR_MESSAGE,
+        "[" +
+        m_camera.getName() +
+        "]\n" +
+        PHOTON_VISION.LOST_CONNECTION_ERROR_MESSAGE,
         false
       );
       return;
@@ -143,8 +145,22 @@ public class PhotonManager extends SubsystemBase {
     if (m_connectionLost) {
       m_connectionLost = false;
       DriverStation.reportWarning(
-        "[" + m_camera.getName() + "]\n" + PHOTON.CONNECTION_REGAINED_MESSAGE,
+        "[" +
+        m_camera.getName() +
+        "]\n" +
+        PHOTON_VISION.CONNECTION_REGAINED_MESSAGE,
         false
+      );
+    }
+    // update reference pose incase we want that strategy
+    m_poseEstimator.setReferencePose(Robot.swerve.getPose2d());
+    // change pose estimator settings to be correct for the current camera
+    m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
+    m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
+    if (m_lastEstimatedPose != null) {
+      Robot.swerve.addVisionMeasurement(
+        m_lastEstimatedPose.estimatedPose.toPose2d(),
+        m_lastEstimatedPose.timestampSeconds
       );
     }
   }
@@ -190,7 +206,7 @@ public class PhotonManager extends SubsystemBase {
   ) {
     double highestPitch =
       targetList.get(0).getPitch() +
-      PHOTON.BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
+      PHOTON_VISION.BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
     PhotonTrackedTarget bestTarget = targetList.get(0);
     for (PhotonTrackedTarget targetSeen : targetList) {
       if (
@@ -247,8 +263,8 @@ public class PhotonManager extends SubsystemBase {
 
     return (
       target.timestamp > then ||
-      Math.abs(target.yaw) > PHOTON.MAX_ANGLE.in(Degrees) ||
-      Math.abs(target.pitch) > PHOTON.MAX_ANGLE.in(Degrees)
+      Math.abs(target.yaw) > PHOTON_VISION.MAX_ANGLE.in(Degrees) ||
+      Math.abs(target.pitch) > PHOTON_VISION.MAX_ANGLE.in(Degrees)
     );
   }
 
@@ -336,7 +352,7 @@ public class PhotonManager extends SubsystemBase {
   }
 
   /**
-   * Gets an estimated pose from the subsystems pose estimator.
+   * Gets the last estimated pose from PV's pose estimator.
    *
    * <p>Should only be used if the camera does not see more than 1 april tag, if it does, use
    * getPNPResult instead, as it is more accurate.
@@ -344,11 +360,8 @@ public class PhotonManager extends SubsystemBase {
    * @return The robots estimated pose, if it has any april tag targets. <strong>Returns null if
    *     there are no targets.</strong>
    */
-  public EstimatedRobotPose getEstimatedPose() {
-    Optional<EstimatedRobotPose> estimatedPose = m_poseEstimator.update(
-      m_result
-    );
-    return estimatedPose.isPresent() ? estimatedPose.get() : null;
+  public EstimatedRobotPose getLastEstimatedPose() {
+    return m_lastEstimatedPose;
   }
 
   /**
@@ -372,10 +385,10 @@ public class PhotonManager extends SubsystemBase {
     double resultReprojectionError = result.estimatedPose.bestReprojErr;
     double resultAmbiguity = result.estimatedPose.ambiguity;
 
-    if (resultAmbiguity > PHOTON.MAX_AMBIGUITY_TOLERANCE) {
+    if (resultAmbiguity > PHOTON_VISION.MAX_AMBIGUITY_TOLERANCE) {
       return null;
     }
-    if (resultReprojectionError > PHOTON.MAX_REPROJECTION_ERROR_PIXELS) {
+    if (resultReprojectionError > PHOTON_VISION.MAX_REPROJECTION_ERROR_PIXELS) {
       return null;
     }
     return new Pose3d(
