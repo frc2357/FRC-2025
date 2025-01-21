@@ -356,13 +356,6 @@ public class CommandSwerveDrivetrain
     }
   }
 
-  public void zeroGyro(boolean flip) {
-    StatusCode code = super.getPigeon2().setYaw(flip ? 180 : 0);
-    System.out.println(
-      "[GYRO] Zeroed to " + (flip ? 180 : 0) + ": " + code.toString()
-    );
-  }
-
   public double getYaw() {
     return getPigeon2().getYaw().getValueAsDouble();
   }
