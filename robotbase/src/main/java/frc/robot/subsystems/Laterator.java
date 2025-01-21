@@ -107,7 +107,7 @@ public class Laterator extends SubsystemBase {
   }
 
   public void stop() {
-    m_motorLeft.set(0);
+    m_motorLeft.stopMotor();
     setTargetRotations(Units.Rotations.of(Double.NaN));
   }
 }
