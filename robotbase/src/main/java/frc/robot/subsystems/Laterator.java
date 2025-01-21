@@ -18,7 +18,8 @@ import frc.robot.Constants.LATERATOR;
 
 public class Laterator extends SubsystemBase {
 
-  private SparkMax m_motor;
+  private SparkMax m_motorLeft;
+  private SparkMax m_motorRight;
 
   private DigitalInput m_hallEffectSensor;
 
@@ -28,16 +29,31 @@ public class Laterator extends SubsystemBase {
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
   public Laterator() {
-    m_motor = new SparkMax(CAN_ID.LATERATOR_MOTOR, MotorType.kBrushless);
-    m_motor.configure(
-      LATERATOR.MOTOR_CONFIG,
+    m_motorLeft = new SparkMax(
+      CAN_ID.LATERATOR_MOTOR_LEFT,
+      MotorType.kBrushless
+    );
+
+    m_motorRight = new SparkMax(
+      CAN_ID.LATERATOR_MOTOR_RIGHT,
+      MotorType.kBrushless
+    );
+
+    m_motorLeft.configure(
+      LATERATOR.MOTOR_CONFIG_LEFT,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
 
-    m_PIDController = m_motor.getClosedLoopController();
+    m_motorRight.configure(
+      LATERATOR.MOTOR_CONFIG_RIGHT,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
 
-    m_encoder = m_motor.getEncoder();
+    m_PIDController = m_motorLeft.getClosedLoopController();
+
+    m_encoder = m_motorLeft.getEncoder();
 
     m_hallEffectSensor = new DigitalInput(
       DIGITAL_INPUT.LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID
@@ -80,11 +96,18 @@ public class Laterator extends SubsystemBase {
   }
 
   public void setSpeed(double speed) {
-    m_motor.set(speed);
+    m_motorLeft.set(speed);
+    setTargetRotations(Units.Rotations.of(Double.NaN));
   }
 
   public void setAxisSpeed(double axisSpeed) {
     axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
-    m_motor.set(axisSpeed);
+    m_motorLeft.set(axisSpeed);
+    setTargetRotations(Units.Rotations.of(Double.NaN));
+  }
+
+  public void stop() {
+    m_motorLeft.set(0);
+    setTargetRotations(Units.Rotations.of(Double.NaN));
   }
 }

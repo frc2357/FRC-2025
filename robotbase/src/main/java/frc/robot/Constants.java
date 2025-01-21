@@ -30,7 +30,9 @@ public final class Constants {
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
-    public static final int LATERATOR_MOTOR = -1;
+    public static final int LATERATOR_MOTOR_LEFT = 28;
+    public static final int LATERATOR_MOTOR_RIGHT = 29;
+
     public static final int CORAL_RUNNER_MOTOR = -1;
   }
 
@@ -108,17 +110,23 @@ public final class Constants {
 
   public static final class LATERATOR {
 
-    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .inverted(false);
+
+    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
+      new SparkMaxConfig()
+        .idleMode(IdleMode.kBrake)
+        .inverted(true)
+        .follow(CAN_ID.LATERATOR_MOTOR_LEFT);
 
     public static final double MOTOR_P = 0;
     public static final double MOTOR_I = 0;
     public static final double MOTOR_D = 0;
     public static final double MOTOR_F = 0;
 
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
-      MOTOR_CONFIG.closedLoop
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
+      MOTOR_CONFIG_LEFT.closedLoop
         .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
         .outputRange(-1, 1);
 
@@ -126,8 +134,8 @@ public final class Constants {
 
     public static final double AXIS_MAX_SPEED = 0.1;
 
-    public static final MAXMotionConfig MAX_MOTION_CONFIG =
-      CLOSED_LOOP_CONFIG.maxMotion
+    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);

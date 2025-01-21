@@ -51,7 +51,7 @@ public class CoralRunner extends SubsystemBase {
   }
 
   public void stop() {
-    m_motor.set(0);
+    m_motor.stopMotor();
   }
 
   public boolean isIntakeBeamBroken() {
