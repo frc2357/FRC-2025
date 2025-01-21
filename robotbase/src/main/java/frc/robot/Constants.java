@@ -63,7 +63,6 @@ public final class Constants {
       Math.PI * 2;
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.094545;
-
   }
 
   public static final class CHOREO {
