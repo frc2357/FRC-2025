@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.PHOTON_VISION;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -20,6 +23,7 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonTargetSortMode;
 import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -159,9 +163,24 @@ public class PhotonVisionCamera extends SubsystemBase {
     m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
     m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
     if (m_lastEstimatedPose != null) {
+      double averageTargetDistance = 0;
+      for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
+        averageTargetDistance += target
+          .getBestCameraToTarget()
+          .getMeasureX()
+          .in(Meters);
+      }
+      averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size() * 2; // average it and some extra stuff
       Robot.swerve.addVisionMeasurement(
         m_lastEstimatedPose.estimatedPose.toPose2d(),
-        m_lastEstimatedPose.timestampSeconds
+        m_lastEstimatedPose.timestampSeconds,
+        VecBuilder.fill(
+          Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
+          averageTargetDistance, // X coordinate confidence
+          Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
+          averageTargetDistance, // Y coordinate confidence
+          Double.MAX_VALUE // Theta confidence. should never change the gyro from a vision measurment, gyro is more accurate for now.
+        )
       );
     }
   }
