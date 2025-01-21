@@ -14,6 +14,8 @@ import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.controls.DriverControls;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.AlgaePivot;
+import frc.robot.subsystems.AlgaeRunner;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 
@@ -28,6 +30,8 @@ public class Robot extends TimedRobot {
 
   public static CommandSwerveDrivetrain swerve;
   public static Elevator elevator;
+  public static AlgaeRunner algaeRunner;
+  public static AlgaePivot algaePivot;
 
   public static AutoChooserManager autoChooserManager;
   public static Autos autos;
@@ -44,6 +48,8 @@ public class Robot extends TimedRobot {
 
     swerve = TunerConstants.createDrivetrain();
     // elevator = new Elevator();
+    algaeRunner = new AlgaeRunner();
+    algaePivot = new AlgaePivot();
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();

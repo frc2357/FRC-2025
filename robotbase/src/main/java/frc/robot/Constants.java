@@ -14,14 +14,19 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
@@ -47,6 +52,9 @@ public final class Constants {
 
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
+    public static final int ALGAE_RUNNER_MOTOR = 25;
+    public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
+    public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
   }
 
   public static final class SWERVE {
@@ -55,6 +63,7 @@ public final class Constants {
       Math.PI * 2;
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.094545;
+
   }
 
   public static final class CHOREO {
@@ -115,6 +124,65 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.1;
 
     public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
+  }
+
+  public static final class ALGAE_RUNNER {
+
+    public static final double AXIS_MAX_SPEED = 0.8;
+
+    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
+
+    public static final boolean MOTOR_INVERTED = false;
+
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+
+    public static final double RAMP_RATE = .25;
+
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .inverted(MOTOR_INVERTED)
+      .smartCurrentLimit(
+        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
+        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
+      );
+  }
+
+  public static final class ALGAE_PIVOT {
+
+    public static final double AXIS_MAX_SPEED = 0.8;
+
+    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
+
+    public static final boolean MOTOR_INVERTED = false;
+
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+
+    public static final double RAMP_RATE = .25;
+
+    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .inverted(MOTOR_INVERTED)
+      .smartCurrentLimit(
+        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
+        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
+      );
+
+    public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
+      new SparkMaxConfig()
+        .idleMode(IDLE_MODE)
+        .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR);
+
+    public static final double LEFT_MOTOR_P = 0;
+    public static final double LEFT_MOTOR_I = 0;
+    public static final double LEFT_MOTOR_D = 0;
+    public static final double LEFT_MOTOR_F = 0;
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
+      LEFT_MOTOR_CONFIG.closedLoop
+        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
+        .outputRange(-1, 1);
   }
 
   public static final class CUSTOM_UNITS {
