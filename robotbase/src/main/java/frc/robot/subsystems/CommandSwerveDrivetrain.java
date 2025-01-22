@@ -1,11 +1,10 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.Constants.CHOREO;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -17,13 +16,18 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.CHOREO;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 
@@ -346,6 +350,38 @@ public class CommandSwerveDrivetrain
 
   public void setPose2d(Pose2d poseToSet) {
     super.resetPose(poseToSet);
+  }
+
+  public ChassisSpeeds getCurrentChassisSpeeds() {
+    return super.getState().Speeds;
+  }
+
+  public LinearVelocity getXVelocity() {
+    return Units.MetersPerSecond.of(
+      getCurrentChassisSpeeds().vxMetersPerSecond
+    );
+  }
+
+  public LinearVelocity getYVelocity() {
+    return Units.MetersPerSecond.of(
+      getCurrentChassisSpeeds().vyMetersPerSecond
+    );
+  }
+
+  public LinearVelocity getTranslationalVelocity() {
+    var speeds = getCurrentChassisSpeeds();
+    var xVel = Math.abs(speeds.vxMetersPerSecond);
+    var yVel = Math.abs(speeds.vyMetersPerSecond);
+    var translationalVelocity = Math.sqrt(
+      Math.pow(xVel, 2) + Math.pow(yVel, 2)
+    ); // A^2 + B^2 = C^2
+    return Units.FeetPerSecond.of(translationalVelocity);
+  }
+
+  public AngularVelocity getThetaVelocity() {
+    return Units.RadiansPerSecond.of(
+      getCurrentChassisSpeeds().omegaRadiansPerSecond
+    );
   }
 
   public void stopMotors() {

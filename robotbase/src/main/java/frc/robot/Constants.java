@@ -11,11 +11,15 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -89,39 +93,30 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .inverted(false);
-
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
         .idleMode(IdleMode.kBrake)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
-
     public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
     public static final double LEFT_MOTOR_D = 0;
     public static final double LEFT_MOTOR_F = 0;
-
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
         .outputRange(-1, 1);
-
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
-
     public static final int ENCODER_COUNTS_PER_REV = 8196;
-
     public static final double GEAR_RATIO = 50 / 14;
     public static final Distance MOTOR_PULLEY_PITCH_DIAMETER = Units.Inches.of(
       2.256
     );
-
     public static final double AXIS_MAX_SPEED = 0.1;
-
     public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
   }
 
@@ -198,6 +193,60 @@ public final class Constants {
       .named("Neo Encoder Tick")
       .symbol("NET")
       .make();
+  }
+
+  public static final class PHOTON_VISION {
+
+    public static final String FRONT_CAMERA_NAME = "test";
+    public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
+      0,
+      0,
+      0,
+      new Rotation3d(0, 0, 0)
+    );
+
+    public static final String LOST_CONNECTION_ERROR_MESSAGE =
+      "**************LOST CONNECTION WITH ORANGE PI";
+    public static final String CONNECTION_REGAINED_MESSAGE =
+      "CONNECTION REGAINED WITH ORANGE PI*********";
+
+    public static final Angle BEST_TARGET_PITCH_TOLERANCE = Units.Degrees.of(4);
+
+    public static final Angle MAX_ANGLE = Units.Degrees.of(35);
+
+    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; //TODO: tune this to a reasonable degree.
+    public static final double MAX_AMBIGUITY_TOLERANCE = 4; //TODO: tune this until its reasonable.
+
+    public static final boolean ACTIVATE_TURBO_SWITCH = false;
+
+    public static final PoseStrategy PRIMARY_STRATEGY =
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+    public static final PoseStrategy FALLBACK_STRATEGY =
+      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
+
+    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
+    public static final double X_STD_DEV_COEFFIECIENT = 1;
+    public static final double Y_STD_DEV_COEFFIECIENT = 1;
+
+    // if were going faster than this, we wont accept any pose est.
+    public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
+      Units.MetersPerSecond.of(3.5);
+
+    // how close the estimated pose can get to the field border before we invalidate it
+    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.5);
+
+    // how far off on the z axis the estimated pose can be before we invalidate it
+    public static final Distance Z_MARGIN = Units.Feet.of(0.25);
+  }
+
+  public static final class FIELD_CONSTANTS {
+
+    public static final Distance FIELD_LENGTH = Units.Feet.of(54).plus(
+      Units.Inches.of(3)
+    );
+    public static final Distance FIELD_WIDTH = Units.Feet.of(26).plus(
+      Units.Inches.of(3)
+    );
   }
 
   public static class DRIVE_TO_POSE {
