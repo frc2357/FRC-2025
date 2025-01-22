@@ -91,6 +91,10 @@ public class Laterator extends SubsystemBase {
     return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
   }
 
+  public Angle getPosition() {
+    return Units.Rotations.of(m_encoder.getPosition());
+  }
+
   public void setZero() {
     m_encoder.setPosition(0);
   }
