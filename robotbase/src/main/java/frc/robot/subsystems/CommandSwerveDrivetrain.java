@@ -1,17 +1,22 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.Constants.CHOREO;
 
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
@@ -25,7 +30,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.CHOREO;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 
@@ -123,10 +127,15 @@ public class CommandSwerveDrivetrain
   /* The SysId routine to test */
   private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
-  private final SwerveRequest.ApplyRobotSpeeds m_robotRelative =
-    new SwerveRequest.ApplyRobotSpeeds();
-  private final SwerveRequest.ApplyFieldSpeeds m_fieldRelative =
-    new SwerveRequest.ApplyFieldSpeeds();
+  private final SwerveRequest.RobotCentric m_robotRelative =
+    new SwerveRequest.RobotCentric()
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+  private final SwerveRequest.FieldCentric m_fieldRelative =
+    new SwerveRequest.FieldCentric()
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+  private final SwerveRequest.ApplyRobotSpeeds m_chassisSpeedsRequest =
+    new SwerveRequest.ApplyRobotSpeeds()
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
 
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -244,24 +253,17 @@ public class CommandSwerveDrivetrain
 
   @Override
   public void periodic() {
-    /*
-     * Periodically try to apply the operator perspective.
-     * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
-     * This allows us to correct the perspective in case the robot code restarts mid-match.
-     * Otherwise, only check and apply the operator perspective if the DS is disabled.
-     * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
-     */
-    if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-      DriverStation.getAlliance()
-        .ifPresent(allianceColor -> {
-          setOperatorPerspectiveForward(
-            allianceColor == Alliance.Red
-              ? kRedAlliancePerspectiveRotation
-              : kBlueAlliancePerspectiveRotation
-          );
-          m_hasAppliedOperatorPerspective = true;
-        });
-    }
+    // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
+    //   DriverStation.getAlliance()
+    //     .ifPresent(allianceColor -> {
+    //       setOperatorPerspectiveForward(
+    //         allianceColor == Alliance.Red
+    //           ? kRedAlliancePerspectiveRotation
+    //           : kBlueAlliancePerspectiveRotation
+    //       );
+    //       m_hasAppliedOperatorPerspective = true;
+    //     });
+    // }
   }
 
   private void startSimThread() {
@@ -292,13 +294,10 @@ public class CommandSwerveDrivetrain
     double rotationRateRadiansPerSecond
   ) {
     setControl(
-      m_robotRelative.withSpeeds(
-        new ChassisSpeeds(
-          velocityXMetersPerSecond,
-          velocityYMetersPerSecond,
-          rotationRateRadiansPerSecond
-        )
-      )
+      m_robotRelative
+        .withVelocityX(velocityXMetersPerSecond)
+        .withVelocityY(velocityYMetersPerSecond)
+        .withRotationalRate(rotationRateRadiansPerSecond)
     );
   }
 
@@ -315,13 +314,10 @@ public class CommandSwerveDrivetrain
     double rotationRateRadiansPerSecond
   ) {
     setControl(
-      m_fieldRelative.withSpeeds(
-        new ChassisSpeeds(
-          velocityXMetersPerSecond,
-          velocityYMetersPerSecond,
-          rotationRateRadiansPerSecond
-        )
-      )
+      m_fieldRelative
+        .withVelocityX(velocityXMetersPerSecond)
+        .withVelocityY(velocityYMetersPerSecond)
+        .withRotationalRate(rotationRateRadiansPerSecond)
     );
   }
 
@@ -343,7 +339,7 @@ public class CommandSwerveDrivetrain
       sample.heading
     );
     setControl(
-      m_fieldRelative
+      m_chassisSpeedsRequest
         .withSpeeds(targetSpeeds)
         .withWheelForceFeedforwardsX(sample.moduleForcesX())
         .withWheelForceFeedforwardsY(sample.moduleForcesY())
@@ -388,5 +384,27 @@ public class CommandSwerveDrivetrain
     return Units.RadiansPerSecond.of(
       getCurrentChassisSpeeds().omegaRadiansPerSecond
     );
+  }
+  
+  public void stopMotors() {
+    driveFieldRelative(0, 0, 0);
+    for (SwerveModule<TalonFX, TalonFX, CANcoder> module : super.getModules()) {
+      module.getDriveMotor().stopMotor(); // anti-jingle
+      module.getSteerMotor().stopMotor(); // remove to bring back the jingle (dont do it)
+    }
+  }
+
+  public double getYaw() {
+    return getPigeon2().getYaw().getValueAsDouble();
+  }
+
+  // Pigeon is rotated 90 degrees so pitch and roll are flipped
+  public double getRoll() {
+    return getPigeon2().getPitch().getValueAsDouble();
+  }
+
+  // Pigeon is rotated 90 degrees so pitch and roll are flipped
+  public double getPitch() {
+    return getPigeon2().getRoll().getValueAsDouble();
   }
 }

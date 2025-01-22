@@ -4,10 +4,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.auto.Autos;
+import frc.robot.commands.drive.DefaultDrive;
+import frc.robot.controls.DriverControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaePivot;
 import frc.robot.subsystems.AlgaeRunner;
@@ -30,19 +35,34 @@ public class Robot extends TimedRobot {
 
   public static AutoChooserManager autoChooserManager;
   public static Autos autos;
+  public static DriverControls driverControls;
+
+  private static Command m_seedFieldRelative;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
+    DriverStation.silenceJoystickConnectionWarning(true); //TODO: turn this off at comp, just in case.
+
     swerve = TunerConstants.createDrivetrain();
-    elevator = new Elevator();
+    // elevator = new Elevator();
     algaeRunner = new AlgaeRunner();
     algaePivot = new AlgaePivot();
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
+
+    driverControls = new DriverControls(
+      new XboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
+      Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
+    );
+
+    m_seedFieldRelative = new InstantCommand(() -> swerve.seedFieldCentric());
+    m_seedFieldRelative.schedule();
+
+    swerve.setDefaultCommand(new DefaultDrive());
   }
 
   /**

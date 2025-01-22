@@ -35,13 +35,38 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
  */
 public final class Constants {
 
-  public static class CAN_ID {
+  public static final class CAN_ID {
+
+    public static final int PIGEON_ID = 5;
+    public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 11;
+    public static final int FRONT_LEFT_STEER_MOTOR_ID = 12;
+    public static final int FRONT_LEFT_ENCODER_ID = 19;
+
+    public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 13;
+    public static final int FRONT_RIGHT_STEER_MOTOR_ID = 14;
+    public static final int FRONT_RIGHT_ENCODER_ID = 20;
+
+    public static final int BACK_LEFT_DRIVE_MOTOR_ID = 15;
+    public static final int BACK_LEFT_STEER_MOTOR_ID = 16;
+    public static final int BACK_LEFT_ENCODER_ID = 21;
+
+    public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 17;
+    public static final int BACK_RIGHT_STEER_MOTOR_ID = 18;
+    public static final int BACK_RIGHT_ENCODER_ID = 22;
 
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
     public static final int ALGAE_RUNNER_MOTOR = 25;
     public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
     public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
+  }
+
+  public static final class SWERVE {
+
+    public static final double MAX_ANGULAR_RATE_ROTATIONS_PER_SECOND =
+      Math.PI * 2;
+
+    public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.094545;
   }
 
   public static final class CHOREO {
@@ -222,5 +247,36 @@ public final class Constants {
     public static final Distance FIELD_WIDTH = Units.Feet.of(26).plus(
       Units.Inches.of(3)
     );
+  }
+  
+  public static class DRIVE_TO_POSE {
+
+    public static final PIDController PIGEON_ROTATION_PID_CONTROLLER =
+      new PIDController(7.5, 0, 0.0);
+    public static final double PIGEON_ROTATION_FEEDFORWARD = 0.00001;
+    public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER =
+      new PIDController(5, 0, 0);
+    // public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER = new PIDController(0, 0, 0);
+    // public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER = new PIDController(0.15, 0, 0);
+    public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER =
+      new PIDController(5, 0, 0);
+
+    public static final Distance WAYPOINT_X_TOLERANCE = Units.Inches.of(2);
+    public static final Distance WAYPOINT_Y_TOLERANCE = Units.Inches.of(2);
+    public static final Angle WAYPOINT_ROTATION_TOLERANCE = Units.Degrees.of(4);
+  }
+
+  public static final class CONTROLLER {
+
+    public static final int DRIVE_CONTROLLER_PORT = 1;
+    public static final double DRIVE_CONTROLLER_DEADBAND = 0.01;
+    public static final int CODRIVER_CONTROLLER_PORT = 0;
+    public static final double CODRIVE_CONTROLLER_DEADBAND = 0.025;
+    public static final double SWERVE_TRANSLATIONAL_DEADBAND = 0.0;
+    public static final double SWERVE_ROTATIONAL_DEADBAND = 0.0;
+    public static final double DRIVE_RUMBLE_INTENSITY = .5;
+    public static final double CODRIVE_RUMBLE_INTENSITY = .5;
+    public static final double DRIVE_RUMBLE_SECONDS = 2;
+    public static final double CODRIVE_RUMBLE_SECONDS = 2;
   }
 }
