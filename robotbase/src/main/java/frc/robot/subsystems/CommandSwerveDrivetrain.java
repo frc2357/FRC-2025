@@ -359,7 +359,7 @@ public class CommandSwerveDrivetrain
   }
 
   public ChassisSpeeds getCurrentChassisSpeeds() {
-    return super.getKinematics().toChassisSpeeds(super.getState().ModuleStates);
+    return super.getState().Speeds;
   }
 
   public LinearVelocity getXVelocity() {
@@ -372,6 +372,16 @@ public class CommandSwerveDrivetrain
     return Units.MetersPerSecond.of(
       getCurrentChassisSpeeds().vyMetersPerSecond
     );
+  }
+
+  public LinearVelocity getTranslationalVelocity() {
+    var speeds = getCurrentChassisSpeeds();
+    var xVel = Math.abs(speeds.vxMetersPerSecond);
+    var yVel = Math.abs(speeds.vyMetersPerSecond);
+    var translationalVelocity = Math.sqrt(
+      Math.pow(xVel, 2) + Math.pow(yVel, 2)
+    ); // A^2 + B^2 = C^2
+    return Units.FeetPerSecond.of(translationalVelocity);
   }
 
   public AngularVelocity getThetaVelocity() {

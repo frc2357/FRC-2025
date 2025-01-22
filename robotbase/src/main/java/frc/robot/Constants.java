@@ -18,6 +18,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
@@ -196,6 +197,30 @@ public final class Constants {
     public static final PoseStrategy PRIMARY_STRATEGY =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.CLOSEST_TO_LAST_POSE;
+      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
+
+    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
+    public static final double X_STD_DEV_COEFFIECIENT = 1;
+    public static final double Y_STD_DEV_COEFFIECIENT = 1;
+
+    // if were going faster than this, we wont accept any pose est.
+    public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
+      Units.MetersPerSecond.of(3.5);
+
+    // how close the estimated pose can get to the field border before we invalidate it
+    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.5);
+
+    // how far off on the z axis the estimated pose can be before we invalidate it
+    public static final Distance Z_MARGIN = Units.Feet.of(0.25);
+  }
+
+  public static final class FIELD_CONSTANTS {
+
+    public static final Distance FIELD_LENGTH = Units.Feet.of(54).plus(
+      Units.Inches.of(3)
+    );
+    public static final Distance FIELD_WIDTH = Units.Feet.of(26).plus(
+      Units.Inches.of(3)
+    );
   }
 }

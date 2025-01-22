@@ -3,29 +3,27 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static frc.robot.Constants.PHOTON_VISION;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.FIELD_CONSTANTS;
+import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Robot;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonTargetSortMode;
 import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -159,15 +157,15 @@ public class PhotonVisionCamera extends SubsystemBase {
         false
       );
     }
+    updatePose(); // update pose based on the new result
+  }
+
+  private void updatePose() {
     // update reference pose incase we want that strategy
     m_poseEstimator.setReferencePose(Robot.swerve.getPose2d());
     // change pose estimator settings to be correct for the current camera
     m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
     m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
-    updatePose(); // update pose based on the new pose estimate
-  }
-
-  private void updatePose() {
     if (m_lastEstimatedPose != null) {
       double averageTargetDistance = 0;
       for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
@@ -178,13 +176,39 @@ public class PhotonVisionCamera extends SubsystemBase {
       }
       averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
 
-      // the higher the confidence is, the less that coordinates measurment is trusted.
+      if ( // checks whether the estimated pose is in the field or not, and chucks it out if it is
+        m_lastEstimatedPose.estimatedPose.getX() <
+          -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+        m_lastEstimatedPose.estimatedPose.getX() >
+        FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+        PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+        m_lastEstimatedPose.estimatedPose.getY() <
+        -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+        m_lastEstimatedPose.estimatedPose.getY() >
+        FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+        PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+        m_lastEstimatedPose.estimatedPose.getZ() <
+        -PHOTON_VISION.Z_MARGIN.in(Meters) ||
+        m_lastEstimatedPose.estimatedPose.getZ() >
+        PHOTON_VISION.Z_MARGIN.in(Meters)
+      ) {
+        return;
+      }
 
+      if (
+        Robot.swerve.getTranslationalVelocity().in(MetersPerSecond) >
+        PHOTON_VISION.MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
+      ) {
+        return;
+      }
+
+      // the higher the confidence is, the less the estimated measurment is trusted.
       double xVelocityConf =
-        1 + Robot.swerve.getXVelocity().in(MetersPerSecond);
+        0.9 + Robot.swerve.getXVelocity().in(MetersPerSecond);
       double yVelocityConf =
-        1 + Robot.swerve.getYVelocity().in(MetersPerSecond);
-      // we add 1 so that if were not moving, it does not impact the confidence, and the faster we move, the more it impact the confidence
+        0.9 + Robot.swerve.getYVelocity().in(MetersPerSecond);
+      // we add 0.9 so that if were not moving we trust it more
+      // and if were moving fast we trust it less
 
       double xCoordinateConfidence =
         (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
@@ -203,7 +227,7 @@ public class PhotonVisionCamera extends SubsystemBase {
         VecBuilder.fill(
           xCoordinateConfidence,
           yCoordinateConfidence,
-          Double.MAX_VALUE
+          Double.POSITIVE_INFINITY // Theta conf, should usually never change gyro from vision
         )
       );
     }
