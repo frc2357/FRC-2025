@@ -20,7 +20,7 @@ public class ElevatorSetDistance extends Command {
 
   @Override
   public boolean isFinished() {
-    return Robot.elevator.isAtSetpoint();
+    return Robot.elevator.isAtTarget();
   }
 
   @Override
