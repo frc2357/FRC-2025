@@ -18,7 +18,9 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaePivot;
 import frc.robot.subsystems.AlgaeRunner;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralRunner;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Laterator;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -31,6 +33,8 @@ public class Robot extends TimedRobot {
 
   public static CommandSwerveDrivetrain swerve;
   public static Elevator elevator;
+  public static Laterator laterator;
+  public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
 
@@ -48,7 +52,9 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(true); //TODO: turn this off at comp, just in case.
 
     swerve = TunerConstants.createDrivetrain();
-    // elevator = new Elevator();
+    elevator = new Elevator();
+    laterator = new Laterator();
+    coralRunner = new CoralRunner();
     algaeRunner = new AlgaeRunner();
     algaePivot = new AlgaePivot();
 

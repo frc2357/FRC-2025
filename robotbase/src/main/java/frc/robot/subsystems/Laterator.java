@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Feet;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -11,35 +13,43 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.Constants.ELEVATOR;
+import frc.robot.Constants.CAN_ID;
+import frc.robot.Constants.DIGITAL_INPUT;
+import frc.robot.Constants.LATERATOR;
 
-public class Elevator extends SubsystemBase {
+public class Laterator extends SubsystemBase {
 
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
+
+  private DigitalInput m_hallEffectSensor;
+
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
+
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  public Elevator() {
+  public Laterator() {
     m_motorLeft = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_LEFT_MOTOR,
+      CAN_ID.LATERATOR_MOTOR_LEFT,
       MotorType.kBrushless
     );
+
     m_motorRight = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_RIGHT_MOTOR,
+      CAN_ID.LATERATOR_MOTOR_RIGHT,
       MotorType.kBrushless
     );
 
     m_motorLeft.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_LEFT,
+      LATERATOR.MOTOR_CONFIG_LEFT,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
+
     m_motorRight.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
+      LATERATOR.MOTOR_CONFIG_RIGHT,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
@@ -47,33 +57,9 @@ public class Elevator extends SubsystemBase {
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
-  }
 
-  public void setSpeed(double speed) {
-    m_motorLeft.set(speed);
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-  }
-
-  public void stop() {
-    m_motorLeft.stopMotor();
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-  }
-
-  public AngularVelocity getVelocity() {
-    return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
-  }
-
-  public void setZero() {
-    m_encoder.setPosition(0);
-  }
-
-  private Angle getRotations() {
-    return Units.Rotations.of(m_encoder.getPosition());
-  }
-
-  public Distance getDistance() {
-    return (
-      ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER.times(m_encoder.getPosition())
+    m_hallEffectSensor = new DigitalInput(
+      DIGITAL_INPUT.LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID
     );
   }
 
@@ -86,16 +72,18 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance.div(ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER).magnitude()
-    );
+    Angle rotations = Units.Rotations.of(targetDistance.in(Feet)); //TODO: Add accurate conversion information
     setTargetRotations(rotations);
+  }
+
+  private Angle getRotations() {
+    return Units.Rotations.of(m_encoder.getPosition());
   }
 
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
-      ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      LATERATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
   }
 
@@ -103,9 +91,35 @@ public class Elevator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
-  public void setAxisSpeed(double speed) {
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-    speed *= ELEVATOR.AXIS_MAX_SPEED;
+  public boolean isAtZero() {
+    return m_hallEffectSensor.get();
+  }
+
+  public AngularVelocity getVelocity() {
+    return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
+  }
+
+  public Distance getPosition() {
+    return Feet.of(0); //TODO: Add accurate conversion information
+  }
+
+  public void setZero() {
+    m_encoder.setPosition(0);
+  }
+
+  public void setSpeed(double speed) {
     m_motorLeft.set(speed);
+    m_targetRotations = Units.Rotations.of(Double.NaN);
+  }
+
+  public void setAxisSpeed(double axisSpeed) {
+    axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
+    m_motorLeft.set(axisSpeed);
+    m_targetRotations = Units.Rotations.of(Double.NaN);
+  }
+
+  public void stop() {
+    m_motorLeft.stopMotor();
+    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 }

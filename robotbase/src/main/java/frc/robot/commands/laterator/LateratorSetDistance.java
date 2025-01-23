@@ -1,30 +1,30 @@
-package frc.robot.commands.elevator;
+package frc.robot.commands.laterator;
 
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
-public class ElevatorSetDistance extends Command {
+public class LateratorSetDistance extends Command {
 
   private Distance m_distance;
 
-  public ElevatorSetDistance(Distance distance) {
+  public LateratorSetDistance(Distance distance) {
     m_distance = distance;
-    addRequirements(Robot.elevator);
+    addRequirements(Robot.laterator);
   }
 
   @Override
   public void initialize() {
-    Robot.elevator.setTargetDistance(m_distance);
+    Robot.laterator.setTargetDistance(m_distance);
   }
 
   @Override
   public boolean isFinished() {
-    return Robot.elevator.isAtTarget();
+    return Robot.laterator.isAtTarget();
   }
 
   @Override
   public void end(boolean interrupted) {
-    Robot.elevator.stop();
+    Robot.laterator.stop();
   }
 }

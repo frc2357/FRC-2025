@@ -56,9 +56,22 @@ public final class Constants {
 
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
+
     public static final int ALGAE_RUNNER_MOTOR = 25;
     public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
     public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
+
+    public static final int LATERATOR_MOTOR_LEFT = 28;
+    public static final int LATERATOR_MOTOR_RIGHT = 29;
+
+    public static final int CORAL_RUNNER_MOTOR = 30;
+  }
+
+  public final class DIGITAL_INPUT {
+
+    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
+    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 1;
+    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 2;
   }
 
   public static final class SWERVE {
@@ -92,10 +105,15 @@ public final class Constants {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
-      .inverted(false);
+      .inverted(false)
+      .openLoopRampRate(.25)
+      .voltageCompensation(12);
+
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
         .idleMode(IdleMode.kBrake)
+        .openLoopRampRate(.25)
+        .voltageCompensation(12)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
     public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
@@ -118,6 +136,74 @@ public final class Constants {
     );
     public static final double AXIS_MAX_SPEED = 0.1;
     public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
+  }
+
+  public static final class LATERATOR {
+
+    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
+      .idleMode(IdleMode.kBrake)
+      .inverted(false)
+      .openLoopRampRate(.25)
+      .voltageCompensation(12);
+
+    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
+      new SparkMaxConfig()
+        .idleMode(IdleMode.kBrake)
+        .inverted(true)
+        .openLoopRampRate(.25)
+        .voltageCompensation(12)
+        .follow(CAN_ID.LATERATOR_MOTOR_LEFT);
+
+    public static final double MOTOR_P = 0;
+    public static final double MOTOR_I = 0;
+    public static final double MOTOR_D = 0;
+    public static final double MOTOR_F = 0;
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
+      MOTOR_CONFIG_LEFT.closedLoop
+        .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
+        .outputRange(-1, 1);
+
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+
+    public static final double AXIS_MAX_SPEED = 0.1;
+
+    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.maxMotion
+        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+        .maxAcceleration(0)
+        .maxVelocity(0);
+  }
+
+  public static final class CORAL_RUNNER {
+
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IdleMode.kBrake)
+      .inverted(false)
+      .openLoopRampRate(.25)
+      .voltageCompensation(12);
+
+    public static final double MOTOR_P = 0;
+    public static final double MOTOR_I = 0;
+    public static final double MOTOR_D = 0;
+    public static final double MOTOR_F = 0;
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
+      MOTOR_CONFIG.closedLoop
+        .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
+        .outputRange(-1, 1);
+
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+
+    public static final double AXIS_MAX_SPEED = 0.1;
+
+    public static final MAXMotionConfig MAX_MOTION_CONFIG =
+      CLOSED_LOOP_CONFIG.maxMotion
+        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+        .maxAcceleration(0)
+        .maxVelocity(0);
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
 
   public static final class ALGAE_RUNNER {
