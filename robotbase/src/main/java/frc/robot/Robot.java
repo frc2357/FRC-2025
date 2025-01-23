@@ -51,6 +51,7 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(true); //TODO: turn this off at comp, just in case.
 
     swerve = TunerConstants.createDrivetrain();
+    elevator = new Elevator()
     laterator = new Laterator();
     coralRunner = new CoralRunner();
     algaeRunner = new AlgaeRunner();
