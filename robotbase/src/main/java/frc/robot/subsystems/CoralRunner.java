@@ -53,7 +53,7 @@ public class CoralRunner extends SubsystemBase {
     m_beamBreakIntake = new DigitalInput(
       DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_INTAKE_ID
     );
-    m_beamBreakIntake = new DigitalInput(
+    m_beamBreakOuttake = new DigitalInput(
       DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID
     );
   }
@@ -77,19 +77,19 @@ public class CoralRunner extends SubsystemBase {
     );
   }
 
-  public void set(double percentOutput) {
-    setTargetVelocity(RotationsPerSecond.of(Double.NaN));
+  public void setSpeed(double percentOutput) {
+    m_targetVelocity = RotationsPerSecond.of(Double.NaN);
     m_motor.set(percentOutput);
   }
 
   public void setAxisSpeed(double axisSpeed) {
-    setTargetVelocity(RotationsPerSecond.of(Double.NaN));
+    m_targetVelocity = RotationsPerSecond.of(Double.NaN);
     axisSpeed *= CORAL_RUNNER.AXIS_MAX_SPEED;
     m_motor.set(axisSpeed);
   }
 
   public void stop() {
-    setTargetVelocity(RotationsPerSecond.of(Double.NaN));
+    m_targetVelocity = RotationsPerSecond.of(Double.NaN);
     m_motor.stopMotor();
   }
 

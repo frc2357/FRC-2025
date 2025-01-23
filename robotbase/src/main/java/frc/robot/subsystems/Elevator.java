@@ -51,12 +51,12 @@ public class Elevator extends SubsystemBase {
 
   public void setSpeed(double speed) {
     m_motorLeft.set(speed);
-    setTargetRotations(Units.Rotations.of(Double.NaN));
+    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 
   public void stop() {
     m_motorLeft.stopMotor();
-    setTargetRotations(Units.Rotations.of(Double.NaN));
+    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 
   public AngularVelocity getVelocity() {
@@ -71,7 +71,7 @@ public class Elevator extends SubsystemBase {
     return Units.Rotations.of(m_encoder.getPosition());
   }
 
-  public void setTargetRotations(Angle targetRotations) {
+  private void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),

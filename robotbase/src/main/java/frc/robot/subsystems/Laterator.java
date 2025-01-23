@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Feet;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -10,6 +12,7 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN_ID;
@@ -60,12 +63,17 @@ public class Laterator extends SubsystemBase {
     );
   }
 
-  public void setTargetRotations(Angle targetRotations) {
+  private void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl
     );
+  }
+
+  public void setTargetDistance(Distance targetDistance) {
+    Angle rotations = Units.Rotations.of(targetDistance.in(Feet)); //TODO: Add accurate conversion information
+    setTargetRotations(rotations);
   }
 
   public Angle getRotations() {
@@ -101,17 +109,17 @@ public class Laterator extends SubsystemBase {
 
   public void setSpeed(double speed) {
     m_motorLeft.set(speed);
-    setTargetRotations(Units.Rotations.of(Double.NaN));
+    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 
   public void setAxisSpeed(double axisSpeed) {
     axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
     m_motorLeft.set(axisSpeed);
-    setTargetRotations(Units.Rotations.of(Double.NaN));
+    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 
   public void stop() {
     m_motorLeft.stopMotor();
-    setTargetRotations(Units.Rotations.of(Double.NaN));
+    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 }
