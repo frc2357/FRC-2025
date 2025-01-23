@@ -91,7 +91,7 @@ public class Laterator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
-  public boolean isAtCenter() {
+  public boolean isAtZero() {
     return m_hallEffectSensor.get();
   }
 
@@ -100,7 +100,7 @@ public class Laterator extends SubsystemBase {
   }
 
   public Distance getPosition() {
-    return Units.Feet.of(m_encoder.getPosition()); //TODO: Add accurate conversion information
+    return Feet.of(0); //TODO: Add accurate conversion information
   }
 
   public void setZero() {
