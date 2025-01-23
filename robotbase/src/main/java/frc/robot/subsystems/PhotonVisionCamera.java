@@ -84,6 +84,7 @@ public class PhotonVisionCamera extends SubsystemBase {
   protected int m_bestTargetFiducialId;
 
   // experimental "turbo switch" that has the ability to increase FPS. Do not fiddle with it.
+  @SuppressWarnings("unused")
   private static final BooleanEntry m_turboSwitch =
     NetworkTableInstance.create()
       .getBooleanTopic("/photonvision/use_new_cscore_frametime")
