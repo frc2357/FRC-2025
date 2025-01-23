@@ -28,8 +28,7 @@ public class DriverControls {
   public Trigger m_leftBumper;
   public Trigger m_rightBumper;
 
-  private AxisThresholdTrigger m_rightTriggerPrime;
-  private AxisThresholdTrigger m_rightTriggerShoot;
+  private AxisThresholdTrigger m_rightTrigger;
   private AxisThresholdTrigger m_leftTrigger;
 
   private Trigger m_upDPad;
@@ -52,15 +51,10 @@ public class DriverControls {
     m_leftBumper = m_controller.leftBumper();
     m_rightBumper = m_controller.rightBumper();
 
-    m_rightTriggerPrime = new AxisThresholdTrigger(
+    m_rightTrigger = new AxisThresholdTrigger(
       m_controller,
       Axis.kRightTrigger,
       0.0
-    );
-    m_rightTriggerShoot = new AxisThresholdTrigger(
-      m_controller,
-      Axis.kRightTrigger,
-      .8
     );
     m_leftTrigger = new AxisThresholdTrigger(
       m_controller,
