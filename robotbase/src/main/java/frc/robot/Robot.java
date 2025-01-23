@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.controls.DriverControls;
@@ -55,7 +56,7 @@ public class Robot extends TimedRobot {
     autoChooserManager = new AutoChooserManager();
 
     driverControls = new DriverControls(
-      new XboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
+      new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
 

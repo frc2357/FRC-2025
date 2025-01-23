@@ -2,57 +2,55 @@ package frc.robot.controls;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
-import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.controls.util.AxisInterface;
 import frc.robot.controls.util.AxisThresholdTrigger;
 
+@SuppressWarnings("unused")
 public class DriverControls {
 
-  private XboxController m_controller;
+  private CommandXboxController m_controller;
+
   private double m_deadband;
 
-  public JoystickButton m_aButton;
-  private JoystickButton m_bButton;
-  private JoystickButton m_xButton;
-  private JoystickButton m_yButton;
+  public Trigger m_aButton;
+  private Trigger m_bButton;
+  private Trigger m_xButton;
+  private Trigger m_yButton;
 
-  private JoystickButton m_backButton;
-  private JoystickButton m_startButton;
-  public JoystickButton m_leftBumper;
-  public JoystickButton m_rightBumper;
+  private Trigger m_backButton;
+  private Trigger m_startButton;
+  public Trigger m_leftBumper;
+  public Trigger m_rightBumper;
 
   private AxisThresholdTrigger m_rightTriggerPrime;
   private AxisThresholdTrigger m_rightTriggerShoot;
   private AxisThresholdTrigger m_leftTrigger;
 
-  private POVButton m_upDPad;
-  private POVButton m_rightDPad;
-  private POVButton m_downDPad;
-  private POVButton m_leftDPad;
+  private Trigger m_upDPad;
+  private Trigger m_rightDPad;
+  private Trigger m_downDPad;
+  private Trigger m_leftDPad;
 
-  public DriverControls(XboxController controller, double deadband) {
+  public DriverControls(CommandXboxController controller, double deadband) {
     m_controller = controller;
     m_deadband = deadband;
 
-    m_aButton = new JoystickButton(m_controller, Button.kA.value);
-    m_bButton = new JoystickButton(m_controller, Button.kB.value);
-    m_xButton = new JoystickButton(m_controller, Button.kX.value);
-    m_yButton = new JoystickButton(m_controller, Button.kY.value);
+    m_aButton = m_controller.a();
+    m_bButton = m_controller.b();
+    m_xButton = m_controller.x();
+    m_yButton = m_controller.y();
 
-    m_backButton = new JoystickButton(m_controller, Button.kBack.value);
-    m_startButton = new JoystickButton(m_controller, Button.kStart.value);
+    m_backButton = m_controller.back();
+    m_startButton = m_controller.start();
 
-    m_leftBumper = new JoystickButton(controller, Button.kLeftBumper.value);
-    m_rightBumper = new JoystickButton(controller, Button.kRightBumper.value);
+    m_leftBumper = m_controller.leftBumper();
+    m_rightBumper = m_controller.rightBumper();
 
     m_rightTriggerPrime = new AxisThresholdTrigger(
       m_controller,
@@ -70,10 +68,10 @@ public class DriverControls {
       0
     );
 
-    m_upDPad = new POVButton(m_controller, 0);
-    m_rightDPad = new POVButton(m_controller, 90);
-    m_downDPad = new POVButton(m_controller, 180);
-    m_leftDPad = new POVButton(m_controller, 270);
+    m_upDPad = m_controller.povUp();
+    m_rightDPad = m_controller.povRight();
+    m_downDPad = m_controller.povDown();
+    m_leftDPad = m_controller.povLeft();
 
     mapControls();
   }
