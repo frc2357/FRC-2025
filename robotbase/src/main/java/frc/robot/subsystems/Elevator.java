@@ -72,11 +72,8 @@ public class Elevator extends SubsystemBase {
   }
 
   public Distance getDistance() {
-    return Distance.ofBaseUnits(
-      Units.Feet.of(m_encoder.getPosition())
-        .times(ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER)
-        .magnitude(),
-      Units.Feet
+    return (
+      ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER.times(m_encoder.getPosition())
     );
   }
 

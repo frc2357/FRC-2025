@@ -57,21 +57,21 @@ public final class Constants {
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
-    public static final int LATERATOR_MOTOR_LEFT = 28;
-    public static final int LATERATOR_MOTOR_RIGHT = 29;
-
-    public static final int CORAL_RUNNER_MOTOR = -1;
-
     public static final int ALGAE_RUNNER_MOTOR = 25;
     public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
     public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
+
+    public static final int LATERATOR_MOTOR_LEFT = 28;
+    public static final int LATERATOR_MOTOR_RIGHT = 29;
+
+    public static final int CORAL_RUNNER_MOTOR = 30;
   }
 
   public final class DIGITAL_INPUT {
 
-    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = -1;
-    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = -1;
-    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = -1;
+    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
+    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 1;
+    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 2;
   }
 
   public static final class SWERVE {
