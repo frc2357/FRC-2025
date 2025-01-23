@@ -67,8 +67,17 @@ public class Elevator extends SubsystemBase {
     m_encoder.setPosition(0);
   }
 
-  public Angle getRotations() {
+  private Angle getRotations() {
     return Units.Rotations.of(m_encoder.getPosition());
+  }
+
+  public Distance getDistance() {
+    return Distance.ofBaseUnits(
+      Units.Feet.of(m_encoder.getPosition())
+        .times(ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER)
+        .magnitude(),
+      Units.Feet
+    );
   }
 
   private void setTargetRotations(Angle targetRotations) {
@@ -86,14 +95,14 @@ public class Elevator extends SubsystemBase {
     setTargetRotations(rotations);
   }
 
-  public boolean isAtTargetRotations() {
+  private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
       ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
   }
 
-  public boolean isAtSetpoint() {
+  public boolean isAtTarget() {
     return isAtTargetRotations();
   }
 

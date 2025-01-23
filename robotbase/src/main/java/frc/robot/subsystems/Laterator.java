@@ -76,18 +76,18 @@ public class Laterator extends SubsystemBase {
     setTargetRotations(rotations);
   }
 
-  public Angle getRotations() {
+  private Angle getRotations() {
     return Units.Rotations.of(m_encoder.getPosition());
   }
 
-  public boolean isAtTargetRotations() {
+  private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
       LATERATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
   }
 
-  public boolean isAtSetpoint() {
+  public boolean isAtTarget() {
     return isAtTargetRotations();
   }
 
@@ -99,8 +99,8 @@ public class Laterator extends SubsystemBase {
     return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
   }
 
-  public Angle getPosition() {
-    return Units.Rotations.of(m_encoder.getPosition());
+  public Distance getPosition() {
+    return Units.Feet.of(m_encoder.getPosition()); //TODO: Add accurate conversion information
   }
 
   public void setZero() {
