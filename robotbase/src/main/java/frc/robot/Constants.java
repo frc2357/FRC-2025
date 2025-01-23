@@ -11,21 +11,48 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
 
-  public static class CAN_ID {
+  public static final class CAN_ID {
+
+    public static final int PIGEON_ID = 5;
+    public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 11;
+    public static final int FRONT_LEFT_STEER_MOTOR_ID = 12;
+    public static final int FRONT_LEFT_ENCODER_ID = 19;
+
+    public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 13;
+    public static final int FRONT_RIGHT_STEER_MOTOR_ID = 14;
+    public static final int FRONT_RIGHT_ENCODER_ID = 20;
+
+    public static final int BACK_LEFT_DRIVE_MOTOR_ID = 15;
+    public static final int BACK_LEFT_STEER_MOTOR_ID = 16;
+    public static final int BACK_LEFT_ENCODER_ID = 21;
+
+    public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 17;
+    public static final int BACK_RIGHT_STEER_MOTOR_ID = 18;
+    public static final int BACK_RIGHT_ENCODER_ID = 22;
 
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
@@ -34,6 +61,10 @@ public final class Constants {
     public static final int LATERATOR_MOTOR_RIGHT = 29;
 
     public static final int CORAL_RUNNER_MOTOR = -1;
+
+    public static final int ALGAE_RUNNER_MOTOR = 25;
+    public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
+    public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
   }
 
   public final class DIGITAL_INPUT {
@@ -43,9 +74,12 @@ public final class Constants {
     public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = -1;
   }
 
-  public static class OPERATOR_CONSTANTS {
+  public static final class SWERVE {
 
-    public static final int kDriverControllerPort = 0;
+    public static final double MAX_ANGULAR_RATE_ROTATIONS_PER_SECOND =
+      Math.PI * 2;
+
+    public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.094545;
   }
 
   public static final class CHOREO {
@@ -81,34 +115,26 @@ public final class Constants {
         .openLoopRampRate(.25)
         .voltageCompensation(12)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
-
     public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
     public static final double LEFT_MOTOR_D = 0;
     public static final double LEFT_MOTOR_F = 0;
-
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
         .outputRange(-1, 1);
-
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
-
     public static final int ENCODER_COUNTS_PER_REV = 8196;
-
     public static final double GEAR_RATIO = 50 / 14;
     public static final Distance MOTOR_PULLEY_PITCH_DIAMETER = Units.Inches.of(
       2.256
     );
-
     public static final double AXIS_MAX_SPEED = 0.1;
-
     public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
   }
 
@@ -180,6 +206,65 @@ public final class Constants {
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
 
+  public static final class ALGAE_RUNNER {
+
+    public static final double AXIS_MAX_SPEED = 0.8;
+
+    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
+
+    public static final boolean MOTOR_INVERTED = false;
+
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+
+    public static final double RAMP_RATE = .25;
+
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .inverted(MOTOR_INVERTED)
+      .smartCurrentLimit(
+        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
+        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
+      );
+  }
+
+  public static final class ALGAE_PIVOT {
+
+    public static final double AXIS_MAX_SPEED = 0.8;
+
+    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
+
+    public static final boolean MOTOR_INVERTED = false;
+
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+
+    public static final double RAMP_RATE = .25;
+
+    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .inverted(MOTOR_INVERTED)
+      .smartCurrentLimit(
+        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
+        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
+      );
+
+    public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
+      new SparkMaxConfig()
+        .idleMode(IDLE_MODE)
+        .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR);
+
+    public static final double LEFT_MOTOR_P = 0;
+    public static final double LEFT_MOTOR_I = 0;
+    public static final double LEFT_MOTOR_D = 0;
+    public static final double LEFT_MOTOR_F = 0;
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
+      LEFT_MOTOR_CONFIG.closedLoop
+        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
+        .outputRange(-1, 1);
+  }
+
   public static final class CUSTOM_UNITS {
 
     // These units are ONLY for the output shaft on the neo. Any pulley will require
@@ -194,5 +279,90 @@ public final class Constants {
       .named("Neo Encoder Tick")
       .symbol("NET")
       .make();
+  }
+
+  public static final class PHOTON_VISION {
+
+    public static final String FRONT_CAMERA_NAME = "test";
+    public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
+      0,
+      0,
+      0,
+      new Rotation3d(0, 0, 0)
+    );
+
+    public static final String LOST_CONNECTION_ERROR_MESSAGE =
+      "**************LOST CONNECTION WITH ORANGE PI";
+    public static final String CONNECTION_REGAINED_MESSAGE =
+      "CONNECTION REGAINED WITH ORANGE PI*********";
+
+    public static final Angle BEST_TARGET_PITCH_TOLERANCE = Units.Degrees.of(4);
+
+    public static final Angle MAX_ANGLE = Units.Degrees.of(35);
+
+    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; //TODO: tune this to a reasonable degree.
+    public static final double MAX_AMBIGUITY_TOLERANCE = 4; //TODO: tune this until its reasonable.
+
+    public static final boolean ACTIVATE_TURBO_SWITCH = false;
+
+    public static final PoseStrategy PRIMARY_STRATEGY =
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+    public static final PoseStrategy FALLBACK_STRATEGY =
+      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
+
+    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
+    public static final double X_STD_DEV_COEFFIECIENT = 1;
+    public static final double Y_STD_DEV_COEFFIECIENT = 1;
+
+    // if were going faster than this, we wont accept any pose est.
+    public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
+      Units.MetersPerSecond.of(3.5);
+
+    // how close the estimated pose can get to the field border before we invalidate it
+    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.5);
+
+    // how far off on the z axis the estimated pose can be before we invalidate it
+    public static final Distance Z_MARGIN = Units.Feet.of(0.25);
+  }
+
+  public static final class FIELD_CONSTANTS {
+
+    public static final Distance FIELD_LENGTH = Units.Feet.of(54).plus(
+      Units.Inches.of(3)
+    );
+    public static final Distance FIELD_WIDTH = Units.Feet.of(26).plus(
+      Units.Inches.of(3)
+    );
+  }
+
+  public static class DRIVE_TO_POSE {
+
+    public static final PIDController PIGEON_ROTATION_PID_CONTROLLER =
+      new PIDController(7.5, 0, 0.0);
+    public static final double PIGEON_ROTATION_FEEDFORWARD = 0.00001;
+    public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER =
+      new PIDController(5, 0, 0);
+    // public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER = new PIDController(0, 0, 0);
+    // public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER = new PIDController(0.15, 0, 0);
+    public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER =
+      new PIDController(5, 0, 0);
+
+    public static final Distance WAYPOINT_X_TOLERANCE = Units.Inches.of(2);
+    public static final Distance WAYPOINT_Y_TOLERANCE = Units.Inches.of(2);
+    public static final Angle WAYPOINT_ROTATION_TOLERANCE = Units.Degrees.of(4);
+  }
+
+  public static final class CONTROLLER {
+
+    public static final int DRIVE_CONTROLLER_PORT = 1;
+    public static final double DRIVE_CONTROLLER_DEADBAND = 0.01;
+    public static final int CODRIVER_CONTROLLER_PORT = 0;
+    public static final double CODRIVE_CONTROLLER_DEADBAND = 0.025;
+    public static final double SWERVE_TRANSLATIONAL_DEADBAND = 0.0;
+    public static final double SWERVE_ROTATIONAL_DEADBAND = 0.0;
+    public static final double DRIVE_RUMBLE_INTENSITY = .5;
+    public static final double CODRIVE_RUMBLE_INTENSITY = .5;
+    public static final double DRIVE_RUMBLE_SECONDS = 2;
+    public static final double CODRIVE_RUMBLE_SECONDS = 2;
   }
 }
