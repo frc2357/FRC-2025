@@ -163,7 +163,7 @@ public class PhotonVisionCamera extends SubsystemBase {
 
   private void updatePose() {
     // update reference pose incase we want that strategy
-    m_poseEstimator.setReferencePose(Robot.swerve.getPose2d());
+    m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
     // change pose estimator settings to be correct for the current camera
     m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
     m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
