@@ -94,7 +94,7 @@ public final class Constants {
 
     public static final AutoFactory AUTO_FACTORY = new AutoFactory(
       Robot.swerve::getFieldRelativePose2d,
-      Robot.swerve::setPose2d,
+      Robot.swerve::setFieldRelativePose2d,
       Robot.swerve::followChoreoPath,
       true,
       Robot.swerve
