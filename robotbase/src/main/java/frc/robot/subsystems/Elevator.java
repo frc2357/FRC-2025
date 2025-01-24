@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -7,10 +9,12 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
@@ -21,7 +25,7 @@ public class Elevator extends SubsystemBase {
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
-  private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
+  private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
 
   public Elevator() {
     m_motorLeft = new SparkMax(
@@ -51,7 +55,7 @@ public class Elevator extends SubsystemBase {
 
   public void setSpeed(double speed) {
     m_motorLeft.set(speed);
-    m_targetRotations = Units.Rotations.of(Double.NaN);
+    m_targetRotations.mut_replace(Double.NaN, Rotations);
   }
 
   public void stop() {
