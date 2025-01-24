@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Feet;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -14,19 +14,18 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants;
-import frc.robot.Constants.ELEVATOR;
+import frc.robot.Constants.CAN_ID;
+import frc.robot.Constants.DIGITAL_INPUT;
+import frc.robot.Constants.LATERATOR;
 
-//import edu.wpi.first.math.controller.PIDController;
-
-public class ElevatorTuningSubsystem {
+public class LateratorTuningSubsystem {
 
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
-  private SparkClosedLoopController m_PIDController;
-  private RelativeEncoder m_encoder;
-  private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
+
+  private DigitalInput m_hallEffectSensor;
 
   private double kP = 0;
   private double kI = 0;
@@ -35,44 +34,45 @@ public class ElevatorTuningSubsystem {
   private double maxVel = 0;
   private double maxAcc = 0;
 
-  private SparkBaseConfig m_motorconfig = Constants.ELEVATOR.MOTOR_CONFIG_LEFT;
+  private SparkBaseConfig motorconfig = LATERATOR.MOTOR_CONFIG_LEFT;
 
-  // private PIDController m_PidController
+  private SparkClosedLoopController m_PIDController;
+  private RelativeEncoder m_encoder;
 
-  public ElevatorTuningSubsystem() {
+  private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
+
+  public LateratorTuningSubsystem() {
     m_motorLeft = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_LEFT_MOTOR,
+      CAN_ID.LATERATOR_MOTOR_LEFT,
       MotorType.kBrushless
     );
+
     m_motorRight = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_RIGHT_MOTOR,
+      CAN_ID.LATERATOR_MOTOR_RIGHT,
       MotorType.kBrushless
     );
 
     updatePIDs();
 
-    m_motorRight.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
+    m_motorLeft.configure(
+      motorconfig,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
 
-    m_motorLeft.configure(
-      m_motorconfig,
+    m_motorRight.configure(
+      LATERATOR.MOTOR_CONFIG_RIGHT,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
 
     m_PIDController = m_motorLeft.getClosedLoopController();
-    displayDashboard();
-  }
 
-  public void updatePIDs() {
-    m_motorconfig.closedLoop.pidf(kP, kI, kD, kFF);
+    m_encoder = m_motorLeft.getEncoder();
 
-    m_motorconfig.closedLoop.maxMotion
-      .maxAcceleration(maxAcc)
-      .maxVelocity(maxVel);
+    m_hallEffectSensor = new DigitalInput(
+      DIGITAL_INPUT.LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID
+    );
   }
 
   public void displayDashboard() {
@@ -94,56 +94,29 @@ public class ElevatorTuningSubsystem {
     maxAcc = SmartDashboard.getNumber("Arm MaxAcc", maxAcc);
 
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
+    SmartDashboard.putBoolean("Is At Zero", isAtZero());
     SmartDashboard.putBoolean("Is At Target", isAtTarget());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
+    SmartDashboard.putNumber("Calculated Distance", getPosition().magnitude());
 
     updatePIDs();
   }
 
+  public void updatePIDs() {
+    motorconfig.closedLoop.pidf(kP, kI, kD, kFF);
+
+    motorconfig.closedLoop.maxMotion
+      .maxAcceleration(maxAcc)
+      .maxVelocity(maxVel);
+  }
+
   public void teleopPeriodic() {
-    // if (SmartDashboard.getBoolean("UseDistance", false)) {
-
-    // double distanceSetpoint;
-    // distanceSetpoint = SmartDashboard.getNumber("Elevator Distance Setpoint", 0);
-    // setTargetDistance(Units.Feet.of(distanceSetpoint));
-    // } else {
-
     double rotationSetpoint;
     rotationSetpoint = SmartDashboard.getNumber(
-      "Elevator Rotation Setpoint",
+      "Laterator Rotation Setpoint",
       0
     );
-    setTargetRotations(Degrees.of(rotationSetpoint));
+    setTargetRotations(Units.Degrees.of(rotationSetpoint));
     // }
-
-  }
-
-  public void setSpeed(double speed) {
-    m_motorLeft.set(speed);
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-  }
-
-  public void stop() {
-    m_motorLeft.stopMotor();
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-  }
-
-  public AngularVelocity getVelocity() {
-    return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
-  }
-
-  public void setZero() {
-    m_encoder.setPosition(0);
-  }
-
-  private Angle getRotations() {
-    return Units.Rotations.of(m_encoder.getPosition());
-  }
-
-  public Distance getDistance() {
-    return (
-      ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER.times(m_encoder.getPosition())
-    );
   }
 
   private void setTargetRotations(Angle targetRotations) {
@@ -155,16 +128,18 @@ public class ElevatorTuningSubsystem {
   }
 
   public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance.div(ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER).magnitude()
-    );
+    Angle rotations = Units.Rotations.of(targetDistance.in(Feet)); //TODO: Add accurate conversion information
     setTargetRotations(rotations);
+  }
+
+  private Angle getRotations() {
+    return Units.Rotations.of(m_encoder.getPosition());
   }
 
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
-      ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      LATERATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
   }
 
@@ -172,9 +147,35 @@ public class ElevatorTuningSubsystem {
     return isAtTargetRotations();
   }
 
-  public void setAxisSpeed(double speed) {
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-    speed *= ELEVATOR.AXIS_MAX_SPEED;
+  public boolean isAtZero() {
+    return m_hallEffectSensor.get();
+  }
+
+  public AngularVelocity getVelocity() {
+    return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
+  }
+
+  public Distance getPosition() {
+    return Feet.of(0); //TODO: Add accurate conversion information
+  }
+
+  public void setZero() {
+    m_encoder.setPosition(0);
+  }
+
+  public void setSpeed(double speed) {
     m_motorLeft.set(speed);
+    m_targetRotations = Units.Rotations.of(Double.NaN);
+  }
+
+  public void setAxisSpeed(double axisSpeed) {
+    axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
+    m_motorLeft.set(axisSpeed);
+    m_targetRotations = Units.Rotations.of(Double.NaN);
+  }
+
+  public void stop() {
+    m_motorLeft.stopMotor();
+    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 }
