@@ -71,15 +71,8 @@ public final class Constants {
       .openLoopRampRate(.25)
       .voltageCompensation(12);
 
-    public static final double MOTOR_P = 0;
-    public static final double MOTOR_I = 0;
-    public static final double MOTOR_D = 0;
-    public static final double MOTOR_F = 0;
-
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
-      MOTOR_CONFIG.closedLoop
-        .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
-        .outputRange(-1, 1);
+      MOTOR_CONFIG.closedLoop.outputRange(-1, 1);
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
@@ -110,15 +103,8 @@ public final class Constants {
         .voltageCompensation(12)
         .follow(CAN_ID.LATERATOR_MOTOR_LEFT);
 
-    public static final double MOTOR_P = 0;
-    public static final double MOTOR_I = 0;
-    public static final double MOTOR_D = 0;
-    public static final double MOTOR_F = 0;
-
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
-      MOTOR_CONFIG_LEFT.closedLoop
-        .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
-        .outputRange(-1, 1);
+      MOTOR_CONFIG_LEFT.closedLoop.outputRange(-1, 1);
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
