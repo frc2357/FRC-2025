@@ -244,7 +244,7 @@ public final class Constants {
     public static final Angle MIN_ANGLE = Units.Degrees.of(0);
     public static final Angle MAX_ANGLE = Units.Degrees.of(90);
 
-    public static final double PIVOT_TOLERANCE = 0;
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0;
 
     public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IDLE_MODE)

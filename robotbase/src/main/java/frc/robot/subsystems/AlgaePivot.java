@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -12,10 +10,8 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.ALGAE_PIVOT;
 import frc.robot.Constants.CAN_ID;
-import frc.robot.util.Utility;
 
 public class AlgaePivot extends SubsystemBase {
 
@@ -66,11 +62,11 @@ public class AlgaePivot extends SubsystemBase {
   }
 
   public void setTargetAngle(Angle angle) {
-    if (angle.in(Degrees) < ALGAE_PIVOT.MIN_ANGLE.in(Degrees)) {
+    if (angle.lt(ALGAE_PIVOT.MIN_ANGLE)) {
       System.err.println("ALGAE PIVOT: Cannot set angle lower than minimum");
       return;
     }
-    if (angle.in(Degrees) > ALGAE_PIVOT.MAX_ANGLE.in(Degrees)) {
+    if (angle.gt(ALGAE_PIVOT.MAX_ANGLE)) {
       System.err.println("ALGAE PIVOT: Cannot set angle higher than minimum");
       return;
     }
@@ -83,17 +79,14 @@ public class AlgaePivot extends SubsystemBase {
   }
 
   public boolean isAtTargetAngle() {
-    return m_targetAngle != null
-      ? Utility.isWithinTolerance(
-        getAngle().in(Degrees),
-        m_targetAngle.in(Degrees),
-        ALGAE_PIVOT.PIVOT_TOLERANCE
-      )
-      : true;
+    return m_targetAngle.isNear(
+      getAngle(),
+      ALGAE_PIVOT.MAX_MOTION_ALLOWED_ERROR_PERCENT
+    );
   }
 
   public void stop() {
     m_leftMotor.stopMotor();
-    m_targetAngle = null;
+    m_targetAngle = Units.Degree.of(Double.NaN);
   }
 }
