@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Rotations;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -9,12 +7,12 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
@@ -26,6 +24,12 @@ public class Elevator extends SubsystemBase {
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
+  private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
+    Double.NaN
+  );
+  private MutAngle m_currentRotationsHolder = Units.Rotations.mutable(
+    Double.NaN
+  );
 
   public Elevator() {
     m_motorLeft = new SparkMax(
@@ -55,16 +59,20 @@ public class Elevator extends SubsystemBase {
 
   public void setSpeed(double speed) {
     m_motorLeft.set(speed);
-    m_targetRotations.mut_replace(Double.NaN, Rotations);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void stop() {
     m_motorLeft.stopMotor();
-    m_targetRotations = Units.Rotations.of(Double.NaN);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public AngularVelocity getVelocity() {
-    return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
+    m_currentAngularVelocityHolder.mut_replace(
+      m_encoder.getVelocity(),
+      Units.RPM
+    );
+    return m_currentAngularVelocityHolder;
   }
 
   public void setZero() {
@@ -72,7 +80,11 @@ public class Elevator extends SubsystemBase {
   }
 
   private Angle getRotations() {
-    return Units.Rotations.of(m_encoder.getPosition());
+    m_currentRotationsHolder.mut_replace(
+      m_encoder.getPosition(),
+      Units.Rotations
+    );
+    return m_currentRotationsHolder;
   }
 
   public Distance getDistance() {
@@ -82,7 +94,7 @@ public class Elevator extends SubsystemBase {
   }
 
   private void setTargetRotations(Angle targetRotations) {
-    m_targetRotations = targetRotations;
+    m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl
@@ -108,8 +120,8 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setAxisSpeed(double speed) {
-    m_targetRotations = Units.Rotations.of(Double.NaN);
     speed *= ELEVATOR.AXIS_MAX_SPEED;
     m_motorLeft.set(speed);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 }
