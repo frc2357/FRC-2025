@@ -14,12 +14,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
-import frc.robot.commands.util.GetAlliance;
+import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaePivot;
@@ -52,10 +51,7 @@ public class Robot extends TimedRobot {
   public static Autos autos;
   public static DriverControls driverControls;
 
-  private static Command m_seedFieldRelative;
-
   public static Alliance alliance = null;
-  private static GetAlliance m_GetAlliance;
 
   public static Field2d shooterFieldRepresentation;
   public static Field2d swerveFieldRepresentation;
@@ -86,15 +82,6 @@ public class Robot extends TimedRobot {
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
 
-    m_seedFieldRelative = new InstantCommand(() -> swerve.seedFieldCentric()
-    ).ignoringDisable(true);
-    m_seedFieldRelative.schedule();
-
-    m_GetAlliance = new GetAlliance(fetchedAlliance ->
-      alliance = fetchedAlliance
-    );
-    m_GetAlliance.schedule();
-
     swerve.setDefaultCommand(new DefaultDrive());
 
     var fieldHelper = new SendableBuilderImpl();
@@ -111,6 +98,7 @@ public class Robot extends TimedRobot {
     swerveFieldRepresentation = new Field2d();
     swerveFieldRepresentation.initSendable(swervefieldHelper);
     swerveFieldRepresentation.setRobotPose(swerve.getFieldRelativePose2d());
+    new InitRobotCommand().schedule();
   }
 
   /**

@@ -7,6 +7,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 
 public final class Constants {
@@ -15,6 +17,8 @@ public final class Constants {
 
     public static final int ELEVATOR_LEFT_MOTOR = -1;
     public static final int ELEVATOR_RIGHT_MOTOR = -1;
+    public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
+    public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
   }
 
   public static final class ELEVATOR {
@@ -49,6 +53,32 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.1;
 
     public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
+  }
+
+  public static final class ALGAE_PIVOT {
+
+    public static final double AXIS_MAX_SPEED = 0.8;
+
+    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
+
+    public static final boolean MOTOR_INVERTED = false;
+
+    public static final Angle MIN_ANGLE = Units.Degrees.of(0);
+    public static final Angle MAX_ANGLE = Units.Degrees.of(90);
+
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0;
+
+    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .inverted(MOTOR_INVERTED);
+
+    public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
+      new SparkMaxConfig()
+        .idleMode(IDLE_MODE)
+        .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR);
+
+    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
+      LEFT_MOTOR_CONFIG.closedLoop.outputRange(-1, 1);
   }
 
   public static final class CUSTOM_UNITS {

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.subsystems.AlgaePivotTuningSubsystem;
 import frc.robot.subsystems.ElevatorTuningSubsystem;
 
 /**
@@ -20,6 +21,8 @@ import frc.robot.subsystems.ElevatorTuningSubsystem;
 public class Robot extends TimedRobot {
 
   ElevatorTuningSubsystem elevator;
+  AlgaePivotTuningSubsystem algaePivot;
+
   XboxController m_controller;
 
   /**
@@ -31,6 +34,7 @@ public class Robot extends TimedRobot {
     m_controller = new XboxController(0);
 
     elevator = new ElevatorTuningSubsystem();
+    algaePivot = new AlgaePivotTuningSubsystem();
   }
 
   /**
@@ -80,6 +84,7 @@ public class Robot extends TimedRobot {
     elevator.updatePIDs();
 
     elevator.teleopPeriodic();
+    // algaePivot.teleopPeriodic();
   }
 
   /** This function is called once when the robot is disabled. */
