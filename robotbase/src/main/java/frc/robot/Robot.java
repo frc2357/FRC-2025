@@ -45,7 +45,6 @@ public class Robot extends TimedRobot {
   public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
-  public static PhotonVisionCamera shooterCam;
 
   public static AutoChooserManager autoChooserManager;
   public static Autos autos;
@@ -68,11 +67,7 @@ public class Robot extends TimedRobot {
     // laterator = new Laterator();
     // coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
-    // algaePivot = new AlgaePivot();
-    shooterCam = new PhotonVisionCamera(
-      PHOTON_VISION.FRONT_CAMERA_NAME,
-      PHOTON_VISION.FRONT_CAMERA_TRANSFORM
-    );
+    // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
@@ -110,16 +105,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    shooterCam.updateResult();
-    var estimatedPose = shooterCam.getLastEstimatedPose();
-    if (estimatedPose != null) {
-      shooterFieldRepresentation.setRobotPose(
-        shooterCam.getLastEstimatedPose().estimatedPose.toPose2d()
-      );
-    }
-    swerve.updatePoseEstimation();
-    swerveFieldRepresentation.setRobotPose(swerve.getFieldRelativePose2d());
-    NetworkTableInstance.getDefault().flush();
     CommandScheduler.getInstance().run();
   }
 

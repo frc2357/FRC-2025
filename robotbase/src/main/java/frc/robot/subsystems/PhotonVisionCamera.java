@@ -71,9 +71,6 @@ public class PhotonVisionCamera extends SubsystemBase {
       new Transform3d()
     );
 
-  private static double m_pheonixTimeOffset = Utils.getCurrentTimeSeconds();
-  private static boolean m_haveSetPheonixTimeOffset = false;
-
   protected Transform3d m_robotToCameraTranform;
 
   protected static EstimatedRobotPose m_lastEstimatedPose;
@@ -140,12 +137,6 @@ public class PhotonVisionCamera extends SubsystemBase {
       ) { // getting the latest result, by finding the result with the highest capture timestamp.
         m_result = results.get(i);
       }
-    }
-    if (!m_haveSetPheonixTimeOffset) {
-      m_pheonixTimeOffset =
-        Utils.getSystemTimeSeconds() - m_result.getTimestampSeconds();
-      System.out.println("NEW TIME OFFSET ******: " + m_pheonixTimeOffset);
-      m_haveSetPheonixTimeOffset = true;
     }
 
     if (m_result == null || !m_result.hasTargets()) {
@@ -228,9 +219,6 @@ public class PhotonVisionCamera extends SubsystemBase {
       double yCoordinateConfidence =
         (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
           ((averageTargetDistance / 2) * yVelocityConf));
-
-      SmartDashboard.putNumber("X Coord Conf", xCoordinateConfidence);
-      SmartDashboard.putNumber("Y Coord Conf", yCoordinateConfidence);
 
       Robot.swerve.addVisionMeasurement(
         m_lastEstimatedPose.estimatedPose.toPose2d(),

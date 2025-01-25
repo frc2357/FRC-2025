@@ -322,6 +322,7 @@ public final class Constants {
       PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
+    // yes, these are essentially magic numbers
     public static final double X_STD_DEV_COEFFIECIENT = 0.4;
     public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
 

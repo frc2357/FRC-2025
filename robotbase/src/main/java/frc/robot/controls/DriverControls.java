@@ -84,17 +84,6 @@ public class DriverControls {
     m_startButton.onTrue(
       new InstantCommand(() -> Robot.swerve.seedFieldCentric())
     );
-
-    m_backButton.onTrue(
-      new InstantCommand(() ->
-        Robot.swerve.setFieldRelativeTranslation2d(
-          Robot.shooterCam
-            .getLastEstimatedPose()
-            .estimatedPose.toPose2d()
-            .getTranslation()
-        )
-      )
-    );
   }
 
   public double getX() {
