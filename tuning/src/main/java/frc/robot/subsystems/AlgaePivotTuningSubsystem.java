@@ -113,7 +113,7 @@ public class AlgaePivotTuningSubsystem extends SubsystemBase {
   }
 
   public Angle getAngle() {
-    return Units.Degree.of(m_absoluteEncoder.getPosition() * 360);
+    return Units.Rotations.of(m_absoluteEncoder.getPosition());
   }
 
   public Angle getTargetAngle() {

@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
     elevator.updatePIDs();
 
     elevator.teleopPeriodic();
-    algaePivot.teleopPeriodic();
+    // algaePivot.teleopPeriodic();
   }
 
   /** This function is called once when the robot is disabled. */
