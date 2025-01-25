@@ -11,10 +11,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.BooleanEntry;
+import edu.wpi.first.networktables.IntegerEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Constants.PHOTON_VISION;
@@ -124,7 +129,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     }
     List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
 
-    if (results.isEmpty()) {
+    if (results.isEmpty()) { // no new results, so we stop here.
       return;
     }
     m_result = results.get(0);
@@ -140,7 +145,6 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (m_result == null || !m_result.hasTargets()) {
       return;
     }
-
     m_bestTargetFiducialId = m_result.getBestTarget().getFiducialId();
     if (m_bestTargetFiducialId == -1) { // -1 means the ID is not set, so its a gamepeice.
       cacheForGamepeices(m_result.targets);
@@ -176,8 +180,7 @@ public class PhotonVisionCamera extends SubsystemBase {
           .in(Meters);
       }
       averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
-
-      if ( // checks whether the estimated pose is in the field or not, and chucks it out if it is
+      if ( // checks whether the estimated pose is in the field or not, and chucks it out if it isnt
         m_lastEstimatedPose.estimatedPose.getX() <
           -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
         m_lastEstimatedPose.estimatedPose.getX() >
@@ -221,6 +224,15 @@ public class PhotonVisionCamera extends SubsystemBase {
           (averageTargetDistance / 2) *
           yVelocityConf) -
         1;
+
+      SmartDashboard.putNumberArray(
+        m_camera.getName() + " ESTIM POSE",
+        new double[] {
+          m_lastEstimatedPose.estimatedPose.getX(),
+          m_lastEstimatedPose.estimatedPose.getY(),
+          m_lastEstimatedPose.estimatedPose.getRotation().getAngle(),
+        }
+      );
 
       Robot.swerve.addVisionMeasurement(
         m_lastEstimatedPose.estimatedPose.toPose2d(),
