@@ -14,7 +14,7 @@ public class AlgaePivotSetSpeed extends Command {
 
   @Override
   public void initialize() {
-    Robot.algaePivot.set(m_speed);
+    Robot.algaePivot.setSpeed(m_speed);
   }
 
   @Override

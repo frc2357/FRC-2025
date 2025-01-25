@@ -1,8 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -14,6 +11,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN_ID;
@@ -30,7 +28,8 @@ public class CoralRunner extends SubsystemBase {
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
 
-  private AngularVelocity m_targetVelocity = Units.RotationsPerSecond.of(
+  private MutAngularVelocity m_targetVelocity = Units.RPM.mutable(Double.NaN);
+  private MutAngularVelocity m_currentVelocityHolder = Units.RPM.mutable(
     Double.NaN
   );
 
@@ -58,39 +57,40 @@ public class CoralRunner extends SubsystemBase {
     );
   }
 
-  public void setTargetVelocity(AngularVelocity targetVelocity) {
-    m_targetVelocity = targetVelocity;
-    m_PIDController.setReference(
-      targetVelocity.in(RPM),
-      ControlType.kMAXMotionVelocityControl
-    );
-  }
-
-  public AngularVelocity getVelocity() {
-    return RotationsPerSecond.of(m_encoder.getVelocity());
-  }
-
-  public Boolean isAtTargetVelocity() {
-    return m_targetVelocity.isNear(
-      getVelocity(),
-      CORAL_RUNNER.MAX_MOTION_ALLOWED_ERROR_PERCENT
-    );
-  }
-
   public void setSpeed(double percentOutput) {
-    m_targetVelocity = RotationsPerSecond.of(Double.NaN);
+    m_targetVelocity.mut_replace(Double.NaN, Units.RPM);
     m_motor.set(percentOutput);
   }
 
   public void setAxisSpeed(double axisSpeed) {
-    m_targetVelocity = RotationsPerSecond.of(Double.NaN);
+    m_targetVelocity.mut_replace(Double.NaN, Units.RPM);
     axisSpeed *= CORAL_RUNNER.AXIS_MAX_SPEED;
     m_motor.set(axisSpeed);
   }
 
   public void stop() {
-    m_targetVelocity = RotationsPerSecond.of(Double.NaN);
+    m_targetVelocity.mut_replace(Double.NaN, Units.RPM);
     m_motor.stopMotor();
+  }
+
+  public void setTargetVelocity(AngularVelocity targetVelocity) {
+    m_targetVelocity.mut_replace(targetVelocity);
+    m_PIDController.setReference(
+      m_targetVelocity.in(Units.RPM),
+      ControlType.kMAXMotionVelocityControl
+    );
+  }
+
+  public AngularVelocity getVelocity() {
+    m_currentVelocityHolder.mut_replace(m_encoder.getVelocity(), Units.RPM);
+    return m_currentVelocityHolder;
+  }
+
+  public Boolean isAtTarget() {
+    return m_targetVelocity.isNear(
+      getVelocity(),
+      CORAL_RUNNER.MAX_MOTION_ALLOWED_ERROR_PERCENT
+    );
   }
 
   public boolean isIntakeBeamBroken() {

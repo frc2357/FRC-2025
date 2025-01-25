@@ -23,6 +23,7 @@ public class Elevator extends SubsystemBase {
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
+
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
   private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
     Double.NaN
@@ -57,7 +58,13 @@ public class Elevator extends SubsystemBase {
     m_encoder = m_motorLeft.getEncoder();
   }
 
-  public void setSpeed(double speed) {
+  public void setSpeed(double percentOutput) {
+    m_motorLeft.set(percentOutput);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+  }
+
+  public void setAxisSpeed(double speed) {
+    speed *= ELEVATOR.AXIS_MAX_SPEED;
     m_motorLeft.set(speed);
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
@@ -65,32 +72,6 @@ public class Elevator extends SubsystemBase {
   public void stop() {
     m_motorLeft.stopMotor();
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
-  }
-
-  public AngularVelocity getVelocity() {
-    m_currentAngularVelocityHolder.mut_replace(
-      m_encoder.getVelocity(),
-      Units.RPM
-    );
-    return m_currentAngularVelocityHolder;
-  }
-
-  public void setZero() {
-    m_encoder.setPosition(0);
-  }
-
-  private Angle getRotations() {
-    m_currentRotationsHolder.mut_replace(
-      m_encoder.getPosition(),
-      Units.Rotations
-    );
-    return m_currentRotationsHolder;
-  }
-
-  public Distance getDistance() {
-    return (
-      ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER.times(m_encoder.getPosition())
-    );
   }
 
   private void setTargetRotations(Angle targetRotations) {
@@ -108,6 +89,28 @@ public class Elevator extends SubsystemBase {
     setTargetRotations(rotations);
   }
 
+  public AngularVelocity getVelocity() {
+    m_currentAngularVelocityHolder.mut_replace(
+      m_encoder.getVelocity(),
+      Units.RPM
+    );
+    return m_currentAngularVelocityHolder;
+  }
+
+  private Angle getRotations() {
+    m_currentRotationsHolder.mut_replace(
+      m_encoder.getPosition(),
+      Units.Rotations
+    );
+    return m_currentRotationsHolder;
+  }
+
+  public Distance getDistance() {
+    return (
+      ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER.times(m_encoder.getPosition())
+    );
+  }
+
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
@@ -119,9 +122,7 @@ public class Elevator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
-  public void setAxisSpeed(double speed) {
-    speed *= ELEVATOR.AXIS_MAX_SPEED;
-    m_motorLeft.set(speed);
-    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+  public void setZero() {
+    m_encoder.setPosition(0);
   }
 }

@@ -14,7 +14,7 @@ public class AlgaeRunnerSetSpeed extends Command {
 
   @Override
   public void initialize() {
-    Robot.algaeRunner.set(m_speed);
+    Robot.algaeRunner.setSpeed(m_speed);
   }
 
   @Override

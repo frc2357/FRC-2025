@@ -22,13 +22,13 @@ public class AlgaeRunner extends SubsystemBase {
     );
   }
 
-  public void setAxisSpeed(double axisSpeed) {
-    axisSpeed *= ALGAE_RUNNER.AXIS_MAX_SPEED;
-    set(axisSpeed);
+  public void setSpeed(double percentOutput) {
+    m_motor.set(percentOutput);
   }
 
-  public void set(double percentOutput) {
-    m_motor.set(percentOutput);
+  public void setAxisSpeed(double axisSpeed) {
+    axisSpeed *= ALGAE_RUNNER.AXIS_MAX_SPEED;
+    setSpeed(axisSpeed);
   }
 
   public void stop() {

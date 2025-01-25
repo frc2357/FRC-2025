@@ -13,6 +13,8 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN_ID;
@@ -29,7 +31,13 @@ public class Laterator extends SubsystemBase {
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
 
-  private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
+  private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
+  private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
+    Double.NaN
+  );
+  private MutAngle m_currentRotationsHolder = Units.Rotations.mutable(
+    Double.NaN
+  );
 
   public Laterator() {
     m_motorLeft = new SparkMax(
@@ -63,8 +71,24 @@ public class Laterator extends SubsystemBase {
     );
   }
 
+  public void setSpeed(double percentOutput) {
+    m_motorLeft.set(percentOutput);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+  }
+
+  public void setAxisSpeed(double axisSpeed) {
+    axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
+    m_motorLeft.set(axisSpeed);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+  }
+
+  public void stop() {
+    m_motorLeft.stopMotor();
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+  }
+
   private void setTargetRotations(Angle targetRotations) {
-    m_targetRotations = targetRotations;
+    m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl
@@ -76,8 +100,24 @@ public class Laterator extends SubsystemBase {
     setTargetRotations(rotations);
   }
 
+  public AngularVelocity getVelocity() {
+    m_currentAngularVelocityHolder.mut_replace(
+      m_encoder.getVelocity(),
+      Units.RPM
+    );
+    return m_currentAngularVelocityHolder;
+  }
+
   private Angle getRotations() {
-    return Units.Rotations.of(m_encoder.getPosition());
+    m_currentRotationsHolder.mut_replace(
+      m_encoder.getPosition(),
+      Units.Rotations
+    );
+    return m_currentRotationsHolder;
+  }
+
+  public Distance getDistance() {
+    return Feet.of(0); //TODO: Add accurate conversion information
   }
 
   private boolean isAtTargetRotations() {
@@ -91,35 +131,11 @@ public class Laterator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
-  public boolean isAtZero() {
-    return m_hallEffectSensor.get();
-  }
-
-  public AngularVelocity getVelocity() {
-    return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
-  }
-
-  public Distance getPosition() {
-    return Feet.of(0); //TODO: Add accurate conversion information
-  }
-
   public void setZero() {
     m_encoder.setPosition(0);
   }
 
-  public void setSpeed(double speed) {
-    m_motorLeft.set(speed);
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-  }
-
-  public void setAxisSpeed(double axisSpeed) {
-    axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
-    m_motorLeft.set(axisSpeed);
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-  }
-
-  public void stop() {
-    m_motorLeft.stopMotor();
-    m_targetRotations = Units.Rotations.of(Double.NaN);
+  public boolean isAtZero() {
+    return m_hallEffectSensor.get();
   }
 }
