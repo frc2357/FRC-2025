@@ -7,13 +7,16 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ALGAE_PIVOT;
 import frc.robot.Constants.CAN_ID;
 
-public class AlgaePivot extends SubsystemBase {
+public class AlgaePivotTuningSubsystem extends SubsystemBase {
 
   private Angle m_targetAngle;
   private SparkMax m_leftMotor;
@@ -21,7 +24,16 @@ public class AlgaePivot extends SubsystemBase {
   private SparkAbsoluteEncoder m_absoluteEncoder;
   private SparkClosedLoopController m_leftPidController;
 
-  public AlgaePivot() {
+  private double kP = 0;
+  private double kI = 0;
+  private double kD = 0;
+  private double kFF = 0;
+  private double maxVel = 0;
+  private double maxAcc = 0;
+
+  private SparkBaseConfig motorConfig = ALGAE_PIVOT.LEFT_MOTOR_CONFIG;
+
+  public AlgaePivotTuningSubsystem() {
     m_leftMotor = new SparkMax(
       CAN_ID.LEFT_ALGAE_PIVOT_MOTOR,
       MotorType.kBrushless
@@ -30,18 +42,64 @@ public class AlgaePivot extends SubsystemBase {
       CAN_ID.RIGHT_ALGAE_PIVOT_MOTOR,
       MotorType.kBrushless
     );
-    m_leftMotor.configure(
-      ALGAE_PIVOT.LEFT_MOTOR_CONFIG,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+
+    updatePIDs();
+
     m_rightMotor.configure(
-      ALGAE_PIVOT.RIGHT_MOTOR_CONFIG,
+      Constants.ALGAE_PIVOT.RIGHT_MOTOR_CONFIG,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-    m_absoluteEncoder = m_leftMotor.getAbsoluteEncoder();
+
+    m_leftMotor.configure(
+      motorConfig,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
+
     m_leftPidController = m_leftMotor.getClosedLoopController();
+    displayDashboard();
+  }
+
+  public void updatePIDs() {
+    motorConfig.closedLoop.pidf(kP, kI, kD, kFF);
+
+    motorConfig.closedLoop.maxMotion
+      .maxAcceleration(maxAcc)
+      .maxVelocity(maxVel);
+  }
+
+  public void displayDashboard() {
+    SmartDashboard.putNumber("AlgaePivot P", kP);
+    SmartDashboard.putNumber("AlgaePivot I", kI);
+    SmartDashboard.putNumber("AlgaePivot D", kD);
+    SmartDashboard.putNumber("AlgaePivot FF", kFF);
+    SmartDashboard.putNumber("AlgaePivot MaxVel", maxVel);
+    SmartDashboard.putNumber("AlgaePivot MaxAcc", maxAcc);
+    SmartDashboard.putNumber("AlgaePivot Degree Setpoint", 0);
+  }
+
+  public void updateDashboard() {
+    kP = SmartDashboard.getNumber("Arm P", kP);
+    kI = SmartDashboard.getNumber("Arm I", kI);
+    kD = SmartDashboard.getNumber("Arm D", kD);
+    kFF = SmartDashboard.getNumber("Arm FF", kFF);
+    maxVel = SmartDashboard.getNumber("Arm MaxVel", maxVel);
+    maxAcc = SmartDashboard.getNumber("Arm MaxAcc", maxAcc);
+
+    SmartDashboard.putNumber("Motor Degrees", getAngle().in(Units.Degrees));
+    SmartDashboard.putBoolean("Is At Setpoint", isAtTargetAngle());
+
+    updatePIDs();
+  }
+
+  public void teleopPeriodic() {
+    updateDashboard();
+    double angleSetpoint = SmartDashboard.getNumber(
+      "AlgaePivot Degree Setpoint",
+      0
+    );
+    setTargetAngle(Units.Degrees.of(angleSetpoint));
   }
 
   public void setAxisSpeed(double axisSpeed) {

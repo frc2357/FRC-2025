@@ -225,7 +225,8 @@ public final class Constants {
       .smartCurrentLimit(
         (int) MOTOR_STALL_LIMIT.in(Units.Amps),
         (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-      );
+      )
+      .openLoopRampRate(RAMP_RATE);
   }
 
   public static final class ALGAE_PIVOT {
@@ -252,7 +253,8 @@ public final class Constants {
       .smartCurrentLimit(
         (int) MOTOR_STALL_LIMIT.in(Units.Amps),
         (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-      );
+      )
+      .openLoopRampRate(RAMP_RATE);
 
     public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
       new SparkMaxConfig()
