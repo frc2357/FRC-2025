@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.ctre.phoenix6.Utils;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
@@ -11,14 +12,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.BooleanEntry;
-import edu.wpi.first.networktables.IntegerEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FIELD_CONSTANTS;
@@ -73,6 +70,9 @@ public class PhotonVisionCamera extends SubsystemBase {
       PHOTON_VISION.PRIMARY_STRATEGY,
       new Transform3d()
     );
+
+  private static double m_pheonixTimeOffset = Utils.getCurrentTimeSeconds();
+  private static boolean m_haveSetPheonixTimeOffset = false;
 
   protected Transform3d m_robotToCameraTranform;
 
@@ -141,6 +141,12 @@ public class PhotonVisionCamera extends SubsystemBase {
         m_result = results.get(i);
       }
     }
+    if (!m_haveSetPheonixTimeOffset) {
+      m_pheonixTimeOffset =
+        Utils.getSystemTimeSeconds() - m_result.getTimestampSeconds();
+      System.out.println("NEW TIME OFFSET ******: " + m_pheonixTimeOffset);
+      m_haveSetPheonixTimeOffset = true;
+    }
 
     if (m_result == null || !m_result.hasTargets()) {
       return;
@@ -207,39 +213,31 @@ public class PhotonVisionCamera extends SubsystemBase {
       }
 
       // the higher the confidence is, the less the estimated measurment is trusted.
-      double xVelocityConf =
-        0.9 + Robot.swerve.getXVelocity().in(MetersPerSecond);
-      double yVelocityConf =
-        0.9 + Robot.swerve.getYVelocity().in(MetersPerSecond);
-      // we add 0.9 so that if were not moving we trust it more
-      // and if were moving fast we trust it less
+      double xVelocityConf = Math.abs(
+        0.2 + Robot.swerve.getXVelocity().in(MetersPerSecond)
+      );
+      double yVelocityConf = Math.abs(
+        0.2 + Robot.swerve.getYVelocity().in(MetersPerSecond)
+      );
+      // we add 0.2 so that if were sitting still, it doesnt spiral into infinity.
+      // its a partialy magic number, and will need tuning because of that.
 
       double xCoordinateConfidence =
         (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-          (averageTargetDistance / 2) *
-          xVelocityConf) -
-        1;
+          ((averageTargetDistance / 2) * xVelocityConf));
       double yCoordinateConfidence =
         (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-          (averageTargetDistance / 2) *
-          yVelocityConf) -
-        1;
+          ((averageTargetDistance / 2) * yVelocityConf));
 
-      SmartDashboard.putNumberArray(
-        m_camera.getName() + " ESTIM POSE",
-        new double[] {
-          m_lastEstimatedPose.estimatedPose.getX(),
-          m_lastEstimatedPose.estimatedPose.getY(),
-          m_lastEstimatedPose.estimatedPose.getRotation().getAngle(),
-        }
-      );
+      SmartDashboard.putNumber("X Coord Conf", xCoordinateConfidence);
+      SmartDashboard.putNumber("Y Coord Conf", yCoordinateConfidence);
 
       Robot.swerve.addVisionMeasurement(
         m_lastEstimatedPose.estimatedPose.toPose2d(),
-        m_lastEstimatedPose.timestampSeconds,
+        Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
         VecBuilder.fill(
-          xCoordinateConfidence,
-          yCoordinateConfidence,
+          xCoordinateConfidence * PHOTON_VISION.X_STD_DEV_COEFFIECIENT,
+          yCoordinateConfidence * PHOTON_VISION.Y_STD_DEV_COEFFIECIENT,
           Double.POSITIVE_INFINITY // Theta conf, should usually never change gyro from vision
         )
       );

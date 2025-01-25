@@ -15,14 +15,18 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -54,6 +58,16 @@ public class CommandSwerveDrivetrain
     Rotation2d.k180deg;
   /* Keep track if we've ever applied the operator perspective before or not */
   private boolean m_hasAppliedOperatorPerspective = false;
+
+  private final SwerveDrivePoseEstimator m_poseEstimator =
+    new SwerveDrivePoseEstimator(
+      super.getKinematics(),
+      getPigeon2().getRotation2d(),
+      super.getState().ModulePositions,
+      new Pose2d(),
+      VecBuilder.fill(0.05, 0.05, 0),
+      VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)
+    );
 
   /* Swerve requests to apply during SysId characterization */
   private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization =
@@ -254,17 +268,17 @@ public class CommandSwerveDrivetrain
 
   @Override
   public void periodic() {
-    // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-    //   DriverStation.getAlliance()
-    //     .ifPresent(allianceColor -> {
-    //       setOperatorPerspectiveForward(
-    //         allianceColor == Alliance.Red
-    //           ? kRedAlliancePerspectiveRotation
-    //           : kBlueAlliancePerspectiveRotation
-    //       );
-    //       m_hasAppliedOperatorPerspective = true;
-    //     });
-    // }
+    if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
+      DriverStation.getAlliance()
+        .ifPresent(allianceColor -> {
+          setOperatorPerspectiveForward(
+            allianceColor == Alliance.Red
+              ? kRedAlliancePerspectiveRotation
+              : kBlueAlliancePerspectiveRotation
+          );
+          m_hasAppliedOperatorPerspective = true;
+        });
+    }
   }
 
   private void startSimThread() {
@@ -352,7 +366,7 @@ public class CommandSwerveDrivetrain
    * @return The field relative pose.
    */
   public Pose2d getFieldRelativePose2d() {
-    return super.getState().Pose;
+    return m_poseEstimator.getEstimatedPosition();
   }
 
   /**
@@ -372,6 +386,28 @@ public class CommandSwerveDrivetrain
    */
   public void setFieldRelativePose2d(Pose2d poseToSet) {
     super.resetPose(poseToSet);
+    m_poseEstimator.resetPose(poseToSet);
+  }
+
+  /**
+   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * @param translationToSet The translation it will set.
+   */
+  public void setFieldRelativeTranslation2d(Translation2d translationToSet) {
+    super.resetTranslation(translationToSet);
+    m_poseEstimator.resetTranslation(translationToSet);
+  }
+
+  /**
+   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * @param translationToSet The translation it will set.
+   */
+  public void setAllianceRelativeTranslation2d(Translation2d translationToSet) {
+    translationToSet = Robot.alliance == Alliance.Blue
+      ? translationToSet
+      : ChoreoAllianceFlipUtil.flip(translationToSet);
+    super.resetTranslation(translationToSet);
+    m_poseEstimator.resetTranslation(translationToSet);
   }
 
   /**
@@ -379,11 +415,11 @@ public class CommandSwerveDrivetrain
    * @param poseToSet The pose to set. Its origin must be on the blue origin to set correctly.
    */
   public void setAllianceRelativePose2d(Pose2d poseToSet) {
-    super.resetPose(
-      Robot.alliance == Alliance.Blue
-        ? poseToSet
-        : ChoreoAllianceFlipUtil.flip(poseToSet)
-    );
+    poseToSet = Robot.alliance == Alliance.Blue
+      ? poseToSet
+      : ChoreoAllianceFlipUtil.flip(poseToSet);
+    super.resetPose(poseToSet);
+    m_poseEstimator.resetPose(poseToSet);
   }
 
   public ChassisSpeeds getCurrentChassisSpeeds() {
@@ -438,5 +474,39 @@ public class CommandSwerveDrivetrain
   // Pigeon is rotated 90 degrees so pitch and roll are flipped
   public double getPitch() {
     return getPigeon2().getRoll().getValueAsDouble();
+  }
+
+  @Override
+  public void addVisionMeasurement(
+    Pose2d visionRobotPoseMeters,
+    double timestampSeconds,
+    Matrix<N3, N1> visionMeasurementStdDevs
+  ) {
+    super.addVisionMeasurement(
+      visionRobotPoseMeters,
+      timestampSeconds,
+      visionMeasurementStdDevs
+    );
+    m_poseEstimator.addVisionMeasurement(
+      visionRobotPoseMeters,
+      timestampSeconds,
+      visionMeasurementStdDevs
+    );
+  }
+
+  /**
+   * Updates the swerve pose estimator. You shouldnt call this.
+   *
+   * <p>
+   *
+   * <h1>YOU SHOULD NEVER CALL THIS! This is for the Robot periodic ONLY. NEVER call this method
+   * outside of it, so STOP READING THIS AND LOOK ELSEWHERE. </h1>
+   */
+  public void updatePoseEstimation() {
+    m_poseEstimator.updateWithTime(
+      Utils.getSystemTimeSeconds(),
+      super.getPigeon2().getRotation2d(),
+      super.getState().ModulePositions
+    );
   }
 }

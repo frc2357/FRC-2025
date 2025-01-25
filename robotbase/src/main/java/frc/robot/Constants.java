@@ -293,7 +293,11 @@ public final class Constants {
       0,
       0,
       0,
-      new Rotation3d(0, 30, 0)
+      new Rotation3d(
+        Units.Degrees.of(0),
+        Units.Degrees.of(30),
+        Units.Degrees.of(180)
+      )
     );
 
     public static final String LOST_CONNECTION_ERROR_MESSAGE =
@@ -316,8 +320,8 @@ public final class Constants {
       PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
-    public static final double X_STD_DEV_COEFFIECIENT = 1;
-    public static final double Y_STD_DEV_COEFFIECIENT = 1;
+    public static final double X_STD_DEV_COEFFIECIENT = 0.4;
+    public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
 
     // if were going faster than this, we wont accept any pose est.
     public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =

@@ -4,9 +4,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -52,6 +57,9 @@ public class Robot extends TimedRobot {
   public static Alliance alliance = null;
   private static GetAlliance m_GetAlliance;
 
+  public static Field2d shooterFieldRepresentation;
+  public static Field2d swerveFieldRepresentation;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -88,6 +96,21 @@ public class Robot extends TimedRobot {
     m_GetAlliance.schedule();
 
     swerve.setDefaultCommand(new DefaultDrive());
+
+    var fieldHelper = new SendableBuilderImpl();
+    fieldHelper.setTable(
+      NetworkTableInstance.getDefault().getTable("SmartDashboard/ShooterField")
+    );
+    shooterFieldRepresentation = new Field2d();
+    shooterFieldRepresentation.initSendable(fieldHelper);
+    shooterFieldRepresentation.setRobotPose(swerve.getFieldRelativePose2d());
+    var swervefieldHelper = new SendableBuilderImpl();
+    swervefieldHelper.setTable(
+      NetworkTableInstance.getDefault().getTable("SmartDashboard/SwerveField")
+    );
+    swerveFieldRepresentation = new Field2d();
+    swerveFieldRepresentation.initSendable(swervefieldHelper);
+    swerveFieldRepresentation.setRobotPose(swerve.getFieldRelativePose2d());
   }
 
   /**
@@ -100,6 +123,15 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     shooterCam.updateResult();
+    var estimatedPose = shooterCam.getLastEstimatedPose();
+    if (estimatedPose != null) {
+      shooterFieldRepresentation.setRobotPose(
+        shooterCam.getLastEstimatedPose().estimatedPose.toPose2d()
+      );
+    }
+    swerve.updatePoseEstimation();
+    swerveFieldRepresentation.setRobotPose(swerve.getFieldRelativePose2d());
+    NetworkTableInstance.getDefault().flush();
     CommandScheduler.getInstance().run();
   }
 
