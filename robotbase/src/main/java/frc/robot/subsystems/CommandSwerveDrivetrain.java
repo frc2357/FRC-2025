@@ -23,6 +23,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -52,8 +53,6 @@ public class CommandSwerveDrivetrain
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
   private static final Rotation2d kRedAlliancePerspectiveRotation =
     Rotation2d.k180deg;
-  /* Keep track if we've ever applied the operator perspective before or not */
-  private boolean m_hasAppliedOperatorPerspective = false;
 
   /* Swerve requests to apply during SysId characterization */
   private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization =
@@ -253,18 +252,14 @@ public class CommandSwerveDrivetrain
   }
 
   @Override
-  public void periodic() {
-    // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-    //   DriverStation.getAlliance()
-    //     .ifPresent(allianceColor -> {
-    //       setOperatorPerspectiveForward(
-    //         allianceColor == Alliance.Red
-    //           ? kRedAlliancePerspectiveRotation
-    //           : kBlueAlliancePerspectiveRotation
-    //       );
-    //       m_hasAppliedOperatorPerspective = true;
-    //     });
-    // }
+  public void periodic() {}
+
+  public void setOperatorPerspectiveForward(DriverStation.Alliance alliance) {
+    setOperatorPerspectiveForward(
+      alliance == Alliance.Red
+        ? kRedAlliancePerspectiveRotation
+        : kBlueAlliancePerspectiveRotation
+    );
   }
 
   private void startSimThread() {

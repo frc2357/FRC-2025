@@ -1,20 +1,15 @@
 package frc.robot.commands.util;
 
-import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.WrapperCommand;
-import java.util.function.Consumer;
+import frc.robot.Robot;
 
-public class GetAlliance extends Command {
+public class SetAlliance extends Command {
 
-  private Consumer<Alliance> m_allianceConsumer;
   private Alliance m_fetchedAlliance;
 
-  public GetAlliance(Consumer<Alliance> allianceConsumer) {
-    m_allianceConsumer = allianceConsumer;
+  public SetAlliance() {
     m_fetchedAlliance = null;
   }
 
@@ -30,7 +25,7 @@ public class GetAlliance extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    m_allianceConsumer.accept(m_fetchedAlliance);
+    Robot.alliance = m_fetchedAlliance;
   }
 
   @Override

@@ -9,11 +9,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
-import frc.robot.commands.util.GetAlliance;
+import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaePivot;
@@ -22,7 +21,6 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralRunner;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Laterator;
-import java.util.function.Consumer;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -44,10 +42,7 @@ public class Robot extends TimedRobot {
   public static Autos autos;
   public static DriverControls driverControls;
 
-  private static Command m_seedFieldRelative;
-
   public static Alliance alliance = null;
-  private static GetAlliance m_GetAlliance;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -71,16 +66,9 @@ public class Robot extends TimedRobot {
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
 
-    m_seedFieldRelative = new InstantCommand(() -> swerve.seedFieldCentric()
-    ).ignoringDisable(true);
-    m_seedFieldRelative.schedule();
-
-    m_GetAlliance = new GetAlliance(fetchedAlliance ->
-      alliance = fetchedAlliance
-    );
-    m_GetAlliance.schedule();
-
     swerve.setDefaultCommand(new DefaultDrive());
+
+    new InitRobotCommand().schedule();
   }
 
   /**
