@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import choreo.trajectory.SwerveSample;
+import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -22,12 +23,15 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CHOREO;
+import frc.robot.Robot;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 
@@ -49,8 +53,6 @@ public class CommandSwerveDrivetrain
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
   private static final Rotation2d kRedAlliancePerspectiveRotation =
     Rotation2d.k180deg;
-  /* Keep track if we've ever applied the operator perspective before or not */
-  private boolean m_hasAppliedOperatorPerspective = false;
 
   /* Swerve requests to apply during SysId characterization */
   private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization =
@@ -250,18 +252,14 @@ public class CommandSwerveDrivetrain
   }
 
   @Override
-  public void periodic() {
-    // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-    //   DriverStation.getAlliance()
-    //     .ifPresent(allianceColor -> {
-    //       setOperatorPerspectiveForward(
-    //         allianceColor == Alliance.Red
-    //           ? kRedAlliancePerspectiveRotation
-    //           : kBlueAlliancePerspectiveRotation
-    //       );
-    //       m_hasAppliedOperatorPerspective = true;
-    //     });
-    // }
+  public void periodic() {}
+
+  public void setOperatorPerspectiveForward(DriverStation.Alliance alliance) {
+    setOperatorPerspectiveForward(
+      alliance == Alliance.Red
+        ? kRedAlliancePerspectiveRotation
+        : kBlueAlliancePerspectiveRotation
+    );
   }
 
   private void startSimThread() {
@@ -320,7 +318,7 @@ public class CommandSwerveDrivetrain
   }
 
   public void followChoreoPath(SwerveSample sample) {
-    Pose2d pose = getPose2d();
+    Pose2d pose = getFieldRelativePose2d();
     CHOREO.ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
 
     var targetSpeeds = sample.getChassisSpeeds();
@@ -344,12 +342,43 @@ public class CommandSwerveDrivetrain
     );
   }
 
-  public Pose2d getPose2d() {
+  /**
+   * Gets the pose, with no flipping to compensate for alliance.
+   * @return The field relative pose.
+   */
+  public Pose2d getFieldRelativePose2d() {
     return super.getState().Pose;
   }
 
-  public void setPose2d(Pose2d poseToSet) {
+  /**
+   * The pose with flipping to ensure it is always on the blue origin.
+   * @return The pose flipped to ensure it is on the blue origin.
+   */
+  public Pose2d getAllianceRelativePose2d() {
+    var curPose = getFieldRelativePose2d();
+    return Robot.alliance == Alliance.Blue
+      ? curPose
+      : ChoreoAllianceFlipUtil.flip(curPose);
+  }
+
+  /**
+   * Sets the pose staright as you input it, with no flipping to compensate for alliance.
+   * @param poseToSet The pose it will set.
+   */
+  public void setFieldRelativePose2d(Pose2d poseToSet) {
     super.resetPose(poseToSet);
+  }
+
+  /**
+   * Sets the pose relative to the alliance, if alliance is red, flips the pose.
+   * @param poseToSet The pose to set. Its origin must be on the blue origin to set correctly.
+   */
+  public void setAllianceRelativePose2d(Pose2d poseToSet) {
+    super.resetPose(
+      Robot.alliance == Alliance.Blue
+        ? poseToSet
+        : ChoreoAllianceFlipUtil.flip(poseToSet)
+    );
   }
 
   public ChassisSpeeds getCurrentChassisSpeeds() {

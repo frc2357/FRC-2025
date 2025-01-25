@@ -52,13 +52,14 @@ public class DriveToPose extends Command {
     m_yController.reset();
     m_rotationController.reset();
     System.out.println(
-      "****\nSTART DRIVE TO POSE\nPOSE AT START: " + Robot.swerve.getPose2d()
+      "****\nSTART DRIVE TO POSE\nPOSE AT START: " +
+      Robot.swerve.getFieldRelativePose2d()
     );
   }
 
   @Override
   public void execute() {
-    m_currentPose = Robot.swerve.getPose2d();
+    m_currentPose = Robot.swerve.getFieldRelativePose2d();
     double xOutput = m_xController.calculate(
       m_currentPose.getX(),
       m_targetPoseSupplier.get().getX()
@@ -141,7 +142,8 @@ public class DriveToPose extends Command {
   public void end(boolean interrupted) {
     Robot.swerve.stopMotors();
     System.out.println(
-      "****\nFINISH DRIVE TO POSE\nPOSE AT FINISH: " + Robot.swerve.getPose2d()
+      "****\nFINISH DRIVE TO POSE\nPOSE AT FINISH: " +
+      Robot.swerve.getFieldRelativePose2d()
     );
   }
 }
