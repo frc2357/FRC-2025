@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.auto.Autos;
-import frc.robot.commands.drive.AutonomousDrive;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
@@ -94,7 +93,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = new AutonomousDrive(swerve); //autoChooserManager.getSelectedCommandScheduler();
+    m_autonomousCommand = autoChooserManager.getSelectedCommandScheduler();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();

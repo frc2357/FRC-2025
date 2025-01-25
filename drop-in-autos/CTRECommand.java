@@ -7,9 +7,8 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Robot;
 
-public class AutonomousDrive extends Command {
+public class CTRECommand extends Command {
 
   private Timer m_timer;
   private SwerveDrivetrain<TalonFX, TalonFX, CANcoder> m_swerveDrivetrain;
@@ -17,12 +16,12 @@ public class AutonomousDrive extends Command {
     new SwerveRequest.FieldCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-  public AutonomousDrive(
+  public CTRECommand(
     SwerveDrivetrain<TalonFX, TalonFX, CANcoder> swerveDrivetrain
   ) {
     m_timer = new Timer();
     m_swerveDrivetrain = swerveDrivetrain;
-    addRequirements(Robot.swerve);
+    addRequirements(m_swerveDrivetrain);
   }
 
   @Override
