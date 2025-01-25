@@ -17,6 +17,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -367,6 +368,26 @@ public class CommandSwerveDrivetrain
    */
   public void setFieldRelativePose2d(Pose2d poseToSet) {
     super.resetPose(poseToSet);
+  }
+
+  /**
+   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * @param translationToSet The translation it will set.
+   */
+  public void setFieldRelativeTranslation2d(Translation2d translationToSet) {
+    super.resetTranslation(translationToSet);
+  }
+
+  /**
+   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * @param translationToSet The translation it will set.
+   */
+  public void setAllianceRelativeTranslation2d(Translation2d translationToSet) {
+    super.resetTranslation(
+      Robot.alliance == Alliance.Blue
+        ? translationToSet
+        : ChoreoAllianceFlipUtil.flip(translationToSet)
+    );
   }
 
   /**

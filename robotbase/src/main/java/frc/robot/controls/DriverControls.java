@@ -81,10 +81,6 @@ public class DriverControls {
 
     Trigger noLeftBumper = m_leftBumper.negate();
 
-    m_aButton.whileTrue(
-      new DriveToPose(() -> new Pose2d(0, 0, new Rotation2d(0, 0)))
-    );
-
     m_startButton.onTrue(
       new InstantCommand(() -> Robot.swerve.seedFieldCentric())
     );

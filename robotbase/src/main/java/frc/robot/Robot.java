@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -44,6 +45,9 @@ public class Robot extends TimedRobot {
 
   public static Alliance alliance = null;
 
+  public static Field2d shooterFieldRepresentation;
+  public static Field2d swerveFieldRepresentation;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -52,11 +56,11 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(true); //TODO: turn this off at comp, just in case.
 
     swerve = TunerConstants.createDrivetrain();
-    elevator = new Elevator();
-    laterator = new Laterator();
-    coralRunner = new CoralRunner();
-    algaeRunner = new AlgaeRunner();
-    algaePivot = new AlgaePivot();
+    // elevator = new Elevator();
+    // laterator = new Laterator();
+    // coralRunner = new CoralRunner();
+    // algaeRunner = new AlgaeRunner();
+    // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
@@ -67,7 +71,6 @@ public class Robot extends TimedRobot {
     );
 
     swerve.setDefaultCommand(new DefaultDrive());
-
     new InitRobotCommand().schedule();
   }
 
