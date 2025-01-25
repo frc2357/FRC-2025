@@ -49,11 +49,13 @@ public class AlgaePivot extends SubsystemBase {
 
   public void setSpeed(double percentOutput) {
     m_leftMotor.set(percentOutput);
+    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void setAxisSpeed(double axisSpeed) {
     axisSpeed *= ALGAE_PIVOT.AXIS_MAX_SPEED;
     setSpeed(axisSpeed);
+    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public Angle getAngle() {
