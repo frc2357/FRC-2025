@@ -5,14 +5,14 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
+import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaePivot;
@@ -42,7 +42,7 @@ public class Robot extends TimedRobot {
   public static Autos autos;
   public static DriverControls driverControls;
 
-  private static Command m_seedFieldRelative;
+  public static Alliance alliance = null;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -66,10 +66,9 @@ public class Robot extends TimedRobot {
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
 
-    m_seedFieldRelative = new InstantCommand(() -> swerve.seedFieldCentric());
-    m_seedFieldRelative.schedule();
-
     swerve.setDefaultCommand(new DefaultDrive());
+
+    new InitRobotCommand().schedule();
   }
 
   /**
@@ -81,10 +80,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
   }
 
