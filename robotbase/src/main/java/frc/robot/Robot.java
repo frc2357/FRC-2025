@@ -78,21 +78,6 @@ public class Robot extends TimedRobot {
     );
 
     swerve.setDefaultCommand(new DefaultDrive());
-
-    var fieldHelper = new SendableBuilderImpl();
-    fieldHelper.setTable(
-      NetworkTableInstance.getDefault().getTable("SmartDashboard/ShooterField")
-    );
-    shooterFieldRepresentation = new Field2d();
-    shooterFieldRepresentation.initSendable(fieldHelper);
-    shooterFieldRepresentation.setRobotPose(swerve.getFieldRelativePose2d());
-    var swervefieldHelper = new SendableBuilderImpl();
-    swervefieldHelper.setTable(
-      NetworkTableInstance.getDefault().getTable("SmartDashboard/SwerveField")
-    );
-    swerveFieldRepresentation = new Field2d();
-    swerveFieldRepresentation.initSendable(swervefieldHelper);
-    swerveFieldRepresentation.setRobotPose(swerve.getFieldRelativePose2d());
     new InitRobotCommand().schedule();
   }
 
