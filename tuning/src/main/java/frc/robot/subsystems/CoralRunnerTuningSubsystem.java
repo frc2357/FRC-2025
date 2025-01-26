@@ -11,24 +11,16 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.CORAL_RUNNER;
-import frc.robot.Constants.DIGITAL_INPUT;
 
 public class CoralRunnerTuningSubsystem extends SubsystemBase {
 
   private SparkMax m_motor;
-
-  private DigitalInput m_beamBreakIntake;
-  private DigitalInput m_beamBreakOuttake;
-  private Debouncer m_debouncer;
 
   private double kP = 0;
   private double kI = 0;
@@ -59,18 +51,6 @@ public class CoralRunnerTuningSubsystem extends SubsystemBase {
 
     m_PIDController = m_motor.getClosedLoopController();
     m_encoder = m_motor.getEncoder();
-
-    m_debouncer = new Debouncer(
-      CORAL_RUNNER.DEBOUNCE_TIME_SECONDS,
-      DebounceType.kBoth
-    );
-
-    m_beamBreakIntake = new DigitalInput(
-      DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_INTAKE_ID
-    );
-    m_beamBreakOuttake = new DigitalInput(
-      DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID
-    );
   }
 
   public void displayDashboard() {
@@ -92,8 +72,6 @@ public class CoralRunnerTuningSubsystem extends SubsystemBase {
     maxAcc = SmartDashboard.getNumber("Arm MaxAcc", maxAcc);
 
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
-    SmartDashboard.putBoolean("BeamBreakIntake", isIntakeBeamBroken());
-    SmartDashboard.putBoolean("BeamBreakOUTtake", isOuttakeBeamBroken());
     SmartDashboard.putNumber("Velocity (RPM)", getVelocity().magnitude());
 
     updatePIDs();
@@ -150,13 +128,5 @@ public class CoralRunnerTuningSubsystem extends SubsystemBase {
   public void stop() {
     m_targetVelocity = RotationsPerSecond.of(Double.NaN);
     m_motor.stopMotor();
-  }
-
-  public boolean isIntakeBeamBroken() {
-    return m_debouncer.calculate(m_beamBreakIntake.get());
-  }
-
-  public boolean isOuttakeBeamBroken() {
-    return m_debouncer.calculate(m_beamBreakOuttake.get());
   }
 }
