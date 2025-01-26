@@ -4,6 +4,14 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.MAXMotionConfig;
@@ -11,14 +19,20 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.generated.TunerConstants;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
@@ -76,10 +90,15 @@ public final class Constants {
 
   public static final class SWERVE {
 
-    public static final double MAX_ANGULAR_RATE_ROTATIONS_PER_SECOND =
-      Math.PI * 2;
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY =
+      Units.RotationsPerSecond.of(Math.PI * 2);
 
-    public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.094545;
+    public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
+
+    public static final LinearAcceleration MAXIMUM_LINEAR_ACCELERATION =
+      Units.MetersPerSecondPerSecond.of(4.5); //TODO: tune this
+    public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
+      Units.DegreesPerSecondPerSecond.of(120); //TODO: tune this
   }
 
   public static final class CHOREO {
@@ -349,19 +368,60 @@ public final class Constants {
 
   public static class DRIVE_TO_POSE {
 
-    public static final PIDController PIGEON_ROTATION_PID_CONTROLLER =
-      new PIDController(7.5, 0, 0.0);
+    // public static final ProfiledPIDController ROTATION_PID_CONTROLLER =
+    //   new ProfiledPIDController(
+    //     2.5,
+    //     0,
+    //     0,
+    //     new Constraints(
+    //       SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
+    //       SWERVE.MAXIMUM_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)
+    //     )
+    //   );
+    public static final PIDController ROTATION_PID_CONTROLLER =
+      new PIDController(5, 0, 0);
     public static final double PIGEON_ROTATION_FEEDFORWARD = 0.00001;
-    public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER =
+    // public static final ProfiledPIDController X_TRANSLATION_PID_CONTROLLER =
+    //   new ProfiledPIDController(
+    //     2.5,
+    //     0,
+    //     0,
+    //     new Constraints(
+    //       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+    //       SWERVE.MAXIMUM_LINEAR_ACCELERATION.in(MetersPerSecondPerSecond)
+    //     )
+    //   );
+    public static final PIDController X_TRANSLATION_PID_CONTROLLER =
       new PIDController(5, 0, 0);
     // public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER = new PIDController(0, 0, 0);
     // public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER = new PIDController(0.15, 0, 0);
-    public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER =
-      new PIDController(5, 0, 0);
+    // public static final ProfilledPIDController Y_TRANSLATION_PID_CONTROLLER =
+    //   new PIDController(
+    //     7.5,
+    //     0,
+    //     0,
+    //     new Constraints(
+    //       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+    //       SWERVE.MAXIMUM_LINEAR_ACCELERATION.in(MetersPerSecondPerSecond)
+    //     )
+    //   );
 
-    public static final Distance WAYPOINT_X_TOLERANCE = Units.Inches.of(2);
-    public static final Distance WAYPOINT_Y_TOLERANCE = Units.Inches.of(2);
-    public static final Angle WAYPOINT_ROTATION_TOLERANCE = Units.Degrees.of(4);
+    public static final PIDController Y_TRANSLATION_PID_CONTROLLER =
+      new PIDController(
+        7.5,
+        0,
+        0
+        // new Constraints(
+        //   TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+        //   SWERVE.MAXIMUM_LINEAR_ACCELERATION.in(MetersPerSecondPerSecond)
+        // )
+      );
+
+    public static final Distance X_TOLERANCE = Units.Inches.of(2);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(2);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
+
+    public static class POSE_SETPOINTS {}
   }
 
   public static final class CONTROLLER {
