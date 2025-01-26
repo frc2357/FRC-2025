@@ -428,7 +428,7 @@ public class CommandSwerveDrivetrain
     return Units.FeetPerSecond.of(translationalVelocity);
   }
 
-  public AngularVelocity getThetaVelocity() {
+  public AngularVelocity getAngularVelocity() {
     return Units.RadiansPerSecond.of(
       getCurrentChassisSpeeds().omegaRadiansPerSecond
     );

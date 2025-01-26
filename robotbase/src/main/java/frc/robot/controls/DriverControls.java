@@ -2,6 +2,7 @@ package frc.robot.controls;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -35,7 +36,15 @@ public class DriverControls {
   public void mapControls() {
     m_controller
       .a()
-      .whileTrue(new DriveToPose(() -> new Pose2d(0, 0, new Rotation2d(0, 0))));
+      .whileTrue(
+        new DriveToPose(() ->
+          new Pose2d(0, 0, new Rotation2d(Units.Degrees.of(0)))
+        )
+      );
+
+    m_controller
+      .b()
+      .onTrue(new InstantCommand(() -> Robot.swerve.resetPose(new Pose2d())));
 
     m_controller
       .start()
