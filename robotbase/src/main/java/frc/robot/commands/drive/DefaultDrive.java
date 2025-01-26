@@ -1,6 +1,7 @@
 package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -27,7 +28,7 @@ public class DefaultDrive extends Command {
       Robot.swerve.driveFieldRelative(
         y * m_speedAt12VoltsMPS,
         x * m_speedAt12VoltsMPS,
-        rotation * Constants.SWERVE.MAX_ANGULAR_RATE_ROTATIONS_PER_SECOND
+        rotation * Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RotationsPerSecond)
       );
     }
   }

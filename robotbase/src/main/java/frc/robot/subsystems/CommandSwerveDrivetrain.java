@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import choreo.trajectory.SwerveSample;
+import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -14,20 +15,26 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CHOREO;
+import frc.robot.Robot;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 
@@ -49,8 +56,6 @@ public class CommandSwerveDrivetrain
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
   private static final Rotation2d kRedAlliancePerspectiveRotation =
     Rotation2d.k180deg;
-  /* Keep track if we've ever applied the operator perspective before or not */
-  private boolean m_hasAppliedOperatorPerspective = false;
 
   /* Swerve requests to apply during SysId characterization */
   private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization =
@@ -134,6 +139,8 @@ public class CommandSwerveDrivetrain
   private final SwerveRequest.ApplyRobotSpeeds m_chassisSpeedsRequest =
     new SwerveRequest.ApplyRobotSpeeds()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+
+  private Twist2d m_fieldVelocity = new Twist2d();
 
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -251,17 +258,15 @@ public class CommandSwerveDrivetrain
 
   @Override
   public void periodic() {
-    // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-    //   DriverStation.getAlliance()
-    //     .ifPresent(allianceColor -> {
-    //       setOperatorPerspectiveForward(
-    //         allianceColor == Alliance.Red
-    //           ? kRedAlliancePerspectiveRotation
-    //           : kBlueAlliancePerspectiveRotation
-    //       );
-    //       m_hasAppliedOperatorPerspective = true;
-    //     });
-    // }
+    updateFieldVelocity();
+  }
+
+  public void setOperatorPerspectiveForward(DriverStation.Alliance alliance) {
+    setOperatorPerspectiveForward(
+      alliance == Alliance.Red
+        ? kRedAlliancePerspectiveRotation
+        : kBlueAlliancePerspectiveRotation
+    );
   }
 
   private void startSimThread() {
@@ -320,7 +325,7 @@ public class CommandSwerveDrivetrain
   }
 
   public void followChoreoPath(SwerveSample sample) {
-    Pose2d pose = getPose2d();
+    Pose2d pose = getFieldRelativePose2d();
     CHOREO.ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
 
     var targetSpeeds = sample.getChassisSpeeds();
@@ -344,12 +349,63 @@ public class CommandSwerveDrivetrain
     );
   }
 
-  public Pose2d getPose2d() {
+  /**
+   * Gets the pose, with no flipping to compensate for alliance.
+   * @return The field relative pose.
+   */
+  public Pose2d getFieldRelativePose2d() {
     return super.getState().Pose;
   }
 
-  public void setPose2d(Pose2d poseToSet) {
+  /**
+   * The pose with flipping to ensure it is always on the blue origin.
+   * @return The pose flipped to ensure it is on the blue origin.
+   */
+  public Pose2d getAllianceRelativePose2d() {
+    var curPose = getFieldRelativePose2d();
+    return Robot.alliance == Alliance.Blue
+      ? curPose
+      : ChoreoAllianceFlipUtil.flip(curPose);
+  }
+
+  /**
+   * Sets the pose staright as you input it, with no flipping to compensate for alliance.
+   * @param poseToSet The pose it will set.
+   */
+  public void setFieldRelativePose2d(Pose2d poseToSet) {
     super.resetPose(poseToSet);
+  }
+
+  /**
+   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * @param translationToSet The translation it will set.
+   */
+  public void setFieldRelativeTranslation2d(Translation2d translationToSet) {
+    super.resetTranslation(translationToSet);
+  }
+
+  /**
+   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * @param translationToSet The translation it will set.
+   */
+  public void setAllianceRelativeTranslation2d(Translation2d translationToSet) {
+    super.resetTranslation(
+      Robot.alliance == Alliance.Blue
+        ? translationToSet
+        : ChoreoAllianceFlipUtil.flip(translationToSet)
+    );
+  }
+
+  /**
+   * Sets the pose relative to the alliance, if alliance is red, flips the pose.
+   * @param poseToSet The pose to set. Its origin must be on the blue origin to set correctly.
+   */
+  public void setAllianceRelativePose2d(Pose2d poseToSet) {
+    super.resetPose(
+      Robot.alliance == Alliance.Blue
+        ? poseToSet
+        : ChoreoAllianceFlipUtil.flip(poseToSet)
+    );
   }
 
   public ChassisSpeeds getCurrentChassisSpeeds() {
@@ -378,7 +434,7 @@ public class CommandSwerveDrivetrain
     return Units.FeetPerSecond.of(translationalVelocity);
   }
 
-  public AngularVelocity getThetaVelocity() {
+  public AngularVelocity getAngularVelocity() {
     return Units.RadiansPerSecond.of(
       getCurrentChassisSpeeds().omegaRadiansPerSecond
     );
@@ -404,5 +460,25 @@ public class CommandSwerveDrivetrain
   // Pigeon is rotated 90 degrees so pitch and roll are flipped
   public double getPitch() {
     return getPigeon2().getRoll().getValueAsDouble();
+  }
+
+  public Twist2d getFieldVelocity() {
+    return m_fieldVelocity;
+  }
+
+  private void updateFieldVelocity() {
+    Translation2d linearFieldVelocity = new Translation2d(
+      getXVelocity().in(Units.MetersPerSecond),
+      getYVelocity().in(Units.MetersPerSecond)
+    ).rotateBy(getFieldRelativePose2d().getRotation());
+
+    m_fieldVelocity = new Twist2d(
+      linearFieldVelocity.getX(),
+      linearFieldVelocity.getY(),
+      getPigeon2()
+        .getAngularVelocityZWorld()
+        .getValue()
+        .in(Units.RadiansPerSecond)
+    );
   }
 }

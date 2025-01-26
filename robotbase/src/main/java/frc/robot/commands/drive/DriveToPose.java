@@ -1,147 +1,142 @@
 package frc.robot.commands.drive;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Constants.DRIVE_TO_POSE;
 import frc.robot.Robot;
+import frc.robot.generated.TunerConstants;
 import frc.robot.util.Utility;
 import java.util.function.Supplier;
 
 public class DriveToPose extends Command {
 
-  private Pose2d[] m_waypoints;
   private Supplier<Pose2d> m_targetPoseSupplier;
-  private Pose2d m_currentPose;
 
-  private int m_currentWaypointIndex = 0;
+  private ProfiledPIDController m_driveController;
+  private ProfiledPIDController m_thetaController;
 
-  private PIDController m_xController;
-  private PIDController m_yController;
-  private PIDController m_rotationController;
+  private static final double m_speedAt12VoltsMPS =
+    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
 
-  public DriveToPose(Supplier<Pose2d> targetPose) {
+  public DriveToPose(Supplier<Pose2d> targetPoseSupplier) {
     addRequirements(Robot.swerve);
 
-    m_targetPoseSupplier = targetPose;
-    m_xController = DRIVE_TO_POSE.VISION_X_TRANSLATION_PID_CONTROLLER;
-    m_yController = DRIVE_TO_POSE.VISION_Y_TRANSLATION_PID_CONTROLLER;
-    m_rotationController = DRIVE_TO_POSE.PIGEON_ROTATION_PID_CONTROLLER;
+    m_targetPoseSupplier = targetPoseSupplier;
+    m_driveController = DRIVE_TO_POSE.AUTO_ALIGN_DRIVE_CONTROLLER;
+    m_thetaController = DRIVE_TO_POSE.AUTO_ALIGN_THETA_CONTROLLER;
   }
 
   @Override
   public void initialize() {
-    m_xController.setTolerance(DRIVE_TO_POSE.WAYPOINT_X_TOLERANCE.in(Meters));
-    m_yController.setTolerance(DRIVE_TO_POSE.WAYPOINT_Y_TOLERANCE.in(Meters));
-    m_rotationController.setTolerance(
-      DRIVE_TO_POSE.WAYPOINT_ROTATION_TOLERANCE.in(Radians)
+    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
+    Pose2d targetPose = m_targetPoseSupplier.get();
+    m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    m_driveController.reset(
+      new TrapezoidProfile.State(
+        currentPose.getTranslation().getDistance(targetPose.getTranslation()),
+        -new Translation2d(
+          Robot.swerve.getFieldVelocity().dx,
+          Robot.swerve.getFieldVelocity().dy
+        )
+          .rotateBy(
+            targetPose
+              .getTranslation()
+              .minus(currentPose.getTranslation())
+              .getAngle()
+              .unaryMinus()
+          )
+          .getX()
+      )
     );
 
-    m_xController.setSetpoint(m_targetPoseSupplier.get().getX());
-    m_yController.setSetpoint(m_targetPoseSupplier.get().getY());
-    m_rotationController.setSetpoint(
-      m_targetPoseSupplier.get().getRotation().getRadians()
-    );
-
-    m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
-
-    m_xController.reset();
-    m_yController.reset();
-    m_rotationController.reset();
+    m_thetaController.reset(currentPose.getRotation().getRadians());
     System.out.println(
-      "****\nSTART DRIVE TO POSE\nPOSE AT START: " + Robot.swerve.getPose2d()
+      "****\nSTART DRIVE TO POSE\nPOSE AT START: " +
+      Robot.swerve.getFieldRelativePose2d()
     );
   }
 
   @Override
   public void execute() {
-    m_currentPose = Robot.swerve.getPose2d();
-    double xOutput = m_xController.calculate(
-      m_currentPose.getX(),
-      m_targetPoseSupplier.get().getX()
+    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
+    Pose2d targetPose = m_targetPoseSupplier.get();
+
+    Translation2d driveVelocity = new Translation2d(
+      Robot.driverControls.getY() * m_speedAt12VoltsMPS,
+      Robot.driverControls.getX() * m_speedAt12VoltsMPS
     );
-    double yOutput = m_yController.calculate(
-      m_currentPose.getY(),
-      m_targetPoseSupplier.get().getY()
-    );
-    double rotationOutput =
-      m_rotationController.calculate(
-        m_currentPose.getRotation().getRadians(),
-        m_targetPoseSupplier.get().getRotation().getRadians()
-      ) +
-      DRIVE_TO_POSE.PIGEON_ROTATION_FEEDFORWARD;
-    if (
-      Utility.isWithinTolerance(
-        m_currentPose.getX(),
-        m_targetPoseSupplier.get().getX(),
-        m_xController.getErrorTolerance()
+    double thetaVelocity =
+      Robot.driverControls.getRotation() *
+      Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
+
+    if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
+      // Calculate drive speed
+      double currentDistance = currentPose
+        .getTranslation()
+        .getDistance(targetPose.getTranslation());
+      double driveErrorAbs = currentDistance;
+      double driveVelocityScalar = m_driveController.calculate(
+        driveErrorAbs,
+        0.0
+      );
+      if (m_driveController.atGoal()) driveVelocityScalar = 0.0;
+
+      // Calculate theta speed
+      thetaVelocity = m_thetaController.calculate(
+        currentPose.getRotation().getRadians(),
+        targetPose.getRotation().getRadians()
+      );
+      if (m_thetaController.atGoal()) thetaVelocity = 0.0;
+
+      // Command speeds
+      driveVelocity = new Pose2d(
+        Translation2d.kZero,
+        currentPose
+          .getTranslation()
+          .minus(targetPose.getTranslation())
+          .getAngle()
       )
-    ) {
-      xOutput = 0;
-    }
-    if (
-      Utility.isWithinTolerance(
-        m_currentPose.getY(),
-        m_targetPoseSupplier.get().getY(),
-        m_yController.getErrorTolerance()
-      )
-    ) {
-      yOutput = 0;
-    }
-    if (
-      Utility.isWithinTolerance(
-        m_currentPose.getRotation().getRadians(),
-        m_targetPoseSupplier.get().getRotation().getRadians(),
-        m_rotationController.getErrorTolerance()
-      )
-    ) {
-      rotationOutput = 0;
+        .transformBy(Utility.translationToTransform(driveVelocityScalar, 0.0))
+        .getTranslation();
     }
 
-    Robot.swerve.driveFieldRelative(xOutput, yOutput, rotationOutput);
+    // System.out.println("ROTO = " + m_rotoOutput);
+    Robot.swerve.driveFieldRelative(
+      driveVelocity.getX(),
+      driveVelocity.getY(),
+      thetaVelocity
+    );
   }
 
   @Override
   public boolean isFinished() {
-    var targetPose = m_targetPoseSupplier.get();
-    if (
-      !Utility.isWithinTolerance(
-        m_currentPose.getX(),
-        targetPose.getX(),
-        DRIVE_TO_POSE.WAYPOINT_X_TOLERANCE.in(Meters)
-      )
-    ) {
-      return false;
-    }
-    if (
-      !Utility.isWithinTolerance(
-        m_currentPose.getY(),
-        targetPose.getY(),
-        DRIVE_TO_POSE.WAYPOINT_Y_TOLERANCE.in(Meters)
-      )
-    ) {
-      return false;
-    }
-    if (
-      !Utility.isWithinTolerance(
-        m_currentPose.getRotation().getRadians(),
-        targetPose.getRotation().getRadians(),
-        DRIVE_TO_POSE.WAYPOINT_ROTATION_TOLERANCE.in(Radians)
-      )
-    ) {
-      return false;
-    }
-    return true;
+    return m_driveController.atGoal() && m_thetaController.atGoal();
   }
 
   @Override
   public void end(boolean interrupted) {
-    Robot.swerve.stopMotors();
+    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
     System.out.println(
-      "****\nFINISH DRIVE TO POSE\nPOSE AT FINISH: " + Robot.swerve.getPose2d()
+      "DRIVE TO POSE FINISH****\nPOSE AT FINISH: " + currentPose
     );
+
+    Translation2d driveVelocity = new Translation2d(
+      Robot.driverControls.getY() * m_speedAt12VoltsMPS,
+      Robot.driverControls.getX() * m_speedAt12VoltsMPS
+    );
+    double thetaVelocity =
+      Robot.driverControls.getRotation() *
+      Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
+    if (driveVelocity == Translation2d.kZero && thetaVelocity == 0) {
+      Robot.swerve.stopMotors();
+    }
   }
 }

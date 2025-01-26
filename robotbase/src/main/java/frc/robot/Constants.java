@@ -4,6 +4,14 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.MAXMotionConfig;
@@ -11,14 +19,21 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.generated.TunerConstants;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
@@ -76,10 +91,15 @@ public final class Constants {
 
   public static final class SWERVE {
 
-    public static final double MAX_ANGULAR_RATE_ROTATIONS_PER_SECOND =
-      Math.PI * 2;
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY =
+      Units.RotationsPerSecond.of(Math.PI * 2);
 
-    public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.094545;
+    public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
+
+    public static final LinearAcceleration MAXIMUM_LINEAR_ACCELERATION =
+      Units.MetersPerSecondPerSecond.of(4.5); //TODO: tune this
+    public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
+      Units.DegreesPerSecondPerSecond.of(120); //TODO: tune this
   }
 
   public static final class CHOREO {
@@ -93,8 +113,8 @@ public final class Constants {
     );
 
     public static final AutoFactory AUTO_FACTORY = new AutoFactory(
-      Robot.swerve::getPose2d,
-      Robot.swerve::setPose2d,
+      Robot.swerve::getFieldRelativePose2d,
+      Robot.swerve::setFieldRelativePose2d,
       Robot.swerve::followChoreoPath,
       true,
       Robot.swerve
@@ -225,7 +245,8 @@ public final class Constants {
       .smartCurrentLimit(
         (int) MOTOR_STALL_LIMIT.in(Units.Amps),
         (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-      );
+      )
+      .openLoopRampRate(RAMP_RATE);
   }
 
   public static final class ALGAE_PIVOT {
@@ -241,13 +262,19 @@ public final class Constants {
 
     public static final double RAMP_RATE = .25;
 
+    public static final Angle MIN_ANGLE = Units.Degrees.of(0);
+    public static final Angle MAX_ANGLE = Units.Degrees.of(90);
+
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0;
+
     public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IDLE_MODE)
       .inverted(MOTOR_INVERTED)
       .smartCurrentLimit(
         (int) MOTOR_STALL_LIMIT.in(Units.Amps),
         (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-      );
+      )
+      .openLoopRampRate(RAMP_RATE);
 
     public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
       new SparkMaxConfig()
@@ -283,12 +310,16 @@ public final class Constants {
 
   public static final class PHOTON_VISION {
 
-    public static final String FRONT_CAMERA_NAME = "test";
+    public static final String FRONT_CAMERA_NAME = "shooter_camera";
     public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
       0,
       0,
       0,
-      new Rotation3d(0, 0, 0)
+      new Rotation3d(
+        Units.Degrees.of(0),
+        Units.Degrees.of(30),
+        Units.Degrees.of(180)
+      )
     );
 
     public static final String LOST_CONNECTION_ERROR_MESSAGE =
@@ -311,18 +342,19 @@ public final class Constants {
       PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
-    public static final double X_STD_DEV_COEFFIECIENT = 1;
-    public static final double Y_STD_DEV_COEFFIECIENT = 1;
+    // yes, these are essentially magic numbers
+    public static final double X_STD_DEV_COEFFIECIENT = 0.4;
+    public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
 
     // if were going faster than this, we wont accept any pose est.
     public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
       Units.MetersPerSecond.of(3.5);
 
     // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.5);
+    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.5);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
-    public static final Distance Z_MARGIN = Units.Feet.of(0.25);
+    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
   }
 
   public static final class FIELD_CONSTANTS {
@@ -337,19 +369,27 @@ public final class Constants {
 
   public static class DRIVE_TO_POSE {
 
-    public static final PIDController PIGEON_ROTATION_PID_CONTROLLER =
-      new PIDController(7.5, 0, 0.0);
-    public static final double PIGEON_ROTATION_FEEDFORWARD = 0.00001;
-    public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER =
-      new PIDController(5, 0, 0);
-    // public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER = new PIDController(0, 0, 0);
-    // public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER = new PIDController(0.15, 0, 0);
-    public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER =
-      new PIDController(5, 0, 0);
+    public static final ProfiledPIDController AUTO_ALIGN_DRIVE_CONTROLLER =
+      new ProfiledPIDController(
+        8,
+        0.0,
+        0.0,
+        new TrapezoidProfile.Constraints(2, 1)
+      );
 
-    public static final Distance WAYPOINT_X_TOLERANCE = Units.Inches.of(2);
-    public static final Distance WAYPOINT_Y_TOLERANCE = Units.Inches.of(2);
-    public static final Angle WAYPOINT_ROTATION_TOLERANCE = Units.Degrees.of(4);
+    public static final ProfiledPIDController AUTO_ALIGN_THETA_CONTROLLER =
+      new ProfiledPIDController(
+        6,
+        0.0,
+        0.0,
+        new TrapezoidProfile.Constraints(2, 1)
+      );
+
+    public static final Distance X_TOLERANCE = Units.Inches.of(2);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(2);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
+
+    public static class POSE_SETPOINTS {}
   }
 
   public static final class CONTROLLER {
