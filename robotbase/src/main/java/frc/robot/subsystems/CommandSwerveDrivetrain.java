@@ -15,9 +15,11 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -138,6 +140,8 @@ public class CommandSwerveDrivetrain
     new SwerveRequest.ApplyRobotSpeeds()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
 
+  private Twist2d m_fieldVelocity = new Twist2d();
+
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    * <p>
@@ -253,7 +257,9 @@ public class CommandSwerveDrivetrain
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    updateFieldVelocity();
+  }
 
   public void setOperatorPerspectiveForward(DriverStation.Alliance alliance) {
     setOperatorPerspectiveForward(
@@ -454,5 +460,25 @@ public class CommandSwerveDrivetrain
   // Pigeon is rotated 90 degrees so pitch and roll are flipped
   public double getPitch() {
     return getPigeon2().getRoll().getValueAsDouble();
+  }
+
+  public Twist2d getFieldVelocity() {
+    return m_fieldVelocity;
+  }
+
+  private void updateFieldVelocity() {
+    Translation2d linearFieldVelocity = new Translation2d(
+      getXVelocity().in(Units.MetersPerSecond),
+      getYVelocity().in(Units.MetersPerSecond)
+    ).rotateBy(getFieldRelativePose2d().getRotation());
+
+    m_fieldVelocity = new Twist2d(
+      linearFieldVelocity.getX(),
+      linearFieldVelocity.getY(),
+      getPigeon2()
+        .getAngularVelocityZWorld()
+        .getValue()
+        .in(Units.RadiansPerSecond)
+    );
   }
 }
