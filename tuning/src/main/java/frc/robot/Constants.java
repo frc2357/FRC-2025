@@ -22,13 +22,6 @@ public final class Constants {
     public static final int CORAL_RUNNER_MOTOR = 30;
   }
 
-  public final class DIGITAL_INPUT {
-
-    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
-    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 1;
-    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 2;
-  }
-
   public static final class ELEVATOR {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
