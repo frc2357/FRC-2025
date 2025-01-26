@@ -22,6 +22,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
@@ -368,53 +369,20 @@ public final class Constants {
 
   public static class DRIVE_TO_POSE {
 
-    // public static final ProfiledPIDController ROTATION_PID_CONTROLLER =
-    //   new ProfiledPIDController(
-    //     2.5,
-    //     0,
-    //     0,
-    //     new Constraints(
-    //       SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
-    //       SWERVE.MAXIMUM_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)
-    //     )
-    //   );
-    public static final PIDController ROTATION_PID_CONTROLLER =
-      new PIDController(5, 0, 0);
-    public static final double PIGEON_ROTATION_FEEDFORWARD = 0.00001;
-    // public static final ProfiledPIDController X_TRANSLATION_PID_CONTROLLER =
-    //   new ProfiledPIDController(
-    //     2.5,
-    //     0,
-    //     0,
-    //     new Constraints(
-    //       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-    //       SWERVE.MAXIMUM_LINEAR_ACCELERATION.in(MetersPerSecondPerSecond)
-    //     )
-    //   );
-    public static final PIDController X_TRANSLATION_PID_CONTROLLER =
-      new PIDController(5, 0, 0);
-    // public static final PIDController VISION_X_TRANSLATION_PID_CONTROLLER = new PIDController(0, 0, 0);
-    // public static final PIDController VISION_Y_TRANSLATION_PID_CONTROLLER = new PIDController(0.15, 0, 0);
-    // public static final ProfilledPIDController Y_TRANSLATION_PID_CONTROLLER =
-    //   new PIDController(
-    //     7.5,
-    //     0,
-    //     0,
-    //     new Constraints(
-    //       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-    //       SWERVE.MAXIMUM_LINEAR_ACCELERATION.in(MetersPerSecondPerSecond)
-    //     )
-    //   );
+    public static final ProfiledPIDController AUTO_ALIGN_DRIVE_CONTROLLER =
+      new ProfiledPIDController(
+        8,
+        0.0,
+        0.0,
+        new TrapezoidProfile.Constraints(2, 1)
+      );
 
-    public static final PIDController Y_TRANSLATION_PID_CONTROLLER =
-      new PIDController(
-        7.5,
-        0,
-        0
-        // new Constraints(
-        //   TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-        //   SWERVE.MAXIMUM_LINEAR_ACCELERATION.in(MetersPerSecondPerSecond)
-        // )
+    public static final ProfiledPIDController AUTO_ALIGN_THETA_CONTROLLER =
+      new ProfiledPIDController(
+        6,
+        0.0,
+        0.0,
+        new TrapezoidProfile.Constraints(2, 1)
       );
 
     public static final Distance X_TOLERANCE = Units.Inches.of(2);
