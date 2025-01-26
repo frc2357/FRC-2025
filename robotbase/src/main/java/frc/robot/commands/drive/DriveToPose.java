@@ -25,10 +25,10 @@ public class DriveToPose extends Command {
   private static final double m_speedAt12VoltsMPS =
     TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
 
-  public DriveToPose(Supplier<Pose2d> targetPose) {
+  public DriveToPose(Supplier<Pose2d> targetPoseSupplier) {
     addRequirements(Robot.swerve);
 
-    m_targetPoseSupplier = targetPose;
+    m_targetPoseSupplier = targetPoseSupplier;
     m_driveController = DRIVE_TO_POSE.AUTO_ALIGN_DRIVE_CONTROLLER;
     m_thetaController = DRIVE_TO_POSE.AUTO_ALIGN_THETA_CONTROLLER;
   }
@@ -36,17 +36,18 @@ public class DriveToPose extends Command {
   @Override
   public void initialize() {
     Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
+    Pose2d targetPose = m_targetPoseSupplier.get();
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     m_driveController.reset(
       new TrapezoidProfile.State(
-        currentPose.getTranslation().getDistance(currentPose.getTranslation()),
+        currentPose.getTranslation().getDistance(targetPose.getTranslation()),
         -new Translation2d(
           Robot.swerve.getFieldVelocity().dx,
           Robot.swerve.getFieldVelocity().dy
         )
           .rotateBy(
-            currentPose
+            targetPose
               .getTranslation()
               .minus(currentPose.getTranslation())
               .getAngle()
@@ -76,7 +77,7 @@ public class DriveToPose extends Command {
       Robot.driverControls.getRotation() *
       Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
 
-    if (driveVelocity == Translation2d.kZero && thetaVelocity == 0) {
+    if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
       // Calculate drive speed
       double currentDistance = currentPose
         .getTranslation()
@@ -91,7 +92,7 @@ public class DriveToPose extends Command {
       // Calculate theta speed
       thetaVelocity = m_thetaController.calculate(
         currentPose.getRotation().getRadians(),
-        currentPose.getRotation().getRadians()
+        targetPose.getRotation().getRadians()
       );
       if (m_thetaController.atGoal()) thetaVelocity = 0.0;
 

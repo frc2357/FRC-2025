@@ -369,29 +369,9 @@ public final class Constants {
 
   public static class DRIVE_TO_POSE {
 
-    // public static final ProfiledPIDController ROTATION_PID_CONTROLLER =
-    //   new ProfiledPIDController(
-    //     2.5,
-    //     0,
-    //     0,
-    //     new Constraints(
-    //       SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
-    //       SWERVE.MAXIMUM_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)
-    //     )
-    //   );
-    public static final PIDController ROTATION_PID_CONTROLLER =
-      new PIDController(5, 0, 0);
-    public static final double PIGEON_ROTATION_FEEDFORWARD = 0.00001;
-    public static final PIDController X_TRANSLATION_PID_CONTROLLER =
-      new PIDController(5, 0, 0);
-
-    public static final PIDController Y_TRANSLATION_PID_CONTROLLER =
-      new PIDController(7.5, 0, 0);
-
-    // Nolan's controllers
     public static final ProfiledPIDController AUTO_ALIGN_DRIVE_CONTROLLER =
       new ProfiledPIDController(
-        1, //8
+        8,
         0.0,
         0.0,
         new TrapezoidProfile.Constraints(2, 1)
@@ -399,7 +379,7 @@ public final class Constants {
 
     public static final ProfiledPIDController AUTO_ALIGN_THETA_CONTROLLER =
       new ProfiledPIDController(
-        0.5, //6
+        6,
         0.0,
         0.0,
         new TrapezoidProfile.Constraints(2, 1)
