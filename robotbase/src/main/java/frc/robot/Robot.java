@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -15,6 +16,7 @@ import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
+import frc.robot.controls.controllers.ButtonboardController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaePivot;
 import frc.robot.subsystems.AlgaeRunner;
@@ -42,6 +44,7 @@ public class Robot extends TimedRobot {
   public static AutoChooserManager autoChooserManager;
   public static Autos autos;
   public static DriverControls driverControls;
+  public static ButtonboardController buttonboard;
 
   public static Alliance alliance = null;
 
@@ -65,6 +68,7 @@ public class Robot extends TimedRobot {
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
 
+    buttonboard = new ButtonboardController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT);
     driverControls = new DriverControls(
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
@@ -84,6 +88,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    SmartDashboard.putString("Selected Reef Side", buttonboard.getSelectedReefSide().name());
+    SmartDashboard.putString("Selected Scoring Level", buttonboard.getSelectedScoringLevel().name());
+    SmartDashboard.putString("Selected Scoring Direction", buttonboard.getSelectedScoringDirection().name());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

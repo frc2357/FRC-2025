@@ -35,7 +35,8 @@ uint8_t scoringDirectionKeys[2] = {10, 11};
 
 Adafruit_Keypad keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Adafruit_NeoPixel ledStrip(LED_COUNT, LED_PIN, NEO_GRB);
-Joystick_ joystick(0x03, 0x04, 14, 0, false, false, false, false, false, false, false, false, false, false, false);
+// All of the following are defaults except 12 (number of buttons) and 0 (number of joysticks)
+Joystick_ joystick(0x03, 0x04, 12, 0, false, false, false, false, false, false, false, false, false, false, false);
 
 int selectedReefSide = -1;
 int selectedScoringLevel = -1;

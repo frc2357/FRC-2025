@@ -4,12 +4,13 @@ import edu.wpi.first.wpilibj.GenericHID;
 
 public class ButtonboardController extends GenericHID {
     public enum ReefSide {
-        kA(0),
-        kB(1),
-        kC(2),
-        kD(3),
-        kE(4),
-        kF(5);
+        kNone(0),
+        kA(1),
+        kB(2),
+        kC(3),
+        kD(4),
+        kE(5),
+        kF(6);
 
         public final int buttonValue;
 
@@ -19,10 +20,11 @@ public class ButtonboardController extends GenericHID {
     }
 
     public enum ScoringLevel {
-        kL4(6),
-        kL3(7),
-        kL2(8),
-        kL1(9);
+        kNone(0),
+        kL4(7),
+        kL3(8),
+        kL2(9),
+        kL1(10);
 
         public final int buttonValue;
 
@@ -32,8 +34,9 @@ public class ButtonboardController extends GenericHID {
     }
 
     public enum ScoringDirection {
-        kRight(10),
-        kLeft(11);
+        kNone(0),
+        kLeft(11),
+        kRight(12);
 
         public final int buttonValue;
 
@@ -48,28 +51,28 @@ public class ButtonboardController extends GenericHID {
 
     public ReefSide getSelectedReefSide() {
         for (ReefSide side : ReefSide.values()) {
-            if (getRawButton(side.buttonValue)) {
+            if (side.buttonValue != 0 && getRawButton(side.buttonValue)) {
                 return side;
             }
         }
-        return null;
+        return ReefSide.kNone;
     }
 
     public ScoringLevel getSelectedScoringLevel() {
         for (ScoringLevel lvl : ScoringLevel.values()) {
-            if (getRawButton(lvl.buttonValue)) {
+            if (lvl.buttonValue != 0 && getRawButton(lvl.buttonValue)) {
                 return lvl;
             }
         }
-        return null;
+        return ScoringLevel.kNone;
     }
 
     public ScoringDirection getSelectedScoringDirection() {
         for (ScoringDirection dir : ScoringDirection.values()) {
-            if (getRawButton(dir.buttonValue)) {
+            if (dir.buttonValue != 0 && getRawButton(dir.buttonValue)) {
                 return dir;
             }
         }
-        return null;
+        return ScoringDirection.kNone;
     }
 }
