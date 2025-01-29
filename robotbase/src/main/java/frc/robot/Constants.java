@@ -92,7 +92,7 @@ public final class Constants {
   public static final class SWERVE {
 
     public static final AngularVelocity MAX_ANGULAR_VELOCITY =
-      Units.RotationsPerSecond.of(Math.PI * 2);
+      Units.RadiansPerSecond.of(Math.PI * 2);
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
 
