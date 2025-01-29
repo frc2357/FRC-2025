@@ -76,6 +76,8 @@ public class Robot extends TimedRobot {
 
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();
+
+    SmartDashboard.putData("Buttonboard", buttonboard);
   }
 
   /**
@@ -88,9 +90,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    SmartDashboard.putString("Selected Reef Side", buttonboard.getSelectedReefSide().name());
-    SmartDashboard.putString("Selected Scoring Level", buttonboard.getSelectedScoringLevel().name());
-    SmartDashboard.putString("Selected Scoring Direction", buttonboard.getSelectedScoringDirection().name());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
