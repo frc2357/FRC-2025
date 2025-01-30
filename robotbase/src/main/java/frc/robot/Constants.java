@@ -20,6 +20,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -389,7 +391,69 @@ public final class Constants {
     public static final Distance Y_TOLERANCE = Units.Inches.of(2);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
 
-    public static class POSE_SETPOINTS {}
+    public static class POSE_SETPOINTS { // all numbers pulled directly from choreo
+
+      public static final Pose2d BRANCH_A = new Pose2d(
+        Units.Meters.of(3.2332),
+        Units.Meters.of(4.1914),
+        new Rotation2d(Units.Radians.of(0))
+      );
+      public static final Pose2d BRANCH_B = new Pose2d(
+        Units.Meters.of(3.2332),
+        Units.Meters.of(3.8564),
+        new Rotation2d(Units.Radians.of(0))
+      );
+      public static final Pose2d BRANCH_C = new Pose2d(
+        Units.Meters.of(3.7160),
+        Units.Meters.of(3.0202),
+        new Rotation2d(Units.Radians.of(1.0441))
+      );
+      public static final Pose2d BRANCH_D = new Pose2d(
+        Units.Meters.of(4.0011),
+        Units.Meters.of(2.8563),
+        new Rotation2d(Units.Radians.of(1.0441))
+      );
+      public static final Pose2d BRANCH_E = new Pose2d(
+        Units.Meters.of(4.9734),
+        Units.Meters.of(2.8552),
+        new Rotation2d(Units.Radians.of(2.0956))
+      );
+      public static final Pose2d BRANCH_F = new Pose2d(
+        Units.Meters.of(5.2600),
+        Units.Meters.of(3.0165),
+        new Rotation2d(Units.Radians.of(2.0956))
+      );
+      public static final Pose2d BRANCH_G = new Pose2d(
+        Units.Meters.of(5.7408),
+        Units.Meters.of(3.8570),
+        new Rotation2d(Units.Degrees.of(180))
+      );
+      public static final Pose2d BRANCH_H = new Pose2d(
+        Units.Meters.of(5.7408),
+        Units.Meters.of(4.1828),
+        new Rotation2d(Units.Degrees.of(180))
+      );
+      public static final Pose2d BRANCH_I = new Pose2d(
+        Units.Meters.of(5.2650),
+        Units.Meters.of(5.0293),
+        new Rotation2d(Units.Radians.of(-2.0970))
+      );
+      public static final Pose2d BRANCH_J = new Pose2d(
+        Units.Meters.of(4.9792),
+        Units.Meters.of(5.1939),
+        new Rotation2d(Units.Radians.of(-2.0970))
+      );
+      public static final Pose2d BRANCH_K = new Pose2d(
+        Units.Meters.of(4.0037),
+        Units.Meters.of(5.1982),
+        new Rotation2d(Units.Radians.of(-1.0505))
+      );
+      public static final Pose2d BRANCH_L = new Pose2d(
+        Units.Meters.of(3.7203),
+        Units.Meters.of(5.0299),
+        new Rotation2d(Units.Radians.of(-1.0505))
+      );
+    }
   }
 
   public static final class CONTROLLER {
