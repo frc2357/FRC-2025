@@ -387,9 +387,9 @@ public final class Constants {
         new TrapezoidProfile.Constraints(2, 1)
       );
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(2);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(2);
-    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
+    public static final Distance X_TOLERANCE = Units.Inches.of(1);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(1);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(3);
 
     public static class POSE_SETPOINTS { // all numbers pulled directly from choreo
 

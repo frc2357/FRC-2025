@@ -33,4 +33,15 @@ public class Utility {
   public static Transform2d translationToTransform(double x, double y) {
     return new Transform2d(new Translation2d(x, y), new Rotation2d());
   }
+
+  /**
+   * Performs the Pythagorean Theorem on 2 numbers. Returns c
+   * @param a A number that is not null or NaN
+   * @param b A number that is not null or NaN
+   * @return The square root of a^2 + b^2
+   */
+  public static double pythagorean(double a, double b) {
+    // a^2 + b^2 = c^2
+    return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+  }
 }
