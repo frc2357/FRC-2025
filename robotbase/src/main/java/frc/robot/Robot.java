@@ -4,9 +4,12 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -43,6 +46,13 @@ public class Robot extends TimedRobot {
   public static DriverControls driverControls;
 
   public static Alliance alliance = null;
+
+  private static Timer timer = new Timer();
+
+  private CommandSwerveDrivetrain m_swerveDrivetrain;
+  private final SwerveRequest.FieldCentric m_fieldRelative =
+    new SwerveRequest.FieldCentric()
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -94,6 +104,10 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = autoChooserManager.getSelectedCommandScheduler();
+    timer.restart();
+    m_swerveDrivetrain.setControl(
+      m_fieldRelative.withVelocityX(-1).withVelocityY(0).withRotationalRate(0)
+    );
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -102,7 +116,15 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    if (timer.hasElapsed(3)) {
+      m_swerveDrivetrain.setControl(
+        m_fieldRelative.withVelocityX(0).withVelocityY(0).withRotationalRate(0)
+      );
+      timer.reset();
+      timer.stop();
+    }
+  }
 
   @Override
   public void teleopInit() {
