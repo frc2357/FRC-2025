@@ -4,10 +4,13 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -391,7 +394,58 @@ public final class Constants {
     public static final Distance Y_TOLERANCE = Units.Inches.of(1);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(3);
 
-    public static class POSE_SETPOINTS { // all numbers pulled directly from choreo
+    public static final class WAYPOINTS {
+
+      public static final Pose2d REEF_SIDE_A = new Pose2d(
+        Meters.of(2.8930),
+        Meters.of(3.9923),
+        new Rotation2d(Degrees.of(0))
+      );
+      public static final Pose2d REEF_SIDE_B = new Pose2d(
+        Meters.of(3.6986),
+        Meters.of(2.6585),
+        new Rotation2d(Radians.of(1.0191))
+      );
+      public static final Pose2d REEF_SIDE_C = new Pose2d(
+        Meters.of(5.5078),
+        Meters.of(2.2887),
+        new Rotation2d(Radians.of(2.1253))
+      );
+      public static final Pose2d REEF_SIDE_D = new Pose2d(
+        Meters.of(2.4567296504974365),
+        Meters.of(4.0244574546813965),
+        new Rotation2d(Degrees.of(180))
+      );
+      public static final Pose2d REEF_SIDE_B = new Pose2d(
+        Meters.of(3.4278),
+        Meters.of(2.4311),
+        new Rotation2d(Radians.of(1.0191))
+      );
+      public static final Pose2d REEF_SIDE_C = new Pose2d(
+        Meters.of(5.4431),
+        Meters.of(2.4673),
+        new Rotation2d(Radians.of(2.1253))
+      );
+    }
+  }
+
+  public static final class CONTROLLER {
+
+    public static final int DRIVE_CONTROLLER_PORT = 1;
+    public static final double DRIVE_CONTROLLER_DEADBAND = 0.01;
+    public static final int CODRIVER_CONTROLLER_PORT = 0;
+    public static final double CODRIVE_CONTROLLER_DEADBAND = 0.025;
+    public static final double SWERVE_TRANSLATIONAL_DEADBAND = 0.0;
+    public static final double SWERVE_ROTATIONAL_DEADBAND = 0.0;
+    public static final double DRIVE_RUMBLE_INTENSITY = .5;
+    public static final double CODRIVE_RUMBLE_INTENSITY = .5;
+    public static final double DRIVE_RUMBLE_SECONDS = 2;
+    public static final double CODRIVE_RUMBLE_SECONDS = 2;
+  }
+
+  public static class FIELD { // pulled directly from Choreo or field drawings provided by FIRST
+
+    public static class REEF {
 
       public static final Pose2d BRANCH_A = new Pose2d(
         Units.Meters.of(3.2332),
@@ -454,19 +508,5 @@ public final class Constants {
         new Rotation2d(Units.Radians.of(-1.0505))
       );
     }
-  }
-
-  public static final class CONTROLLER {
-
-    public static final int DRIVE_CONTROLLER_PORT = 1;
-    public static final double DRIVE_CONTROLLER_DEADBAND = 0.01;
-    public static final int CODRIVER_CONTROLLER_PORT = 0;
-    public static final double CODRIVE_CONTROLLER_DEADBAND = 0.025;
-    public static final double SWERVE_TRANSLATIONAL_DEADBAND = 0.0;
-    public static final double SWERVE_ROTATIONAL_DEADBAND = 0.0;
-    public static final double DRIVE_RUMBLE_INTENSITY = .5;
-    public static final double CODRIVE_RUMBLE_INTENSITY = .5;
-    public static final double DRIVE_RUMBLE_SECONDS = 2;
-    public static final double CODRIVE_RUMBLE_SECONDS = 2;
   }
 }
