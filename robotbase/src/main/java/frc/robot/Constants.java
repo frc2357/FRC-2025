@@ -417,9 +417,9 @@ public final class Constants {
       /**
        * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
        */
-      public static final Distance REEF_BOUNDARY = FIELD.REEF.RADIUS.plus(
-        ROBOT_CONFIGURATION.BOUNDARY
-      ).plus(COLLISION_TOLERANCE);
+      public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
+        .plus(ROBOT_CONFIGURATION.BOUNDARY)
+        .plus(COLLISION_TOLERANCE);
     }
   }
 
@@ -506,7 +506,7 @@ public final class Constants {
         Units.Meters.of(4.0135),
         new Rotation2d(Degrees.of(0))
       );
-      public static final Distance RADIUS = Units.Inches.of(75.506);
+      public static final Distance DIAMETER = Units.Inches.of(75.506);
     }
   }
 
