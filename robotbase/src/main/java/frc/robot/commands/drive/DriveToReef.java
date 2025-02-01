@@ -2,26 +2,13 @@ package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.Constants.DRIVE_TO_POSE.FINAL_APPROACH_DISTANCE;
-import static frc.robot.Constants.DRIVE_TO_POSE.INTERPLOATION_PERCENT;
-import static frc.robot.Constants.DRIVE_TO_POSE.ROTATION_TOLERANCE;
-import static frc.robot.Constants.DRIVE_TO_POSE.X_TOLERANCE;
-import static frc.robot.Constants.DRIVE_TO_POSE.Y_TOLERANCE;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_A;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_B;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_C;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_D;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_E;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_G;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_H;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_J;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_K;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_L;
+import static frc.robot.Constants.DRIVE_TO_POSE.*;
+import static frc.robot.Constants.FIELD.REEF.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE;
 import frc.robot.Constants.FIELD.REEF;
@@ -51,13 +38,7 @@ public class DriveToReef extends Command {
   @Override
   public void initialize() {
     m_lastTarget = Robot.swerve.getAllianceRelativePose2d();
-    m_finalGoal = getGoalFromButtonboard();
-    // if final goal is null, then somethings up, and we dont have any clue where to go from here.
-    if (m_finalGoal == null) {
-      m_currDriveToPose.cancel();
-      this.cancel(); // so we wont go anywhere from here, and just cancel instead.
-      return;
-    }
+    m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currDriveToPose = new DriveToPose(getTargetFunction()); // make a DriveToPose that we have control of
     m_currDriveToPose.schedule();
@@ -65,27 +46,13 @@ public class DriveToReef extends Command {
 
   @Override
   public void execute() {
-    checkDriverInputs();
-    m_finalGoal = getGoalFromButtonboard();
-    if (m_finalGoal == null) {
-      if (m_finalGoal == null) {
-        m_currDriveToPose.cancel();
-        this.cancel(); // nowhere to go, so no purpose.
-        return;
-      }
-    }
+    m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
   }
 
   @Override
   public boolean isFinished() {
-    if (!m_currDriveToPose.isScheduled()) {
-      if (!isAtGoal()) {
-        m_currDriveToPose = new DriveToPose(getTargetFunction());
-        return false;
-      }
-    }
-    return isAtGoal();
+    return isAtTarget(m_finalGoal, m_currPose);
   }
 
   private boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
@@ -119,55 +86,6 @@ public class DriveToReef extends Command {
     return true;
   }
 
-  private boolean isAtGoal() {
-    return isAtTarget(m_finalGoal, m_currPose);
-  }
-
-  private Pose2d getGoalFromButtonboard() {
-    ReefSide goal = Robot.buttonboard.getSelectedReefSide();
-    ScoringDirection scoringDirection =
-      Robot.buttonboard.getSelectedScoringDirection();
-
-    switch (scoringDirection) {
-      case Left:
-        switch (goal) {
-          case A:
-            return BRANCH_A;
-          case B:
-            return BRANCH_C;
-          case C:
-            return BRANCH_E;
-          case D:
-            return BRANCH_G;
-          case E:
-            return BRANCH_I;
-          case F:
-            return BRANCH_K;
-          default:
-            return null; // if this happens, somethings wrong.
-        }
-      case Right:
-        switch (goal) {
-          case A:
-            return BRANCH_B;
-          case B:
-            return BRANCH_D;
-          case C:
-            return BRANCH_F;
-          case D:
-            return BRANCH_H;
-          case E:
-            return BRANCH_J;
-          case F:
-            return BRANCH_L;
-          default:
-            return null; // if this happens, somethings wrong.
-        }
-      default:
-        return null; // if this happens, somethings wrong.
-    }
-  }
-
   private Function<Pose2d, Pose2d> getTargetFunction() {
     return new Function<Pose2d, Pose2d>() {
       @Override
@@ -177,24 +95,12 @@ public class DriveToReef extends Command {
     };
   }
 
-  private Pose2d getPoseDelta(Pose2d currPose, Pose2d targetPose) {
-    return targetPose.relativeTo(currPose);
-  }
-
-  private boolean arePoseTranslationsEqual(Pose2d pose1, Pose2d pose2) {
-    return pose1.getX() == pose2.getX() && pose1.getY() == pose2.getY();
+  private Pose2d getPoseDelta(Pose2d intial, Pose2d last) {
+    return last.relativeTo(intial);
   }
 
   private boolean isFinalGoal(Pose2d targetPose) {
-    return (
-      arePoseTranslationsEqual(targetPose, m_finalGoal) &&
-      targetPose.getRotation().getDegrees() ==
-      m_finalGoal.getRotation().getDegrees()
-    );
-  }
-
-  private boolean willHitReef(Pose2d currPose, Pose2d targetPose) {
-    return willHitReef(currPose, targetPose, INTERPLOATION_PERCENT);
+    return targetPose.equals(m_finalGoal);
   }
 
   private boolean willHitReef(
@@ -202,40 +108,20 @@ public class DriveToReef extends Command {
     Pose2d targetPose,
     double... interpolationPercentages
   ) {
+    var interpolatedPose = new Pose2d();
     for (double percentage : interpolationPercentages) {
-      if (willHitReef(currPose, targetPose, percentage)) {
+      interpolatedPose = currPose.interpolate(targetPose, percentage);
+      // if true, collision with reef is likely, and avoidance should begin.
+      if (
+        Math.abs(
+          Utility.findDistanceBetweenPoses(interpolatedPose, REEF.CENTER)
+        ) <=
+        COLLISION_AVOIDANCE.REEF_BOUNDARY.in(Meters)
+      ) {
         return true;
       }
     }
     return false;
-  }
-
-  private boolean willHitReef(
-    Pose2d currPose,
-    Pose2d targetPose,
-    double interpolationPercentage
-  ) {
-    var interpolatedPose = currPose.interpolate(
-      targetPose,
-      interpolationPercentage
-    );
-    // if true, collision with reef is likely, and avoidance should begin.
-    return (
-      Math.abs(
-        Utility.findDistanceBetweenPoses(interpolatedPose, REEF.CENTER)
-      ) <=
-      COLLISION_AVOIDANCE.REEF_BOUNDARY.in(Meters)
-    );
-  }
-
-  private void checkDriverInputs() {
-    if (
-      Robot.driverControls.getX() != 0 ||
-      Robot.driverControls.getY() != 0 ||
-      Robot.driverControls.getRotation() != 0
-    ) {
-      m_isDriverControlling = true;
-    }
   }
 
   /**
@@ -284,7 +170,7 @@ public class DriveToReef extends Command {
     Pose2d lastTarget,
     Pose2d currPose
   ) {
-    Pose2d validTarget = currTarget;
+    Pose2d safeTarget = currTarget;
     Pose2d lastPoseToCurrTarDelta = getPoseDelta(currPose, currTarget);
 
     // find which direction we want to go (pos or neg in x/y axes)
@@ -302,8 +188,6 @@ public class DriveToReef extends Command {
         COLLISION_AVOIDANCE.TWIST_Y_METERS_DEFAULT * yDirectionOfTravelMult;
       m_collisionAvoidanceTwist.dtheta =
         COLLISION_AVOIDANCE.TWIST_ROTO_RADIANS_DEFAULT;
-
-      Pose2d safeTarget = validTarget;
       int attemptsTaken = 0;
       for (
         attemptsTaken = 0;
@@ -311,7 +195,7 @@ public class DriveToReef extends Command {
         attemptsTaken++
       ) {
         safeTarget.exp(m_collisionAvoidanceTwist);
-        if (!willHitReef(currPose, safeTarget)) {
+        if (!willHitReef(currPose, safeTarget, INTERPLOATION_PERCENT)) {
           break;
         }
         m_collisionAvoidanceTwist.dx += m_collisionAvoidanceTwist.dx / 2;
@@ -335,9 +219,8 @@ public class DriveToReef extends Command {
           );
         }
       }
-      validTarget = safeTarget;
     }
-    return validTarget;
+    return safeTarget;
   }
 
   private Pose2d findNewTarget(

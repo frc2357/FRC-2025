@@ -420,40 +420,6 @@ public final class Constants {
         ROBOT_CONFIGURATION.BOUNDARY
       ).plus(COLLISION_TOLERANCE);
     }
-
-    public static final class WAYPOINTS {
-
-      public static final Pose2d REEF_SIDE_A = new Pose2d(
-        Meters.of(2.8930),
-        Meters.of(3.9923),
-        new Rotation2d(Degrees.of(0))
-      );
-      public static final Pose2d REEF_SIDE_B = new Pose2d(
-        Meters.of(3.6986),
-        Meters.of(2.6585),
-        new Rotation2d(Radians.of(1.0191))
-      );
-      public static final Pose2d REEF_SIDE_C = new Pose2d(
-        Meters.of(5.5078),
-        Meters.of(2.2887),
-        new Rotation2d(Radians.of(2.1253))
-      );
-      public static final Pose2d REEF_SIDE_D = new Pose2d(
-        Meters.of(2.4567296504974365),
-        Meters.of(4.0244574546813965),
-        new Rotation2d(Degrees.of(180))
-      );
-      public static final Pose2d REEF_SIDE_E = new Pose2d(
-        Meters.of(5.336165428161621),
-        Meters.of(5.339362144470215),
-        new Rotation2d(Radians.of(-2.1112160630631216))
-      );
-      public static final Pose2d REEF_SIDE_F = new Pose2d(
-        Meters.of(3.7514467239379883),
-        Meters.of(5.392186164855957),
-        new Rotation2d(Radians.of(-1.0670657807739827))
-      );
-    }
   }
 
   public static final class CONTROLLER {
