@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
@@ -532,6 +533,12 @@ public final class Constants {
      * The distance that for any given object, if it is closer to the robot than this, it is hitting it, or will hit it when the robot turns.
      * Do not let anything get inside this.
      */
-    public static final Distance BOUNDARY = Units.Inches.of(41.0121933 / 2);
+    public static final Distance BOUNDARY = Units.Inches.of(
+      Math.sqrt(
+        Math.pow(FRAME_LENGTH.in(Inches), 2) +
+        Math.pow(FRAME_WIDTH.in(Inches), 2)
+      ) /
+      2
+    );
   }
 }
