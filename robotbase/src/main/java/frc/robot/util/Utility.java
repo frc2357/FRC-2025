@@ -1,8 +1,11 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 
 public class Utility {
 
@@ -40,8 +43,23 @@ public class Utility {
    * @param b A number that is not null or NaN
    * @return The square root of a^2 + b^2
    */
-  public static double pythagorean(double a, double b) {
+  public static double findHypotenuse(double a, double b) {
     // a^2 + b^2 = c^2
     return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+  }
+
+  /**
+   * Finds the distance between any 2 given points. Finds how far "there" is from "here"
+   * @param here The point that will become the origin (0,0)
+   * @param there The point that is being used to find the distance from "here"
+   * @return The distance between the 2 points in meters, it may also be negative.
+   */
+  public static double findDistanceBetweenPoses(Pose2d here, Pose2d there) {
+    var distanceBetweenPoints = there.relativeTo(here); // gets a pose for the distance of "there" from here
+    return findHypotenuse(
+      // gets the hypotenuse of the pose, which now has an origin of "here"
+      distanceBetweenPoints.getX(),
+      distanceBetweenPoints.getY()
+    ); // this essentially measures how far away "there" is from "here"
   }
 }
