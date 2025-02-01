@@ -108,7 +108,7 @@ public class DriveToReef extends Command {
     Pose2d targetPose,
     double... interpolationPercentages
   ) {
-    var interpolatedPose = new Pose2d();
+    Pose2d interpolatedPose = new Pose2d();
     for (double percentage : interpolationPercentages) {
       interpolatedPose = currPose.interpolate(targetPose, percentage);
       // if true, collision with reef is likely, and avoidance should begin.
