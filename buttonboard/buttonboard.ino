@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 #include <Adafruit_Keypad.h>
-#include <Joystick.h>
+#include <XInput.h>
 #include <Adafruit_NeoPixel.h>
 
 #define LOOP_DELAY_MS 10
@@ -29,14 +29,27 @@ char keys[ROWS][COLS] = {
     {'g', 'h', 'i', 'j', 'k', 'l'},
     {'m', 'n', 'o', 'p', 'q', 'r'}};
 
-uint8_t reefsideKeys[6] = {0, 1, 2, 3, 4, 5};
-uint8_t scoringLevelKeys[4] = {6, 7, 8, 9};
-uint8_t scoringDirectionKeys[2] = {10, 11};
+XInputControl reefSideButtons[6] = {
+    BUTTON_A,
+    BUTTON_B,
+    BUTTON_X,
+    BUTTON_Y,
+    BUTTON_BACK,
+    BUTTON_START,
+};
+XInputControl scoringLevelButtons[4] = {
+    DPAD_UP,
+    DPAD_RIGHT,
+    DPAD_DOWN,
+    DPAD_LEFT,
+};
+XInputControl scoringDirectionButtons[2] = {
+    BUTTON_LB,
+    BUTTON_RB,
+};
 
 Adafruit_Keypad keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 Adafruit_NeoPixel ledStrip(LED_COUNT, LED_PIN, NEO_GRB);
-// All of the following are defaults except 12 (number of buttons) and 0 (number of joysticks)
-Joystick_ joystick(0x03, 0x04, 12, 0, false, false, false, false, false, false, false, false, false, false, false);
 
 int selectedReefSide = -1;
 int selectedScoringLevel = -1;
@@ -44,7 +57,7 @@ int selectedScoringDirection = -1;
 
 void setup()
 {
-  joystick.begin();
+  XInput.begin();
 
   keypad.begin();
 
@@ -62,6 +75,24 @@ void loop()
 
 void scanKeypad()
 {
+  // Signal that we've scored and to deselect everything
+  if (XInput.getRumble())
+  {
+    if (selectedScoringDirection != -1)
+      XInput.release(scoringDirectionButtons[selectedScoringDirection - 1]); // Subtract 1 because row 0 is reefside
+    if (selectedScoringLevel != -1)
+      XInput.release(scoringLevelButtons[selectedScoringLevel]);
+    if (selectedReefSide != -1)
+      XInput.release(reefSideButtons[selectedReefSide]);
+
+    ledStrip.setPixelColor(getLEDIndex(REEF_SIDE_ROW, selectedReefSide), COLOR_OFF);
+    ledStrip.setPixelColor(getLEDIndex(selectedScoringDirection, selectedScoringLevel), COLOR_OFF);
+    ledStrip.show();
+
+    selectedReefSide = -1;
+    selectedScoringLevel = -1;
+    selectedScoringDirection = -1;
+  }
   while (keypad.available())
   {
     keypadEvent e = keypad.read();
@@ -104,33 +135,33 @@ void setReefSide(int row, int col)
 
   if (select && selectedReefSide != -1)
   {
-    joystick.setButton(reefsideKeys[selectedReefSide], 0);
+    XInput.release(reefSideButtons[selectedReefSide]);
     ledStrip.setPixelColor(getLEDIndex(REEF_SIDE_ROW, selectedReefSide), COLOR_OFF);
   }
 
   selectedReefSide = select ? col : -1;
-  joystick.setButton(reefsideKeys[col], select);
+  XInput.setButton(reefSideButtons[col], select);
   ledStrip.setPixelColor(getLEDIndex(row, col), color);
 }
 
 void setScoringLocation(int row, int col)
 {
   if (col >= SCORING_LOCATION_ROWS)
-    return; // We only have 4 rows for the scoring location buttons
+    return; // We only have SCORING_LOCATION_ROWS rows for the scoring location buttons
   bool select = (selectedScoringLevel != col) || selectedScoringDirection != row;
   uint32_t color = select ? COLOR_ON : COLOR_OFF;
 
   if (select && selectedScoringLevel != -1 && selectedScoringDirection != -1)
   {
-    joystick.setButton(scoringLevelKeys[selectedScoringLevel], 0);
-    joystick.setButton(scoringDirectionKeys[selectedScoringDirection - 1], 0);
+    XInput.release(scoringLevelButtons[selectedScoringLevel]);
+    XInput.release(scoringDirectionButtons[selectedScoringDirection - 1]);
     ledStrip.setPixelColor(getLEDIndex(selectedScoringDirection, selectedScoringLevel), COLOR_OFF);
   }
 
   selectedScoringLevel = select ? col : -1;
   selectedScoringDirection = select ? row : -1;
-  joystick.setButton(scoringLevelKeys[col], select);
-  joystick.setButton(scoringDirectionKeys[row - 1], select);
+  XInput.setButton(scoringLevelButtons[col], select);
+  XInput.setButton(scoringDirectionButtons[row - 1], select);
   ledStrip.setPixelColor(getLEDIndex(row, col), color);
 }
 
