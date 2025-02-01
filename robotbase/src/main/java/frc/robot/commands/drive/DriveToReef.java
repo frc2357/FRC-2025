@@ -2,6 +2,7 @@ package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.Constants.DRIVE_TO_POSE.FINAL_APPROACH_DISTANCE;
 import static frc.robot.Constants.DRIVE_TO_POSE.INTERPLOATION_PERCENT;
 import static frc.robot.Constants.DRIVE_TO_POSE.ROTATION_TOLERANCE;
 import static frc.robot.Constants.DRIVE_TO_POSE.X_TOLERANCE;
@@ -53,6 +54,7 @@ public class DriveToReef extends Command {
     m_finalGoal = getGoalFromButtonboard();
     // if final goal is null, then somethings up, and we dont have any clue where to go from here.
     if (m_finalGoal == null) {
+      m_currDriveToPose.cancel();
       this.cancel(); // so we wont go anywhere from here, and just cancel instead.
       return;
     }
@@ -65,6 +67,13 @@ public class DriveToReef extends Command {
   public void execute() {
     checkDriverInputs();
     m_finalGoal = getGoalFromButtonboard();
+    if (m_finalGoal == null) {
+      if (m_finalGoal == null) {
+        m_currDriveToPose.cancel();
+        this.cancel(); // nowhere to go, so no purpose.
+        return;
+      }
+    }
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
   }
 
@@ -78,9 +87,6 @@ public class DriveToReef extends Command {
     }
     return isAtGoal();
   }
-
-  @Override
-  public void end(boolean interrupted) {}
 
   private boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
     if (
@@ -339,9 +345,21 @@ public class DriveToReef extends Command {
     Pose2d lastTarget,
     Pose2d currPose
   ) {
+    // if not beyond current target, keep using it
     if (!isBeyondTarget(currTarget, lastTarget, currPose)) {
       return collisionAvoidanceTarget(currTarget, lastTarget, currPose);
-    } // if not beyond current target, keep using it
+    }
+
+    Pose2d currPoseToFinalGoalDelta = getPoseDelta(currPose, m_finalGoal);
+    // if were close to the final goal, just make the target the goal and send it
+    if (
+      currPoseToFinalGoalDelta.getX() < FINAL_APPROACH_DISTANCE.in(Meters) &&
+      currPoseToFinalGoalDelta.getY() < FINAL_APPROACH_DISTANCE.in(Meters)
+    ) {
+      m_currentTarget = m_finalGoal;
+      return m_finalGoal; // cant use collision avoidance, would make sure we dont get that close
+    }
+    // interpolate a new target, and let collision avoidance make sure we dont slam into the reef
     Pose2d newTarget = currPose.interpolate(m_finalGoal, INTERPLOATION_PERCENT);
     m_lastTarget = m_currentTarget;
     m_currentTarget = newTarget;
