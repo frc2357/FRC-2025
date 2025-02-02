@@ -11,9 +11,12 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
+import frc.robot.commands.drive.DriveBrake;
+import frc.robot.commands.drive.DriveCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
@@ -79,7 +82,6 @@ public class Robot extends TimedRobot {
 
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();
-
   }
 
   @Override
@@ -102,7 +104,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    new WaitCommand(3).andThen(new DriveCoast()).schedule();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -130,6 +134,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    new DriveBrake().schedule();
   }
 
   /** This function is called periodically during operator control. */
