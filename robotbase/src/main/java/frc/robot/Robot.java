@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -144,7 +145,7 @@ public class Robot extends TimedRobot {
 
     m_setCoastOnDisable.cancel();
 
-    new DriveSetBrake().schedule();
+    swerve.configNeutralMode(NeutralModeValue.Brake);
   }
 
   /** This function is called periodically during operator control. */
