@@ -9,7 +9,11 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
 
 import choreo.auto.AutoFactory;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.spark.config.AbsoluteEncoderConfig;
+import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -171,13 +175,15 @@ public final class Constants {
         .inverted(true)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .follow(CAN_ID.LATERATOR_MOTOR_LEFT);
+        .follow(CAN_ID.LATERATOR_MOTOR_LEFT)
+        .apply(new AbsoluteEncoderConfig());
 
     public static final double MOTOR_P = 0;
     public static final double MOTOR_I = 0;
     public static final double MOTOR_D = 0;
     public static final double MOTOR_F = 0;
 
+    // Set feedback sensor to alternate encoder
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
@@ -186,6 +192,9 @@ public final class Constants {
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
     public static final double AXIS_MAX_SPEED = 0.1;
+
+    // TODO: Create alternate encoder config
+    //public static final EncoderConfig ALTERNATE_ENCODER_CONFIG_LEFT = MOTOR_CONFIG_LEFT.encoder.countsPerRevolution(8196);
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
@@ -285,10 +294,14 @@ public final class Constants {
     public static final double LEFT_MOTOR_D = 0;
     public static final double LEFT_MOTOR_F = 0;
 
+    // TODO: Set feedback to an absolute encoder
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       LEFT_MOTOR_CONFIG.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
         .outputRange(-1, 1);
+    // TODO: Add MAXMotion Config
+
+    // TODO: Configure Absolute encoder
   }
 
   public static final class CUSTOM_UNITS {
