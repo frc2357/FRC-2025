@@ -85,6 +85,10 @@ public class Robot extends TimedRobot {
 
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();
+
+    m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
+      new DriveSetCoast()
+    );
   }
 
   @Override
@@ -108,9 +112,6 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
-    m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
-      new DriveSetCoast()
-    );
     m_setCoastOnDisable.schedule();
   }
 
