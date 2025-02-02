@@ -8,10 +8,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
-import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.controls.controllers.ButtonboardController.ReefSide;
-import frc.robot.controls.controllers.ButtonboardController.ScoringDirection;
 
 public class ButtonboardController extends GenericHID implements Sendable {
 

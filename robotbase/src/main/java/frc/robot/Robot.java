@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
+import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.ButtonboardController;
@@ -79,7 +80,12 @@ public class Robot extends TimedRobot {
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();
 
+  }
+
+  @Override
+  public void robotInit() {
     SmartDashboard.putData("Buttonboard", buttonboard);
+    SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
   }
 
   /**
