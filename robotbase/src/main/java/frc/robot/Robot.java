@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -11,9 +12,14 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.SWERVE;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
+import frc.robot.commands.drive.DriveSetBrake;
+import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
@@ -34,6 +40,7 @@ import frc.robot.subsystems.Laterator;
 public class Robot extends TimedRobot {
 
   private Command m_autonomousCommand;
+  private SequentialCommandGroup m_setCoastOnDisable;
 
   public static CommandSwerveDrivetrain swerve;
   public static Elevator elevator;
@@ -80,6 +87,9 @@ public class Robot extends TimedRobot {
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();
 
+    m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
+      new DriveSetCoast()
+    );
   }
 
   @Override
@@ -102,7 +112,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_setCoastOnDisable.schedule();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -130,6 +142,10 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    m_setCoastOnDisable.cancel();
+
+    swerve.configNeutralMode(NeutralModeValue.Brake);
   }
 
   /** This function is called periodically during operator control. */
