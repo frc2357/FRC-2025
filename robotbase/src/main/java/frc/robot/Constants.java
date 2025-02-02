@@ -5,17 +5,8 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
@@ -30,7 +21,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -41,7 +31,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
-import frc.robot.generated.TunerConstants;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
@@ -108,6 +97,8 @@ public final class Constants {
       Units.MetersPerSecondPerSecond.of(4.5); //TODO: tune this
     public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
       Units.DegreesPerSecondPerSecond.of(120); //TODO: tune this
+
+    public static final Time TIME_TO_COAST = Units.Seconds.of(3);
   }
 
   public static final class CHOREO {
