@@ -68,7 +68,9 @@ public class Robot extends TimedRobot {
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
 
-    buttonboard = new ButtonboardController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT);
+    buttonboard = new ButtonboardController(
+      Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT
+    );
     driverControls = new DriverControls(
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND

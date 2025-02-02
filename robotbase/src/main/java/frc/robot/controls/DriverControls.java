@@ -37,7 +37,7 @@ public class DriverControls {
     m_controller
       .a()
       .whileTrue(
-        new DriveToPose(() ->
+        new DriveToPose(Pose ->
           new Pose2d(0, 0, new Rotation2d(Units.Degrees.of(0)))
         )
       );

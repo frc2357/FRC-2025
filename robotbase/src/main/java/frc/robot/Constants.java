@@ -4,10 +4,15 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inch;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -20,6 +25,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -33,6 +40,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.generated.TunerConstants;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -385,11 +393,34 @@ public final class Constants {
         new TrapezoidProfile.Constraints(2, 1)
       );
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(2);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(2);
-    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
+    public static final Distance X_TOLERANCE = Units.Inches.of(1);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(1);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(3);
 
-    public static class POSE_SETPOINTS {}
+    public static final double INTERPLOATION_PERCENT = 0.15;
+
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
+
+    public static final class COLLISION_AVOIDANCE {
+
+      public static final int ATTEMPTS = 20;
+
+      public static final double TWIST_X_METERS_DEFAULT = 0.05;
+      public static final double TWIST_Y_METERS_DEFAULT = 0.05;
+      public static final double TWIST_ROTO_RADIANS_DEFAULT = 0;
+
+      /**
+       * How far away we want to be from things that we could hit.
+       */
+      public static final Distance COLLISION_TOLERANCE = Units.Inches.of(3);
+
+      /**
+       * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
+       */
+      public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
+        .plus(ROBOT_CONFIGURATION.BOUNDARY)
+        .plus(COLLISION_TOLERANCE);
+    }
   }
 
   public static final class CONTROLLER {
@@ -404,5 +435,110 @@ public final class Constants {
     public static final double CODRIVE_RUMBLE_INTENSITY = .5;
     public static final double DRIVE_RUMBLE_SECONDS = 2;
     public static final double CODRIVE_RUMBLE_SECONDS = 2;
+  }
+
+  public static class FIELD { // pulled directly from Choreo or field drawings provided by FIRST
+
+    public static class REEF {
+
+      public static final Pose2d BRANCH_A = new Pose2d(
+        Units.Meters.of(3.2332),
+        Units.Meters.of(4.1914),
+        new Rotation2d(Radians.of(0))
+      );
+      public static final Pose2d BRANCH_B = new Pose2d(
+        Units.Meters.of(3.2332),
+        Units.Meters.of(3.8564),
+        new Rotation2d(Radians.of(0))
+      );
+      public static final Pose2d BRANCH_C = new Pose2d(
+        Units.Meters.of(3.7160),
+        Units.Meters.of(3.0202),
+        new Rotation2d(Radians.of(1.0441))
+      );
+      public static final Pose2d BRANCH_D = new Pose2d(
+        Units.Meters.of(4.0011),
+        Units.Meters.of(2.8563),
+        new Rotation2d(Radians.of(1.0441))
+      );
+      public static final Pose2d BRANCH_E = new Pose2d(
+        Units.Meters.of(4.9734),
+        Units.Meters.of(2.8552),
+        new Rotation2d(Radians.of(2.0956))
+      );
+      public static final Pose2d BRANCH_F = new Pose2d(
+        Units.Meters.of(5.2600),
+        Units.Meters.of(3.0165),
+        new Rotation2d(Radians.of(2.0956))
+      );
+      public static final Pose2d BRANCH_G = new Pose2d(
+        Units.Meters.of(5.7408),
+        Units.Meters.of(3.8570),
+        new Rotation2d(Degrees.of(180))
+      );
+      public static final Pose2d BRANCH_H = new Pose2d(
+        Units.Meters.of(5.7408),
+        Units.Meters.of(4.1828),
+        new Rotation2d(Degrees.of(180))
+      );
+      public static final Pose2d BRANCH_I = new Pose2d(
+        Units.Meters.of(5.2650),
+        Units.Meters.of(5.0293),
+        new Rotation2d(Radians.of(-2.0970))
+      );
+      public static final Pose2d BRANCH_J = new Pose2d(
+        Units.Meters.of(4.9792),
+        Units.Meters.of(5.1939),
+        new Rotation2d(Radians.of(-2.0970))
+      );
+      public static final Pose2d BRANCH_K = new Pose2d(
+        Units.Meters.of(4.0037),
+        Units.Meters.of(5.1982),
+        new Rotation2d(Radians.of(-1.0505))
+      );
+      public static final Pose2d BRANCH_L = new Pose2d(
+        Units.Meters.of(3.7203),
+        Units.Meters.of(5.0299),
+        new Rotation2d(Radians.of(-1.0505))
+      );
+      public static final Pose2d CENTER = new Pose2d(
+        Units.Meters.of(4.4894),
+        Units.Meters.of(4.0135),
+        new Rotation2d(Degrees.of(0))
+      );
+      public static final Distance DIAMETER = Units.Inches.of(75.506);
+    }
+  }
+
+  /**
+   * Class for numbers like the robots weight, its dimensions, bumper thickness, and anything else that should be written down about the robot.
+   */
+  public static class ROBOT_CONFIGURATION {
+
+    public static final double WEIGHT_POUNDS = 51.5;
+
+    public static final Distance FRAME_LENGTH = Units.Inches.of(26);
+    public static final Distance FRAME_WIDTH = Units.Inches.of(26);
+
+    public static final Distance BUMPER_THICKNESS = Units.Inches.of(3);
+
+    public static final Distance FULL_LENGTH = FRAME_LENGTH.plus(
+      BUMPER_THICKNESS.times(2)
+    );
+    public static final Distance FULL_WIDTH = FRAME_WIDTH.plus(
+      BUMPER_THICKNESS.times(2)
+    );
+
+    /**
+     * The distance that for any given object, if it is closer to the robot than this, it is hitting it, or will hit it when the robot turns.
+     * Do not let anything get inside this.
+     */
+    public static final Distance BOUNDARY = Units.Inches.of(
+      Math.sqrt(
+        Math.pow(FRAME_LENGTH.in(Inches), 2) +
+        Math.pow(FRAME_WIDTH.in(Inches), 2)
+      ) /
+      2
+    );
   }
 }
