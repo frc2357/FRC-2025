@@ -17,13 +17,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.controls.controllers.ButtonboardController.ReefSide;
 import frc.robot.util.Utility;
 import java.util.function.Function;
 
 public class DriveToReef extends Command {
 
-  public enum DirectionOfTravel {
+  private enum DirectionOfTravel {
     X(true),
     Y(false);
 
@@ -34,22 +33,22 @@ public class DriveToReef extends Command {
     }
   }
 
-  public Pose2d m_currPose;
+  private Pose2d m_currPose;
 
-  public Pose2d m_currentTarget;
-  public Pose2d m_lastTarget;
+  private Pose2d m_currentTarget;
+  private Pose2d m_lastTarget;
 
-  public Pose2d m_finalGoal;
+  private Pose2d m_finalGoal;
 
-  public DriveToPose m_currDriveToPose;
+  private DriveToPose m_currDriveToPose;
 
-  public Twist2d m_collisionAvoidanceTwist = new Twist2d(
+  private Twist2d m_collisionAvoidanceTwist = new Twist2d(
     TWIST_X_METERS_DEFAULT,
     TWIST_Y_METERS_DEFAULT,
     TWIST_ROTO_RADIANS_DEFAULT
   );
 
-  public boolean m_isDriverControlling;
+  private boolean m_isDriverControlling;
 
   public DriveToReef() {}
 
@@ -73,7 +72,7 @@ public class DriveToReef extends Command {
     return isAtTarget(m_finalGoal, m_currPose);
   }
 
-  public boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
+  private boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
     if (
       !Utility.isWithinTolerance(
         targetPose.getX(),
@@ -113,15 +112,15 @@ public class DriveToReef extends Command {
     };
   }
 
-  public Pose2d getPoseDelta(Pose2d origin, Pose2d delta) {
+  private Pose2d getPoseDelta(Pose2d origin, Pose2d delta) {
     return delta.relativeTo(origin);
   }
 
-  public boolean isFinalGoal(Pose2d targetPose) {
+  private boolean isFinalGoal(Pose2d targetPose) {
     return targetPose.equals(m_finalGoal);
   }
 
-  public boolean willHitReef(
+  private boolean willHitReef(
     Pose2d currPose,
     Pose2d targetPose,
     double... interpolationPercentages
@@ -152,7 +151,7 @@ public class DriveToReef extends Command {
    * @param currPose Your pose, so we know where you are and can bound correctly
    * @return Whether or not your currPose is beyond your currTarget in the x or y axis
    */
-  public boolean isBeyondTarget(
+  private boolean isBeyondTarget(
     Pose2d currTarget,
     Pose2d lastTarget,
     Pose2d currPose
@@ -186,7 +185,7 @@ public class DriveToReef extends Command {
    * @param currPose The robots current pose
    * @return A pose to use a target that shouldnt hit the reef.
    */
-  public Pose2d collisionAvoidanceTarget(
+  private Pose2d collisionAvoidanceTarget(
     Pose2d currTarget,
     Pose2d lastTarget,
     Pose2d currPose
@@ -258,11 +257,11 @@ public class DriveToReef extends Command {
     return safeTarget;
   }
 
-  public void setFinalGoal(Pose2d newGoal) {
+  private void setFinalGoal(Pose2d newGoal) {
     m_finalGoal = newGoal;
   }
 
-  public Pose2d findNewTarget(
+  private Pose2d findNewTarget(
     Pose2d currTarget,
     Pose2d lastTarget,
     Pose2d currPose
@@ -291,7 +290,7 @@ public class DriveToReef extends Command {
     return newTarget;
   }
 
-  public DirectionOfTravel findMainDirectionOfTravel(
+  private DirectionOfTravel findMainDirectionOfTravel(
     Pose2d currPose,
     Pose2d finalGoal
   ) {
@@ -301,7 +300,7 @@ public class DriveToReef extends Command {
       : DirectionOfTravel.Y;
   }
 
-  public Pose2d pinPoseToReef(
+  private Pose2d pinPoseToReef(
     Pose2d poseToPin,
     DirectionOfTravel pinnedDirection
   ) {
