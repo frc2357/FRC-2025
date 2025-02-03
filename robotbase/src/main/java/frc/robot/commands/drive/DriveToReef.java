@@ -48,8 +48,6 @@ public class DriveToReef extends Command {
     TWIST_ROTO_RADIANS_DEFAULT
   );
 
-  private boolean m_isDriverControlling;
-
   public DriveToReef() {}
 
   @Override
@@ -116,10 +114,6 @@ public class DriveToReef extends Command {
     return delta.relativeTo(origin);
   }
 
-  private boolean isFinalGoal(Pose2d targetPose) {
-    return targetPose.equals(m_finalGoal);
-  }
-
   private boolean willHitReef(
     Pose2d currPose,
     Pose2d targetPose,
@@ -179,98 +173,11 @@ public class DriveToReef extends Command {
     return false;
   }
 
-  /**
-   * Takes a pose, and returns a pose that should NOT hit the reef. most likely.
-   * @param currTarget The robots current target
-   * @param lastTarget The robots last target
-   * @param currPose The robots current pose
-   * @return A pose to use a target that shouldnt hit the reef.
-   */
-  private Pose2d collisionAvoidanceTarget(
-    Pose2d currTarget,
-    Pose2d lastTarget,
-    Pose2d currPose
-  ) {
-    Pose2d safeTarget = currTarget;
-    Pose2d currPoseToCurrTarDelta = getPoseDelta(currPose, currTarget);
-
-    // find which direction we want to go (pos or neg in x/y axes)
-    // 1 means we want to go UP in value, -1 means we want to go DOWN in value.
-    double xDirectionOfTravelMult = currPoseToCurrTarDelta.getX() >= 0 ? 1 : -1;
-    double yDirectionOfTravelMult = currPoseToCurrTarDelta.getY() >= 0 ? 1 : -1;
-    // figure out whether or not were going to hit the reef
-    if (
-      willHitReef(
-        currPose,
-        currTarget,
-        COLLISION_AVOIDANCE.DEFAULT_INTERPOLATION_PERCENTAGES
-      )
-
-    ) {
-      m_collisionAvoidanceTwist.dx =
-        COLLISION_AVOIDANCE.TWIST_X_METERS_DEFAULT * xDirectionOfTravelMult;
-      m_collisionAvoidanceTwist.dy =
-        COLLISION_AVOIDANCE.TWIST_Y_METERS_DEFAULT * yDirectionOfTravelMult;
-      m_collisionAvoidanceTwist.dtheta =
-        COLLISION_AVOIDANCE.TWIST_ROTO_RADIANS_DEFAULT;
-      int attemptsTaken = 0;
-      for (
-        attemptsTaken = 0;
-        attemptsTaken < COLLISION_AVOIDANCE.ATTEMPTS;
-        attemptsTaken++
-      ) {
-        safeTarget = safeTarget.exp(m_collisionAvoidanceTwist);
-        if (
-          !willHitReef(currPose, safeTarget, DEFAULT_INTERPOLATION_PERCENTAGES)
-        ) {
-          break;
-        }
-        m_collisionAvoidanceTwist.dx *= 1.1;
-        m_collisionAvoidanceTwist.dy *= 1.1;
-      }
-      // make sure that the safeTarget is not past the final goal
-      if (isBeyondTarget(m_finalGoal, currTarget, safeTarget)) {
-        Pose2d safeTarToFinalGoalDelta = getPoseDelta(safeTarget, m_finalGoal);
-
-        if (
-          safeTarToFinalGoalDelta.getX() +
-            FINAL_APPROACH_DISTANCE.times(2 / 3).in(Meters) <
-          0
-        ) {
-
-          safeTarget = new Pose2d(
-            m_finalGoal.getX(),
-            safeTarget.getY(),
-            safeTarget.getRotation()
-          );
-        }
-        if (
-          safeTarToFinalGoalDelta.getY() +
-            FINAL_APPROACH_DISTANCE.times(2 / 3).in(Meters) <
-          0
-        ) {
-
-          safeTarget = new Pose2d(
-            safeTarget.getX(),
-            m_finalGoal.getY(),
-            safeTarget.getRotation()
-          );
-        }
-      }
-    }
-    return safeTarget;
-  }
-
-  private void setFinalGoal(Pose2d newGoal) {
-    m_finalGoal = newGoal;
-  }
-
   private Pose2d findNewTarget(
     Pose2d currTarget,
     Pose2d lastTarget,
     Pose2d currPose
   ) {
-
     Pose2d currPoseToFinalGoalDelta = getPoseDelta(currPose, m_finalGoal);
     // if were close to the final goal, just make the target the goal and send it
     if (
@@ -308,10 +215,7 @@ public class DriveToReef extends Command {
   private Pose2d pinPoseToReef(
     Pose2d poseToPin,
     DirectionOfTravel pinnedDirection
-  ) {
-    // we find c by getting how far away the center of the reef is relative to the pose
-    double c = Utility.findDistanceBetweenPoses(poseToPin, REEF.CENTER);
-
+  ) { // c^2 - a^2 = b^2 | c^2 - b^2 = a^2 | a = x, b = y, change whatever is NOT the main direction of travel
     Pose2d poseToCenterDelta = getPoseDelta(poseToPin, REEF.CENTER);
     double a = poseToCenterDelta.getX();
     double b = poseToCenterDelta.getY();
