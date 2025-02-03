@@ -12,17 +12,19 @@ import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.controls.controllers.ButtonboardController.ReefSide;
 import frc.robot.controls.controllers.ButtonboardController.ScoringDirection;
+import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.Robot;
 
 public class ButtonboardController extends GenericHID implements Sendable {
 
   public enum ReefSide {
-    None(0),
-    A(1),
-    B(2),
-    C(3),
-    D(4),
-    E(5),
-    F(6);
+    None(-1),
+    A(XboxController.Button.kA.value),
+    B(XboxController.Button.kB.value),
+    C(XboxController.Button.kX.value),
+    D(XboxController.Button.kY.value),
+    E(XboxController.Button.kBack.value),
+    F(XboxController.Button.kStart.value);
 
     public final int buttonValue;
 
@@ -32,23 +34,23 @@ public class ButtonboardController extends GenericHID implements Sendable {
   }
 
   public enum ScoringLevel {
-    None(0),
-    L4(7),
-    L3(8),
-    L2(9),
-    L1(10);
+    None(-1),
+    L4(0),
+    L3(90),
+    L2(180),
+    L1(270);
 
-    public final int buttonValue;
+    public final int povValue;
 
-    ScoringLevel(int buttonValue) {
-      this.buttonValue = buttonValue;
+    ScoringLevel(int povValue) {
+      this.povValue = povValue;
     }
   }
 
   public enum ScoringDirection {
-    None(0),
-    Left(11),
-    Right(12);
+    None(-1),
+    Left(XboxController.Button.kLeftBumper.value),
+    Right(XboxController.Button.kRightBumper.value);
 
     public final int buttonValue;
 
@@ -63,7 +65,7 @@ public class ButtonboardController extends GenericHID implements Sendable {
 
   public ReefSide getSelectedReefSide() {
     for (ReefSide side : ReefSide.values()) {
-      if (side.buttonValue != 0 && getRawButton(side.buttonValue)) {
+      if (side.buttonValue != -1 && getRawButton(side.buttonValue)) {
         return side;
       }
     }
@@ -72,7 +74,7 @@ public class ButtonboardController extends GenericHID implements Sendable {
 
   public ScoringLevel getSelectedScoringLevel() {
     for (ScoringLevel lvl : ScoringLevel.values()) {
-      if (lvl.buttonValue != 0 && getRawButton(lvl.buttonValue)) {
+      if (lvl.povValue != -1 && lvl.povValue == getPOV()) {
         return lvl;
       }
     }
@@ -81,7 +83,7 @@ public class ButtonboardController extends GenericHID implements Sendable {
 
   public ScoringDirection getSelectedScoringDirection() {
     for (ScoringDirection dir : ScoringDirection.values()) {
-      if (dir.buttonValue != 0 && getRawButton(dir.buttonValue)) {
+      if (dir.buttonValue != -1 && getRawButton(dir.buttonValue)) {
         return dir;
       }
     }

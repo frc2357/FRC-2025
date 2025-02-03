@@ -103,7 +103,7 @@ public class DriveToReef extends Command {
     return true;
   }
 
-  public Function<Pose2d, Pose2d> getTargetFunction() {
+  private Function<Pose2d, Pose2d> getTargetFunction() {
     return new Function<Pose2d, Pose2d>() {
       @Override
       public Pose2d apply(Pose2d currPose) {
@@ -132,6 +132,7 @@ public class DriveToReef extends Command {
         interpolatedPose,
         REEF.CENTER
       );
+
       if (
         Math.abs(
           Utility.findDistanceBetweenPoses(interpolatedPose, REEF.CENTER)
@@ -204,6 +205,7 @@ public class DriveToReef extends Command {
         currTarget,
         COLLISION_AVOIDANCE.DEFAULT_INTERPOLATION_PERCENTAGES
       )
+
     ) {
       m_collisionAvoidanceTwist.dx =
         COLLISION_AVOIDANCE.TWIST_X_METERS_DEFAULT * xDirectionOfTravelMult;
@@ -235,6 +237,7 @@ public class DriveToReef extends Command {
             FINAL_APPROACH_DISTANCE.times(2 / 3).in(Meters) <
           0
         ) {
+
           safeTarget = new Pose2d(
             m_finalGoal.getX(),
             safeTarget.getY(),
@@ -246,6 +249,7 @@ public class DriveToReef extends Command {
             FINAL_APPROACH_DISTANCE.times(2 / 3).in(Meters) <
           0
         ) {
+
           safeTarget = new Pose2d(
             safeTarget.getX(),
             m_finalGoal.getY(),
@@ -266,6 +270,7 @@ public class DriveToReef extends Command {
     Pose2d lastTarget,
     Pose2d currPose
   ) {
+
     Pose2d currPoseToFinalGoalDelta = getPoseDelta(currPose, m_finalGoal);
     // if were close to the final goal, just make the target the goal and send it
     if (
