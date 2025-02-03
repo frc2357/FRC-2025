@@ -2,36 +2,54 @@ package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.Constants.DRIVE_TO_POSE.*;
-import static frc.robot.Constants.FIELD.REEF.*;
+import static frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE.*;
+import static frc.robot.Constants.DRIVE_TO_POSE.FINAL_APPROACH_DISTANCE;
+import static frc.robot.Constants.DRIVE_TO_POSE.INTERPLOATION_PERCENT;
+import static frc.robot.Constants.DRIVE_TO_POSE.ROTATION_TOLERANCE;
+import static frc.robot.Constants.DRIVE_TO_POSE.X_TOLERANCE;
+import static frc.robot.Constants.DRIVE_TO_POSE.Y_TOLERANCE;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.controls.controllers.ButtonboardController.ReefSide;
-import frc.robot.controls.controllers.ButtonboardController.ScoringDirection;
 import frc.robot.util.Utility;
 import java.util.function.Function;
 
 public class DriveToReef extends Command {
 
-  private Pose2d m_currPose;
+  public enum DirectionOfTravel {
+    X(true),
+    Y(false);
 
-  private Pose2d m_currentTarget;
-  private Pose2d m_lastTarget;
+    public final boolean dirOfTravel;
 
-  private Pose2d m_finalGoal;
+    DirectionOfTravel(boolean dirOfTravel) {
+      this.dirOfTravel = dirOfTravel;
+    }
+  }
 
-  private DriveToPose m_currDriveToPose;
+  public Pose2d m_currPose;
 
-  private Twist2d m_collisionAvoidanceTwist = new Twist2d();
+  public Pose2d m_currentTarget;
+  public Pose2d m_lastTarget;
 
-  private boolean m_isDriverControlling;
+  public Pose2d m_finalGoal;
+
+  public DriveToPose m_currDriveToPose;
+
+  public Twist2d m_collisionAvoidanceTwist = new Twist2d(
+    TWIST_X_METERS_DEFAULT,
+    TWIST_Y_METERS_DEFAULT,
+    TWIST_ROTO_RADIANS_DEFAULT
+  );
+
+  public boolean m_isDriverControlling;
 
   public DriveToReef() {}
 
@@ -55,7 +73,7 @@ public class DriveToReef extends Command {
     return isAtTarget(m_finalGoal, m_currPose);
   }
 
-  private boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
+  public boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
     if (
       !Utility.isWithinTolerance(
         targetPose.getX(),
@@ -86,7 +104,7 @@ public class DriveToReef extends Command {
     return true;
   }
 
-  private Function<Pose2d, Pose2d> getTargetFunction() {
+  public Function<Pose2d, Pose2d> getTargetFunction() {
     return new Function<Pose2d, Pose2d>() {
       @Override
       public Pose2d apply(Pose2d currPose) {
@@ -95,23 +113,26 @@ public class DriveToReef extends Command {
     };
   }
 
-  private Pose2d getPoseDelta(Pose2d intial, Pose2d last) {
-    return last.relativeTo(intial);
+  public Pose2d getPoseDelta(Pose2d origin, Pose2d delta) {
+    return delta.relativeTo(origin);
   }
 
-  private boolean isFinalGoal(Pose2d targetPose) {
+  public boolean isFinalGoal(Pose2d targetPose) {
     return targetPose.equals(m_finalGoal);
   }
 
-  private boolean willHitReef(
+  public boolean willHitReef(
     Pose2d currPose,
     Pose2d targetPose,
     double... interpolationPercentages
   ) {
-    Pose2d interpolatedPose = new Pose2d();
     for (double percentage : interpolationPercentages) {
-      interpolatedPose = currPose.interpolate(targetPose, percentage);
+      Pose2d interpolatedPose = currPose.interpolate(targetPose, percentage);
       // if true, collision with reef is likely, and avoidance should begin.
+      double dist = Utility.findDistanceBetweenPoses(
+        interpolatedPose,
+        REEF.CENTER
+      );
       if (
         Math.abs(
           Utility.findDistanceBetweenPoses(interpolatedPose, REEF.CENTER)
@@ -131,7 +152,7 @@ public class DriveToReef extends Command {
    * @param currPose Your pose, so we know where you are and can bound correctly
    * @return Whether or not your currPose is beyond your currTarget in the x or y axis
    */
-  private boolean isBeyondTarget(
+  public boolean isBeyondTarget(
     Pose2d currTarget,
     Pose2d lastTarget,
     Pose2d currPose
@@ -165,22 +186,25 @@ public class DriveToReef extends Command {
    * @param currPose The robots current pose
    * @return A pose to use a target that shouldnt hit the reef.
    */
-  private Pose2d collisionAvoidanceTarget(
+  public Pose2d collisionAvoidanceTarget(
     Pose2d currTarget,
     Pose2d lastTarget,
     Pose2d currPose
   ) {
     Pose2d safeTarget = currTarget;
-    Pose2d lastPoseToCurrTarDelta = getPoseDelta(currPose, currTarget);
+    Pose2d currPoseToCurrTarDelta = getPoseDelta(currPose, currTarget);
 
     // find which direction we want to go (pos or neg in x/y axes)
     // 1 means we want to go UP in value, -1 means we want to go DOWN in value.
-    double xDirectionOfTravelMult = lastPoseToCurrTarDelta.getX() >= 0 ? 1 : -1;
-    double yDirectionOfTravelMult = lastPoseToCurrTarDelta.getY() >= 0 ? 1 : -1;
+    double xDirectionOfTravelMult = currPoseToCurrTarDelta.getX() >= 0 ? 1 : -1;
+    double yDirectionOfTravelMult = currPoseToCurrTarDelta.getY() >= 0 ? 1 : -1;
     // figure out whether or not were going to hit the reef
     if (
-      willHitReef(currPose, currTarget, 0.9, 0.7, 0.5) &&
-      !isFinalGoal(currTarget)
+      willHitReef(
+        currPose,
+        currTarget,
+        COLLISION_AVOIDANCE.DEFAULT_INTERPOLATION_PERCENTAGES
+      )
     ) {
       m_collisionAvoidanceTwist.dx =
         COLLISION_AVOIDANCE.TWIST_X_METERS_DEFAULT * xDirectionOfTravelMult;
@@ -194,24 +218,35 @@ public class DriveToReef extends Command {
         attemptsTaken < COLLISION_AVOIDANCE.ATTEMPTS;
         attemptsTaken++
       ) {
-        safeTarget.exp(m_collisionAvoidanceTwist);
-        if (!willHitReef(currPose, safeTarget, INTERPLOATION_PERCENT)) {
+        safeTarget = safeTarget.exp(m_collisionAvoidanceTwist);
+        if (
+          !willHitReef(currPose, safeTarget, DEFAULT_INTERPOLATION_PERCENTAGES)
+        ) {
           break;
         }
-        m_collisionAvoidanceTwist.dx += m_collisionAvoidanceTwist.dx / 2;
-        m_collisionAvoidanceTwist.dy += m_collisionAvoidanceTwist.dy / 2;
+        m_collisionAvoidanceTwist.dx *= 1.1;
+        m_collisionAvoidanceTwist.dy *= 1.1;
       }
       // make sure that the safeTarget is not past the final goal
-      if (isBeyondTarget(safeTarget, lastTarget, m_finalGoal)) {
+      if (isBeyondTarget(m_finalGoal, currTarget, safeTarget)) {
         Pose2d safeTarToFinalGoalDelta = getPoseDelta(safeTarget, m_finalGoal);
-        if (safeTarToFinalGoalDelta.getX() < 0) {
+
+        if (
+          safeTarToFinalGoalDelta.getX() +
+            FINAL_APPROACH_DISTANCE.times(2 / 3).in(Meters) <
+          0
+        ) {
           safeTarget = new Pose2d(
             m_finalGoal.getX(),
             safeTarget.getY(),
             safeTarget.getRotation()
           );
         }
-        if (safeTarToFinalGoalDelta.getY() < 0) {
+        if (
+          safeTarToFinalGoalDelta.getY() +
+            FINAL_APPROACH_DISTANCE.times(2 / 3).in(Meters) <
+          0
+        ) {
           safeTarget = new Pose2d(
             safeTarget.getX(),
             m_finalGoal.getY(),
@@ -223,16 +258,15 @@ public class DriveToReef extends Command {
     return safeTarget;
   }
 
-  private Pose2d findNewTarget(
+  public void setFinalGoal(Pose2d newGoal) {
+    m_finalGoal = newGoal;
+  }
+
+  public Pose2d findNewTarget(
     Pose2d currTarget,
     Pose2d lastTarget,
     Pose2d currPose
   ) {
-    // if not beyond current target, keep using it
-    if (!isBeyondTarget(currTarget, lastTarget, currPose)) {
-      return collisionAvoidanceTarget(currTarget, lastTarget, currPose);
-    }
-
     Pose2d currPoseToFinalGoalDelta = getPoseDelta(currPose, m_finalGoal);
     // if were close to the final goal, just make the target the goal and send it
     if (
@@ -242,10 +276,65 @@ public class DriveToReef extends Command {
       m_currentTarget = m_finalGoal;
       return m_finalGoal; // cant use collision avoidance, would make sure we dont get that close
     }
-    // interpolate a new target, and let collision avoidance make sure we dont slam into the reef
+
+    // if not beyond current target, keep using it
+    if (!isBeyondTarget(currTarget, lastTarget, currPose)) {
+      return currTarget;
+    }
     Pose2d newTarget = currPose.interpolate(m_finalGoal, INTERPLOATION_PERCENT);
+    newTarget = pinPoseToReef(
+      newTarget,
+      findMainDirectionOfTravel(currPose, m_finalGoal)
+    );
     m_lastTarget = m_currentTarget;
     m_currentTarget = newTarget;
-    return collisionAvoidanceTarget(currTarget, lastTarget, currPose);
+    return newTarget;
+  }
+
+  public DirectionOfTravel findMainDirectionOfTravel(
+    Pose2d currPose,
+    Pose2d finalGoal
+  ) {
+    Pose2d currPoseToGoalDelta = getPoseDelta(currPose, finalGoal);
+    return currPoseToGoalDelta.getX() >= currPoseToGoalDelta.getY()
+      ? DirectionOfTravel.X
+      : DirectionOfTravel.Y;
+  }
+
+  public Pose2d pinPoseToReef(
+    Pose2d poseToPin,
+    DirectionOfTravel pinnedDirection
+  ) {
+    // we find c by getting how far away the center of the reef is relative to the pose
+    double c = Utility.findDistanceBetweenPoses(poseToPin, REEF.CENTER);
+
+    Pose2d poseToCenterDelta = getPoseDelta(poseToPin, REEF.CENTER);
+    double a = poseToCenterDelta.getX();
+    double b = poseToCenterDelta.getY();
+
+    Transform2d pinnedTransform = Transform2d.kZero;
+
+    switch (pinnedDirection) {
+      case X:
+        pinnedTransform = new Transform2d(
+          0,
+          Math.sqrt(
+            Math.pow(IDEAL_DISTANCE_FROM_REEF.in(Meters), 2) - Math.pow(a, 2)
+          ),
+          Rotation2d.kZero
+        );
+        break;
+      case Y:
+        pinnedTransform = new Transform2d(
+          0,
+          Math.sqrt(
+            Math.pow(IDEAL_DISTANCE_FROM_REEF.in(Meters), 2) - Math.pow(b, 2)
+          ),
+          Rotation2d.kZero
+        );
+        break;
+    }
+
+    return poseToPin.transformBy(pinnedTransform);
   }
 }

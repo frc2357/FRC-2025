@@ -420,6 +420,24 @@ public final class Constants {
       public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
         .plus(ROBOT_CONFIGURATION.BOUNDARY)
         .plus(COLLISION_TOLERANCE);
+
+      public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
+        .1,
+        .2,
+        .3,
+        .4,
+        .5,
+        .6,
+        .7,
+        .8,
+        .9,
+      };
+
+      /**
+       * REEF_BOUNDARY + X distance away from the center of the reef
+       */
+      public static final Distance IDEAL_DISTANCE_FROM_REEF =
+        REEF_BOUNDARY.plus(Units.Feet.of(0.4));
     }
   }
 
