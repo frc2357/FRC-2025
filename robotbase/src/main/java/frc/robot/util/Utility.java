@@ -4,8 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Distance;
 
 public class Utility {
 
@@ -42,7 +40,7 @@ public class Utility {
   }
 
   public static Transform2d poseToTransform(Pose2d pose) {
-    return new Transform2d(pose.getTranslation(), Rotation2d.kZero);
+    return new Transform2d(pose.getTranslation(), pose.getRotation());
   }
 
   /**

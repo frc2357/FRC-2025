@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE.DEFAULT_INTERPOLATION_PERCENTAGES;
 import static frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE.IDEAL_DISTANCE_FROM_REEF;
 import static frc.robot.Constants.DRIVE_TO_POSE.FINAL_APPROACH_DISTANCE;
-import static frc.robot.Constants.DRIVE_TO_POSE.INTERPLOATION_PERCENT;
+import static frc.robot.Constants.DRIVE_TO_POSE.INTERPOLATION_PERCENT;
 import static frc.robot.Constants.DRIVE_TO_POSE.ROTATION_TOLERANCE;
 import static frc.robot.Constants.DRIVE_TO_POSE.X_TOLERANCE;
 import static frc.robot.Constants.DRIVE_TO_POSE.Y_TOLERANCE;
@@ -22,14 +22,8 @@ import java.util.function.Function;
 public class DriveToReef extends Command {
 
   private enum DirectionOfTravel {
-    X(true),
-    Y(false);
-
-    private final boolean dirOfTravel;
-
-    DirectionOfTravel(boolean dirOfTravel) {
-      this.dirOfTravel = dirOfTravel;
-    }
+    X,
+    Y,
   }
 
   private Pose2d m_currPose;
@@ -119,9 +113,7 @@ public class DriveToReef extends Command {
 
       if (
         Math.abs(
-          interpolatedPose
-            .getTranslation()
-            .getDistance(REEF.CENTER.getTranslation())
+          Utility.findDistanceBetweenPoses(interpolatedPose, REEF.CENTER)
         ) <=
         COLLISION_AVOIDANCE.REEF_BOUNDARY.in(Meters)
       ) {
@@ -146,7 +138,7 @@ public class DriveToReef extends Command {
       return m_finalGoal; // cant use collision avoidance, would make sure we dont get that close
     }
 
-    Pose2d newTarget = currPose.interpolate(m_finalGoal, INTERPLOATION_PERCENT);
+    Pose2d newTarget = currPose.interpolate(m_finalGoal, INTERPOLATION_PERCENT);
     if (willHitReef(currPose, newTarget, DEFAULT_INTERPOLATION_PERCENTAGES)) {
       newTarget = pinPoseToReef(
         newTarget,
