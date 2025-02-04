@@ -31,6 +31,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralRunner;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Laterator;
+import frc.robot.util.ElasticFieldManager;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -56,8 +57,7 @@ public class Robot extends TimedRobot {
 
   public static Alliance alliance = null;
 
-  public static Field2d shooterFieldRepresentation;
-  public static Field2d swerveFieldRepresentation;
+  public static ElasticFieldManager elasticFieldManager;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -72,6 +72,8 @@ public class Robot extends TimedRobot {
     // coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
+    elasticFieldManager = new ElasticFieldManager();
+    elasticFieldManager.setupSwerveField();
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();
@@ -107,6 +109,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    elasticFieldManager.swerveFieldRep.setRobotPose(
+      swerve.getFieldRelativePose2d()
+    );
     CommandScheduler.getInstance().run();
   }
 

@@ -398,7 +398,7 @@ public final class Constants {
     public static final Distance Y_TOLERANCE = Units.Inches.of(1);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(3);
 
-    public static final double INTERPLOATION_PERCENT = 0.15;
+    public static final double INTERPLOATION_PERCENT = 0.2;
 
     public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
 

@@ -57,6 +57,7 @@ public class DriveToReef extends Command {
   @Override
   public void initialize() {
     m_lastTarget = Robot.swerve.getAllianceRelativePose2d();
+    m_currentTarget = Robot.swerve.getAllianceRelativePose2d();
     m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currDriveToPose = new DriveToPose(getTargetFunction()); // make a DriveToPose that we have control of
@@ -261,10 +262,6 @@ public class DriveToReef extends Command {
       return m_finalGoal; // cant use collision avoidance, would make sure we dont get that close
     }
 
-    // if not beyond current target, keep using it
-    if (!isBeyondTarget(currTarget, lastTarget, currPose)) {
-      return currTarget;
-    }
     Pose2d newTarget = currPose.interpolate(m_finalGoal, INTERPLOATION_PERCENT);
     if (willHitReef(currPose, newTarget, DEFAULT_INTERPOLATION_PERCENTAGES)) {
       newTarget = pinPoseToReef(

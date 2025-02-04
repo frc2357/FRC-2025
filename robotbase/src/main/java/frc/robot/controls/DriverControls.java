@@ -7,8 +7,10 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.drive.DriveToPose;
+import frc.robot.commands.drive.DriveToReef;
 
 public class DriverControls {
 
@@ -34,17 +36,11 @@ public class DriverControls {
   }
 
   public void mapControls() {
-    m_controller
-      .a()
-      .whileTrue(
-        new DriveToPose(Pose ->
-          new Pose2d(0, 0, new Rotation2d(Units.Degrees.of(0)))
-        )
-      );
+    m_controller.a().whileTrue(new DriveToReef());
 
     m_controller
       .b()
-      .onTrue(new InstantCommand(() -> Robot.swerve.resetPose(new Pose2d())));
+      .onTrue(new InstantCommand(() -> Robot.swerve.resetPose(REEF.BRANCH_C)));
 
     m_controller
       .start()
