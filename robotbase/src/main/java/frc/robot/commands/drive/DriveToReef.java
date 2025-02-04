@@ -160,17 +160,26 @@ public class DriveToReef extends Command {
       : DirectionOfTravel.Y;
   }
 
+  /**
+   * Pins the given pose to a specific distance away from the reef. The distance is specified by the IDEAL_DISTANCE_FROM_REEF constant.
+   * <p>Only changes the non-pinned axis.
+   * @param poseToPin The pose that you want to pin to the reef
+   * @param pinnedDirection The axis (X or Y) that you dont want to change. Reccomend getting this from {@link DriveToReef#getDirectionOfTravel()}
+   * @return
+   */
   private Pose2d pinPoseToReef(
     Pose2d poseToPin,
     DirectionOfTravel pinnedDirection
   ) { // c^2 - a^2 = b^2 | c^2 - b^2 = a^2 | a = x, b = y, change whatever is NOT the pinned direction
     Pose2d poseToCenterDelta = getPoseDelta(REEF.CENTER, poseToPin);
-    double a = poseToCenterDelta.getX();
-    double b = poseToCenterDelta.getY();
+    double a = poseToCenterDelta.getX(); // the side length of side a
+    double b = poseToCenterDelta.getY(); // the side length of side b
 
     // pinned pose is relative to the center of the reef
+    // this means that positive X is RIGHT, positive Y is UP, negative x is LEFT, negative y is DOWN.
     Pose2d pinnedPose = Pose2d.kZero;
-
+    // because the reef boundary is a circle, theres multiple solutions we could use, so we have to find the best one we can.
+    // we do this by pinning the pose in a specific way, dictated by the multiplier we apply to the pinned pose.
     Pose2d upRightPinned = Pose2d.kZero;
     Pose2d downLeftpinned = Pose2d.kZero;
     double upRightDist = 0;
@@ -192,6 +201,7 @@ public class DriveToReef extends Command {
           -1,
           Rotation2d.kZero
         );
+        // to try and find the best solution we can, we get two opposite solutions, and we figure out which one is closer to the goal, and use it.
         upRightDist = Math.abs(
           Utility.findDistanceBetweenPoses(pinnedPose, upRightPinned)
         );
@@ -218,6 +228,7 @@ public class DriveToReef extends Command {
           b,
           Rotation2d.kZero
         );
+        // to try and find the best solution we can, we get two opposite solutions, and we figure out which one is closer to the goal, and use it.
         upRightDist = Math.abs(
           Utility.findDistanceBetweenPoses(pinnedPose, upRightPinned)
         );
@@ -229,9 +240,10 @@ public class DriveToReef extends Command {
           : downLeftpinned;
         break;
     }
+    // the pinned pose is relative to REEF.CENTER, so if we add that pose to it, it moves the origin back to blue origin, making it useable.
     Pose2d finalPose = pinnedPose.plus(Utility.poseToTransform(REEF.CENTER));
-    // If the poseToPin is close to being pinned, the changed coord will be NaN.
-    // This is the easiest way to make sure we dont give a NaN
+    // If the poseToPin is close to being pinned, the changed coord will be NaN due to the Math functions we call.
+    // This is the easiest way to make sure we dont give back a NaN without doing preemptive calculations
     if (Double.isNaN(finalPose.getX())) {
       finalPose = new Pose2d(
         poseToPin.getX(),
