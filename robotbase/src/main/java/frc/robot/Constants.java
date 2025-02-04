@@ -404,12 +404,6 @@ public final class Constants {
 
     public static final class COLLISION_AVOIDANCE {
 
-      public static final int ATTEMPTS = 20;
-
-      public static final double TWIST_X_METERS_DEFAULT = 0.05;
-      public static final double TWIST_Y_METERS_DEFAULT = 0.05;
-      public static final double TWIST_ROTO_RADIANS_DEFAULT = 0;
-
       /**
        * How far away we want to be from things that we could hit.
        */
