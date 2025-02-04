@@ -388,17 +388,11 @@ public final class Constants {
     public static final Distance Y_TOLERANCE = Units.Inches.of(1);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(3);
 
-    public static final double INTERPLOATION_PERCENT = 0.15;
+    public static final double INTERPOLATION_PERCENT = 0.2;
 
     public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
 
     public static final class COLLISION_AVOIDANCE {
-
-      public static final int ATTEMPTS = 20;
-
-      public static final double TWIST_X_METERS_DEFAULT = 0.05;
-      public static final double TWIST_Y_METERS_DEFAULT = 0.05;
-      public static final double TWIST_ROTO_RADIANS_DEFAULT = 0;
 
       /**
        * How far away we want to be from things that we could hit.
@@ -411,6 +405,24 @@ public final class Constants {
       public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
         .plus(ROBOT_CONFIGURATION.BOUNDARY)
         .plus(COLLISION_TOLERANCE);
+
+      public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
+        .1,
+        .2,
+        .3,
+        .4,
+        .5,
+        .6,
+        .7,
+        .8,
+        .9,
+      };
+
+      /**
+       * REEF_BOUNDARY + X distance away from the center of the reef
+       */
+      public static final Distance IDEAL_DISTANCE_FROM_REEF =
+        REEF_BOUNDARY.plus(Units.Feet.of(0.4));
     }
   }
 
