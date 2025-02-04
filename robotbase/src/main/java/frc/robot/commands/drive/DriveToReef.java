@@ -13,11 +13,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.wpilibj.DSControlWord;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.util.Utility;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 
 public class DriveToReef extends Command {
@@ -26,7 +30,7 @@ public class DriveToReef extends Command {
     X(true),
     Y(false);
 
-    public final boolean dirOfTravel;
+    private final boolean dirOfTravel;
 
     DirectionOfTravel(boolean dirOfTravel) {
       this.dirOfTravel = dirOfTravel;
@@ -139,6 +143,75 @@ public class DriveToReef extends Command {
     return false;
   }
 
+  private boolean isFinalGoal(Pose2d targetPose) {
+    return targetPose.equals(m_finalGoal);
+  }
+
+  /**
+   * Takes a pose, and returns a pose that should NOT hit the reef. most likely.
+   * @param currTarget The robots current target
+   * @param lastTarget The robots last target
+   * @param currPose The robots current pose
+   * @return A pose to use a target that shouldnt hit the reef.
+   */
+  private Pose2d collisionAvoidanceTarget(
+    Pose2d currTarget,
+    Pose2d lastTarget,
+    Pose2d currPose
+  ) {
+    Pose2d safeTarget = currTarget;
+    Pose2d lastPoseToCurrTarDelta = getPoseDelta(currPose, currTarget);
+
+    // find which direction we want to go (pos or neg in x/y axes)
+    // 1 means we want to go UP in value, -1 means we want to go DOWN in value.
+    double xDirectionOfTravelMult = lastPoseToCurrTarDelta.getX() >= 0 ? 1 : -1;
+    double yDirectionOfTravelMult = lastPoseToCurrTarDelta.getY() >= 0 ? 1 : -1;
+    // figure out whether or not were going to hit the reef
+    if (
+      willHitReef(currPose, currTarget, 0.9, 0.7, 0.5) &&
+      !isFinalGoal(currTarget)
+    ) {
+      m_collisionAvoidanceTwist.dx =
+        COLLISION_AVOIDANCE.TWIST_X_METERS_DEFAULT * xDirectionOfTravelMult;
+      m_collisionAvoidanceTwist.dy =
+        COLLISION_AVOIDANCE.TWIST_Y_METERS_DEFAULT * yDirectionOfTravelMult;
+      m_collisionAvoidanceTwist.dtheta =
+        COLLISION_AVOIDANCE.TWIST_ROTO_RADIANS_DEFAULT;
+      int attemptsTaken = 0;
+      for (
+        attemptsTaken = 0;
+        attemptsTaken < COLLISION_AVOIDANCE.ATTEMPTS;
+        attemptsTaken++
+      ) {
+        safeTarget.exp(m_collisionAvoidanceTwist);
+        if (!willHitReef(currPose, safeTarget, INTERPLOATION_PERCENT)) {
+          break;
+        }
+        m_collisionAvoidanceTwist.dx += m_collisionAvoidanceTwist.dx / 2;
+        m_collisionAvoidanceTwist.dy += m_collisionAvoidanceTwist.dy / 2;
+      }
+      // make sure that the safeTarget is not past the final goal
+      if (isBeyondTarget(safeTarget, lastTarget, m_finalGoal)) {
+        Pose2d safeTarToFinalGoalDelta = getPoseDelta(safeTarget, m_finalGoal);
+        if (safeTarToFinalGoalDelta.getX() < 0) {
+          safeTarget = new Pose2d(
+            m_finalGoal.getX(),
+            safeTarget.getY(),
+            safeTarget.getRotation()
+          );
+        }
+        if (safeTarToFinalGoalDelta.getY() < 0) {
+          safeTarget = new Pose2d(
+            safeTarget.getX(),
+            m_finalGoal.getY(),
+            safeTarget.getRotation()
+          );
+        }
+      }
+    }
+    return safeTarget;
+  }
+
   /**
    * Returns whether or not your current pose is beyond your current target
    * @param currTarget Used to determine where you want to go
@@ -193,10 +266,12 @@ public class DriveToReef extends Command {
       return currTarget;
     }
     Pose2d newTarget = currPose.interpolate(m_finalGoal, INTERPLOATION_PERCENT);
-    newTarget = pinPoseToReef(
-      newTarget,
-      findMainDirectionOfTravel(currPose, m_finalGoal)
-    );
+    if (willHitReef(currPose, newTarget, DEFAULT_INTERPOLATION_PERCENTAGES)) {
+      newTarget = pinPoseToReef(
+        newTarget,
+        findMainDirectionOfTravel(currPose, m_finalGoal)
+      );
+    }
     m_lastTarget = m_currentTarget;
     m_currentTarget = newTarget;
     return newTarget;
@@ -215,34 +290,93 @@ public class DriveToReef extends Command {
   private Pose2d pinPoseToReef(
     Pose2d poseToPin,
     DirectionOfTravel pinnedDirection
-  ) { // c^2 - a^2 = b^2 | c^2 - b^2 = a^2 | a = x, b = y, change whatever is NOT the main direction of travel
-    Pose2d poseToCenterDelta = getPoseDelta(poseToPin, REEF.CENTER);
+  ) { // c^2 - a^2 = b^2 | c^2 - b^2 = a^2 | a = x, b = y, change whatever is NOT the pinned direction
+    Pose2d poseToCenterDelta = getPoseDelta(REEF.CENTER, poseToPin);
     double a = poseToCenterDelta.getX();
     double b = poseToCenterDelta.getY();
 
-    Transform2d pinnedTransform = Transform2d.kZero;
+    // pinned pose is relative to the center of the reef
+    Pose2d pinnedPose = Pose2d.kZero;
 
+    Pose2d upRightPinned = Pose2d.kZero;
+    Pose2d downLeftpinned = Pose2d.kZero;
+    double upRightDist = 0;
+    double downLeftDist = 0;
     switch (pinnedDirection) {
       case X:
-        pinnedTransform = new Transform2d(
-          0,
+        upRightPinned = new Pose2d(
+          a,
           Math.sqrt(
             Math.pow(IDEAL_DISTANCE_FROM_REEF.in(Meters), 2) - Math.pow(a, 2)
           ),
           Rotation2d.kZero
         );
+        downLeftpinned = new Pose2d(
+          a,
+          Math.sqrt(
+            Math.pow(IDEAL_DISTANCE_FROM_REEF.in(Meters), 2) - Math.pow(a, 2)
+          ) *
+          -1,
+          Rotation2d.kZero
+        );
+        upRightDist = Math.abs(
+          Utility.findDistanceBetweenPoses(pinnedPose, upRightPinned)
+        );
+        downLeftDist = Math.abs(
+          Utility.findDistanceBetweenPoses(pinnedPose, downLeftpinned)
+        );
+        pinnedPose = upRightDist < downLeftDist
+          ? upRightPinned
+          : downLeftpinned;
         break;
       case Y:
-        pinnedTransform = new Transform2d(
-          0,
+        upRightPinned = new Pose2d(
           Math.sqrt(
             Math.pow(IDEAL_DISTANCE_FROM_REEF.in(Meters), 2) - Math.pow(b, 2)
           ),
+          b,
           Rotation2d.kZero
         );
+        downLeftpinned = new Pose2d(
+          Math.sqrt(
+            Math.pow(IDEAL_DISTANCE_FROM_REEF.in(Meters), 2) - Math.pow(b, 2)
+          ) *
+          -1,
+          b,
+          Rotation2d.kZero
+        );
+        upRightDist = Math.abs(
+          Utility.findDistanceBetweenPoses(pinnedPose, upRightPinned)
+        );
+        downLeftDist = Math.abs(
+          Utility.findDistanceBetweenPoses(pinnedPose, downLeftpinned)
+        );
+        pinnedPose = upRightDist < downLeftDist
+          ? upRightPinned
+          : downLeftpinned;
         break;
     }
+    Pose2d finalPose = pinnedPose.plus(Utility.poseToTransform(REEF.CENTER));
+    // If the poseToPin is close to being pinned, the changed coord will be NaN.
+    // This is the easiest way to make sure we dont give a NaN
+    if (Double.isNaN(finalPose.getX())) {
+      finalPose = new Pose2d(
+        poseToPin.getX(),
+        finalPose.getY(),
+        poseToPin.getRotation()
+      );
+    }
+    if (Double.isNaN(finalPose.getY())) {
+      finalPose = new Pose2d(
+        finalPose.getX(),
+        poseToPin.getY(),
+        poseToPin.getRotation()
+      );
+    }
+    return finalPose;
+  }
 
-    return poseToPin.transformBy(pinnedTransform);
+  private void setFinalGoal(Pose2d goal) {
+    m_finalGoal = goal;
   }
 }
