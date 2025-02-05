@@ -14,7 +14,6 @@ import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.Utility;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class DriveToPose extends Command {
 

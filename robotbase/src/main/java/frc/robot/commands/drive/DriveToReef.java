@@ -3,18 +3,13 @@ package frc.robot.commands.drive;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.DRIVE_TO_POSE.*;
-import static frc.robot.Constants.FIELD.REEF.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.controls.controllers.ButtonboardController.ReefSide;
-import frc.robot.controls.controllers.ButtonboardController.ScoringDirection;
 import frc.robot.util.Utility;
 import java.util.function.Function;
 
