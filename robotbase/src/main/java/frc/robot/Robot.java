@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
-import frc.robot.commands.drive.DriveSetBrake;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
