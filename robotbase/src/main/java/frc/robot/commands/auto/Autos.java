@@ -57,12 +57,12 @@ public class Autos {
   // This is an example of how you make an auto. it must be in a function, in this file, which returns an AutoRoutine object.
   public AutoRoutine robotRelativeTest() {
     // This is how you make an auto routine. The name should be essentially the same as the name of the function it is in.
-    AutoRoutine routine = AUTO_FACTORY.newRoutine("robotRelativeTest");
+    AutoRoutine routine = AUTO_FACTORY.newRoutine("RobotRelativeTest");
 
     // This is how you make a trajectory to put into the AutoRoutine. The trajectoryName is the name of the file in Choreo.
     // Any deviation from that name will result in the file not being found.
     AutoTrajectory robotRelativeTestTraj = routine.trajectory(
-      "robotRelativeTest"
+      "RobotRelativeTest"
     );
 
     // This is how you reset the odometry and make the routine use a trajectory. This is a veyr regular thing that you will have to do.
@@ -74,7 +74,7 @@ public class Autos {
         // Commands.sequence() lets us sequence commands to run, letting us run multiple commands per trigger.
         Commands.sequence(
           // This command resets the odometry, and it MUST be run on the beginning of auto, or very bad things will happen.
-          resetOdometryCommand("CubeTestPath"),
+          resetOdometryCommand("RobotRelativeTest"),
           // This runs the trajectory that was loaded earlier. This is needed to make the AutoRoutine actually run the trajectory, instead of doing nothing.
           robotRelativeTestTraj.cmd()
         )
