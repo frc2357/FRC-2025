@@ -16,7 +16,9 @@ public class AutoChooserManager {
   // The map of auto routines that will show up on the auto command chooser.
   private static Map<String, AutoRoutine> m_autoRoutinesToBind = Map.of(
     "Cube test path",
-    Robot.autos.cubeTestPath()
+    Robot.autos.cubeTestPath(),
+    "Robot Relative Test",
+    Robot.autos.robotRelativeTest()
   );
 
   private static AutoChooser m_autoChooser;
