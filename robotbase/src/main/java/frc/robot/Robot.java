@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -24,6 +25,7 @@ import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.ButtonboardController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.networkTables.AutoChooserManager;
+import frc.robot.networkTables.SignalLoggerManager;
 import frc.robot.networkTables.SysIdChooser;
 import frc.robot.subsystems.AlgaePivot;
 import frc.robot.subsystems.AlgaeRunner;
@@ -56,6 +58,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
   private AutoChooserManager m_autoChooserManager;
+  private SignalLoggerManager m_SignalLoggerManager;
 
   @SuppressWarnings("unused")
   private SysIdChooser m_sysIdChooser;
@@ -87,9 +90,11 @@ public class Robot extends TimedRobot {
     // Define network table tools
     m_autoChooserManager = new AutoChooserManager();
     m_sysIdChooser = new SysIdChooser();
+    m_SignalLoggerManager = new SignalLoggerManager();
 
     SmartDashboard.putData("Buttonboard", buttonboard);
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
+    SmartDashboard.putData("Signal Logger", m_SignalLoggerManager);
 
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
