@@ -255,6 +255,10 @@ public final class Constants {
         (int) MOTOR_FREE_LIMIT.in(Units.Amps)
       )
       .openLoopRampRate(RAMP_RATE);
+
+    public static final double ALGAE_INTAKE_SPEED = 0;
+
+    public static final double ALGAE_EJECTOR_SPEED = 0;
   }
 
   public static final class ALGAE_PIVOT {
@@ -308,6 +312,8 @@ public final class Constants {
 
     public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
       LEFT_MOTOR_CONFIG.absoluteEncoder;
+
+    public static final Angle ALGAE_INTAKE_ANGLE = Units.Degrees.of(0);
   }
 
   public static final class CUSTOM_UNITS {
