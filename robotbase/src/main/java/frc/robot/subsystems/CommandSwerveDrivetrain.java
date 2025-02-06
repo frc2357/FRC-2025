@@ -324,7 +324,6 @@ public class CommandSwerveDrivetrain
   }
 
   public void followChoreoPath(SwerveSample sample) {
-    System.out.println("Following path");
     Pose2d pose = getFieldRelativePose2d();
     CHOREO.ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -373,7 +372,6 @@ public class CommandSwerveDrivetrain
    * @param poseToSet The pose it will set.
    */
   public void setFieldRelativePose2d(Pose2d poseToSet) {
-    System.out.println("Setting poise");
     super.resetPose(poseToSet);
   }
 
