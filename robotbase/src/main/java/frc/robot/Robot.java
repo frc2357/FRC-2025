@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.SWERVE;
-import frc.robot.commands.auto.Autos;
+import frc.robot.commands.auto.AutoBase;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
@@ -40,6 +40,7 @@ public class Robot extends TimedRobot {
 
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
+  private static AutoChooserManager autoChooserManager;
 
   public static CommandSwerveDrivetrain swerve;
   public static Elevator elevator;
@@ -47,9 +48,6 @@ public class Robot extends TimedRobot {
   public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
-
-  public static AutoChooserManager autoChooserManager;
-  public static Autos autos;
   public static DriverControls driverControls;
   public static ButtonboardController buttonboard;
 
@@ -72,7 +70,6 @@ public class Robot extends TimedRobot {
     // algaeRunner = new AlgaeRunner();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
 
-    autos = new Autos();
     autoChooserManager = new AutoChooserManager();
 
     buttonboard = new ButtonboardController(
