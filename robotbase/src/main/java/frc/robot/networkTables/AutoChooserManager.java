@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.networkTables;
 
 import choreo.auto.AutoChooser;
 import edu.wpi.first.networktables.NetworkTableInstance;

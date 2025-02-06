@@ -23,6 +23,7 @@ import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.ButtonboardController;
 import frc.robot.generated.TunerConstants;
+import frc.robot.networkTables.AutoChooserManager;
 import frc.robot.networkTables.SysIdChooser;
 import frc.robot.subsystems.AlgaePivot;
 import frc.robot.subsystems.AlgaeRunner;
@@ -55,6 +56,8 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
   private AutoChooserManager m_autoChooserManager;
+
+  @SuppressWarnings("unused")
   private SysIdChooser m_sysIdChooser;
 
   /**
