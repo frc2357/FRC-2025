@@ -157,7 +157,21 @@ public final class Constants {
       2.256
     );
     public static final double AXIS_MAX_SPEED = 0.1;
-    public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
+
+    public static final class SETPOINTS {
+
+      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+
+      public static final Distance INTAKE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L1 = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L2 = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L3 = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L4 = Units.Feet.of(0); //TODO: Tune Setpoint
+    }
   }
 
   public static final class LATERATOR {
@@ -201,6 +215,21 @@ public final class Constants {
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
+
+    public static final class SETPOINTS {
+
+      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+
+      public static final Distance INTAKE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L1 = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L2 = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L3 = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance L4 = Units.Feet.of(0); //TODO: Tune Setpoint
+    }
   }
 
   public static final class CORAL_RUNNER {
