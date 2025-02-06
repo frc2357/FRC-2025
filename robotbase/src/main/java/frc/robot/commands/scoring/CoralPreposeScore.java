@@ -16,17 +16,17 @@ public class CoralPreposeScore extends ParallelCommandGroup {
     super();
     switch (m_level) {
       case L1:
-        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L1;
-        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L1;
+        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L1_PREPOSE;
+        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L1_PREPOSE;
       case L2:
-        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L2;
-        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L2;
+        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L2_PREPOSE;
+        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L2_PREPOSE;
       case L3:
-        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L3;
-        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L3;
+        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L3_PREPOSE;
+        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L3_PREPOSE;
       case L4:
-        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L4;
-        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L4;
+        m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L4_PREPOSE;
+        m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L4_PREPOSE;
       default:
         break;
     }
