@@ -29,6 +29,8 @@ public class CoralPreposeScore extends ParallelCommandGroup {
       case L4:
         m_elevatorDistance = Constants.ELEVATOR.SETPOINTS.L4;
         m_lateratorDistance = Constants.LATERATOR.SETPOINTS.L4;
+      default:
+        break;
     }
 
     addCommands(
