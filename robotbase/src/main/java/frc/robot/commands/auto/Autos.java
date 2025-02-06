@@ -7,6 +7,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.commands.util.VariableWaitCommand;
 
 public class Autos {
@@ -73,10 +74,13 @@ public class Autos {
       .onTrue(
         // Commands.sequence() lets us sequence commands to run, letting us run multiple commands per trigger.
         Commands.sequence(
+          new PrintCommand("Starting auto"),
           // This command resets the odometry, and it MUST be run on the beginning of auto, or very bad things will happen.
           resetOdometryCommand("RobotRelativeTest"),
+          new PrintCommand("Set odometry"),
           // This runs the trajectory that was loaded earlier. This is needed to make the AutoRoutine actually run the trajectory, instead of doing nothing.
-          robotRelativeTestTraj.cmd()
+          robotRelativeTestTraj.cmd(),
+          new PrintCommand("End auto")
         )
       );
 
