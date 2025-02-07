@@ -62,6 +62,12 @@ public:
     void setControllerAxes();
 
 private:
+    static void setCoralRollers(bool on);
+    static void setAlgaeRollers(bool on);
+    static void setElevator(bool on);
+    static void setLaterator(bool on);
+    static void setAlgaePivot(bool on);
+    static void setClimber(bool on);
     // I2C address of the MCP23017
     byte m_mcpI2CAddress;
     // Arduino pin that is connected to the MCP INTA/B pin
