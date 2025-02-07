@@ -1,29 +1,28 @@
-package frc.robot;
+package frc.robot.networkTables;
 
 import choreo.auto.AutoChooser;
-import choreo.auto.AutoRoutine;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.auto.AutoBase;
+import frc.robot.commands.auto.RobotRelativeTest;
 import java.util.Map;
 
 public class AutoChooserManager {
 
   // The map of named commands we use in choreo
-  private static Map<String, Command> m_autoCommandsToBind = Map.of();
+  private Map<String, Command> m_autoCommandsToBind = Map.of();
 
-  // The map of auto routines that will show up on the auto command chooser.
-  private static Map<String, AutoRoutine> m_autoRoutinesToBind = Map.of(
-    "Cube test path",
-    Robot.autos.cubeTestPath()
-  );
+  // The auto routines that will show up on the auto command chooser.
+  private AutoBase[] m_autos = {
+    new AutoBase("CubeTestPath"),
+    new RobotRelativeTest(),
+  };
 
-  private static AutoChooser m_autoChooser;
+  private AutoChooser m_autoChooser = new AutoChooser();
 
   public AutoChooserManager() {
-    m_autoChooser = new AutoChooser();
-
     SendableBuilderImpl autoChooserBuilder = new SendableBuilderImpl();
     autoChooserBuilder.setTable(
       NetworkTableInstance.getDefault().getTable("SmartDashboard/Auto chooser")
@@ -34,9 +33,10 @@ public class AutoChooserManager {
     m_autoCommandsToBind.forEach((String name, Command command) -> {
       m_autoChooser.addCmd(name, () -> command);
     });
-    m_autoRoutinesToBind.forEach((String name, AutoRoutine routine) -> {
-      m_autoChooser.addRoutine(name, () -> routine);
-    });
+
+    for (AutoBase auto : m_autos) {
+      m_autoChooser.addRoutine(auto.toString(), auto::getRoutine);
+    }
 
     SmartDashboard.putData("Auto chooser", m_autoChooser);
     SmartDashboard.putNumber("wait seconds", 0.0);
