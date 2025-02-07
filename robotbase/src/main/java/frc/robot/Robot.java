@@ -72,6 +72,7 @@ public class Robot extends TimedRobot {
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
+    elasticFieldManager.setupShooterField();
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();

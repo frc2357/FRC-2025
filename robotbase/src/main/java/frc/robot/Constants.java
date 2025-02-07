@@ -373,7 +373,7 @@ public final class Constants {
         8,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1)
+        new TrapezoidProfile.Constraints(1.5, 1)
       );
 
     public static final ProfiledPIDController AUTO_ALIGN_THETA_CONTROLLER =
@@ -384,46 +384,46 @@ public final class Constants {
         new TrapezoidProfile.Constraints(2, 1)
       );
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(1);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(1);
-    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(3);
-
-    public static final double INTERPOLATION_PERCENT = 0.2;
+    public static final Distance X_TOLERANCE = Units.Inches.of(5);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(5);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(6);
 
     public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
 
-    public static final class COLLISION_AVOIDANCE {
+    public static final double INTERPOLATION_PERCENT = 0.3;
 
-      /**
-       * How far away we want to be from things that we could hit.
-       */
-      public static final Distance COLLISION_TOLERANCE = Units.Inches.of(3);
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.35);
 
-      /**
-       * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
-       */
-      public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
-        .plus(ROBOT_CONFIGURATION.BOUNDARY)
-        .plus(COLLISION_TOLERANCE);
+    /**
+     * How far away we want to be from things that we could hit.
+     */
+    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(4);
 
-      public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
-        .1,
-        .2,
-        .3,
-        .4,
-        .5,
-        .6,
-        .7,
-        .8,
-        .9,
-      };
+    /**
+     * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
+     */
+    public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
+      .plus(ROBOT_CONFIGURATION.BOUNDARY)
+      .plus(COLLISION_TOLERANCE);
 
-      /**
-       * REEF_BOUNDARY + X distance away from the center of the reef
-       */
-      public static final Distance IDEAL_DISTANCE_FROM_REEF =
-        REEF_BOUNDARY.plus(Units.Feet.of(0.4));
-    }
+    public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
+      .1,
+      .2,
+      .3,
+      .4,
+      .5,
+      .6,
+      .7,
+      .8,
+      .9,
+    };
+
+    /**
+     * REEF_BOUNDARY + X distance away from the center of the reef
+     */
+    public static final Distance IDEAL_DISTANCE_FROM_REEF = REEF_BOUNDARY.plus(
+      Units.Feet.of(1)
+    );
   }
 
   public static final class CONTROLLER {
@@ -510,6 +510,16 @@ public final class Constants {
         Units.Meters.of(4.4894),
         Units.Meters.of(4.0135),
         new Rotation2d(Degrees.of(0))
+      );
+      public static final Pose2d BOTTOM = new Pose2d(
+        Units.Meters.of(4.4745),
+        Units.Meters.of(1.9516),
+        Rotation2d.kZero
+      );
+      public static final Pose2d BOTTOM_LEFT_CORNER = new Pose2d(
+        Units.Meters.of(3.1608),
+        Units.Meters.of(2.4731),
+        Rotation2d.kZero
       );
       public static final Distance DIAMETER = Units.Inches.of(75.506);
     }
