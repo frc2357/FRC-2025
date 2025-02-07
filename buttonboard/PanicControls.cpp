@@ -13,7 +13,7 @@ void PanicControls::init(byte mcpI2CAddress, byte intPin)
     PanicControls::intPin = intPin;
     if (!PanicControls::mcp.begin_I2C(mcpI2CAddress))
     {
-        Serial.println("Failed to begin communications with Panic Controls MCP");
+        Serial.println("Failed to establish communication with the Panic Controls MCP23017 I2C device");
         while (1)
             ;
     }
