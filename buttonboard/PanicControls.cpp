@@ -1,48 +1,42 @@
 #include "PanicControls.h"
 
-byte PanicControls::intPin = -1;
-Adafruit_MCP23X17 PanicControls::mcp;
-
-PanicControls::Mechanism PanicControls::selectedMechanism = PanicControls::Mechanism::NONE;
-bool PanicControls::mechanismReversed = false;
-
-uint64_t PanicControls::lastInterruptMillis = 0;
-
-void PanicControls::init(byte mcpI2CAddress, byte intPin)
+PanicControls::PanicControls(byte mcpI2CAddress, byte intPin)
+    : m_mcpI2CAddress(mcpI2CAddress), m_intPin(intPin)
 {
-    PanicControls::intPin = intPin;
-    if (!PanicControls::mcp.begin_I2C(mcpI2CAddress))
+}
+
+void PanicControls::init()
+{
+    if (!m_mcp.begin_I2C(m_mcpI2CAddress))
     {
         Serial.println("Failed to begin communications with Panic Controls MCP");
         while (1)
             ;
     }
 
-    pinMode(PanicControls::intPin, INPUT_PULLUP);
+    pinMode(m_intPin, INPUT_PULLUP);
     // mirror INTA/B so we only need to connect to one int pin
-    PanicControls::mcp.setupInterrupts(true, false, LOW);
+    m_mcp.setupInterrupts(true, false, LOW);
 
     for (int pin = 0; pin < PIN_COUNT; pin++)
     {
-        PanicControls::mcp.pinMode(pin, INPUT);
+        m_mcp.pinMode(pin, INPUT);
         // Enable interrupts when `pin` changes values
-        PanicControls::mcp.setupInterruptPin(pin, CHANGE);
+        m_mcp.setupInterruptPin(pin, CHANGE);
     }
 
     XInput.setTriggerRange(POT_MIN_VALUE, POT_MAX_VALUE);
     XInput.setJoystickRange(POT_MIN_VALUE, POT_MAX_VALUE);
-
-    attachInterrupt(digitalPinToInterrupt(PanicControls::intPin), PanicControls::update, FALLING);
 }
 
 void PanicControls::update()
 {
-    if (millis() > DEBOUNCE_TIME_MILLIS + PanicControls::lastInterruptMillis)
+    if (!digitalRead(m_intPin) && millis() > (DEBOUNCE_TIME_MILLIS + m_lastInterruptMillis))
     {
         // Each bit of `state` is the value of the pin at that index
         // e.g. 0b0001 means that pins 1-3 are low and pin 0 is high
-        uint8_t pin = PanicControls::mcp.getLastInterruptPin();
-        uint16_t state = PanicControls::mcp.getCapturedInterrupt();
+        uint8_t pin = m_mcp.getLastInterruptPin();
+        uint16_t state = m_mcp.getCapturedInterrupt();
         // Right shift to get `pin`s bit to index 0
         // Bitwise anding this with 1 tells us if `pin` is high or low
         bool pinValue = 1 && state >> pin;
@@ -50,54 +44,54 @@ void PanicControls::update()
         if (pinValue)
         {
             uint8_t mechIndex = pin / 2; // 2 for the 2 directions
-            PanicControls::selectedMechanism = static_cast<PanicControls::Mechanism>(mechIndex);
-            PanicControls::mechanismReversed = pin % 2;
+            m_selectedMechanism = static_cast<PanicControls::Mechanism>(mechIndex);
+            m_mechanismReversed = pin % 2;
         }
         else
         {
-            PanicControls::selectedMechanism = PanicControls::Mechanism::NONE;
-            PanicControls::mechanismReversed = false;
+            m_selectedMechanism = PanicControls::Mechanism::NONE;
+            m_mechanismReversed = false;
         }
 
-        PanicControls::lastInterruptMillis = millis();
+        m_lastInterruptMillis = millis();
+    }
 
-        if (PanicControls::selectedMechanism != PanicControls::Mechanism::NONE)
-        {
-            PanicControls::setControllerAxes();
-        }
+    if (m_selectedMechanism != PanicControls::Mechanism::NONE)
+    {
+        setControllerAxes();
     }
 }
 
 void PanicControls::setControllerAxes()
 {
-    switch (PanicControls::selectedMechanism)
+    switch (m_selectedMechanism)
     {
     case CORAL_INTAKE_ROLLER:
-        PanicControls::setCoralRollers(true);
+        setCoralRollers(true);
         break;
     case ALGAE_INTAKE_ROLLER:
-        PanicControls::setAlgaeRollers(true);
+        setAlgaeRollers(true);
         break;
     case ELEVATOR:
-        PanicControls::setElevator(true);
+        setElevator(true);
         break;
     case LATERATOR:
-        PanicControls::setLaterator(true);
+        setLaterator(true);
         break;
     case ALGAE_PIVOT:
-        PanicControls::setAlgaePivot(true);
+        setAlgaePivot(true);
         break;
     case CLIMBER:
-        PanicControls::setClimber(true);
+        setClimber(true);
         break;
     default:
         // Clear all axes
-        PanicControls::setCoralRollers(false);
-        PanicControls::setAlgaeRollers(false);
-        PanicControls::setElevator(false);
-        PanicControls::setLaterator(false);
-        PanicControls::setAlgaePivot(false);
-        PanicControls::setClimber(false);
+        setCoralRollers(false);
+        setAlgaeRollers(false);
+        setElevator(false);
+        setLaterator(false);
+        setAlgaePivot(false);
+        setClimber(false);
         break;
     }
 }
@@ -105,35 +99,35 @@ void PanicControls::setControllerAxes()
 void PanicControls::setCoralRollers(bool on)
 {
     XInput.setTrigger(XInputControl::TRIGGER_RIGHT, on * analogRead(ROLLER_POT_PIN));
-    XInput.setButton(XInputControl::BUTTON_R3, on && PanicControls::mechanismReversed);
+    XInput.setButton(XInputControl::BUTTON_R3, on && m_mechanismReversed);
 }
 
 void PanicControls::setAlgaeRollers(bool on)
 {
     XInput.setTrigger(XInputControl::TRIGGER_LEFT, on * analogRead(ROLLER_POT_PIN));
-    XInput.setButton(XInputControl::BUTTON_L3, on && PanicControls::mechanismReversed);
+    XInput.setButton(XInputControl::BUTTON_L3, on && m_mechanismReversed);
 }
 
 void PanicControls::setElevator(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
-    XInput.setJoystickY(XInputControl::JOY_RIGHT, val, on && PanicControls::mechanismReversed);
+    XInput.setJoystickY(XInputControl::JOY_RIGHT, val, on && m_mechanismReversed);
 }
 
 void PanicControls::setLaterator(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
-    XInput.setJoystickX(XInputControl::JOY_RIGHT, val, on && PanicControls::mechanismReversed);
+    XInput.setJoystickX(XInputControl::JOY_RIGHT, val, on && m_mechanismReversed);
 }
 
 void PanicControls::setAlgaePivot(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
-    XInput.setJoystickX(XInputControl::JOY_LEFT, val, on && PanicControls::mechanismReversed);
+    XInput.setJoystickX(XInputControl::JOY_LEFT, val, on && m_mechanismReversed);
 }
 
 void PanicControls::setClimber(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
-    XInput.setJoystickY(XInputControl::JOY_LEFT, val, on && PanicControls::mechanismReversed);
+    XInput.setJoystickY(XInputControl::JOY_LEFT, val, on && m_mechanismReversed);
 }
