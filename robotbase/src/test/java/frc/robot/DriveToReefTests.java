@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import frc.robot.commands.drive.DriveToReef;
-import frc.robot.commands.drive.DriveToReef.RouteAroundReef;
+import frc.robot.commands.drive.DriveToPoseHandler;
+import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 // class DriveToReefTests {

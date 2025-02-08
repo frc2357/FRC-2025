@@ -11,8 +11,8 @@ import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
-import frc.robot.commands.drive.DriveToReef;
-import frc.robot.commands.drive.DriveToReef.RouteAroundReef;
+import frc.robot.commands.drive.DriveToPoseHandler;
+import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 
 @SuppressWarnings("unused")
 public class DriverControls {
@@ -39,7 +39,7 @@ public class DriverControls {
   }
 
   public void mapControls() {
-    m_controller.a().whileTrue(new DriveToReef(RouteAroundReef.Fastest));
+    m_controller.a().whileTrue(new DriveToPoseHandler(RouteAroundReef.Fastest));
     m_controller
       .b()
       .whileTrue(
