@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
+import static frc.robot.Constants.DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.AbsoluteEncoderConfig;
@@ -478,6 +479,11 @@ public final class Constants {
      */
     public static final Distance IDEAL_DISTANCE_FROM_REEF =
       COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(1));
+
+    /**
+     * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
+     */
+    public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 2;
   }
 
   public static final class COLLISION_DETECTION {
@@ -619,6 +625,49 @@ public final class Constants {
         Rotation2d.kZero
       );
       public static final Distance DIAMETER = Units.Inches.of(75.506);
+    }
+
+    public static class CORAL_STATION {
+
+      public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = //TODO: tune this to field
+        new Pose2d(
+          0.5548880100250244,
+          6.694406032562256,
+          new Rotation2d(2.206778871255995)
+        );
+      public static final Transform2d UPPER_STATION_SLOT_TO_SLOT_TRANSFORM =
+        new Transform2d(
+          Units.Inches.of(5.65685),
+          Units.Inches.of(5.65685),
+          Rotation2d.kZero
+        );
+
+      public static final Pose2d UPPER_STATION_DESIRED_SLOT =
+        UPPER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
+          UPPER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
+            DESIRED_CORAL_STATION_SLOT_NUMBER
+          )
+        );
+
+      public static final Pose2d LOWER_STATION_LEFTMOST_USABLE_SLOT = //TODO: tune this to field
+        new Pose2d(
+          0.5548880100250244,
+          1.3386709690093994,
+          new Rotation2d(-2.206778871255995)
+        );
+      public static final Transform2d LOWER_STATION_SLOT_TO_SLOT_TRANSFORM =
+        new Transform2d(
+          Units.Inches.of(5.65685),
+          Units.Inches.of(-5.65685),
+          Rotation2d.kZero
+        );
+
+      public static final Pose2d LOWER_STATION_DESIRED_SLOT =
+        LOWER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
+          LOWER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
+            DESIRED_CORAL_STATION_SLOT_NUMBER
+          )
+        );
     }
   }
 
