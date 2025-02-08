@@ -2,21 +2,23 @@ package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.DRIVE_TO_POSE.*;
+import static frc.robot.Constants.FIELD.CORAL_STATION.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
+import frc.robot.commands.drive.DriveToReef.RouteAroundReef;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.Utility;
 import java.util.function.Function;
 
-public class DriveToReef extends Command {
+public class DriveToCoralStation extends Command {
 
-  public enum RouteAroundReef {
-    Clockwise,
-    CounterClockwise,
+  public enum StationToGoTo {
+    Upper,
+    Lower,
     Fastest,
   }
 
@@ -24,16 +26,23 @@ public class DriveToReef extends Command {
 
   private DriveToPose m_currDriveToPose;
 
+  private StationToGoTo m_desiredStation;
+
   private RouteAroundReef m_routeAroundReef;
 
-  public DriveToReef(RouteAroundReef routeAroundReef) {
+  public DriveToCoralStation(
+    StationToGoTo desiredStation,
+    RouteAroundReef routeAroundReef
+  ) {
+    m_desiredStation = desiredStation != null
+      ? desiredStation
+      : StationToGoTo.Fastest;
     m_routeAroundReef = routeAroundReef;
   }
 
   @Override
   public void initialize() {
     m_currentTarget = Robot.swerve.getAllianceRelativePose2d();
-    m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currDriveToPose = new DriveToPose(getTargetFunction()); // make a DriveToPose that we have control of
     m_currDriveToPose.schedule();
@@ -41,7 +50,6 @@ public class DriveToReef extends Command {
 
   @Override
   public void execute() {
-    m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
   }
 
@@ -88,7 +96,8 @@ public class DriveToReef extends Command {
   }
 
   private Pose2d findNewTarget(Pose2d currTarget, Pose2d currPose) {
-    // if we can go to the final goal without hitting it, just go there
+    // if we can go to the final goal without hitting the reef, just go there
+    m_finalGoal = getDesiredTarget(currPose);
     if (
       Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
         FINAL_APPROACH_DISTANCE.in(Meters) ||
@@ -120,6 +129,28 @@ public class DriveToReef extends Command {
     m_currentTarget = newTarget;
     // make it go faster through deceit and deception
     return newTarget.transformBy(new Transform2d(currPose, newTarget));
+  }
+
+  private Pose2d getDesiredTarget(Pose2d currPose) {
+    switch (m_desiredStation) {
+      case Lower:
+        return LOWER_STATION_DESIRED_SLOT;
+      case Upper:
+        return UPPER_STATION_DESIRED_SLOT;
+      case Fastest:
+      default:
+        double upperStationDist = Utility.findDistanceBetweenPoses(
+          currPose,
+          UPPER_STATION_DESIRED_SLOT
+        );
+        double lowerStationDist = Utility.findDistanceBetweenPoses(
+          currPose,
+          LOWER_STATION_DESIRED_SLOT
+        );
+        return upperStationDist <= lowerStationDist
+          ? UPPER_STATION_DESIRED_SLOT
+          : LOWER_STATION_DESIRED_SLOT;
+    }
   }
 
   /**
