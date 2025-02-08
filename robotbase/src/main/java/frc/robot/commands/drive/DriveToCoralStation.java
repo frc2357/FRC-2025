@@ -30,14 +30,25 @@ public class DriveToCoralStation extends Command {
 
   private RouteAroundReef m_routeAroundReef;
 
+  private Command m_finalApproachCommand;
+
   public DriveToCoralStation(
     StationToGoTo desiredStation,
     RouteAroundReef routeAroundReef
+  ) {
+    this(desiredStation, routeAroundReef, null);
+  }
+
+  public DriveToCoralStation(
+    StationToGoTo desiredStation,
+    RouteAroundReef routeAroundReef,
+    Command commandToRunAtFinalApproach
   ) {
     m_desiredStation = desiredStation != null
       ? desiredStation
       : StationToGoTo.Fastest;
     m_routeAroundReef = routeAroundReef;
+    m_finalApproachCommand = commandToRunAtFinalApproach;
   }
 
   @Override
@@ -96,6 +107,12 @@ public class DriveToCoralStation extends Command {
   }
 
   private Pose2d findNewTarget(Pose2d currTarget, Pose2d currPose) {
+    boolean isAtFinalApproach =
+      Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
+      FINAL_APPROACH_DISTANCE.in(Meters);
+    if (isAtFinalApproach && m_finalApproachCommand != null) {
+      m_finalApproachCommand.schedule();
+    }
     // if we can go to the final goal without hitting the reef, just go there
     m_finalGoal = getDesiredTarget(currPose);
     if (

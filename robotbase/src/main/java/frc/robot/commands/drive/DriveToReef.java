@@ -26,8 +26,18 @@ public class DriveToReef extends Command {
 
   private RouteAroundReef m_routeAroundReef;
 
+  private Command m_finalApproachCommand;
+
   public DriveToReef(RouteAroundReef routeAroundReef) {
+    this(routeAroundReef, null);
+  }
+
+  public DriveToReef(
+    RouteAroundReef routeAroundReef,
+    Command commandToRunOnFinalApproach
+  ) {
     m_routeAroundReef = routeAroundReef;
+    m_finalApproachCommand = commandToRunOnFinalApproach;
   }
 
   @Override
@@ -88,10 +98,15 @@ public class DriveToReef extends Command {
   }
 
   private Pose2d findNewTarget(Pose2d currTarget, Pose2d currPose) {
+    boolean isAtFinalApproach =
+      Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
+      FINAL_APPROACH_DISTANCE.in(Meters);
+    if (isAtFinalApproach && m_finalApproachCommand != null) {
+      m_finalApproachCommand.schedule();
+    }
     // if we can go to the final goal without hitting it, just go there
     if (
-      Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
-        FINAL_APPROACH_DISTANCE.in(Meters) ||
+      isAtFinalApproach ||
       !CollisionDetection.willHitReef(
         currPose,
         m_finalGoal,
