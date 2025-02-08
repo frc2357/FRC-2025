@@ -4,16 +4,13 @@
 
 #define PANIC_CONTROLS_MCP_INTERRUPT_PIN 7 // TODO: Set this
 
-PanicControls panicControls(PANIC_CONTROLS_MCP_I2C_ADDRESS, PANIC_CONTROLS_MCP_INTERRUPT_PIN);
-
 void setup()
 {
     XInput.begin();
 
-    panicControls.init();
+    PanicControls::init(PANIC_CONTROLS_MCP_I2C_ADDRESS, PANIC_CONTROLS_MCP_INTERRUPT_PIN);
 }
 
 void loop()
 {
-    panicControls.update();
 }

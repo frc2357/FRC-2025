@@ -9,10 +9,8 @@
 
 #define PIN_COUNT 12
 
-#define ROLLER_MECHANISM_SLIDER_FORWARD_PIN A0
-#define ROLLER_MECHANISM_SLIDER_REVERSE_PIN A1
-#define MOVEMENT_MECHANISM_SLIDER_FORWARD_PIN A2
-#define MOVEMENT_MECHANISM_SLIDER_REVERSE_PIN A3
+#define ROLLER_POT_PIN A0
+#define MOVEMENT_POT_PIN A1
 
 #define POT_MIN_VALUE 0
 #define POT_MAX_VALUE 1023
@@ -56,28 +54,25 @@ public:
         CLIMBER = 5
     };
 
-    PanicControls(byte mcpI2CAddress, byte intPin);
-    void init();
-    void update();
-    void setControllerAxes();
+    static void init(byte mcpI2CAddress, byte intPin);
+    static void update();
+    static void setControllerAxes();
 
 private:
-    void setCoralRollers(bool on);
-    void setAlgaeRollers(bool on);
-    void setElevator(bool on);
-    void setLaterator(bool on);
-    void setAlgaePivot(bool on);
-    void setClimber(bool on);
-    // I2C address of the MCP23017
-    byte m_mcpI2CAddress;
+    static void setCoralRollers(bool on);
+    static void setAlgaeRollers(bool on);
+    static void setElevator(bool on);
+    static void setLaterator(bool on);
+    static void setAlgaePivot(bool on);
+    static void setClimber(bool on);
     // Arduino pin that is connected to the MCP INTA/B pin
-    byte m_intPin;
-    Adafruit_MCP23X17 m_mcp;
+    static byte intPin;
+    static Adafruit_MCP23X17 mcp;
 
-    PanicControls::Mechanism m_selectedMechanism;
-    bool m_mechanismReversed;
+    static PanicControls::Mechanism selectedMechanism;
+    static bool mechanismReversed;
 
-    long m_lastInterruptMillis;
+    static uint64_t lastInterruptMillis;
 };
 
 #endif // PANIC_CONTROLS_H
