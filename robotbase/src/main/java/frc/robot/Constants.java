@@ -22,6 +22,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
@@ -34,6 +35,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
+import frc.robot.Constants.FIELD.REEF;
+import frc.robot.util.SATCollisionDetector.SATVector;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
@@ -427,7 +430,7 @@ public final class Constants {
         8,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1)
+        new TrapezoidProfile.Constraints(1.5, 1)
       );
 
     public static final ProfiledPIDController AUTO_ALIGN_THETA_CONTROLLER =
@@ -438,34 +441,57 @@ public final class Constants {
         new TrapezoidProfile.Constraints(2, 1)
       );
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(1);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(1);
-    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(3);
-
-    public static final double INTERPLOATION_PERCENT = 0.15;
+    public static final Distance X_TOLERANCE = Units.Inches.of(3);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(3);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(6);
 
     public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
 
-    public static final class COLLISION_AVOIDANCE {
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.35);
 
-      public static final int ATTEMPTS = 20;
+    public static final Rotation2d ROTATE_AROUND_REEF_ROTATIONS =
+      new Rotation2d(Units.Rotations.of(0.05));
 
-      public static final double TWIST_X_METERS_DEFAULT = 0.05;
-      public static final double TWIST_Y_METERS_DEFAULT = 0.05;
-      public static final double TWIST_ROTO_RADIANS_DEFAULT = 0;
+    public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
+      .1,
+      .2,
+      .3,
+      .4,
+      .5,
+      .6,
+      .7,
+      .8,
+      .9,
+    };
 
-      /**
-       * How far away we want to be from things that we could hit.
-       */
-      public static final Distance COLLISION_TOLERANCE = Units.Inches.of(3);
+    /**
+     * REEF_BOUNDARY + X distance away from the center of the reef
+     */
+    public static final Distance IDEAL_DISTANCE_FROM_REEF =
+      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(1));
+  }
 
-      /**
-       * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
-       */
-      public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
-        .plus(ROBOT_CONFIGURATION.BOUNDARY)
-        .plus(COLLISION_TOLERANCE);
-    }
+  public static final class COLLISION_DETECTION {
+
+    /**
+     * How far away we want to be from things that we could hit.
+     */
+    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(4);
+
+    /**
+     * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
+     */
+    public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
+      .plus(ROBOT_CONFIGURATION.BOUNDARY)
+      .plus(COLLISION_TOLERANCE);
+
+    public static final SATVector[] REEF_SAT_POLY = {
+      new SATVector(REEF.BOTTOM_LEFT_CORNER),
+      new SATVector(REEF.BOTTOM_RIGHT_CORNER),
+      new SATVector(REEF.TOP_RIGHT_CORNER),
+      new SATVector(REEF.TOP_CORNER),
+      new SATVector(REEF.TOP_LEFT_CORNER),
+    };
   }
 
   public static final class CONTROLLER {
@@ -491,12 +517,12 @@ public final class Constants {
       public static final Pose2d BRANCH_A = new Pose2d(
         Units.Meters.of(3.2332),
         Units.Meters.of(4.1914),
-        new Rotation2d(Radians.of(0))
+        Rotation2d.kZero
       );
       public static final Pose2d BRANCH_B = new Pose2d(
         Units.Meters.of(3.2332),
         Units.Meters.of(3.8564),
-        new Rotation2d(Radians.of(0))
+        Rotation2d.kZero
       );
       public static final Pose2d BRANCH_C = new Pose2d(
         Units.Meters.of(3.7160),
@@ -521,12 +547,12 @@ public final class Constants {
       public static final Pose2d BRANCH_G = new Pose2d(
         Units.Meters.of(5.7408),
         Units.Meters.of(3.8570),
-        new Rotation2d(Degrees.of(180))
+        Rotation2d.k180deg
       );
       public static final Pose2d BRANCH_H = new Pose2d(
         Units.Meters.of(5.7408),
         Units.Meters.of(4.1828),
-        new Rotation2d(Degrees.of(180))
+        Rotation2d.k180deg
       );
       public static final Pose2d BRANCH_I = new Pose2d(
         Units.Meters.of(5.2650),
@@ -551,7 +577,37 @@ public final class Constants {
       public static final Pose2d CENTER = new Pose2d(
         Units.Meters.of(4.4894),
         Units.Meters.of(4.0135),
-        new Rotation2d(Degrees.of(0))
+        Rotation2d.kZero
+      );
+      public static final Pose2d BOTTOM_LEFT_CORNER = new Pose2d(
+        3.6375527381896973,
+        3.5441830158233643,
+        Rotation2d.kZero
+      );
+      public static final Pose2d BOTTOM_CORNER = new Pose2d(
+        4.485269546508789,
+        3.054239273071289,
+        Rotation2d.kZero
+      );
+      public static final Pose2d BOTTOM_RIGHT_CORNER = new Pose2d(
+        5.330072402954102,
+        3.548002004623413,
+        Rotation2d.kZero
+      );
+      public static final Pose2d TOP_RIGHT_CORNER = new Pose2d(
+        5.326759338378906,
+        4.525322914123535,
+        Rotation2d.kZero
+      );
+      public static final Pose2d TOP_CORNER = new Pose2d(
+        4.48210334777832,
+        5.012092113494873,
+        Rotation2d.kZero
+      );
+      public static final Pose2d TOP_LEFT_CORNER = new Pose2d(
+        3.635162591934204,
+        4.51914644241333,
+        Rotation2d.kZero
       );
       public static final Distance DIAMETER = Units.Inches.of(75.506);
     }
@@ -575,6 +631,31 @@ public final class Constants {
     public static final Distance FULL_WIDTH = FRAME_WIDTH.plus(
       BUMPER_THICKNESS.times(2)
     );
+
+    public static final Transform2d FRONT_LEFT_CORNER_TRANSFORM =
+      new Transform2d(
+        FRAME_WIDTH.div(2),
+        FRAME_LENGTH.div(2),
+        Rotation2d.kZero
+      );
+    public static final Transform2d FRONT_RIGHT_CORNER_TRANSFORM =
+      new Transform2d(
+        FRAME_WIDTH.div(2),
+        FRAME_LENGTH.div(2).unaryMinus(),
+        Rotation2d.kZero
+      );
+    public static final Transform2d BACK_LEFT_CORNER_TRANSFORM =
+      new Transform2d(
+        FRAME_WIDTH.div(2).unaryMinus(),
+        FRAME_LENGTH.div(2),
+        Rotation2d.kZero
+      );
+    public static final Transform2d BACK_RIGHT_CORNER_TRANSFORM =
+      new Transform2d(
+        FRAME_WIDTH.div(2).unaryMinus(),
+        FRAME_LENGTH.div(2).unaryMinus(),
+        Rotation2d.kZero
+      );
 
     /**
      * The distance that for any given object, if it is closer to the robot than this, it is hitting it, or will hit it when the robot turns.

@@ -122,21 +122,5 @@ public class DriveToPose extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {
-    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
-    System.out.println(
-      "DRIVE TO POSE FINISH****\nPOSE AT FINISH: " + currentPose
-    );
-
-    Translation2d driveVelocity = new Translation2d(
-      Robot.driverControls.getY() * m_speedAt12VoltsMPS,
-      Robot.driverControls.getX() * m_speedAt12VoltsMPS
-    );
-    double thetaVelocity =
-      Robot.driverControls.getRotation() *
-      Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
-    if (driveVelocity == Translation2d.kZero && thetaVelocity == 0) {
-      Robot.swerve.stopMotors();
-    }
-  }
+  public void end(boolean interrupted) {}
 }

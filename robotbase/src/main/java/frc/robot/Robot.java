@@ -33,6 +33,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralRunner;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Laterator;
+import frc.robot.util.ElasticFieldManager;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -49,6 +50,7 @@ public class Robot extends TimedRobot {
   public static AlgaePivot algaePivot;
   public static DriverControls driverControls;
   public static ButtonboardController buttonboard;
+  public static ElasticFieldManager elasticFieldManager;
 
   public static Alliance alliance = null;
 
@@ -68,7 +70,9 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
-    DriverStation.silenceJoystickConnectionWarning(true); //TODO: turn this off at comp, just in case.
+    DriverStation.silenceJoystickConnectionWarning(
+      !DriverStation.isFMSAttached()
+    ); //TODO: turn this off at comp, just in case.
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -77,6 +81,8 @@ public class Robot extends TimedRobot {
     // coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
+    elasticFieldManager = new ElasticFieldManager();
+    elasticFieldManager.setupSwerveField();
 
     // Define controls
     buttonboard = new ButtonboardController(
@@ -114,6 +120,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    elasticFieldManager.swerveFieldRep.setRobotPose(
+      swerve.getFieldRelativePose2d()
+    );
     CommandScheduler.getInstance().run();
   }
 

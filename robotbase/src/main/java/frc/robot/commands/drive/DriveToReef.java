@@ -1,38 +1,36 @@
 package frc.robot.commands.drive;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.Constants.COLLISION_DETECTION.REEF_BOUNDARY;
+import static frc.robot.Constants.COLLISION_DETECTION.REEF_SAT_POLY;
 import static frc.robot.Constants.DRIVE_TO_POSE.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.DRIVE_TO_POSE.COLLISION_AVOIDANCE;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
+import frc.robot.util.SATCollisionDetector;
 import frc.robot.util.Utility;
 import java.util.function.Function;
 
 public class DriveToReef extends Command {
 
-  private Pose2d m_currPose;
+  public enum DirectionOfTravel {
+    Clockwise,
+    CounterClockwise,
+    Fastest,
+  }
 
-  private Pose2d m_currentTarget;
-  private Pose2d m_lastTarget;
-
-  private Pose2d m_finalGoal;
+  private Pose2d m_currPose, m_currentTarget, m_finalGoal;
 
   private DriveToPose m_currDriveToPose;
-
-  private Twist2d m_collisionAvoidanceTwist = new Twist2d();
-
-  private boolean m_isDriverControlling;
 
   public DriveToReef() {}
 
   @Override
   public void initialize() {
-    m_lastTarget = Robot.swerve.getAllianceRelativePose2d();
+    m_currentTarget = Robot.swerve.getAllianceRelativePose2d();
     m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currDriveToPose = new DriveToPose(getTargetFunction()); // make a DriveToPose that we have control of
@@ -48,6 +46,12 @@ public class DriveToReef extends Command {
   @Override
   public boolean isFinished() {
     return isAtTarget(m_finalGoal, m_currPose);
+  }
+
+  @Override
+  public void end(boolean isInteruptted) {
+    m_currDriveToPose.cancel();
+    Robot.swerve.stopMotors();
   }
 
   private boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
@@ -69,15 +73,6 @@ public class DriveToReef extends Command {
     ) {
       return false;
     }
-    if (
-      !Utility.isWithinTolerance(
-        targetPose.getRotation().getDegrees(),
-        currPose.getRotation().getDegrees(),
-        ROTATION_TOLERANCE.in(Degrees)
-      )
-    ) {
-      return false;
-    }
     return true;
   }
 
@@ -85,33 +80,27 @@ public class DriveToReef extends Command {
     return new Function<Pose2d, Pose2d>() {
       @Override
       public Pose2d apply(Pose2d currPose) {
-        return findNewTarget(m_currentTarget, m_lastTarget, currPose);
+        return findNewTarget(m_currentTarget, currPose);
       }
     };
   }
 
-  private Pose2d getPoseDelta(Pose2d intial, Pose2d last) {
-    return last.relativeTo(intial);
-  }
-
-  private boolean isFinalGoal(Pose2d targetPose) {
-    return targetPose.equals(m_finalGoal);
-  }
-
-  private boolean willHitReef(
+  public boolean willHitReef(
     Pose2d currPose,
     Pose2d targetPose,
     double... interpolationPercentages
   ) {
-    Pose2d interpolatedPose = new Pose2d();
+    Transform2d currToTargetTransform = new Transform2d(currPose, targetPose);
     for (double percentage : interpolationPercentages) {
-      interpolatedPose = currPose.interpolate(targetPose, percentage);
+      Transform2d transformToUse = currToTargetTransform.times(percentage);
+      Pose2d interpolatedPose = currPose.transformBy(transformToUse);
       // if true, collision with reef is likely, and avoidance should begin.
       if (
-        Math.abs(
-          Utility.findDistanceBetweenPoses(interpolatedPose, REEF.CENTER)
-        ) <=
-        COLLISION_AVOIDANCE.REEF_BOUNDARY.in(Meters)
+        SATCollisionDetector.hasCollided(
+          SATCollisionDetector.makePolyFromRobotPose(interpolatedPose),
+          REEF_SAT_POLY,
+          REEF_BOUNDARY.in(Meters)
+        )
       ) {
         return true;
       }
@@ -119,128 +108,100 @@ public class DriveToReef extends Command {
     return false;
   }
 
-  /**
-   * Returns whether or not your current pose is beyond your current target
-   * @param currTarget Used to determine where you want to go
-   * @param lastTarget Used to determine which direction your going
-   * @param currPose Your pose, so we know where you are and can bound correctly
-   * @return Whether or not your currPose is beyond your currTarget in the x or y axis
-   */
-  private boolean isBeyondTarget(
-    Pose2d currTarget,
-    Pose2d lastTarget,
-    Pose2d currPose
-  ) {
-    Pose2d lastTarToCurrTarDelta = getPoseDelta(lastTarget, currTarget);
-    Pose2d currPoseToCurrTarDelta = getPoseDelta(currPose, currTarget);
-
-    // find which direction we want to go (pos or neg in x/y axes)
-    // 1 means we want to go UP in value, -1 means we want to go DOWN in value.
-    double xDirectionOfTravelMult = lastTarToCurrTarDelta.getX() >= 0 ? 1 : -1;
-    double yDirectionOfTravelMult = lastTarToCurrTarDelta.getY() >= 0 ? 1 : -1;
+  private Pose2d findNewTarget(Pose2d currTarget, Pose2d currPose) {
+    // if we can go to the final goal without hitting it, just go there
     if (
-      currPoseToCurrTarDelta.getX() !=
-      Math.copySign(currPoseToCurrTarDelta.getX(), xDirectionOfTravelMult)
-    ) {
-      return true;
-    }
-    if (
-      currPoseToCurrTarDelta.getY() !=
-      Math.copySign(currPoseToCurrTarDelta.getY(), yDirectionOfTravelMult)
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Takes a pose, and returns a pose that should NOT hit the reef. most likely.
-   * @param currTarget The robots current target
-   * @param lastTarget The robots last target
-   * @param currPose The robots current pose
-   * @return A pose to use a target that shouldnt hit the reef.
-   */
-  private Pose2d collisionAvoidanceTarget(
-    Pose2d currTarget,
-    Pose2d lastTarget,
-    Pose2d currPose
-  ) {
-    Pose2d safeTarget = currTarget;
-    Pose2d lastPoseToCurrTarDelta = getPoseDelta(currPose, currTarget);
-
-    // find which direction we want to go (pos or neg in x/y axes)
-    // 1 means we want to go UP in value, -1 means we want to go DOWN in value.
-    double xDirectionOfTravelMult = lastPoseToCurrTarDelta.getX() >= 0 ? 1 : -1;
-    double yDirectionOfTravelMult = lastPoseToCurrTarDelta.getY() >= 0 ? 1 : -1;
-    // figure out whether or not were going to hit the reef
-    if (
-      willHitReef(currPose, currTarget, 0.9, 0.7, 0.5) &&
-      !isFinalGoal(currTarget)
-    ) {
-      m_collisionAvoidanceTwist.dx =
-        COLLISION_AVOIDANCE.TWIST_X_METERS_DEFAULT * xDirectionOfTravelMult;
-      m_collisionAvoidanceTwist.dy =
-        COLLISION_AVOIDANCE.TWIST_Y_METERS_DEFAULT * yDirectionOfTravelMult;
-      m_collisionAvoidanceTwist.dtheta =
-        COLLISION_AVOIDANCE.TWIST_ROTO_RADIANS_DEFAULT;
-      int attemptsTaken = 0;
-      for (
-        attemptsTaken = 0;
-        attemptsTaken < COLLISION_AVOIDANCE.ATTEMPTS;
-        attemptsTaken++
-      ) {
-        safeTarget.exp(m_collisionAvoidanceTwist);
-        if (!willHitReef(currPose, safeTarget, INTERPLOATION_PERCENT)) {
-          break;
-        }
-        m_collisionAvoidanceTwist.dx += m_collisionAvoidanceTwist.dx / 2;
-        m_collisionAvoidanceTwist.dy += m_collisionAvoidanceTwist.dy / 2;
-      }
-      // make sure that the safeTarget is not past the final goal
-      if (isBeyondTarget(safeTarget, lastTarget, m_finalGoal)) {
-        Pose2d safeTarToFinalGoalDelta = getPoseDelta(safeTarget, m_finalGoal);
-        if (safeTarToFinalGoalDelta.getX() < 0) {
-          safeTarget = new Pose2d(
-            m_finalGoal.getX(),
-            safeTarget.getY(),
-            safeTarget.getRotation()
-          );
-        }
-        if (safeTarToFinalGoalDelta.getY() < 0) {
-          safeTarget = new Pose2d(
-            safeTarget.getX(),
-            m_finalGoal.getY(),
-            safeTarget.getRotation()
-          );
-        }
-      }
-    }
-    return safeTarget;
-  }
-
-  private Pose2d findNewTarget(
-    Pose2d currTarget,
-    Pose2d lastTarget,
-    Pose2d currPose
-  ) {
-    // if not beyond current target, keep using it
-    if (!isBeyondTarget(currTarget, lastTarget, currPose)) {
-      return collisionAvoidanceTarget(currTarget, lastTarget, currPose);
-    }
-
-    Pose2d currPoseToFinalGoalDelta = getPoseDelta(currPose, m_finalGoal);
-    // if were close to the final goal, just make the target the goal and send it
-    if (
-      currPoseToFinalGoalDelta.getX() < FINAL_APPROACH_DISTANCE.in(Meters) &&
-      currPoseToFinalGoalDelta.getY() < FINAL_APPROACH_DISTANCE.in(Meters)
+      Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
+        FINAL_APPROACH_DISTANCE.in(Meters) ||
+      !willHitReef(currPose, m_finalGoal, DEFAULT_INTERPOLATION_PERCENTAGES)
     ) {
       m_currentTarget = m_finalGoal;
-      return m_finalGoal; // cant use collision avoidance, would make sure we dont get that close
+      return m_finalGoal;
     }
-    // interpolate a new target, and let collision avoidance make sure we dont slam into the reef
-    Pose2d newTarget = currPose.interpolate(m_finalGoal, INTERPLOATION_PERCENT);
-    m_lastTarget = m_currentTarget;
+
+    if (!isAtTarget(currTarget, currPose)) {
+      // make it go faster by lying to it
+      return currTarget.transformBy(new Transform2d(currPose, currTarget));
+    }
+
+    Pose2d newTarget = interpolateTarget(currPose, m_finalGoal);
+    if (willHitReef(currPose, newTarget, DEFAULT_INTERPOLATION_PERCENTAGES)) {
+      newTarget = rotateAway(currPose, DirectionOfTravel.Fastest);
+    }
     m_currentTarget = newTarget;
-    return collisionAvoidanceTarget(currTarget, lastTarget, currPose);
+    // make it go faster through deceit and deception
+    return newTarget.transformBy(new Transform2d(currPose, newTarget));
+  }
+
+  /**
+   * Interpolates a new target based on the constant for interpolation distance.
+   * @param currPose The current pose
+   * @param goal The final goal
+   * @return The interpolated pose
+   */
+  private Pose2d interpolateTarget(Pose2d currPose, Pose2d goal) {
+    double dist = Utility.findDistanceBetweenPoses(currPose, goal);
+    return currPose.interpolate(
+      goal,
+      (1 / dist) * INTERPOLATION_DISTANCE.in(Meters)
+    );
+  }
+
+  private Pose2d rotateAway(
+    Pose2d currPose,
+    DirectionOfTravel routeAroundReef
+  ) {
+    Pose2d target;
+    Pose2d targetClockwise = new Pose2d(
+      currPose
+        .getTranslation()
+        .rotateAround(
+          REEF.CENTER.getTranslation(),
+          ROTATE_AROUND_REEF_ROTATIONS
+        ),
+      currPose.getRotation()
+    );
+    Pose2d targetCounterClockwise = new Pose2d(
+      currPose
+        .getTranslation()
+        .rotateAround(
+          REEF.CENTER.getTranslation(),
+          ROTATE_AROUND_REEF_ROTATIONS.unaryMinus()
+        ),
+      currPose.getRotation()
+    );
+    double clockwiseDistFromCenter = Math.abs(
+      Utility.findDistanceBetweenPoses(m_finalGoal, targetClockwise)
+    );
+    double counterClockwiseDistFromCenter = Math.abs(
+      Utility.findDistanceBetweenPoses(m_finalGoal, targetCounterClockwise)
+    );
+    switch (routeAroundReef) {
+      case Clockwise:
+        target = targetClockwise;
+        break;
+      case CounterClockwise:
+        target = targetCounterClockwise;
+        break;
+      case Fastest:
+        target = clockwiseDistFromCenter <= counterClockwiseDistFromCenter
+          ? targetClockwise
+          : targetCounterClockwise;
+        break;
+      default:
+        target = targetClockwise;
+    }
+    double distAwayFromReef = Utility.findDistanceBetweenPoses(
+      REEF.CENTER,
+      target
+    );
+    if (distAwayFromReef < IDEAL_DISTANCE_FROM_REEF.in(Meters)) {
+      Transform2d centerToTarTransform = new Transform2d(REEF.CENTER, target);
+      centerToTarTransform.times(
+        ((1 / distAwayFromReef) * IDEAL_DISTANCE_FROM_REEF.in(Meters))
+      );
+      target.transformBy(centerToTarTransform);
+    }
+    return target;
   }
 }

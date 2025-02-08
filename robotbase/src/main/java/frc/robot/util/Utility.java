@@ -32,7 +32,15 @@ public class Utility {
    * @return The resulting transform
    */
   public static Transform2d translationToTransform(double x, double y) {
-    return new Transform2d(new Translation2d(x, y), new Rotation2d());
+    return new Transform2d(new Translation2d(x, y), Rotation2d.kZero);
+  }
+
+  public static Transform2d translationToTransform(Translation2d translation) {
+    return new Transform2d(translation, Rotation2d.kZero);
+  }
+
+  public static Transform2d poseToTransform(Pose2d pose) {
+    return new Transform2d(pose.getTranslation(), pose.getRotation());
   }
 
   /**
@@ -53,11 +61,6 @@ public class Utility {
    * @return The distance between the 2 points in meters, it may also be negative.
    */
   public static double findDistanceBetweenPoses(Pose2d here, Pose2d there) {
-    var distanceBetweenPoints = there.relativeTo(here); // gets a pose for the distance of "there" from here
-    return findHypotenuse(
-      // gets the hypotenuse of the pose, which now has an origin of "here"
-      distanceBetweenPoints.getX(),
-      distanceBetweenPoints.getY()
-    ); // this essentially measures how far away "there" is from "here"
+    return here.getTranslation().getDistance(there.getTranslation());
   }
 }
