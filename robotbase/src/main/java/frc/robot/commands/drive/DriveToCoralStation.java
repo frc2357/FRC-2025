@@ -1,18 +1,11 @@
 package frc.robot.commands.drive;
 
-import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.Constants.DRIVE_TO_POSE.*;
-import static frc.robot.Constants.FIELD.CORAL_STATION.*;
+import static frc.robot.Constants.FIELD.CORAL_STATION.LOWER_STATION_DESIRED_SLOT;
+import static frc.robot.Constants.FIELD.CORAL_STATION.UPPER_STATION_DESIRED_SLOT;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.FIELD.REEF;
-import frc.robot.Robot;
-import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
-import frc.robot.util.CollisionDetection;
 import frc.robot.util.Utility;
-import java.util.function.Function;
 
 public class DriveToCoralStation extends DriveToPoseHandler {
 
