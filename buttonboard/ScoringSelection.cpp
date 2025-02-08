@@ -1,19 +1,20 @@
 #include "ScoringSelection.h"
 
-ScoringSelection::ScoringSelection(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress) : m_leftKeypadAddress(leftKeypadI2CAddress), m_rightKeypadAddress(rightKeypadI2CAddress)
-{
-}
+Adafruit_NeoKey_1x4 ScoringSelection::leftKeypad;
+Adafruit_NeoKey_1x4 ScoringSelection::rightKeypad;
 
-void ScoringSelection::init()
+int ScoringSelection::scoringLevelSelection = -1;
+
+void ScoringSelection::init(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress, byte keypadInterruptPin)
 {
-    if (!m_leftKeypad.begin(m_leftKeypadAddress))
+    if (!ScoringSelection::leftKeypad.begin(leftKeypadI2CAddress))
     {
         Serial.println("Failed to establish communication with the Left Scoring Level Selection Keypad I2C device");
         while (1)
             ;
     }
 
-    if (!m_rightKeypad.begin(m_rightKeypadAddress))
+    if (!ScoringSelection::rightKeypad.begin(rightKeypadI2CAddress))
     {
         Serial.println("Failed to establish communication with the Right Scoring Level Selection Keypad I2C device");
         while (1)
@@ -21,45 +22,45 @@ void ScoringSelection::init()
     }
 
     // Clear leds
-    for (uint8_t i = 0; i < m_leftKeypad.pixels.numPixels(); i++)
+    for (uint8_t i = 0; i < ScoringSelection::leftKeypad.pixels.numPixels(); i++)
     {
-        m_leftKeypad.pixels.setPixelColor(i, COLOR_OFF);
-        m_rightKeypad.pixels.setPixelColor(i, COLOR_OFF);
+        ScoringSelection::setKeypadLedState(i, false);
     }
-    m_leftKeypad.pixels.show();
-    m_rightKeypad.pixels.show();
+
+    // Interrupts are enabled by default on the keypads. Pin goes LOW when any button pressed
+    pinMode(keypadInterruptPin, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(keypadInterruptPin), ScoringSelection::updateScoringLevelSelection, FALLING);
 }
 
-void ScoringSelection::update()
+void ScoringSelection::updateScoringLevelSelection()
 {
-    uint8_t leftState = m_leftKeypad.read();
-    uint8_t rightState = m_rightKeypad.read();
+    uint8_t leftState = ScoringSelection::leftKeypad.read();
+    uint8_t rightState = ScoringSelection::rightKeypad.read();
 
     if (leftState != 0 || rightState != 0)
     {
         // Find log_2 of the combined state
         // This will basically tell us the position of the most significant bit that is set to 1
-        setScoringLevelSelection(log2(leftState | rightState));
+        int selection = log2(leftState | rightState);
+        if (selection == ScoringSelection::scoringLevelSelection)
+        {
+            XInput.release(SCORING_LEVEL_CONTROLLER_BUTTONS[ScoringSelection::scoringLevelSelection]);
+            ScoringSelection::scoringLevelSelection = -1;
+            ScoringSelection::setLedState(selection, false);
+        }
+        else
+        {
+            ScoringSelection::scoringLevelSelection = selection;
+            ScoringSelection::setKeypadLedState(selection, true);
+            XInput.press(SCORING_LEVEL_CONTROLLER_BUTTONS[ScoringSelection::scoringLevelSelection]);
+        }
     }
 }
 
-void ScoringSelection::setScoringLevelSelection(int selection)
+void ScoringSelection::setKeypadLedState(int index, bool on)
 {
-    if (selection == m_scoringLevelSelection)
-    {
-        XInput.release(SCORING_LEVEL_CONTROLLER_BUTTONS[m_scoringLevelSelection]);
-        m_scoringLevelSelection = -1;
-        m_leftKeypad.pixels.setPixelColor(selection, COLOR_OFF);
-        m_rightKeypad.pixels.setPixelColor(selection, COLOR_OFF);
-    }
-    else
-    {
-        m_scoringLevelSelection = selection;
-        m_leftKeypad.pixels.setPixelColor(selection, COLOR_ON);
-        m_rightKeypad.pixels.setPixelColor(selection, COLOR_ON);
-        XInput.press(SCORING_LEVEL_CONTROLLER_BUTTONS[m_scoringLevelSelection]);
-    }
-
-    m_leftKeypad.pixels.show();
-    m_rightKeypad.pixels.show();
+    ScoringSelection::leftKeypad.pixels.setPixelColor(index, on ? COLOR_ON : COLOR_OFF);
+    ScoringSelection::rightKeypad.pixels.setPixelColor(index, on ? COLOR_ON : COLOR_OFF);
+    ScoringSelection::leftKeypad.pixels.show();
+    ScoringSelection::rightKeypad.pixels.show();
 }

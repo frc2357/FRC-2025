@@ -65,8 +65,7 @@ private:
     static void setLaterator(bool on);
     static void setAlgaePivot(bool on);
     static void setClimber(bool on);
-    // Arduino pin that is connected to the MCP INTA/B pin
-    static byte intPin;
+
     static Adafruit_MCP23X17 mcp;
 
     static PanicControls::Mechanism selectedMechanism;

@@ -20,17 +20,14 @@ const XInputControl SCORING_LEVEL_CONTROLLER_BUTTONS[4] = {
 class ScoringSelection
 {
 public:
-    ScoringSelection(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress);
-    void init();
-    void update();
+    static void init(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress, byte keypadInterruptPin);
 
 private:
-    void setScoringLevelSelection(int selection);
+    static void updateScoringLevelSelection();
+    static void setKeypadLedState(int index, bool on);
 
-    byte m_leftKeypadAddress, m_rightKeypadAddress;
-    Adafruit_NeoKey_1x4 m_leftKeypad, m_rightKeypad;
-
-    int m_scoringLevelSelection = -1;
+    static Adafruit_NeoKey_1x4 leftKeypad, rightKeypad;
+    static int scoringLevelSelection;
 };
 
 #endif // SCORING_SELECTION_H

@@ -1,6 +1,5 @@
 #include "PanicControls.h"
 
-byte PanicControls::intPin = -1;
 Adafruit_MCP23X17 PanicControls::mcp;
 
 PanicControls::Mechanism PanicControls::selectedMechanism = PanicControls::Mechanism::NONE;
@@ -10,7 +9,6 @@ uint64_t PanicControls::lastInterruptMillis = 0;
 
 void PanicControls::init(byte mcpI2CAddress, byte intPin)
 {
-    PanicControls::intPin = intPin;
     if (!PanicControls::mcp.begin_I2C(mcpI2CAddress))
     {
         Serial.println("Failed to establish communication with the Panic Controls MCP23017 I2C device");
@@ -18,7 +16,7 @@ void PanicControls::init(byte mcpI2CAddress, byte intPin)
             ;
     }
 
-    pinMode(PanicControls::intPin, INPUT_PULLUP);
+    pinMode(intPin, INPUT_PULLUP);
     // mirror INTA/B so we only need to connect to one int pin
     PanicControls::mcp.setupInterrupts(true, false, LOW);
 
@@ -32,7 +30,7 @@ void PanicControls::init(byte mcpI2CAddress, byte intPin)
     XInput.setTriggerRange(POT_MIN_VALUE, POT_MAX_VALUE);
     XInput.setJoystickRange(POT_MIN_VALUE, POT_MAX_VALUE);
 
-    attachInterrupt(digitalPinToInterrupt(PanicControls::intPin), PanicControls::update, FALLING);
+    attachInterrupt(digitalPinToInterrupt(intPin), PanicControls::update, FALLING);
 }
 
 void PanicControls::update()
@@ -102,37 +100,37 @@ void PanicControls::setControllerAxes()
     }
 }
 
-void PanicControls::setCoralRollers(bool on, bool reverse)
+void PanicControls::setCoralRollers(bool on)
 {
     XInput.setTrigger(XInputControl::TRIGGER_RIGHT, on * analogRead(ROLLER_POT_PIN));
     XInput.setButton(XInputControl::BUTTON_R3, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setAlgaeRollers(bool on, bool reverse)
+void PanicControls::setAlgaeRollers(bool on)
 {
     XInput.setTrigger(XInputControl::TRIGGER_LEFT, on * analogRead(ROLLER_POT_PIN));
     XInput.setButton(XInputControl::BUTTON_L3, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setElevator(bool on, bool reverse)
+void PanicControls::setElevator(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickY(XInputControl::JOY_RIGHT, val, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setLaterator(bool on, bool reverse)
+void PanicControls::setLaterator(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickX(XInputControl::JOY_RIGHT, val, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setAlgaePivot(bool on, bool reverse)
+void PanicControls::setAlgaePivot(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickX(XInputControl::JOY_LEFT, val, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setClimber(bool on, bool reverse)
+void PanicControls::setClimber(bool on)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickY(XInputControl::JOY_LEFT, val, on && PanicControls::mechanismReversed);
