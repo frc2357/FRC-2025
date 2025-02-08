@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -15,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.SWERVE;
-import frc.robot.commands.auto.Autos;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
@@ -23,6 +23,9 @@ import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.ButtonboardController;
 import frc.robot.generated.TunerConstants;
+import frc.robot.networkTables.AutoChooserManager;
+import frc.robot.networkTables.SignalLoggerManager;
+import frc.robot.networkTables.SysIdChooser;
 import frc.robot.subsystems.AlgaePivot;
 import frc.robot.subsystems.AlgaeRunner;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -38,24 +41,27 @@ import frc.robot.util.ElasticFieldManager;
  */
 public class Robot extends TimedRobot {
 
-  private Command m_autonomousCommand;
-  private SequentialCommandGroup m_setCoastOnDisable;
-
   public static CommandSwerveDrivetrain swerve;
   public static Elevator elevator;
   public static Laterator laterator;
   public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
-
-  public static AutoChooserManager autoChooserManager;
-  public static Autos autos;
   public static DriverControls driverControls;
   public static ButtonboardController buttonboard;
 
   public static Alliance alliance = null;
 
-  public static ElasticFieldManager elasticFieldManager;
+  private Field2d shooterFieldRepresentation;
+  private Field2d swerveFieldRepresentation;
+
+  private Command m_autonomousCommand;
+  private SequentialCommandGroup m_setCoastOnDisable;
+  private AutoChooserManager m_autoChooserManager;
+  private SignalLoggerManager m_SignalLoggerManager;
+
+  @SuppressWarnings("unused")
+  private SysIdChooser m_sysIdChooser;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -66,6 +72,7 @@ public class Robot extends TimedRobot {
       !DriverStation.isFMSAttached()
     ); //TODO: turn this off at comp, just in case.
 
+    // Define subsystems
     swerve = TunerConstants.createDrivetrain();
     // elevator = new Elevator();
     // laterator = new Laterator();
@@ -75,9 +82,7 @@ public class Robot extends TimedRobot {
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
 
-    autos = new Autos();
-    autoChooserManager = new AutoChooserManager();
-
+    // Define controls
     buttonboard = new ButtonboardController(
       Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT
     );
@@ -86,18 +91,22 @@ public class Robot extends TimedRobot {
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
 
+    // Define network table tools
+    m_autoChooserManager = new AutoChooserManager();
+    m_sysIdChooser = new SysIdChooser();
+    m_SignalLoggerManager = new SignalLoggerManager();
+
+    SmartDashboard.putData("Buttonboard", buttonboard);
+    SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
+    SmartDashboard.putData("Signal Logger", m_SignalLoggerManager);
+
+    // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();
 
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
       new DriveSetCoast()
     );
-  }
-
-  @Override
-  public void robotInit() {
-    SmartDashboard.putData("Buttonboard", buttonboard);
-    SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
   }
 
   /**
@@ -127,7 +136,8 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = autoChooserManager.getSelectedCommandScheduler();
+    swerve.configNeutralMode(NeutralModeValue.Brake);
+    m_autonomousCommand = m_autoChooserManager.getSelectedCommandScheduler();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();

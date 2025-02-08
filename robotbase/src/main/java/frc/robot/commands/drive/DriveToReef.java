@@ -19,7 +19,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.commands.elevator.ElevatorStop;
 import frc.robot.util.SATCollisionDetector;
 import frc.robot.util.Utility;
 import java.util.function.BooleanSupplier;
