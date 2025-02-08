@@ -102,37 +102,37 @@ void PanicControls::setControllerAxes()
     }
 }
 
-void PanicControls::setCoralRollers(bool on)
+void PanicControls::setCoralRollers(bool on, bool reverse)
 {
     XInput.setTrigger(XInputControl::TRIGGER_RIGHT, on * analogRead(ROLLER_POT_PIN));
     XInput.setButton(XInputControl::BUTTON_R3, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setAlgaeRollers(bool on)
+void PanicControls::setAlgaeRollers(bool on, bool reverse)
 {
     XInput.setTrigger(XInputControl::TRIGGER_LEFT, on * analogRead(ROLLER_POT_PIN));
     XInput.setButton(XInputControl::BUTTON_L3, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setElevator(bool on)
+void PanicControls::setElevator(bool on, bool reverse)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickY(XInputControl::JOY_RIGHT, val, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setLaterator(bool on)
+void PanicControls::setLaterator(bool on, bool reverse)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickX(XInputControl::JOY_RIGHT, val, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setAlgaePivot(bool on)
+void PanicControls::setAlgaePivot(bool on, bool reverse)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickX(XInputControl::JOY_LEFT, val, on && PanicControls::mechanismReversed);
 }
 
-void PanicControls::setClimber(bool on)
+void PanicControls::setClimber(bool on, bool reverse)
 {
     uint16_t val = on ? analogRead(MOVEMENT_POT_PIN) : 0;
     XInput.setJoystickY(XInputControl::JOY_LEFT, val, on && PanicControls::mechanismReversed);

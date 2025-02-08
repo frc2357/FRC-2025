@@ -39,23 +39,25 @@ void ScoringSelection::update()
     {
         // Find log_2 of the combined state
         // This will basically tell us the position of the most significant bit that is set to 1
-        setCurrentSelection(log2(leftState | rightState));
+        setScoringLevelSelection(log2(leftState | rightState));
     }
 }
 
-void ScoringSelection::setCurrentSelection(int selection)
+void ScoringSelection::setScoringLevelSelection(int selection)
 {
-    if (selection == m_currentSelection)
+    if (selection == m_scoringLevelSelection)
     {
-        m_currentSelection = -1;
+        XInput.release(SCORING_LEVEL_CONTROLLER_BUTTONS[m_scoringLevelSelection]);
+        m_scoringLevelSelection = -1;
         m_leftKeypad.pixels.setPixelColor(selection, COLOR_OFF);
         m_rightKeypad.pixels.setPixelColor(selection, COLOR_OFF);
     }
     else
     {
-        m_currentSelection = selection;
+        m_scoringLevelSelection = selection;
         m_leftKeypad.pixels.setPixelColor(selection, COLOR_ON);
         m_rightKeypad.pixels.setPixelColor(selection, COLOR_ON);
+        XInput.press(SCORING_LEVEL_CONTROLLER_BUTTONS[m_scoringLevelSelection]);
     }
 
     m_leftKeypad.pixels.show();

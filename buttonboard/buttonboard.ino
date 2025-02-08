@@ -1,4 +1,5 @@
 #include "PanicControls.h"
+#include "ScoringSelection.h"
 
 #define LEFT_SCORING_LEVEL_SELECTOR_ADDRESS 0x30
 #define RIGHT_SCORING_LEVEL_SELECTOR_ADDRESS 0x31
