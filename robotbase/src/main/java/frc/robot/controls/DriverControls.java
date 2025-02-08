@@ -9,7 +9,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.commands.drive.DriveToReef;
+import frc.robot.commands.drive.DriveToCoralStation;
+import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
+import frc.robot.commands.drive.DriveToPoseHandler;
+import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 
 @SuppressWarnings("unused")
 public class DriverControls {
@@ -36,10 +39,15 @@ public class DriverControls {
   }
 
   public void mapControls() {
-    m_controller.a().whileTrue(new DriveToReef());
-
+    m_controller.a().whileTrue(new DriveToPoseHandler(RouteAroundReef.Fastest));
     m_controller
       .b()
+      .whileTrue(
+        new DriveToCoralStation(StationToGoTo.Fastest, RouteAroundReef.Fastest)
+      );
+
+    m_controller
+      .x()
       .onTrue(
         new InstantCommand(() ->
           Robot.swerve.resetPose(
