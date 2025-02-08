@@ -2,11 +2,9 @@ package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotation;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Constants.SWERVE;
@@ -37,17 +35,14 @@ public class DriveLockReef extends Command {
       return;
     }
 
-    Pose2d relativePose = Robot.swerve
-      .getAllianceRelativePose2d()
-      .relativeTo(REEF.CENTER);
-    Rotation2d calc_rotation = Rotation2d.fromRadians(
-      Math.atan2(relativePose.getX(), relativePose.getY())
+    Pose2d relativePose = REEF.CENTER.relativeTo(
+      Robot.swerve.getAllianceRelativePose2d()
     );
 
     Robot.swerve.driveTargetAngle(
       x * m_speedAt12VoltsMPS,
       y * m_speedAt12VoltsMPS,
-      calc_rotation
+      new Rotation2d(relativePose.getX(), relativePose.getY())
     );
   }
 }
