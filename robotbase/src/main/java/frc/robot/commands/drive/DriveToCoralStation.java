@@ -36,8 +36,9 @@ public class DriveToCoralStation extends DriveToPoseHandler {
   }
 
   @Override
-  protected void extraNewTargetChecks(Pose2d currTarget, Pose2d currPose) {
+  protected Pose2d getNewTarget(Pose2d currTarget, Pose2d currPose) {
     m_finalGoal = getDesiredTarget(currPose);
+    return super.getNewTarget(currTarget, currPose);
   }
 
   private Pose2d getDesiredTarget(Pose2d currPose) {

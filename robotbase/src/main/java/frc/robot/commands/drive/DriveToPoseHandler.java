@@ -28,6 +28,10 @@ public class DriveToPoseHandler extends Command {
 
   protected Command m_finalApproachCommand;
 
+  public DriveToPoseHandler() {
+    this(RouteAroundReef.Fastest);
+  }
+
   public DriveToPoseHandler(RouteAroundReef routeAroundReef) {
     this(routeAroundReef, null);
   }
@@ -47,19 +51,13 @@ public class DriveToPoseHandler extends Command {
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currDriveToPose = new DriveToPose(getTargetFunction()); // make a DriveToPose that we have control of
     m_currDriveToPose.schedule();
-    extraInitialize();
   }
-
-  protected void extraInitialize() {}
 
   @Override
   public void execute() {
     m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
-    extraExecute();
   }
-
-  protected void extraExecute() {}
 
   @Override
   public boolean isFinished() {
@@ -70,10 +68,7 @@ public class DriveToPoseHandler extends Command {
   public void end(boolean isInteruptted) {
     m_currDriveToPose.cancel();
     Robot.swerve.stopMotors();
-    extraEnd();
   }
-
-  protected void extraEnd() {}
 
   protected boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
     if (
@@ -101,13 +96,12 @@ public class DriveToPoseHandler extends Command {
     return new Function<Pose2d, Pose2d>() {
       @Override
       public Pose2d apply(Pose2d currPose) {
-        return findNewTarget(m_currentTarget, currPose);
+        return getNewTarget(m_currentTarget, currPose);
       }
     };
   }
 
-  protected Pose2d findNewTarget(Pose2d currTarget, Pose2d currPose) {
-    extraNewTargetChecks(currTarget, currPose);
+  protected Pose2d getNewTarget(Pose2d currTarget, Pose2d currPose) {
     boolean isAtFinalApproach =
       Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
       FINAL_APPROACH_DISTANCE.in(Meters);
@@ -121,8 +115,7 @@ public class DriveToPoseHandler extends Command {
         currPose,
         m_finalGoal,
         DEFAULT_INTERPOLATION_PERCENTAGES
-      ) ||
-      extraCollisionChecks(currTarget, currPose)
+      )
     ) {
       m_currentTarget = m_finalGoal;
       return m_finalGoal;
@@ -141,17 +134,11 @@ public class DriveToPoseHandler extends Command {
         DEFAULT_INTERPOLATION_PERCENTAGES
       )
     ) {
-      newTarget = rotateAway(currPose, m_routeAroundReef);
+      newTarget = avoidReef(currPose, m_routeAroundReef);
     }
     m_currentTarget = newTarget;
     // make it go faster through deceit and deception
     return newTarget.transformBy(new Transform2d(currPose, newTarget));
-  }
-
-  protected void extraNewTargetChecks(Pose2d currTarget, Pose2d currPose) {}
-
-  protected boolean extraCollisionChecks(Pose2d currTarget, Pose2d currPose) {
-    return false;
   }
 
   /**
@@ -168,10 +155,13 @@ public class DriveToPoseHandler extends Command {
     );
   }
 
-  protected Pose2d rotateAway(
-    Pose2d currPose,
-    RouteAroundReef routeAroundReef
-  ) {
+  /**
+   * Avoids any collision with the reef
+   * @param currPose Robots current pose
+   * @param routeAroundReef Chosen path around the reef
+   * @return A pose that should be a target that follows the desired route around the reef, and going towards the goal.
+   */
+  protected Pose2d avoidReef(Pose2d currPose, RouteAroundReef routeAroundReef) {
     Pose2d target;
     Pose2d targetClockwise = new Pose2d(
       currPose
