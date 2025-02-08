@@ -3,32 +3,20 @@ package frc.robot.commands.drive;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.COLLISION_DETECTION.REEF_BOUNDARY;
 import static frc.robot.Constants.COLLISION_DETECTION.REEF_SAT_POLY;
-import static frc.robot.Constants.DRIVE_TO_POSE.DEFAULT_INTERPOLATION_PERCENTAGES;
-import static frc.robot.Constants.DRIVE_TO_POSE.FINAL_APPROACH_DISTANCE;
-import static frc.robot.Constants.DRIVE_TO_POSE.IDEAL_DISTANCE_FROM_REEF;
-import static frc.robot.Constants.DRIVE_TO_POSE.INTERPOLATION_DISTANCE;
-import static frc.robot.Constants.DRIVE_TO_POSE.ROTATE_AROUND_REEF_ROTATIONS;
-import static frc.robot.Constants.DRIVE_TO_POSE.X_TOLERANCE;
-import static frc.robot.Constants.DRIVE_TO_POSE.Y_TOLERANCE;
+import static frc.robot.Constants.DRIVE_TO_POSE.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.util.SATCollisionDetector;
 import frc.robot.util.Utility;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public class DriveToReef extends Command {
 
   public enum DirectionOfTravel {
-    X,
-    Y,
     Clockwise,
     CounterClockwise,
     Fastest,
@@ -85,15 +73,6 @@ public class DriveToReef extends Command {
     ) {
       return false;
     }
-    // if (
-    //   !Utility.isWithinTolerance(
-    //     targetPose.getRotation().getDegrees(),
-    //     currPose.getRotation().getDegrees(),
-    //     ROTATION_TOLERANCE.in(Degrees)
-    //   )
-    // ) {
-    //   return false;
-    // }
     return true;
   }
 
@@ -173,59 +152,44 @@ public class DriveToReef extends Command {
     DirectionOfTravel routeAroundReef
   ) {
     Pose2d target;
+    Pose2d targetClockwise = new Pose2d(
+      currPose
+        .getTranslation()
+        .rotateAround(
+          REEF.CENTER.getTranslation(),
+          ROTATE_AROUND_REEF_ROTATIONS
+        ),
+      currPose.getRotation()
+    );
+    Pose2d targetCounterClockwise = new Pose2d(
+      currPose
+        .getTranslation()
+        .rotateAround(
+          REEF.CENTER.getTranslation(),
+          ROTATE_AROUND_REEF_ROTATIONS.unaryMinus()
+        ),
+      currPose.getRotation()
+    );
+    double clockwiseDistFromCenter = Math.abs(
+      Utility.findDistanceBetweenPoses(m_finalGoal, targetClockwise)
+    );
+    double counterClockwiseDistFromCenter = Math.abs(
+      Utility.findDistanceBetweenPoses(m_finalGoal, targetCounterClockwise)
+    );
     switch (routeAroundReef) {
       case Clockwise:
-        target = new Pose2d(
-          currPose
-            .getTranslation()
-            .rotateAround(
-              REEF.CENTER.getTranslation(),
-              ROTATE_AROUND_REEF_ROTATIONS
-            ),
-          currPose.getRotation()
-        );
+        target = targetClockwise;
         break;
       case CounterClockwise:
-        target = new Pose2d(
-          currPose
-            .getTranslation()
-            .rotateAround(
-              REEF.CENTER.getTranslation(),
-              ROTATE_AROUND_REEF_ROTATIONS.unaryMinus()
-            ),
-          currPose.getRotation()
-        );
+        target = targetCounterClockwise;
+        break;
+      case Fastest:
+        target = clockwiseDistFromCenter <= counterClockwiseDistFromCenter
+          ? targetClockwise
+          : targetCounterClockwise;
         break;
       default:
-        Pose2d targetClockwise = new Pose2d(
-          currPose
-            .getTranslation()
-            .rotateAround(
-              REEF.CENTER.getTranslation(),
-              ROTATE_AROUND_REEF_ROTATIONS
-            ),
-          currPose.getRotation()
-        );
-        Pose2d targetCounterClockwise = new Pose2d(
-          currPose
-            .getTranslation()
-            .rotateAround(
-              REEF.CENTER.getTranslation(),
-              ROTATE_AROUND_REEF_ROTATIONS.unaryMinus()
-            ),
-          currPose.getRotation()
-        );
-        double clockwiseDistFromCenter = Math.abs(
-          Utility.findDistanceBetweenPoses(m_finalGoal, targetClockwise)
-        );
-        double counterClockwiseDistFromCenter = Math.abs(
-          Utility.findDistanceBetweenPoses(m_finalGoal, targetCounterClockwise)
-        );
-        if (clockwiseDistFromCenter <= counterClockwiseDistFromCenter) {
-          target = targetClockwise;
-        } else {
-          target = targetCounterClockwise;
-        }
+        target = targetClockwise;
     }
     double distAwayFromReef = Utility.findDistanceBetweenPoses(
       REEF.CENTER,
