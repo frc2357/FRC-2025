@@ -110,6 +110,7 @@ public class ButtonboardController extends GenericHID implements Sendable {
     ReefSide goal = Robot.buttonboard.getSelectedReefSide();
     ScoringDirection scoringDirection =
       Robot.buttonboard.getSelectedScoringDirection();
+
     switch (scoringDirection) {
       case Left:
         switch (goal) {
