@@ -62,7 +62,9 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
-    DriverStation.silenceJoystickConnectionWarning(true); //TODO: turn this off at comp, just in case.
+    DriverStation.silenceJoystickConnectionWarning(
+      !DriverStation.isFMSAttached()
+    ); //TODO: turn this off at comp, just in case.
 
     swerve = TunerConstants.createDrivetrain();
     // elevator = new Elevator();
@@ -72,7 +74,6 @@ public class Robot extends TimedRobot {
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
-    elasticFieldManager.setupShooterField();
 
     autos = new Autos();
     autoChooserManager = new AutoChooserManager();

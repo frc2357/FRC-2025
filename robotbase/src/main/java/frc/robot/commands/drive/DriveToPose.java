@@ -13,15 +13,11 @@ import frc.robot.Constants.DRIVE_TO_POSE;
 import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.Utility;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class DriveToPose extends Command {
 
   private Function<Pose2d, Pose2d> m_targetPoseFunction;
-  private BooleanSupplier m_isFinishedSupplier;
-  private Pose2d m_target;
 
   private ProfiledPIDController m_driveController;
   private ProfiledPIDController m_thetaController;
@@ -29,14 +25,10 @@ public class DriveToPose extends Command {
   private static final double m_speedAt12VoltsMPS =
     TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
 
-  public DriveToPose(
-    Function<Pose2d, Pose2d> targetPoseFunction,
-    BooleanSupplier isFinishedSupplier
-  ) {
+  public DriveToPose(Function<Pose2d, Pose2d> targetPoseFunction) {
     addRequirements(Robot.swerve);
 
     m_targetPoseFunction = targetPoseFunction;
-    m_isFinishedSupplier = isFinishedSupplier;
     m_driveController = DRIVE_TO_POSE.AUTO_ALIGN_DRIVE_CONTROLLER;
     m_thetaController = DRIVE_TO_POSE.AUTO_ALIGN_THETA_CONTROLLER;
   }
@@ -45,7 +37,6 @@ public class DriveToPose extends Command {
   public void initialize() {
     Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
     Pose2d targetPose = m_targetPoseFunction.apply(currentPose);
-    m_target = targetPose;
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     m_driveController.reset(
@@ -77,7 +68,6 @@ public class DriveToPose extends Command {
   public void execute() {
     Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
     Pose2d targetPose = m_targetPoseFunction.apply(currentPose);
-    m_target = targetPose;
 
     Translation2d driveVelocity = new Translation2d(
       Robot.driverControls.getY() * m_speedAt12VoltsMPS,

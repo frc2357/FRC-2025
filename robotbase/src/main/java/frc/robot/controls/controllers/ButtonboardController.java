@@ -9,11 +9,7 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.Robot;
-import frc.robot.controls.controllers.ButtonboardController.ReefSide;
-import frc.robot.controls.controllers.ButtonboardController.ScoringDirection;
 
 public class ButtonboardController extends GenericHID implements Sendable {
 
@@ -110,48 +106,47 @@ public class ButtonboardController extends GenericHID implements Sendable {
     );
   }
 
-  public Pose2d getPoseFromGoal() { // TODO: undo temp change
-    //   ReefSide goal = Robot.buttonboard.getSelectedReefSide();
-    //   ScoringDirection scoringDirection =
-    //     Robot.buttonboard.getSelectedScoringDirection();
-    return REEF.BRANCH_D;
-    // switch (scoringDirection) {
-    //   case Left:
-    //     switch (goal) {
-    //       case A:
-    //         return BRANCH_A;
-    //       case B:
-    //         return BRANCH_C;
-    //       case C:
-    //         return BRANCH_E;
-    //       case D:
-    //         return BRANCH_G;
-    //       case E:
-    //         return BRANCH_I;
-    //       case F:
-    //         return BRANCH_K;
-    //       default:
-    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-    //     }
-    //   case Right:
-    //     switch (goal) {
-    //       case A:
-    //         return BRANCH_B;
-    //       case B:
-    //         return BRANCH_D;
-    //       case C:
-    //         return BRANCH_F;
-    //       case D:
-    //         return BRANCH_H;
-    //       case E:
-    //         return BRANCH_J;
-    //       case F:
-    //         return BRANCH_L;
-    //       default:
-    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-    //     }
-    //   default:
-    //     return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-    // }
+  public Pose2d getPoseFromGoal() {
+    ReefSide goal = Robot.buttonboard.getSelectedReefSide();
+    ScoringDirection scoringDirection =
+      Robot.buttonboard.getSelectedScoringDirection();
+    switch (scoringDirection) {
+      case Left:
+        switch (goal) {
+          case A:
+            return BRANCH_A;
+          case B:
+            return BRANCH_C;
+          case C:
+            return BRANCH_E;
+          case D:
+            return BRANCH_G;
+          case E:
+            return BRANCH_I;
+          case F:
+            return BRANCH_K;
+          default:
+            return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+        }
+      case Right:
+        switch (goal) {
+          case A:
+            return BRANCH_B;
+          case B:
+            return BRANCH_D;
+          case C:
+            return BRANCH_F;
+          case D:
+            return BRANCH_H;
+          case E:
+            return BRANCH_J;
+          case F:
+            return BRANCH_L;
+          default:
+            return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+        }
+      default:
+        return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+    }
   }
 }
