@@ -7,8 +7,16 @@ import frc.robot.Robot;
 public class CoralRunnerSetVelocity extends Command {
 
   private AngularVelocity m_velocity;
+  private boolean m_stopOnEnd;
+
+  public CoralRunnerSetVelocity(AngularVelocity velocity, boolean stopOnEnd) {
+    m_stopOnEnd = stopOnEnd;
+    m_velocity = velocity;
+    addRequirements(Robot.coralRunner);
+  }
 
   public CoralRunnerSetVelocity(AngularVelocity velocity) {
+    m_stopOnEnd = true;
     m_velocity = velocity;
     addRequirements(Robot.coralRunner);
   }
@@ -25,6 +33,8 @@ public class CoralRunnerSetVelocity extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    Robot.coralRunner.stop();
+    if (m_stopOnEnd) {
+      Robot.coralRunner.stop();
+    }
   }
 }

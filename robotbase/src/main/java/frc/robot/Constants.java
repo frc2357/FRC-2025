@@ -171,12 +171,6 @@ public final class Constants {
       public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-
-      public static final Distance INTAKE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L1 = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L2 = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L3 = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L4 = Units.Feet.of(0); //TODO: Tune Setpoint
     }
   }
 
@@ -231,12 +225,6 @@ public final class Constants {
       public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-
-      public static final Distance INTAKE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L1 = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L2 = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L3 = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L4 = Units.Feet.of(0); //TODO: Tune Setpoint
     }
   }
 
@@ -246,6 +234,10 @@ public final class Constants {
       AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
     public static final AngularVelocity SLOW_INTAKE_VELOCITY =
       AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
+    public static final AngularVelocity SCORING_VELOCITY =
+      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
+
+    public static final double SCORING_WAIT_TIME = .25;
 
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
