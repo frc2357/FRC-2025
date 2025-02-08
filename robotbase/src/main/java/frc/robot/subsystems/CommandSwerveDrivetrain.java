@@ -139,6 +139,10 @@ public class CommandSwerveDrivetrain
     new SwerveRequest.ApplyFieldSpeeds()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
 
+  private final SwerveRequest.FieldCentricFacingAngle m_fieldCentricFacingAnglentric =
+    new SwerveRequest.FieldCentricFacingAngle()
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+
   private Twist2d m_fieldVelocity = new Twist2d();
 
   /**
@@ -320,6 +324,26 @@ public class CommandSwerveDrivetrain
         .withVelocityX(velocityXMetersPerSecond)
         .withVelocityY(velocityYMetersPerSecond)
         .withRotationalRate(rotationRateRadiansPerSecond)
+    );
+  }
+
+  /**
+   * The method to use for target angle driving.
+   *
+   * @param velocityXMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYMetersPerSecond The desired speed on the Y axis in meters per second.
+   * @param targetAngle The target angle.
+   */
+  public void driveTargetAngle(
+    double velocityXMetersPerSecond,
+    double velocityYMetersPerSecond,
+    Rotation2d targetAngle
+  ) {
+    setControl(
+      m_fieldCentricFacingAnglentric
+        .withVelocityX(velocityXMetersPerSecond)
+        .withVelocityY(velocityYMetersPerSecond)
+        .withTargetDirection(targetAngle)
     );
   }
 
