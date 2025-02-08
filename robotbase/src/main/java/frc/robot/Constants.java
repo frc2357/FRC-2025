@@ -34,6 +34,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Velocity;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -162,6 +163,8 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
+      public static final Distance HOME = Units.Feet.of(0); //TODO: Tune Setpoint
+
       public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
@@ -220,6 +223,8 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
+      public static final Distance HOME = Units.Feet.of(0); //TODO: Tune Setpoint
+
       public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
       public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
@@ -235,6 +240,11 @@ public final class Constants {
   }
 
   public static final class CORAL_RUNNER {
+
+    public static final AngularVelocity FAST_INTAKE_VELOCITY =
+      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
+    public static final AngularVelocity SLOW_INTAKE_VELOCITY =
+      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
 
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
