@@ -58,10 +58,6 @@ public class DriveToPose extends Command {
     );
 
     m_thetaController.reset(currentPose.getRotation().getRadians());
-    System.out.println(
-      "****\nSTART DRIVE TO POSE\nPOSE AT START: " +
-      Robot.swerve.getFieldRelativePose2d()
-    );
   }
 
   @Override
