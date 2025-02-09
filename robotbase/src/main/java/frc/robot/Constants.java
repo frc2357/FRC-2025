@@ -468,7 +468,7 @@ public final class Constants {
      * REEF_BOUNDARY + X distance away from the center of the reef
      */
     public static final Distance IDEAL_DISTANCE_FROM_REEF =
-      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(1));
+      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(1.5));
 
     /**
      * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
@@ -492,10 +492,11 @@ public final class Constants {
 
     public static final SATVector[] REEF_SAT_POLY = {
       new SATVector(REEF.BOTTOM_LEFT_CORNER),
-      new SATVector(REEF.BOTTOM_RIGHT_CORNER),
-      new SATVector(REEF.TOP_RIGHT_CORNER),
-      new SATVector(REEF.TOP_CORNER),
       new SATVector(REEF.TOP_LEFT_CORNER),
+      new SATVector(REEF.TOP_CORNER),
+      new SATVector(REEF.TOP_RIGHT_CORNER),
+      new SATVector(REEF.BOTTOM_RIGHT_CORNER),
+      new SATVector(REEF.BOTTOM_CORNER),
     };
   }
 
