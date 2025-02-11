@@ -46,9 +46,6 @@ public class Robot extends TimedRobot {
 
   public static Alliance alliance = null;
 
-  private Field2d shooterFieldRepresentation;
-  private Field2d swerveFieldRepresentation;
-
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
   private AutoChooserManager m_autoChooserManager;
@@ -87,6 +84,8 @@ public class Robot extends TimedRobot {
     m_autoChooserManager = new AutoChooserManager();
     m_sysIdChooser = new SysIdChooser();
     m_SignalLoggerManager = new SignalLoggerManager();
+    elasticFieldManager = new ElasticFieldManager();
+    elasticFieldManager.setupSwerveField();
 
     SmartDashboard.putData("Buttonboard", buttonboard);
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
