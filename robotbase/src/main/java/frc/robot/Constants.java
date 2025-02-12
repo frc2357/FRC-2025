@@ -18,6 +18,15 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
+import frc.robot.Constants.FIELD.REEF;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -256,7 +265,7 @@ public final class Constants {
 
   public static final class ALGAE_RUNNER {
 
-    public static final double AXIS_MAX_SPEED = 0.8;
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final IdleMode IDLE_MODE = IdleMode.kBrake;
 
@@ -283,7 +292,7 @@ public final class Constants {
 
   public static final class ALGAE_PIVOT {
 
-    public static final double AXIS_MAX_SPEED = 0.8;
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final IdleMode IDLE_MODE = IdleMode.kBrake;
 
@@ -301,7 +310,6 @@ public final class Constants {
 
     public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IDLE_MODE)
-      .inverted(MOTOR_INVERTED)
       .smartCurrentLimit(
         (int) MOTOR_STALL_LIMIT.in(Units.Amps),
         (int) MOTOR_FREE_LIMIT.in(Units.Amps)
@@ -311,7 +319,12 @@ public final class Constants {
     public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
       new SparkMaxConfig()
         .idleMode(IDLE_MODE)
-        .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR);
+        .openLoopRampRate(RAMP_RATE)
+        .smartCurrentLimit(
+          (int) MOTOR_STALL_LIMIT.in(Units.Amps),
+          (int) MOTOR_FREE_LIMIT.in(Units.Amps)
+        )
+        .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR, true);
 
     public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
@@ -321,8 +334,8 @@ public final class Constants {
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       LEFT_MOTOR_CONFIG.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
-        .outputRange(-1, 1)
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+        .outputRange(-1, 1);
+    //.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
@@ -330,8 +343,8 @@ public final class Constants {
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
-      LEFT_MOTOR_CONFIG.absoluteEncoder;
+    // public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
+    //   LEFT_MOTOR_CONFIG.absoluteEncoder;
 
     public static final Angle ALGAE_INTAKE_ANGLE = Units.Degrees.of(0);
   }
