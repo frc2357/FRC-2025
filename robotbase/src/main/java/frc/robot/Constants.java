@@ -88,6 +88,10 @@ public final class Constants {
       Units.DegreesPerSecondPerSecond.of(120); //TODO: tune this
 
     public static final Time TIME_TO_COAST = Units.Seconds.of(3);
+
+    public static final double FACING_ANGLE_P = 0;
+    public static final double FACING_ANGLE_I = 0;
+    public static final double FACING_ANGLE_D = 0;
   }
 
   public static final class CHOREO {
