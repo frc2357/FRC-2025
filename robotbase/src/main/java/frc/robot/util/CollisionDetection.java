@@ -1,12 +1,88 @@
 package frc.robot.util;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.COLLISION_DETECTION.*;
+import static frc.robot.Constants.FIELD.REEF.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.units.Units;
+import frc.robot.util.SATCollisionDetector.SATVector;
 
 public class CollisionDetection {
+
+  /**
+   * Exists purely to keep a ton of lines out of the {@link frc.robot.Constants.COLLISION_DETECTION Constants} file.
+   * @return A polygon of the reef, in SATVectors, with the collision tolerance applied. Larger than the actual reef.
+   */
+  public static SATVector[] createReefPolygon() {
+    return new SATVector[] {
+      new SATVector(
+        BOTTOM_LEFT_CORNER.transformBy(
+          new Transform2d(CENTER, BOTTOM_LEFT_CORNER).times(
+            (1 /
+              Math.abs(
+                Utility.findDistanceBetweenPoses(CENTER, BOTTOM_LEFT_CORNER)
+              )) *
+            COLLISION_TOLERANCE.in(Meters)
+          )
+        )
+      ),
+      new SATVector(
+        TOP_LEFT_CORNER.transformBy(
+          new Transform2d(CENTER, TOP_LEFT_CORNER).times(
+            (1 /
+              Math.abs(
+                Utility.findDistanceBetweenPoses(CENTER, TOP_LEFT_CORNER)
+              )) *
+            COLLISION_TOLERANCE.in(Meters)
+          )
+        )
+      ),
+      new SATVector(
+        TOP_CORNER.transformBy(
+          new Transform2d(CENTER, TOP_CORNER).times(
+            (1 /
+              Math.abs(Utility.findDistanceBetweenPoses(CENTER, TOP_CORNER))) *
+            COLLISION_TOLERANCE.in(Meters)
+          )
+        )
+      ),
+      new SATVector(
+        TOP_RIGHT_CORNER.transformBy(
+          new Transform2d(CENTER, TOP_RIGHT_CORNER).times(
+            (1 /
+              Math.abs(
+                Utility.findDistanceBetweenPoses(CENTER, TOP_RIGHT_CORNER)
+              )) *
+            COLLISION_TOLERANCE.in(Meters)
+          )
+        )
+      ),
+      new SATVector(
+        BOTTOM_RIGHT_CORNER.transformBy(
+          new Transform2d(CENTER, BOTTOM_RIGHT_CORNER).times(
+            (1 /
+              Math.abs(
+                Utility.findDistanceBetweenPoses(CENTER, BOTTOM_RIGHT_CORNER)
+              )) *
+            COLLISION_TOLERANCE.in(Meters)
+          )
+        )
+      ),
+      new SATVector(
+        BOTTOM_CORNER.transformBy(
+          new Transform2d(CENTER, BOTTOM_CORNER).times(
+            (1 /
+              Math.abs(
+                Utility.findDistanceBetweenPoses(CENTER, BOTTOM_CORNER)
+              )) *
+            COLLISION_TOLERANCE.in(Meters)
+          )
+        )
+      ),
+    };
+  }
 
   public static boolean willHitReef(
     Pose2d currPose,

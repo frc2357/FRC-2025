@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import frc.robot.Constants.DRIVE_TO_POSE;
+import frc.robot.Constants.FIELD.REEF;
 import frc.robot.commands.drive.DriveToPoseHandler;
 import frc.robot.util.Utility;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,28 +44,17 @@ class DriveToPoseHandlerTests extends DriveToPoseHandler {
     assertEquals(true, result);
   }
 
-  // @Test
-  // void findNewTargetFinalApproachTest() {
-  //   Pose2d finalGoal = REEF.BRANCH_A;
-  //   Pose2d currPose = finalGoal.plus(new Transform2d(-.5, 0, Rotation2d.kZero));
-  //   Pose2d currTar = REEF.BRANCH_A.plus(
-  //     new Transform2d(-0.05, 0, Rotation2d.kZero)
-  //   );
-  //   m_finalGoal = finalGoal;
-  //   Pose2d result = super.getNewTarget(currTar, currPose);
-  //   assertEquals(finalGoal, result);
-  // }
-
-  // @Test
-  // void findNewTargetStayWithTargetTest() {
-  //   Pose2d finalGoal = REEF.BRANCH_A;
-  //   Pose2d currPose = finalGoal.plus(new Transform2d(-2, 0, Rotation2d.kZero));
-  //   Pose2d currTar = currPose.plus(new Transform2d(0.5, 0, Rotation2d.kZero));
-  //   m_finalGoal = finalGoal;
-  //   Pose2d newTar = super.getNewTarget(currTar, currPose);
-  //   double result = Utility.findDistanceBetweenPoses(currTar, newTar);
-  //   assertEquals(0, result, DELTA);
-  // }
+  @Test
+  void findNewTargetFinalApproachTest() {
+    Pose2d finalGoal = REEF.BRANCH_A;
+    Pose2d currPose = finalGoal.plus(new Transform2d(-.5, 0, Rotation2d.kZero));
+    Pose2d currTar = REEF.BRANCH_A.plus(
+      new Transform2d(-0.05, 0, Rotation2d.kZero)
+    );
+    m_finalGoal = finalGoal;
+    Pose2d result = super.getNewTarget(currTar, currPose);
+    assertEquals(finalGoal, result);
+  }
 
   @Test
   void InterpolateTest() {

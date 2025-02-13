@@ -10,10 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
@@ -23,15 +20,8 @@ import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.ButtonboardController;
 import frc.robot.generated.TunerConstants;
-import frc.robot.networkTables.AutoChooserManager;
-import frc.robot.networkTables.SignalLoggerManager;
-import frc.robot.networkTables.SysIdChooser;
-import frc.robot.subsystems.AlgaePivot;
-import frc.robot.subsystems.AlgaeRunner;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CoralRunner;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Laterator;
+import frc.robot.networkTables.*;
+import frc.robot.subsystems.*;
 import frc.robot.util.ElasticFieldManager;
 
 /**
@@ -39,6 +29,7 @@ import frc.robot.util.ElasticFieldManager;
  * the TimedRobot documentation. If you change the name of this class or the package after creating
  * this project, you must also update the Main.java file in the project.
  */
+@SuppressWarnings("unused")
 public class Robot extends TimedRobot {
 
   public static CommandSwerveDrivetrain swerve;
