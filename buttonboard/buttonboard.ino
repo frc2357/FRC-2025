@@ -1,4 +1,5 @@
 #include "LevelSelection.h"
+#include "BranchSelection.h"
 
 #define LEFT_LEVEL_KEYPAD_ADDRESS 0x30
 #define RIGHT_LEVEL_KEYPAD_ADDRESS 0x31
@@ -14,6 +15,7 @@ void setup()
   XInput.begin();
 
   level.init();
+  BranchSelection::init();
 }
 
 void loop()
