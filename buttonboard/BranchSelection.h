@@ -47,7 +47,7 @@ public:
 private:
     static void onPinActivated(int pin);
     static void onPinDeactivated(int pin);
-    static XInputControl *getXboxButtonsFromBranch(BranchSelection::Branch selection);
+    static XInputControl *setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
 
     static FTDebouncer debouncer;
     static BranchSelection::Branch selection;

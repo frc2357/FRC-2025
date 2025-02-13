@@ -36,22 +36,18 @@ BranchSelection::Branch BranchSelection::getSelection()
 void BranchSelection::onPinActivated(int pin)
 {
     BranchSelection::Branch branch = static_cast<BranchSelection::Branch>(pin);
-    XInputControl *buttons = BranchSelection::getXboxButtonsFromBranch(branch);
+
     if (branch == BranchSelection::selection)
     {
+        // Deselect already selected branch
+        BranchSelection::setXboxButtonsForBranch(BranchSelection::selection, false);
         BranchSelection::selection = BranchSelection::Branch::NONE;
-        for (int i = 0; i < 2; i++)
-        {
-            XInput.release(static_cast<XInputControl>(i));
-        }
     }
     else
     {
+        BranchSelection::setXboxButtonsForBranch(BranchSelection::selection, false);
+        BranchSelection::setXboxButtonsForBranch(branch, true);
         BranchSelection::selection = branch;
-        for (int i = 0; i < 2; i++)
-        {
-            XInput.press(static_cast<XInputControl>(i));
-        }
     }
 }
 
@@ -59,33 +55,57 @@ void BranchSelection::onPinDeactivated(int pin)
 {
 }
 
-XInputControl *BranchSelection::getXboxButtonsFromBranch(BranchSelection::Branch branch)
+XInputControl *BranchSelection::setXboxButtonsForBranch(BranchSelection::Branch branch, bool selected)
 {
     switch (branch)
     {
     case A:
-        return new XInputControl[2]{REEF_DIR_LEFT, REEF_SIDE1};
+        XInput.setButton(REEF_DIR_LEFT, selected);
+        XInput.setButton(REEF_SIDE1, selected);
+        break;
     case B:
-        return new XInputControl[2]{REEF_DIR_RIGHT, REEF_SIDE1};
+        XInput.setButton(REEF_DIR_RIGHT, selected);
+        XInput.setButton(REEF_SIDE1, selected);
+        break;
     case C:
-        return new XInputControl[2]{REEF_DIR_LEFT, REEF_SIDE2};
+        XInput.setButton(REEF_DIR_LEFT, selected);
+        XInput.setButton(REEF_SIDE2, selected);
+        break;
     case D:
-        return new XInputControl[2]{REEF_DIR_RIGHT, REEF_SIDE2};
+        XInput.setButton(REEF_DIR_RIGHT, selected);
+        XInput.setButton(REEF_SIDE2, selected);
+        break;
     case E:
-        return new XInputControl[2]{REEF_DIR_LEFT, REEF_SIDE3};
+        XInput.setButton(REEF_DIR_LEFT, selected);
+        XInput.setButton(REEF_SIDE3, selected);
+        break;
     case F:
-        return new XInputControl[2]{REEF_DIR_RIGHT, REEF_SIDE3};
+        XInput.setButton(REEF_DIR_RIGHT, selected);
+        XInput.setButton(REEF_SIDE3, selected);
+        break;
     case G:
-        return new XInputControl[2]{REEF_DIR_LEFT, REEF_SIDE4};
+        XInput.setButton(REEF_DIR_LEFT, selected);
+        XInput.setButton(REEF_SIDE4, selected);
+        break;
     case H:
-        return new XInputControl[2]{REEF_DIR_RIGHT, REEF_SIDE4};
+        XInput.setButton(REEF_DIR_RIGHT, selected);
+        XInput.setButton(REEF_SIDE4, selected);
+        break;
     case I:
-        return new XInputControl[2]{REEF_DIR_LEFT, REEF_SIDE5};
+        XInput.setButton(REEF_DIR_LEFT, selected);
+        XInput.setButton(REEF_SIDE5, selected);
+        break;
     case J:
-        return new XInputControl[2]{REEF_DIR_RIGHT, REEF_SIDE5};
+        XInput.setButton(REEF_DIR_RIGHT, selected);
+        XInput.setButton(REEF_SIDE5, selected);
+        break;
     case K:
-        return new XInputControl[2]{REEF_DIR_LEFT, REEF_SIDE6};
+        XInput.setButton(REEF_DIR_LEFT, selected);
+        XInput.setButton(REEF_SIDE6, selected);
+        break;
     case L:
-        return new XInputControl[2]{REEF_DIR_RIGHT, REEF_SIDE6};
+        XInput.setButton(REEF_DIR_RIGHT, selected);
+        XInput.setButton(REEF_SIDE6, selected);
+        break;
     }
 }
