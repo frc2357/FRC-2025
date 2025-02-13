@@ -6,37 +6,19 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
-import static frc.robot.Constants.DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER;
 
 import choreo.auto.AutoFactory;
-import com.revrobotics.spark.config.AbsoluteEncoderConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.EncoderConfig;
-import com.revrobotics.spark.config.MAXMotionConfig;
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import frc.robot.Constants.FIELD.REEF;
+import edu.wpi.first.units.measure.*;
+import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -492,14 +474,8 @@ public final class Constants {
       .plus(ROBOT_CONFIGURATION.BOUNDARY)
       .plus(COLLISION_TOLERANCE);
 
-    public static final SATVector[] REEF_SAT_POLY = {
-      new SATVector(REEF.BOTTOM_LEFT_CORNER),
-      new SATVector(REEF.TOP_LEFT_CORNER),
-      new SATVector(REEF.TOP_CORNER),
-      new SATVector(REEF.TOP_RIGHT_CORNER),
-      new SATVector(REEF.BOTTOM_RIGHT_CORNER),
-      new SATVector(REEF.BOTTOM_CORNER),
-    };
+    public static final SATVector[] REEF_SAT_POLY =
+      CollisionDetection.createReefPolygon();
   }
 
   public static final class CONTROLLER {
@@ -638,7 +614,7 @@ public final class Constants {
       public static final Pose2d UPPER_STATION_DESIRED_SLOT =
         UPPER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
           UPPER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
-            DESIRED_CORAL_STATION_SLOT_NUMBER
+            DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER
           )
         );
 
@@ -658,7 +634,7 @@ public final class Constants {
       public static final Pose2d LOWER_STATION_DESIRED_SLOT =
         LOWER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
           LOWER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
-            DESIRED_CORAL_STATION_SLOT_NUMBER
+            DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER
           )
         );
     }
