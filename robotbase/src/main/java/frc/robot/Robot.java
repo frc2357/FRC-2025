@@ -66,7 +66,7 @@ public class Robot extends TimedRobot {
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
-    // elevator = new Elevator();
+    elevator = new Elevator();
     // laterator = new Laterator();
     // coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();

@@ -7,6 +7,9 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -43,12 +46,18 @@ public class Elevator extends SubsystemBase {
     );
 
     m_motorLeft.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_LEFT,
+      new SparkMaxConfig()
+        .inverted(false)
+        .smartCurrentLimit(30, 30)
+        .idleMode(IdleMode.kCoast),
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
     m_motorRight.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
+      new SparkMaxConfig()
+        .inverted(true)
+        .smartCurrentLimit(30, 30)
+        .idleMode(IdleMode.kCoast),
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
@@ -60,17 +69,20 @@ public class Elevator extends SubsystemBase {
 
   public void setSpeed(double percentOutput) {
     m_motorLeft.set(percentOutput);
+    m_motorRight.set(percentOutput);
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void setAxisSpeed(double speed) {
     speed *= ELEVATOR.AXIS_MAX_SPEED;
     m_motorLeft.set(speed);
+    m_motorRight.set(speed);
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void stop() {
     m_motorLeft.stopMotor();
+    m_motorRight.stopMotor();
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 

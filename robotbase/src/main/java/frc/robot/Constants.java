@@ -125,21 +125,25 @@ public final class Constants {
   public static final class ELEVATOR {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
-      .idleMode(IdleMode.kBrake)
-      .inverted(false)
+      .idleMode(IdleMode.kCoast)
+      .inverted(true)
       .openLoopRampRate(.25)
+      .smartCurrentLimit(10, 10)
       .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
-        .idleMode(IdleMode.kBrake)
+        .idleMode(IdleMode.kCoast)
+        .inverted(false)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
+        .smartCurrentLimit(10, 10);
+
     public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
     public static final double LEFT_MOTOR_D = 0;
     public static final double LEFT_MOTOR_F = 0;
+
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
@@ -150,12 +154,13 @@ public final class Constants {
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
+
     public static final int ENCODER_COUNTS_PER_REV = 8196;
     public static final double GEAR_RATIO = 50 / 14;
     public static final Distance MOTOR_PULLEY_PITCH_DIAMETER = Units.Inches.of(
       2.256
     );
-    public static final double AXIS_MAX_SPEED = 0.1;
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final class SETPOINTS {
 
