@@ -1,24 +1,11 @@
 package frc.robot.controls;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.FIELD.REEF;
-import frc.robot.Robot;
-import frc.robot.commands.algaePivot.AlgaePivotAxis;
-import frc.robot.commands.algaeRunner.AlgaeRunnerAxis;
-import frc.robot.commands.drive.DriveToCoralStation;
-import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
-import frc.robot.commands.drive.DriveToPoseHandler;
-import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.elevator.ElevatorAxis;
 
-@SuppressWarnings("unused")
-public class CoDriverControls {
+public class CodriverControls {
 
   private CommandXboxController m_controller;
 
@@ -27,7 +14,7 @@ public class CoDriverControls {
   private Trigger m_rightTrigger;
   private Trigger m_leftTrigger;
 
-  public CoDriverControls(CommandXboxController controller, double deadband) {
+  public CodriverControls(CommandXboxController controller, double deadband) {
     m_controller = controller;
     m_deadband = deadband;
 

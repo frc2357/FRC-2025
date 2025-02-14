@@ -124,18 +124,18 @@ public final class Constants {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kCoast)
-      .inverted(true)
+      .inverted(false)
       .openLoopRampRate(.25)
-      .smartCurrentLimit(10, 10)
+      .smartCurrentLimit(30, 30)
       .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
         .idleMode(IdleMode.kCoast)
-        .inverted(false)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .smartCurrentLimit(10, 10);
+        .smartCurrentLimit(30, 30)
+        .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
     public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;

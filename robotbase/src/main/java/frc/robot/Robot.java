@@ -17,7 +17,7 @@ import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
-import frc.robot.controls.CoDriverControls;
+import frc.robot.controls.CodriverControls;
 import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.ButtonboardController;
 import frc.robot.generated.TunerConstants;
@@ -41,7 +41,7 @@ public class Robot extends TimedRobot {
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
   public static DriverControls driverControls;
-  public static CoDriverControls coDriverControls;
+  public static CodriverControls coDriverControls;
   public static ButtonboardController buttonboard;
   public static ElasticFieldManager elasticFieldManager;
 
@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
-    coDriverControls = new CoDriverControls(
+    coDriverControls = new CodriverControls(
       new CommandXboxController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT),
       Constants.CONTROLLER.CODRIVE_CONTROLLER_DEADBAND
     );
