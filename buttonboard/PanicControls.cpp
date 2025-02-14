@@ -40,24 +40,19 @@ void PanicControls::init(byte mcpI2CAddress, byte intPin)
     XInput.setJoystickRange(-POT_MAX_VALUE, POT_MAX_VALUE);
 }
 
-void onPinActivated(int pin)
+void PanicControls::onPinActivated(int pin)
 {
     PanicControls::selection = static_cast<PanicControls::MechanismControl>(pin);
 }
 
-void onPinDeactivated(int pin)
+void PanicControls::onPinDeactivated(int pin)
 {
-    setXboxControlsForMechanism(PanicControls::selection, 0, false);
+    setXboxControlsForMechanism(PanicControls::selection, 0);
     PanicControls::selection = PanicControls::MechanismControl::NONE;
 }
 
-void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism, int potVal)
+void PanicControls::setXboxControlsForMechanism(PanicControls::MechanismControl mechanism, int potVal)
 {
-    if (mechanism = PanicControls::MechanismControl::NONE)
-    {
-        mechanism = PanicControls::selection;
-    }
-
     switch (mechanism)
     {
     case CORAL_FORWARD:

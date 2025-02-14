@@ -36,10 +36,10 @@ public:
 
     static void init(byte mcpI2CAddress, byte intPin);
 
+private:
     static void onPinActivated(int pin);
     static void onPinDeactivated(int pin);
 
-private:
     static void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism, int potVal);
 
     static Adafruit_MCP23X17 mcp;
