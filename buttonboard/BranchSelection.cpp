@@ -23,9 +23,14 @@ void BranchSelection::init()
 {
     for (int pin : BranchSelection::pins)
     {
-        BranchSelection::debouncer.addPin(pin, HIGH, BranchSelection::onPinActivated, BranchSelection::onPinDeactivated, INPUT_PULLUP);
+        BranchSelection::debouncer.addPin(pin, HIGH, INPUT_PULLUP);
     }
     BranchSelection::debouncer.begin();
+}
+
+void BranchSelection::update()
+{
+    BranchSelection::debouncer.update();
 }
 
 BranchSelection::Branch BranchSelection::getSelection()
@@ -55,7 +60,7 @@ void BranchSelection::onPinDeactivated(int pin)
 {
 }
 
-XInputControl *BranchSelection::setXboxButtonsForBranch(BranchSelection::Branch branch, bool selected)
+void BranchSelection::setXboxButtonsForBranch(BranchSelection::Branch branch, bool selected)
 {
     switch (branch)
     {

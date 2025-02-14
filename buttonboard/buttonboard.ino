@@ -21,4 +21,16 @@ void setup()
 void loop()
 {
   level.update();
+  BranchSelection::update();
+}
+
+// Reef branch selection debouncer methods
+void onPinActivated(int pin)
+{
+  BranchSelection::onPinActivated(pin);
+}
+
+void onPinDeactivated(int pin)
+{
+  BranchSelection::onPinDeactivated(pin);
 }

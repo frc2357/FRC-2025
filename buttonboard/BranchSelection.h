@@ -42,12 +42,15 @@ public:
     static int pins[NUM_BUTTONS];
 
     static void init();
+    static void update();
+
     static BranchSelection::Branch getSelection();
 
-private:
     static void onPinActivated(int pin);
     static void onPinDeactivated(int pin);
-    static XInputControl *setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
+
+private:
+    static void setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
 
     static FTDebouncer debouncer;
     static BranchSelection::Branch selection;
