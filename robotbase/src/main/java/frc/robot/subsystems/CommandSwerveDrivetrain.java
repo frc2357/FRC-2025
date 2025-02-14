@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.Constants.SWERVE.*;
 
 import choreo.trajectory.SwerveSample;
 import choreo.util.ChoreoAllianceFlipUtil;
@@ -133,9 +134,10 @@ public class CommandSwerveDrivetrain
     new SwerveRequest.ApplyFieldSpeeds()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
 
-  private final SwerveRequest.FieldCentricFacingAngle m_fieldCentricFacingAnglentric =
+  private final SwerveRequest.FieldCentricFacingAngle m_fieldCentricFacingAngle =
     new SwerveRequest.FieldCentricFacingAngle()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+      .withHeadingPID(FACING_ANGLE_P, FACING_ANGLE_I, FACING_ANGLE_D); // Use open-loop control for drive motors;
 
   private Twist2d m_fieldVelocity = new Twist2d();
 
@@ -334,7 +336,7 @@ public class CommandSwerveDrivetrain
     Rotation2d targetAngle
   ) {
     setControl(
-      m_fieldCentricFacingAnglentric
+      m_fieldCentricFacingAngle
         .withVelocityX(velocityXMetersPerSecond)
         .withVelocityY(velocityYMetersPerSecond)
         .withTargetDirection(targetAngle)
