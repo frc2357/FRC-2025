@@ -35,12 +35,14 @@ public:
     static int pins[NUM_BUTTONS];
 
     static void init(byte mcpI2CAddress, byte intPin);
+    static void update();
 
 private:
     static void onPinActivated(int pin);
     static void onPinDeactivated(int pin);
 
-    static void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism, int potVal);
+    static void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism);
+    static void clearXboxAxes();
 
     static Adafruit_MCP23X17 mcp;
     static PanicControls::MechanismControl selection;
