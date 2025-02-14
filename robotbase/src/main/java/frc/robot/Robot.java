@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -23,6 +24,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.networkTables.*;
 import frc.robot.subsystems.*;
 import frc.robot.util.ElasticFieldManager;
+import frc.robot.util.Telemetry;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -71,8 +73,6 @@ public class Robot extends TimedRobot {
     // coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
-    elasticFieldManager = new ElasticFieldManager();
-    elasticFieldManager.setupSwerveField();
 
     // Define controls
     buttonboard = new ButtonboardController(
@@ -91,6 +91,17 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Buttonboard", buttonboard);
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
     SmartDashboard.putData("Signal Logger", m_SignalLoggerManager);
+
+    elasticFieldManager = new ElasticFieldManager();
+    elasticFieldManager.setupSwerveField();
+
+    // Logging
+    DataLogManager.logNetworkTables(true); // enable/disable automatic NetworksTable Logging
+    DataLogManager.start("", "", 1.0); // defaults, flush to flash every 1 seconds
+    DriverStation.startDataLog(DataLogManager.getLog());
+
+    // Setup logging swerve pose and state for viewing in Advantage Scope
+    Robot.swerve.registerTelemetry(new Telemetry()::telemeterize);
 
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
