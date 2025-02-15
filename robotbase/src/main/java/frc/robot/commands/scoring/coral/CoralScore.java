@@ -1,4 +1,4 @@
-package frc.robot.commands.scoring;
+package frc.robot.commands.scoring.coral;
 
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;

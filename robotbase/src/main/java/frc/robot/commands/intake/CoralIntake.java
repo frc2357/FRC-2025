@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetVelocity;
-import frc.robot.commands.scoring.CoralHome;
+import frc.robot.commands.scoring.coral.CoralHome;
 
 public class CoralIntake extends SequentialCommandGroup {
 
