@@ -671,20 +671,23 @@ public final class Constants {
     public static final Current STALL_LIMIT = Units.Amps.of(30);
     public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);
 
+    public static final double AXIS_MAX_SPEED = 0.25;
+
     public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
       .idleMode(IDLE_MODE)
       .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
+      .openLoopRampRate(1)
       .inverted(false);
     public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
       .idleMode(IDLE_MODE)
       .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
-      .inverted(false)
+      .openLoopRampRate(1)
       .follow(CAN_ID.CLIMBER_MOTOR_ONE);
     public static final SparkBaseConfig MOTOR_CONFIG_THREE =
       new SparkMaxConfig()
         .idleMode(IDLE_MODE)
         .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
-        .inverted(false)
+        .openLoopRampRate(1)
         .follow(CAN_ID.CLIMBER_MOTOR_ONE);
   }
 

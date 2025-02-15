@@ -44,7 +44,7 @@ public class Climber extends SubsystemBase {
   }
 
   public void setAxisSpeed(double speed) {
-    speed *= ELEVATOR.AXIS_MAX_SPEED;
+    speed *= CLIMBER.AXIS_MAX_SPEED;
     m_motorOne.set(speed);
   }
 

@@ -40,11 +40,11 @@ public class Robot extends TimedRobot {
   public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
+  public static Climber climber;
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
   public static ButtonboardController buttonboard;
   public static ElasticFieldManager elasticFieldManager;
-  public static Climber climber;
 
   public static Alliance alliance = null;
 
