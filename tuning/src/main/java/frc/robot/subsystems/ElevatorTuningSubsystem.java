@@ -47,16 +47,15 @@ public class ElevatorTuningSubsystem {
       MotorType.kBrushless
     );
 
-    updatePIDs();
-
-    m_motorRight.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
+    m_motorLeft.configure(
+      m_motorconfig,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
+    m_encoder = m_motorLeft.getEncoder();
 
-    m_motorLeft.configure(
-      m_motorconfig,
+    m_motorRight.configure(
+      Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
@@ -80,17 +79,19 @@ public class ElevatorTuningSubsystem {
     SmartDashboard.putNumber("Elevator FF", kFF);
     SmartDashboard.putNumber("Elevator MaxVel", maxVel);
     SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
-    SmartDashboard.putNumber("Elevator Setpoint", 0);
+    SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
+    SmartDashboard.putBoolean("Is At Target", isAtTarget());
+    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
+    SmartDashboard.putNumber("Elevator Setpoint", m_encoder.getPosition());
   }
 
   public void updateDashboard() {
-    kP = SmartDashboard.getNumber("Arm P", kP);
-    kI = SmartDashboard.getNumber("Arm I", kI);
-    kD = SmartDashboard.getNumber("Arm D", kD);
-    kFF = SmartDashboard.getNumber("Arm FF", kFF);
-    maxVel = SmartDashboard.getNumber("Arm MaxVel", maxVel);
-    maxAcc = SmartDashboard.getNumber("Arm MaxAcc", maxAcc);
-
+    kP = SmartDashboard.getNumber("Elevator P", kP);
+    kI = SmartDashboard.getNumber("Elevator I", kI);
+    kD = SmartDashboard.getNumber("Elevator D", kD);
+    kFF = SmartDashboard.getNumber("Elevator FF", kFF);
+    maxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
+    maxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putBoolean("Is At Target", isAtTarget());
     SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
@@ -107,10 +108,8 @@ public class ElevatorTuningSubsystem {
     // } else {
 
     double rotationSetpoint;
-    rotationSetpoint = SmartDashboard.getNumber(
-      "Elevator Rotation Setpoint",
-      0
-    );
+    rotationSetpoint = SmartDashboard.getNumber("Elevator Setpoint", 0);
+    System.out.println(rotationSetpoint);
     setTargetRotations(Degrees.of(rotationSetpoint));
     // }
 
@@ -150,6 +149,8 @@ public class ElevatorTuningSubsystem {
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl
     );
+    System.out.println(m_PIDController);
+    System.out.println(m_targetRotations);
   }
 
   public void setTargetDistance(Distance targetDistance) {

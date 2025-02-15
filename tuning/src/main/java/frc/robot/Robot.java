@@ -48,7 +48,9 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    elevator.updateDashboard();
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select
@@ -81,8 +83,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    elevator.updatePIDs();
-
     elevator.teleopPeriodic();
     // algaePivot.teleopPeriodic();
   }
@@ -102,7 +102,11 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-    elevator.setAxisSpeed(m_controller.getRightY());
+    if (m_controller.getXButton()) {
+      elevator.setZero();
+    }
+
+    elevator.setAxisSpeed(-m_controller.getRightY());
     // Call elevator.setAxisSpeed with controller right joystick y axis value
 
   }

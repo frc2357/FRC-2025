@@ -30,11 +30,17 @@ public final class Constants {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
-      .inverted(false);
+      .inverted(false)
+      .openLoopRampRate(.25)
+      .smartCurrentLimit(30, 30)
+      .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
         .idleMode(IdleMode.kBrake)
+        .openLoopRampRate(.25)
+        .voltageCompensation(12)
+        .smartCurrentLimit(30, 30)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
@@ -55,7 +61,7 @@ public final class Constants {
       2.256
     );
 
-    public static final double AXIS_MAX_SPEED = 0.1;
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
   }
