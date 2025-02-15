@@ -5,12 +5,17 @@
 #include <Xinput.h>
 
 #define NUM_BUTTONS 12
+#define BUTTON_PRESSED_STATE LOW
+#define INTERRUPT_SET_STATE LOW
 
 #define POT_MIN_VALUE 0
 #define POT_MAX_VALUE 1023
 
 #define ROLLER_POT_PIN A0
 #define MOVEMENT_POT_PIN A1
+
+// Button to indicate if the roller mechanism panic controls are reversed or not
+#define ROLLER_NEGATIVE_INDICATOR_BUTTON XInputControl::BUTTON_R3
 
 class PanicControls
 {
@@ -38,12 +43,9 @@ public:
     static void update();
 
 private:
-    static void onPinActivated(int pin);
-    static void onPinDeactivated(int pin);
-
     static void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism);
-    static void clearXboxAxes();
 
+    static int interruptPin;
     static Adafruit_MCP23X17 mcp;
     static PanicControls::MechanismControl selection;
 };
