@@ -34,7 +34,7 @@ public class Robot extends TimedRobot {
     m_controller = new XboxController(0);
 
     elevator = new ElevatorTuningSubsystem();
-    algaePivot = new AlgaePivotTuningSubsystem();
+    // algaePivot = new AlgaePivotTuningSubsystem();
   }
 
   /**
