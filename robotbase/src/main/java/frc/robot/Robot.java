@@ -41,7 +41,7 @@ public class Robot extends TimedRobot {
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
   public static DriverControls driverControls;
-  public static CodriverControls coDriverControls;
+  public static CodriverControls codriverControls;
   public static ButtonboardController buttonboard;
   public static ElasticFieldManager elasticFieldManager;
 
@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
-    coDriverControls = new CodriverControls(
+    codriverControls = new CodriverControls(
       new CommandXboxController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT),
       Constants.CONTROLLER.CODRIVE_CONTROLLER_DEADBAND
     );

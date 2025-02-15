@@ -123,7 +123,7 @@ public final class Constants {
   public static final class ELEVATOR {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
-      .idleMode(IdleMode.kCoast)
+      .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
       .smartCurrentLimit(30, 30)
@@ -131,7 +131,7 @@ public final class Constants {
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
-        .idleMode(IdleMode.kCoast)
+        .idleMode(IdleMode.kBrake)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
         .smartCurrentLimit(30, 30)

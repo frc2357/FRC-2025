@@ -27,7 +27,7 @@ public class CodriverControls {
   public void mapControls() {
     m_controller
       .axisMagnitudeGreaterThan(Axis.kLeftY.value, 0.01)
-      .whileTrue(new ElevatorAxis(() -> modifyAxis(m_controller.getLeftY())));
+      .whileTrue(new ElevatorAxis(() -> modifyAxis(-m_controller.getLeftY())));
     // m_controller
     //   .axisMagnitudeGreaterThan(Axis.kRightY.value, 0.01)
     //   .whileTrue(
