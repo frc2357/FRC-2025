@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -73,6 +74,10 @@ public final class Constants {
     public static final int LATERATOR_MOTOR_RIGHT = 29;
 
     public static final int CORAL_RUNNER_MOTOR = 30;
+
+    public static final int CLIMBER_MOTOR_ONE = 31;
+    public static final int CLIMBER_MOTOR_TWO = 32;
+    public static final int CLIMBER_MOTOR_THREE = 33;
   }
 
   public final class DIGITAL_INPUT {
@@ -658,6 +663,29 @@ public final class Constants {
           )
         );
     }
+  }
+
+  public static class CLIMBER {
+
+    public static final IdleMode IDLE_MODE = SparkBaseConfig.IdleMode.kBrake;
+    public static final Current STALL_LIMIT = Units.Amps.of(30);
+    public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);
+
+    public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
+      .inverted(false);
+    public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
+      .inverted(false)
+      .follow(CAN_ID.CLIMBER_MOTOR_ONE);
+    public static final SparkBaseConfig MOTOR_CONFIG_THREE =
+      new SparkMaxConfig()
+        .idleMode(IDLE_MODE)
+        .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
+        .inverted(false)
+        .follow(CAN_ID.CLIMBER_MOTOR_ONE);
   }
 
   /**
