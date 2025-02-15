@@ -14,10 +14,8 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.CAN_ID;
-import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.LATERATOR;
 
 public class LateratorTuningSubsystem {

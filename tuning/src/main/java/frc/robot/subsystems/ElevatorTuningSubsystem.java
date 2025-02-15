@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
-//import edu.wpi.first.math.controller.PIDController;
-
 public class ElevatorTuningSubsystem {
 
   private SparkMax m_motorLeft;
