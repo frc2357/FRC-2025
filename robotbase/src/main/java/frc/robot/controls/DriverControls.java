@@ -13,6 +13,8 @@ import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
+import frc.robot.commands.scoring.coral.CoralHumanPrepose;
+import frc.robot.commands.scoring.coral.CoralScore;
 
 @SuppressWarnings("unused")
 public class DriverControls {
@@ -59,6 +61,12 @@ public class DriverControls {
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
+    // Manual Coral Scoring
+    // CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
+    // m_controller.leftBumper().onTrue(humanPrepose.getSelectCommand());
+    // m_controller
+    //   .leftTrigger()
+    //   .onTrue(new CoralScore().andThen(humanPrepose.reset()));
   }
 
   public double getX() {
