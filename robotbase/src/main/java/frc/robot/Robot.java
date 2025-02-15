@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -18,6 +17,7 @@ import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
+import frc.robot.controls.CodriverControls;
 import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.ButtonboardController;
 import frc.robot.generated.TunerConstants;
@@ -41,13 +41,11 @@ public class Robot extends TimedRobot {
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
   public static DriverControls driverControls;
+  public static CodriverControls codriverControls;
   public static ButtonboardController buttonboard;
   public static ElasticFieldManager elasticFieldManager;
 
   public static Alliance alliance = null;
-
-  private Field2d shooterFieldRepresentation;
-  private Field2d swerveFieldRepresentation;
 
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
@@ -68,7 +66,7 @@ public class Robot extends TimedRobot {
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
-    // elevator = new Elevator();
+    elevator = new Elevator();
     // laterator = new Laterator();
     // coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
@@ -82,11 +80,17 @@ public class Robot extends TimedRobot {
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
+    codriverControls = new CodriverControls(
+      new CommandXboxController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT),
+      Constants.CONTROLLER.CODRIVE_CONTROLLER_DEADBAND
+    );
 
     // Define network table tools
     m_autoChooserManager = new AutoChooserManager();
     m_sysIdChooser = new SysIdChooser();
     m_SignalLoggerManager = new SignalLoggerManager();
+    elasticFieldManager = new ElasticFieldManager();
+    elasticFieldManager.setupSwerveField();
 
     SmartDashboard.putData("Buttonboard", buttonboard);
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
