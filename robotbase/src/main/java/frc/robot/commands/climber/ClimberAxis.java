@@ -10,13 +10,13 @@ public class ClimberAxis extends Command {
 
   public ClimberAxis(AxisInterface axis) {
     m_axis = axis;
-    addRequirements(Robot.Climber);
+    addRequirements(Robot.climber);
   }
 
   @Override
   public void execute() {
     double axisValue = m_axis.getValue();
-    Robot.Climber.setAxisSpeed(axisValue);
+    Robot.climber.setAxisSpeed(axisValue);
   }
 
   @Override
@@ -26,6 +26,6 @@ public class ClimberAxis extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    Robot.Climber.stop();
+    Robot.climber.stop();
   }
 }
