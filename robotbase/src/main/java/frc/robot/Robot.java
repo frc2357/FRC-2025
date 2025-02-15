@@ -40,6 +40,7 @@ public class Robot extends TimedRobot {
   public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
   public static AlgaePivot algaePivot;
+  public static Climber climber;
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
   public static ButtonboardController buttonboard;
@@ -71,6 +72,9 @@ public class Robot extends TimedRobot {
     // coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
+    // climber = new Climber();
+    elasticFieldManager = new ElasticFieldManager();
+    elasticFieldManager.setupSwerveField();
 
     // Define controls
     buttonboard = new ButtonboardController(
