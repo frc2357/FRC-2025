@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 import choreo.auto.AutoFactory;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.MomentOfInertiaUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -25,6 +27,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
@@ -696,7 +699,7 @@ public final class Constants {
    */
   public static class ROBOT_CONFIGURATION {
 
-    public static final double WEIGHT_POUNDS = 51.5;
+    public static final double WEIGHT_POUNDS = 105; // TODO: currently estimated. get weight once laterator is on, and then final weight.
 
     public static final Distance FRAME_LENGTH = Units.Inches.of(26);
     public static final Distance FRAME_WIDTH = Units.Inches.of(26);
@@ -740,11 +743,20 @@ public final class Constants {
      * Do not let anything get inside this.
      */
     public static final Distance BOUNDARY = Units.Inches.of(
-      Math.sqrt(
-        Math.pow(FRAME_LENGTH.in(Inches), 2) +
-        Math.pow(FRAME_WIDTH.in(Inches), 2)
-      ) /
-      2
+      (Math.sqrt(
+          Math.pow(FRAME_LENGTH.in(Inches), 2) +
+          Math.pow(FRAME_WIDTH.in(Inches), 2)
+        ) /
+        2)
     );
+
+    /**
+     * The mass moment of intertia in Kg / M^2
+     */
+    public static final double MOMENT_OF_INERTIA_SIMPLIFIED_DISTRIBUTION =
+      (1.0 / 12) *
+      (WEIGHT_POUNDS / 2.205) */*pounds to kilograms conversion is / 2.205*/
+      (Math.pow(FULL_LENGTH.in(Meters), 2) +
+        Math.pow(FULL_WIDTH.in(Meters), 2));
   }
 }
