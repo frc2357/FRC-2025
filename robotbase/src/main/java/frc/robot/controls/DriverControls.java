@@ -61,13 +61,12 @@ public class DriverControls {
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-
     // Manual Coral Scoring
-    CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
-    m_controller.leftBumper().onTrue(humanPrepose.getSelectCommand());
-    m_controller
-      .leftTrigger()
-      .onTrue(new CoralScore().andThen(humanPrepose.reset()));
+    // CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
+    // m_controller.leftBumper().onTrue(humanPrepose.getSelectCommand());
+    // m_controller
+    //   .leftTrigger()
+    //   .onTrue(new CoralScore().andThen(humanPrepose.reset()));
   }
 
   public double getX() {
