@@ -69,8 +69,8 @@ public class Robot extends TimedRobot {
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
     elevator = new Elevator();
-    // laterator = new Laterator();
-    // coralRunner = new CoralRunner();
+    laterator = new Laterator();
+    coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
     // climber = new Climber();

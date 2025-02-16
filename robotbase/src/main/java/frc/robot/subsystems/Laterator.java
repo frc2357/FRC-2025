@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Feet;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -23,8 +21,7 @@ import frc.robot.Constants.LATERATOR;
 
 public class Laterator extends SubsystemBase {
 
-  private SparkMax m_motorLeft;
-  private SparkMax m_motorRight;
+  private SparkMax m_motor;
 
   private DigitalInput m_hallEffectSensor;
 
@@ -40,31 +37,17 @@ public class Laterator extends SubsystemBase {
   );
 
   public Laterator() {
-    m_motorLeft = new SparkMax(
-      CAN_ID.LATERATOR_MOTOR_LEFT,
-      MotorType.kBrushless
-    );
+    m_motor = new SparkMax(CAN_ID.LATERATOR_MOTOR, MotorType.kBrushless);
 
-    m_motorRight = new SparkMax(
-      CAN_ID.LATERATOR_MOTOR_RIGHT,
-      MotorType.kBrushless
-    );
-
-    m_motorLeft.configure(
-      LATERATOR.MOTOR_CONFIG_LEFT,
+    m_motor.configure(
+      LATERATOR.MOTOR_CONFIG,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
 
-    m_motorRight.configure(
-      LATERATOR.MOTOR_CONFIG_RIGHT,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+    m_PIDController = m_motor.getClosedLoopController();
 
-    m_PIDController = m_motorLeft.getClosedLoopController();
-
-    m_encoder = m_motorLeft.getEncoder();
+    m_encoder = m_motor.getEncoder();
 
     m_hallEffectSensor = new DigitalInput(
       DIGITAL_INPUT.LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID
@@ -72,18 +55,18 @@ public class Laterator extends SubsystemBase {
   }
 
   public void setSpeed(double percentOutput) {
-    m_motorLeft.set(percentOutput);
+    m_motor.set(percentOutput);
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void setAxisSpeed(double axisSpeed) {
     axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
-    m_motorLeft.set(axisSpeed);
+    m_motor.set(axisSpeed);
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void stop() {
-    m_motorLeft.stopMotor();
+    m_motor.stopMotor();
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
@@ -96,7 +79,12 @@ public class Laterator extends SubsystemBase {
   }
 
   public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(targetDistance.in(Feet)); //TODO: Add accurate conversion information
+    Angle rotations = Units.Rotations.of(
+      targetDistance
+        .div(LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
+        .times(LATERATOR.GEAR_RATIO)
+        .magnitude()
+    );
     setTargetRotations(rotations);
   }
 
@@ -117,7 +105,11 @@ public class Laterator extends SubsystemBase {
   }
 
   public Distance getDistance() {
-    return Feet.of(0); //TODO: Add accurate conversion information
+    return (
+      LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
+        getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
+      )
+    );
   }
 
   private boolean isAtTargetRotations() {

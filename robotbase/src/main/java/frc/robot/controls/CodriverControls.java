@@ -3,7 +3,9 @@ package frc.robot.controls;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
+import frc.robot.commands.laterator.LateratorAxis;
 
 public class CodriverControls {
 
@@ -28,12 +30,26 @@ public class CodriverControls {
     m_controller
       .povUp()
       .whileTrue(new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY())));
-    // m_controller
-    //   .axisMagnitudeGreaterThan(Axis.kRightY.value, 0.01)
-    //   .whileTrue(
-    //     new AlgaeRunnerAxis(() -> modifyAxis(m_controller.getRightY()))
-    //   );
 
+    m_controller
+      .povRight()
+      .whileTrue(
+        new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
+      );
+    m_controller
+      .povRight()
+      .and(m_rightTrigger)
+      .whileTrue(
+        new CoralRunnerAxis(() -> modifyAxis(m_controller.getRightTriggerAxis())
+        )
+      );
+    m_controller
+      .povRight()
+      .and(m_leftTrigger)
+      .whileTrue(
+        new CoralRunnerAxis(() -> modifyAxis(m_controller.getRightTriggerAxis())
+        )
+      );
   }
 
   public double deadband(double value, double deadband) {
