@@ -70,7 +70,28 @@ public class ElevatorTuningSubsystem implements Sendable {
     Preferences.initDouble("elevatorMaxVel", 0);
     Preferences.initDouble("elevatorMaxAcc", 0);
 
+    P = Preferences.getDouble("elevatorP", 0);
+    I = Preferences.getDouble("elevatorI", 0);
+    D = Preferences.getDouble("elevatorD", 0);
+    FF = Preferences.getDouble("elevatorFF", 0);
+    maxVel = Preferences.getDouble("elevatorMaxVel", 0);
+    maxAcc = Preferences.getDouble("elevatorMaxAcc", 0);
+
     displayDashboard();
+  }
+
+  public void displayDashboard() {
+    SmartDashboard.putNumber("Elevator P", P);
+    SmartDashboard.putNumber("Elevator I", I);
+    SmartDashboard.putNumber("Elevator D", D);
+    SmartDashboard.putNumber("Elevator FF", FF);
+    SmartDashboard.putNumber("Elevator MaxVel", maxVel);
+    SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
+    SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
+    SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
+    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
+    SmartDashboard.putNumber("Elevator Setpoint", 0);
+    SmartDashboard.putData("Save Elevator Config", this);
   }
 
   public void updatePIDs() {
@@ -85,20 +106,6 @@ public class ElevatorTuningSubsystem implements Sendable {
       ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
-  }
-
-  public void displayDashboard() {
-    SmartDashboard.putNumber("Elevator P", P);
-    SmartDashboard.putNumber("Elevator I", I);
-    SmartDashboard.putNumber("Elevator D", D);
-    SmartDashboard.putNumber("Elevator FF", FF);
-    SmartDashboard.putNumber("Elevator MaxVel", maxVel);
-    SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
-    SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
-    SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
-    SmartDashboard.putNumber("Elevator Setpoint", 0);
-    SmartDashboard.putData("Save PID", this);
   }
 
   public void updateDashboard() {
@@ -202,18 +209,18 @@ public class ElevatorTuningSubsystem implements Sendable {
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    builder.setSmartDashboardType("save");
+    builder.setSmartDashboardType("elevator");
 
     builder.addBooleanProperty(
-      "Save Preferences",
+      "Save Config",
       () -> false,
       value -> {
-        Preferences.initDouble("elevatorP", P);
-        Preferences.initDouble("elevatorI", I);
-        Preferences.initDouble("elevatorD", D);
-        Preferences.initDouble("elevatorFF", FF);
-        Preferences.initDouble("elevatorMaxVel", maxAcc);
-        Preferences.initDouble("elevatorMaxAcc", maxVel);
+        Preferences.setDouble("elevatorP", P);
+        Preferences.setDouble("elevatorI", I);
+        Preferences.setDouble("elevatorD", D);
+        Preferences.setDouble("elevatorFF", FF);
+        Preferences.setDouble("elevatorMaxVel", maxAcc);
+        Preferences.setDouble("elevatorMaxAcc", maxVel);
       }
     );
   }
