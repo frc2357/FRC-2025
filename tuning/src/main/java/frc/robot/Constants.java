@@ -8,7 +8,6 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 
 public final class Constants {
@@ -46,7 +45,7 @@ public final class Constants {
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop.outputRange(-1, 1);
 
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.1;
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
@@ -62,8 +61,6 @@ public final class Constants {
     );
 
     public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
   }
 
   public static final class CORAL_RUNNER {

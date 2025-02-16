@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -26,16 +26,14 @@ public class ElevatorTuningSubsystem {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double kP = 0;
-  private double kI = 0;
-  private double kD = 0;
-  private double kFF = 0;
+  private double P = 0;
+  private double I = 0;
+  private double D = 0;
+  private double FF = 0;
   private double maxVel = 0;
   private double maxAcc = 0;
 
   private SparkBaseConfig m_motorconfig = Constants.ELEVATOR.MOTOR_CONFIG_LEFT;
-
-  // private PIDController m_PidController
 
   public ElevatorTuningSubsystem() {
     m_motorLeft = new SparkMax(
@@ -65,38 +63,62 @@ public class ElevatorTuningSubsystem {
   }
 
   public void updatePIDs() {
-    m_motorconfig.closedLoop.pidf(kP, kI, kD, kFF);
+    m_motorconfig.closedLoop.pidf(P, I, D, FF);
 
     m_motorconfig.closedLoop.maxMotion
       .maxAcceleration(maxAcc)
       .maxVelocity(maxVel);
+
+    m_motorLeft.configure(
+      m_motorconfig,
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
+    );
   }
 
   public void displayDashboard() {
-    SmartDashboard.putNumber("Elevator P", kP);
-    SmartDashboard.putNumber("Elevator I", kI);
-    SmartDashboard.putNumber("Elevator D", kD);
-    SmartDashboard.putNumber("Elevator FF", kFF);
+    SmartDashboard.putNumber("Elevator P", P);
+    SmartDashboard.putNumber("Elevator I", I);
+    SmartDashboard.putNumber("Elevator D", D);
+    SmartDashboard.putNumber("Elevator FF", FF);
     SmartDashboard.putNumber("Elevator MaxVel", maxVel);
     SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
-    SmartDashboard.putBoolean("Is At Target", isAtTarget());
+    SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
     SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
-    SmartDashboard.putNumber("Elevator Setpoint", m_encoder.getPosition());
+    SmartDashboard.putNumber("Elevator Setpoint", 0);
   }
 
   public void updateDashboard() {
-    kP = SmartDashboard.getNumber("Elevator P", kP);
-    kI = SmartDashboard.getNumber("Elevator I", kI);
-    kD = SmartDashboard.getNumber("Elevator D", kD);
-    kFF = SmartDashboard.getNumber("Elevator FF", kFF);
-    maxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
-    maxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
+    double newP = SmartDashboard.getNumber("Elevator P", P);
+    double newI = SmartDashboard.getNumber("Elevator I", I);
+    double newD = SmartDashboard.getNumber("Elevator D", D);
+    double newFF = SmartDashboard.getNumber("Elevator FF", FF);
+    double newMaxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
+    double newMaxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
-    SmartDashboard.putBoolean("Is At Target", isAtTarget());
+    m_targetRotations = Rotations.of(
+      SmartDashboard.getNumber("Elevator Setpoint", 0)
+    );
+    SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
     SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
 
-    updatePIDs();
+    if (
+      newP != P ||
+      newI != I ||
+      newD != D ||
+      newFF != FF ||
+      newMaxVel != maxVel ||
+      newMaxAcc != maxAcc
+    ) {
+      P = newP;
+      I = newI;
+      D = newD;
+      FF = newFF;
+      maxVel = newMaxVel;
+      maxAcc = newMaxAcc;
+      updatePIDs();
+    }
   }
 
   public void teleopPeriodic() {
@@ -107,30 +129,31 @@ public class ElevatorTuningSubsystem {
     // setTargetDistance(Units.Feet.of(distanceSetpoint));
     // } else {
 
-    double rotationSetpoint;
-    rotationSetpoint = SmartDashboard.getNumber("Elevator Setpoint", 0);
-    System.out.println(rotationSetpoint);
-    setTargetRotations(Degrees.of(rotationSetpoint));
+    setTargetRotations(m_targetRotations);
     // }
 
   }
 
   public void setSpeed(double speed) {
     m_motorLeft.set(speed);
-    m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 
-  public void stop() {
-    m_motorLeft.stopMotor();
+  public void setAxisSpeed(double speed) {
     m_targetRotations = Units.Rotations.of(Double.NaN);
-  }
-
-  public AngularVelocity getVelocity() {
-    return Units.RotationsPerSecond.of(m_encoder.getVelocity() / 60);
+    speed *= ELEVATOR.AXIS_MAX_SPEED;
+    m_motorLeft.set(speed);
   }
 
   public void setZero() {
     m_encoder.setPosition(0);
+  }
+
+  public void stop() {
+    m_motorLeft.stopMotor();
+  }
+
+  public AngularVelocity getVelocity() {
+    return Units.RPM.of(m_encoder.getVelocity());
   }
 
   private Angle getRotations() {
@@ -149,8 +172,6 @@ public class ElevatorTuningSubsystem {
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl
     );
-    System.out.println(m_PIDController);
-    System.out.println(m_targetRotations);
   }
 
   public void setTargetDistance(Distance targetDistance) {
@@ -165,15 +186,5 @@ public class ElevatorTuningSubsystem {
       getRotations(),
       ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
-  }
-
-  public boolean isAtTarget() {
-    return isAtTargetRotations();
-  }
-
-  public void setAxisSpeed(double speed) {
-    m_targetRotations = Units.Rotations.of(Double.NaN);
-    speed *= ELEVATOR.AXIS_MAX_SPEED;
-    m_motorLeft.set(speed);
   }
 }
