@@ -14,11 +14,14 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
-public class ElevatorTuningSubsystem {
+public class ElevatorTuningSubsystem implements Sendable {
 
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
@@ -59,6 +62,14 @@ public class ElevatorTuningSubsystem {
     );
 
     m_PIDController = m_motorLeft.getClosedLoopController();
+
+    Preferences.initDouble("elevatorP", 0);
+    Preferences.initDouble("elevatorI", 0);
+    Preferences.initDouble("elevatorD", 0);
+    Preferences.initDouble("elevatorFF", 0);
+    Preferences.initDouble("elevatorMaxVel", 0);
+    Preferences.initDouble("elevatorMaxAcc", 0);
+
     displayDashboard();
   }
 
@@ -87,6 +98,7 @@ public class ElevatorTuningSubsystem {
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
     SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
     SmartDashboard.putNumber("Elevator Setpoint", 0);
+    SmartDashboard.putData("Save PID", this);
   }
 
   public void updateDashboard() {
@@ -185,6 +197,24 @@ public class ElevatorTuningSubsystem {
     return m_targetRotations.isNear(
       getRotations(),
       ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+    );
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    builder.setSmartDashboardType("save");
+
+    builder.addBooleanProperty(
+      "Save Preferences",
+      () -> false,
+      value -> {
+        Preferences.initDouble("elevatorP", P);
+        Preferences.initDouble("elevatorI", I);
+        Preferences.initDouble("elevatorD", D);
+        Preferences.initDouble("elevatorFF", FF);
+        Preferences.initDouble("elevatorMaxVel", maxAcc);
+        Preferences.initDouble("elevatorMaxAcc", maxVel);
+      }
     );
   }
 }
