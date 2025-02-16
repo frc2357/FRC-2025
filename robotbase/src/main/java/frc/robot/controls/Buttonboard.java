@@ -66,29 +66,41 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   private class SetReefSide extends InstantCommand {
-
     public SetReefSide(ReefSide side) {
       super(() -> {
         m_selectedReefSide = side;
       });
     }
+
+    @Override
+    public boolean runsWhenDisabled() {
+      return true;
+    }
   }
 
   private class SetScoringLevel extends InstantCommand {
-
     public SetScoringLevel(ScoringLevel lvl) {
       super(() -> {
         m_selectedScoringLevel = lvl;
       });
     }
+
+    @Override
+    public boolean runsWhenDisabled() {
+      return true;
+    }
   }
 
   private class SetScoringDirection extends InstantCommand {
-
     public SetScoringDirection(ScoringDirection dir) {
       super(() -> {
         m_selectScoringDirection = dir;
       });
+    }
+
+    @Override
+    public boolean runsWhenDisabled() {
+      return true;
     }
   }
 
@@ -140,29 +152,6 @@ public class Buttonboard implements Sendable, RumbleInterface {
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("HID");
-    builder.addBooleanArrayProperty(
-      "Buttons",
-      () -> {
-        return new boolean[] {
-          m_controller.a().getAsBoolean(),
-          m_controller.b().getAsBoolean(),
-          m_controller.c().getAsBoolean(),
-          m_controller.d().getAsBoolean(),
-          m_controller.e().getAsBoolean(),
-          m_controller.f().getAsBoolean(),
-          m_controller.noSide().getAsBoolean(),
-          m_controller.L1().getAsBoolean(),
-          m_controller.L2().getAsBoolean(),
-          m_controller.L3().getAsBoolean(),
-          m_controller.L4().getAsBoolean(),
-          m_controller.noLevel().getAsBoolean(),
-          m_controller.left().getAsBoolean(),
-          m_controller.right().getAsBoolean(),
-          m_controller.noDirection().getAsBoolean(),
-        };
-      },
-      null
-    );
     builder.addStringProperty(
       "Reef Side",
       () -> getSelectedReefSide().name(),

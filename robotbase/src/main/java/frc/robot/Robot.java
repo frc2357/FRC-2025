@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
     // Define controls
     buttonboard = new Buttonboard(
       new CommandButtonboardController(
-        Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT
+        Constants.CONTROLLER.BUTTONBOARD_CONTROLLER_PORT
       )
     );
     driverControls = new DriverControls(
