@@ -59,7 +59,10 @@ public class CommandSwerveDrivetrain
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization =
     new SwerveRequest.SysIdSwerveRotation();
 
-  /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
+  /*
+   * SysId routine for characterizing translation. This is used to find PID gains
+   * for the drive motors.
+   */
   private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
     new SysIdRoutine.Config(
       null, // Use default ramp rate (1 V/s)
@@ -76,7 +79,10 @@ public class CommandSwerveDrivetrain
     )
   );
 
-  /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
+  /*
+   * SysId routine for characterizing steer. This is used to find PID gains for
+   * the steer motors.
+   */
   private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
     new SysIdRoutine.Config(
       null, // Use default ramp rate (1 V/s)
@@ -94,8 +100,10 @@ public class CommandSwerveDrivetrain
 
   /*
    * SysId routine for characterizing rotation.
-   * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
-   * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
+   * This is used to find PID gains for the FieldCentricFacingAngle
+   * HeadingController.
+   * See the documentation of SwerveRequest.SysIdSwerveRotation for info on
+   * importing the log to SysId.
    */
   private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
     new SysIdRoutine.Config(
@@ -144,12 +152,14 @@ public class CommandSwerveDrivetrain
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    * <p>
-   * This constructs the underlying hardware devices, so users should not construct
-   * the devices themselves. If they need the devices, they can access them through
+   * This constructs the underlying hardware devices, so users should not
+   * construct
+   * the devices themselves. If they need the devices, they can access them
+   * through
    * getters in the classes.
    *
-   * @param drivetrainConstants   Drivetrain-wide constants for the swerve drive
-   * @param modules               Constants for each specific module
+   * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
+   * @param modules             Constants for each specific module
    */
   public CommandSwerveDrivetrain(
     SwerveDrivetrainConstants drivetrainConstants,
@@ -164,8 +174,10 @@ public class CommandSwerveDrivetrain
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    * <p>
-   * This constructs the underlying hardware devices, so users should not construct
-   * the devices themselves. If they need the devices, they can access them through
+   * This constructs the underlying hardware devices, so users should not
+   * construct
+   * the devices themselves. If they need the devices, they can access them
+   * through
    * getters in the classes.
    *
    * @param drivetrainConstants     Drivetrain-wide constants for the swerve drive
@@ -188,19 +200,27 @@ public class CommandSwerveDrivetrain
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    * <p>
-   * This constructs the underlying hardware devices, so users should not construct
-   * the devices themselves. If they need the devices, they can access them through
+   * This constructs the underlying hardware devices, so users should not
+   * construct
+   * the devices themselves. If they need the devices, they can access them
+   * through
    * getters in the classes.
    *
-   * @param drivetrainConstants       Drivetrain-wide constants for the swerve drive
+   * @param drivetrainConstants       Drivetrain-wide constants for the swerve
+   *                                  drive
    * @param odometryUpdateFrequency   The frequency to run the odometry loop. If
-   *                                  unspecified or set to 0 Hz, this is 250 Hz on
+   *                                  unspecified or set to 0 Hz, this is 250 Hz
+   *                                  on
    *                                  CAN FD, and 100 Hz on CAN 2.0.
-   * @param odometryStandardDeviation The standard deviation for odometry calculation
-   *                                  in the form [x, y, theta]ᵀ, with units in meters
+   * @param odometryStandardDeviation The standard deviation for odometry
+   *                                  calculation
+   *                                  in the form [x, y, theta]ᵀ, with units in
+   *                                  meters
    *                                  and radians
-   * @param visionStandardDeviation   The standard deviation for vision calculation
-   *                                  in the form [x, y, theta]ᵀ, with units in meters
+   * @param visionStandardDeviation   The standard deviation for vision
+   *                                  calculation
+   *                                  in the form [x, y, theta]ᵀ, with units in
+   *                                  meters
    *                                  and radians
    * @param modules                   Constants for each specific module
    */
@@ -224,7 +244,8 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * Returns a command that applies the specified control request to this swerve drivetrain.
+   * Returns a command that applies the specified control request to this swerve
+   * drivetrain.
    *
    * @param request Function returning the request to apply
    * @return Command to run
@@ -286,9 +307,12 @@ public class CommandSwerveDrivetrain
   /**
    * The method to use for robot relative driving.
    *
-   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
+   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in
+   *                                      meters per second.
+   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in
+   *                                      meters per second.
+   * @param rotationRateRadiansPerSecond  The desired rotation rate in radians per
+   *                                      second.
    */
   public void driveRobotRelative(
     double velocityXMetersPerSecond,
@@ -306,9 +330,12 @@ public class CommandSwerveDrivetrain
   /**
    * The method to use for field relative driving.
    *
-   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
+   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in
+   *                                      meters per second.
+   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in
+   *                                      meters per second.
+   * @param rotationRateRadiansPerSecond  The desired rotation rate in radians per
+   *                                      second.
    */
   public void driveFieldRelative(
     double velocityXMetersPerSecond,
@@ -326,9 +353,11 @@ public class CommandSwerveDrivetrain
   /**
    * The method to use for target angle driving.
    *
-   * @param velocityXMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYMetersPerSecond The desired speed on the Y axis in meters per second.
-   * @param targetAngle The target angle.
+   * @param velocityXMetersPerSecond The desired speed on the X axis in meters per
+   *                                 second.
+   * @param velocityYMetersPerSecond The desired speed on the Y axis in meters per
+   *                                 second.
+   * @param targetAngle              The target angle.
    */
   public void driveTargetAngle(
     double velocityXMetersPerSecond,
@@ -370,6 +399,7 @@ public class CommandSwerveDrivetrain
 
   /**
    * Gets the pose, with no flipping to compensate for alliance.
+   *
    * @return The field relative pose.
    */
   public Pose2d getFieldRelativePose2d() {
@@ -378,6 +408,7 @@ public class CommandSwerveDrivetrain
 
   /**
    * The pose with flipping to ensure it is always on the blue origin.
+   *
    * @return The pose flipped to ensure it is on the blue origin.
    */
   public Pose2d getAllianceRelativePose2d() {
@@ -388,7 +419,9 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * Sets the pose staright as you input it, with no flipping to compensate for alliance.
+   * Sets the pose staright as you input it, with no flipping to compensate for
+   * alliance.
+   *
    * @param poseToSet The pose it will set.
    */
   public void setFieldRelativePose2d(Pose2d poseToSet) {
@@ -396,7 +429,9 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * Sets the translation staright as you input it, with no flipping to compensate
+   * for alliance.
+   *
    * @param translationToSet The translation it will set.
    */
   public void setFieldRelativeTranslation2d(Translation2d translationToSet) {
@@ -404,7 +439,9 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * Sets the translation staright as you input it, with no flipping to compensate
+   * for alliance.
+   *
    * @param translationToSet The translation it will set.
    */
   public void setAllianceRelativeTranslation2d(Translation2d translationToSet) {
@@ -417,7 +454,9 @@ public class CommandSwerveDrivetrain
 
   /**
    * Sets the pose relative to the alliance, if alliance is red, flips the pose.
-   * @param poseToSet The pose to set. Its origin must be on the blue origin to set correctly.
+   *
+   * @param poseToSet The pose to set. Its origin must be on the blue origin to
+   *                  set correctly.
    */
   public void setAllianceRelativePose2d(Pose2d poseToSet) {
     super.resetPose(
