@@ -86,7 +86,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Elevator P", P);
     SmartDashboard.putNumber("Elevator I", I);
     SmartDashboard.putNumber("Elevator D", D);
-    SmartDashboard.putNumber("Elevator FF", arbFF);
+    SmartDashboard.putNumber("Elevator arbFF", arbFF);
     SmartDashboard.putNumber("Elevator MaxVel", maxVel);
     SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -115,7 +115,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     double newP = SmartDashboard.getNumber("Elevator P", P);
     double newI = SmartDashboard.getNumber("Elevator I", I);
     double newD = SmartDashboard.getNumber("Elevator D", D);
-    double newFF = SmartDashboard.getNumber("Elevator FF", arbFF);
+    double newFF = SmartDashboard.getNumber("Elevator arbFF", arbFF);
     double newMaxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
