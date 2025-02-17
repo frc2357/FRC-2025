@@ -3,10 +3,12 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -32,7 +34,7 @@ public class ElevatorTuningSubsystem implements Sendable {
   private double P = 0;
   private double I = 0;
   private double D = 0;
-  private double FF = 0;
+  private double arbFF = 0;
   private double maxVel = 0;
   private double maxAcc = 0;
 
@@ -73,7 +75,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     P = Preferences.getDouble("elevatorP", 0);
     I = Preferences.getDouble("elevatorI", 0);
     D = Preferences.getDouble("elevatorD", 0);
-    FF = Preferences.getDouble("elevatorFF", 0);
+    arbFF = Preferences.getDouble("elevatorFF", 0);
     maxVel = Preferences.getDouble("elevatorMaxVel", 0);
     maxAcc = Preferences.getDouble("elevatorMaxAcc", 0);
 
@@ -84,7 +86,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Elevator P", P);
     SmartDashboard.putNumber("Elevator I", I);
     SmartDashboard.putNumber("Elevator D", D);
-    SmartDashboard.putNumber("Elevator FF", FF);
+    SmartDashboard.putNumber("Elevator FF", arbFF);
     SmartDashboard.putNumber("Elevator MaxVel", maxVel);
     SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -95,7 +97,7 @@ public class ElevatorTuningSubsystem implements Sendable {
   }
 
   public void updatePIDs() {
-    m_motorconfig.closedLoop.pidf(P, I, D, FF);
+    m_motorconfig.closedLoop.pidf(P, I, D, 0);
 
     m_motorconfig.closedLoop.maxMotion
       .maxAcceleration(maxAcc)
@@ -112,7 +114,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     double newP = SmartDashboard.getNumber("Elevator P", P);
     double newI = SmartDashboard.getNumber("Elevator I", I);
     double newD = SmartDashboard.getNumber("Elevator D", D);
-    double newFF = SmartDashboard.getNumber("Elevator FF", FF);
+    double newFF = SmartDashboard.getNumber("Elevator FF", arbFF);
     double newMaxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -126,14 +128,14 @@ public class ElevatorTuningSubsystem implements Sendable {
       newP != P ||
       newI != I ||
       newD != D ||
-      newFF != FF ||
+      newFF != arbFF ||
       newMaxVel != maxVel ||
       newMaxAcc != maxAcc
     ) {
       P = newP;
       I = newI;
       D = newD;
-      FF = newFF;
+      arbFF = newFF;
       maxVel = newMaxVel;
       maxAcc = newMaxAcc;
       updatePIDs();
@@ -189,7 +191,10 @@ public class ElevatorTuningSubsystem implements Sendable {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl
+      ControlType.kMAXMotionPositionControl,
+      ClosedLoopSlot.kSlot0,
+      arbFF,
+      ArbFFUnits.kVoltage
     );
   }
 
@@ -218,7 +223,7 @@ public class ElevatorTuningSubsystem implements Sendable {
         Preferences.setDouble("elevatorP", P);
         Preferences.setDouble("elevatorI", I);
         Preferences.setDouble("elevatorD", D);
-        Preferences.setDouble("elevatorFF", FF);
+        Preferences.setDouble("elevatorFF", arbFF);
         Preferences.setDouble("elevatorMaxVel", maxAcc);
         Preferences.setDouble("elevatorMaxAcc", maxVel);
       }
