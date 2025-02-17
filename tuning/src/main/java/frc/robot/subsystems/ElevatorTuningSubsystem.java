@@ -97,6 +97,7 @@ public class ElevatorTuningSubsystem implements Sendable {
   }
 
   public void updatePIDs() {
+    // Rev recommends not using velocity feed forward for max motion positional control
     m_motorconfig.closedLoop.pidf(P, I, D, 0);
 
     m_motorconfig.closedLoop.maxMotion
