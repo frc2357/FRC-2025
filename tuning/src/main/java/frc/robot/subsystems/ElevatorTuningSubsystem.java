@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
+// TODO: Goal: Full elevator extension and retraction in 0.5 seconds
 public class ElevatorTuningSubsystem implements Sendable {
 
   private SparkMax m_motorLeft;
@@ -35,8 +36,8 @@ public class ElevatorTuningSubsystem implements Sendable {
   private double I = 0;
   private double D = 0;
   private double arbFF = 0.05;
-  private double maxVel = 4600;
-  private double maxAcc = 5000;
+  private double maxVel = 4600; // Desired: 4600, Max: 5600
+  private double maxAcc = 5000; // Desired: 18400
 
   private SparkBaseConfig m_motorconfig = Constants.ELEVATOR.MOTOR_CONFIG_LEFT;
 
