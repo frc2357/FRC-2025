@@ -17,9 +17,10 @@ import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
+import frc.robot.controls.Buttonboard;
 import frc.robot.controls.CodriverControls;
 import frc.robot.controls.DriverControls;
-import frc.robot.controls.controllers.ButtonboardController;
+import frc.robot.controls.controllers.CommandButtonboardController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.networkTables.*;
 import frc.robot.subsystems.*;
@@ -43,7 +44,7 @@ public class Robot extends TimedRobot {
   public static Climber climber;
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
-  public static ButtonboardController buttonboard;
+  public static Buttonboard buttonboard;
   public static ElasticFieldManager elasticFieldManager;
 
   public static Alliance alliance = null;
@@ -77,8 +78,10 @@ public class Robot extends TimedRobot {
     elasticFieldManager.setupSwerveField();
 
     // Define controls
-    buttonboard = new ButtonboardController(
-      Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT
+    buttonboard = new Buttonboard(
+      new CommandButtonboardController(
+        Constants.CONTROLLER.BUTTONBOARD_CONTROLLER_PORT
+      )
     );
     driverControls = new DriverControls(
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),

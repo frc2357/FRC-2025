@@ -1,6 +1,5 @@
 package frc.robot.commands.rumble;
 
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.CONTROLLER;
@@ -12,10 +11,7 @@ public class ClearButtonboard extends Command {
 
   @Override
   public void initialize() {
-    Robot.buttonboard.setRumble(
-      RumbleType.kBothRumble,
-      CONTROLLER.BUTTONBOARD_RUMBLE_INTENSITY
-    );
+    Robot.buttonboard.setRumble(CONTROLLER.BUTTONBOARD_RUMBLE_INTENSITY);
     timer.reset();
     timer.start();
   }
@@ -28,7 +24,7 @@ public class ClearButtonboard extends Command {
   @Override
   public void end(boolean interrupted) {
     timer.stop();
-    Robot.buttonboard.setRumble(RumbleType.kBothRumble, 0);
+    Robot.buttonboard.setRumble(0);
   }
 
   @Override

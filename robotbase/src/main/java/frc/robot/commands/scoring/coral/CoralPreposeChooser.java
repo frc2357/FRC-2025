@@ -3,7 +3,7 @@ package frc.robot.commands.scoring.coral;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import frc.robot.Robot;
-import frc.robot.controls.controllers.ButtonboardController.ScoringLevel;
+import frc.robot.controls.controllers.CommandButtonboardController.ScoringLevel;
 import java.util.Map;
 
 public class CoralPreposeChooser extends SelectCommand<ScoringLevel> {
