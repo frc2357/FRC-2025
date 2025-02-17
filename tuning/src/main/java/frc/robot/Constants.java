@@ -62,30 +62,6 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.25;
   }
 
-  public static final class CORAL_RUNNER {
-
-    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
-      .idleMode(IdleMode.kBrake)
-      .inverted(false)
-      .openLoopRampRate(.25)
-      .voltageCompensation(12);
-
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
-      MOTOR_CONFIG.closedLoop.outputRange(-1, 1);
-
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-
-    public static final double AXIS_MAX_SPEED = 0.1;
-
-    public static final MAXMotionConfig MAX_MOTION_CONFIG =
-      CLOSED_LOOP_CONFIG.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(0)
-        .maxVelocity(0);
-
-    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
-  }
-
   public static final class LATERATOR {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()

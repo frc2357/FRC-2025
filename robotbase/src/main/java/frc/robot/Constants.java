@@ -4,38 +4,17 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-
 import choreo.auto.AutoFactory;
-import com.revrobotics.spark.config.AbsoluteEncoderConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.EncoderConfig;
-import com.revrobotics.spark.config.MAXMotionConfig;
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.*;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -243,6 +222,10 @@ public final class Constants {
 
   public static final class CORAL_RUNNER {
 
+    // TODO: Tune speeds
+    public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(0);
+    public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(0);
+    public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0);
     public static final double SCORING_WAIT_TIME = .25;
 
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
@@ -252,25 +235,7 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(20, 20);
 
-    public static final double MOTOR_P = 0;
-    public static final double MOTOR_I = 0;
-    public static final double MOTOR_D = 0;
-    public static final double MOTOR_F = 0;
-
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
-      MOTOR_CONFIG.closedLoop
-        .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
-        .outputRange(-1, 1);
-
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-
-    public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final MAXMotionConfig MAX_MOTION_CONFIG =
-      CLOSED_LOOP_CONFIG.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(0)
-        .maxVelocity(0);
+    public static final double AXIS_MAX_SPEED = 0.1;
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
@@ -552,22 +517,22 @@ public final class Constants {
       public static final Pose2d BRANCH_C = new Pose2d(
         Units.Meters.of(3.7160),
         Units.Meters.of(3.0202),
-        new Rotation2d(Radians.of(1.0441))
+        new Rotation2d(Units.Radians.of(1.0441))
       );
       public static final Pose2d BRANCH_D = new Pose2d(
         Units.Meters.of(4.0011),
         Units.Meters.of(2.8563),
-        new Rotation2d(Radians.of(1.0441))
+        new Rotation2d(Units.Radians.of(1.0441))
       );
       public static final Pose2d BRANCH_E = new Pose2d(
         Units.Meters.of(4.9734),
         Units.Meters.of(2.8552),
-        new Rotation2d(Radians.of(2.0956))
+        new Rotation2d(Units.Radians.of(2.0956))
       );
       public static final Pose2d BRANCH_F = new Pose2d(
         Units.Meters.of(5.2600),
         Units.Meters.of(3.0165),
-        new Rotation2d(Radians.of(2.0956))
+        new Rotation2d(Units.Radians.of(2.0956))
       );
       public static final Pose2d BRANCH_G = new Pose2d(
         Units.Meters.of(5.7408),
@@ -582,22 +547,22 @@ public final class Constants {
       public static final Pose2d BRANCH_I = new Pose2d(
         Units.Meters.of(5.2650),
         Units.Meters.of(5.0293),
-        new Rotation2d(Radians.of(-2.0970))
+        new Rotation2d(Units.Radians.of(-2.0970))
       );
       public static final Pose2d BRANCH_J = new Pose2d(
         Units.Meters.of(4.9792),
         Units.Meters.of(5.1939),
-        new Rotation2d(Radians.of(-2.0970))
+        new Rotation2d(Units.Radians.of(-2.0970))
       );
       public static final Pose2d BRANCH_K = new Pose2d(
         Units.Meters.of(4.0037),
         Units.Meters.of(5.1982),
-        new Rotation2d(Radians.of(-1.0505))
+        new Rotation2d(Units.Radians.of(-1.0505))
       );
       public static final Pose2d BRANCH_L = new Pose2d(
         Units.Meters.of(3.7203),
         Units.Meters.of(5.0299),
-        new Rotation2d(Radians.of(-1.0505))
+        new Rotation2d(Units.Radians.of(-1.0505))
       );
       public static final Pose2d CENTER = new Pose2d(
         Units.Meters.of(4.4894),
@@ -691,18 +656,18 @@ public final class Constants {
 
     public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
       .idleMode(IDLE_MODE)
-      .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
+      .smartCurrentLimit((int) STALL_LIMIT.in(Units.Amps))
       .openLoopRampRate(1)
       .inverted(false);
     public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
       .idleMode(IDLE_MODE)
-      .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
+      .smartCurrentLimit((int) STALL_LIMIT.in(Units.Amps))
       .openLoopRampRate(1)
       .follow(CAN_ID.CLIMBER_MOTOR_ONE);
     public static final SparkBaseConfig MOTOR_CONFIG_THREE =
       new SparkMaxConfig()
         .idleMode(IDLE_MODE)
-        .smartCurrentLimit((int) STALL_LIMIT.in(Amps))
+        .smartCurrentLimit((int) STALL_LIMIT.in(Units.Amps))
         .openLoopRampRate(1)
         .follow(CAN_ID.CLIMBER_MOTOR_ONE);
   }
@@ -757,8 +722,8 @@ public final class Constants {
      */
     public static final Distance BOUNDARY = Units.Inches.of(
       (Math.sqrt(
-          Math.pow(FRAME_LENGTH.in(Inches), 2) +
-          Math.pow(FRAME_WIDTH.in(Inches), 2)
+          Math.pow(FRAME_LENGTH.in(Units.Inches), 2) +
+          Math.pow(FRAME_WIDTH.in(Units.Inches), 2)
         ) /
         2)
     );
@@ -769,7 +734,7 @@ public final class Constants {
     public static final double MOMENT_OF_INERTIA_SIMPLIFIED_DISTRIBUTION =
       (1.0 / 12) *
       (WEIGHT_POUNDS / 2.205) */*pounds to kilograms conversion is / 2.205*/
-      (Math.pow(FULL_LENGTH.in(Meters), 2) +
-        Math.pow(FULL_WIDTH.in(Meters), 2));
+      (Math.pow(FULL_LENGTH.in(Units.Meters), 2) +
+        Math.pow(FULL_WIDTH.in(Units.Meters), 2));
   }
 }

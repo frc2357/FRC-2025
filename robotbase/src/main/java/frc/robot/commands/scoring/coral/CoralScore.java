@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.commands.coralRunner.CoralRunnerSetVelocity;
+import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerStop;
 
 public class CoralScore extends SequentialCommandGroup {
@@ -18,7 +18,7 @@ public class CoralScore extends SequentialCommandGroup {
           new WaitUntilCommand(Robot.coralRunner::isOuttakeBeamBroken),
           new WaitCommand(Constants.CORAL_RUNNER.SCORING_WAIT_TIME)
         ),
-        new CoralRunnerSetVelocity(Constants.CORAL_RUNNER.SCORING_VELOCITY)
+        new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT)
       ),
       new CoralRunnerStop(),
       new CoralHome()
