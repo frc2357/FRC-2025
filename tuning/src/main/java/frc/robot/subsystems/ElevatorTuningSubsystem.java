@@ -31,12 +31,12 @@ public class ElevatorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0;
+  private double P = 0.008;
   private double I = 0;
   private double D = 0;
-  private double arbFF = 0;
-  private double maxVel = 0;
-  private double maxAcc = 0;
+  private double arbFF = 0.05;
+  private double maxVel = 4600;
+  private double maxAcc = 5000;
 
   private SparkBaseConfig m_motorconfig = Constants.ELEVATOR.MOTOR_CONFIG_LEFT;
 
@@ -90,6 +90,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Elevator MaxVel", maxVel);
     SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
+    SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
     SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
     SmartDashboard.putNumber("Elevator Setpoint", 0);
@@ -119,6 +120,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     double newMaxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
+    SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
     m_targetRotations = Rotations.of(
       SmartDashboard.getNumber("Elevator Setpoint", 0)
     );
@@ -194,9 +196,14 @@ public class ElevatorTuningSubsystem implements Sendable {
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0,
-      arbFF,
+      Math.copySign(arbFF, direction()),
       ArbFFUnits.kVoltage
     );
+  }
+
+  private int direction() {
+    Angle diff = m_targetRotations.minus(getRotations());
+    return (int) Math.copySign(1, diff.in(Units.Rotations));
   }
 
   public void setTargetDistance(Distance targetDistance) {
@@ -225,8 +232,8 @@ public class ElevatorTuningSubsystem implements Sendable {
         Preferences.setDouble("elevatorI", I);
         Preferences.setDouble("elevatorD", D);
         Preferences.setDouble("elevatorFF", arbFF);
-        Preferences.setDouble("elevatorMaxVel", maxAcc);
-        Preferences.setDouble("elevatorMaxAcc", maxVel);
+        Preferences.setDouble("elevatorMaxVel", maxVel);
+        Preferences.setDouble("elevatorMaxAcc", maxAcc);
       }
     );
   }
