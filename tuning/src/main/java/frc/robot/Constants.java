@@ -8,7 +8,6 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 
 public final class Constants {
@@ -30,11 +29,17 @@ public final class Constants {
 
     public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
-      .inverted(false);
+      .inverted(false)
+      .openLoopRampRate(.25)
+      .smartCurrentLimit(40, 40)
+      .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
         .idleMode(IdleMode.kBrake)
+        .openLoopRampRate(.25)
+        .voltageCompensation(12)
+        .smartCurrentLimit(40, 40)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
@@ -55,9 +60,7 @@ public final class Constants {
       2.256
     );
 
-    public static final double AXIS_MAX_SPEED = 0.1;
-
-    public static final Distance[] ELEVATOR_HEIGHT_SETPOINTS = {};
+    public static final double AXIS_MAX_SPEED = 0.25;
   }
 
   public static final class CORAL_RUNNER {
