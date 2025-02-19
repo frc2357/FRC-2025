@@ -40,16 +40,12 @@ public class CodriverControls {
       .povRight()
       .and(m_rightTrigger)
       .whileTrue(
-        new CoralRunnerAxis(() -> modifyAxis(m_controller.getRightTriggerAxis())
-        )
+        new CoralRunnerAxis(() -> -m_controller.getRightTriggerAxis())
       );
     m_controller
       .povRight()
       .and(m_leftTrigger)
-      .whileTrue(
-        new CoralRunnerAxis(() -> modifyAxis(m_controller.getRightTriggerAxis())
-        )
-      );
+      .whileTrue(new CoralRunnerAxis(() -> m_controller.getLeftTriggerAxis()));
   }
 
   public double deadband(double value, double deadband) {

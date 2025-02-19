@@ -187,7 +187,9 @@ public class ElevatorTuningSubsystem implements Sendable {
 
   public Distance getDistance() {
     return (
-      ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER.times(m_encoder.getPosition())
+      ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
+        getRotations().div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
+      )
     );
   }
 
@@ -197,19 +199,17 @@ public class ElevatorTuningSubsystem implements Sendable {
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0,
-      Math.copySign(arbFF, direction()),
+      arbFF,
       ArbFFUnits.kVoltage
     );
   }
 
-  private int direction() {
-    Angle diff = m_targetRotations.minus(getRotations());
-    return (int) Math.copySign(1, diff.in(Units.Rotations));
-  }
-
   public void setTargetDistance(Distance targetDistance) {
     Angle rotations = Units.Rotations.of(
-      targetDistance.div(ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER).magnitude()
+      targetDistance
+        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
+        .times(ELEVATOR.GEAR_RATIO)
+        .magnitude()
     );
     setTargetRotations(rotations);
   }
