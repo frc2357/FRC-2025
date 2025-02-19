@@ -6,7 +6,6 @@ package frc.robot;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -238,13 +237,6 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.1;
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
-
-    public static final AngularVelocity FAST_INTAKE_VELOCITY =
-      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
-    public static final AngularVelocity SLOW_INTAKE_VELOCITY =
-      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
-    public static final AngularVelocity SCORING_VELOCITY =
-      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
   }
 
   public static final class ALGAE_RUNNER {
