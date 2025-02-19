@@ -66,6 +66,7 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   private class SetReefSide extends InstantCommand {
+
     public SetReefSide(ReefSide side) {
       super(() -> {
         m_selectedReefSide = side;
@@ -79,6 +80,7 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   private class SetScoringLevel extends InstantCommand {
+
     public SetScoringLevel(ScoringLevel lvl) {
       super(() -> {
         m_selectedScoringLevel = lvl;
@@ -92,6 +94,7 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   private class SetScoringDirection extends InstantCommand {
+
     public SetScoringDirection(ScoringDirection dir) {
       super(() -> {
         m_selectScoringDirection = dir;
