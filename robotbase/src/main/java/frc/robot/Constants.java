@@ -177,7 +177,7 @@ public final class Constants {
       .inverted(false)
       .openLoopRampRate(.25)
       .voltageCompensation(12)
-      .smartCurrentLimit(20, 20);
+      .smartCurrentLimit(40, 40);
 
     public static final double MOTOR_P = 0;
     public static final double MOTOR_I = 0;
@@ -192,7 +192,7 @@ public final class Constants {
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
-    public static final double AXIS_MAX_SPEED = 0.25;
+    public static final double AXIS_MAX_SPEED = 0.5;
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
@@ -225,16 +225,16 @@ public final class Constants {
     public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(0);
     public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(0);
     public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0);
-    public static final double SCORING_WAIT_TIME = .25;
+    public static final double SCORING_WAIT_TIME = .5;
 
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
       .voltageCompensation(12)
-      .smartCurrentLimit(20, 20);
+      .smartCurrentLimit(40, 40);
 
-    public static final double AXIS_MAX_SPEED = 0.1;
+    public static final double AXIS_MAX_SPEED = 0.5;
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }

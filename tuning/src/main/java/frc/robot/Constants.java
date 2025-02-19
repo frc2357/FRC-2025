@@ -54,10 +54,12 @@ public final class Constants {
 
     public static final int ENCODER_COUNTS_PER_REV = 8196;
 
-    public static final double GEAR_RATIO = 50 / 14;
-    public static final Distance MOTOR_PULLEY_PITCH_DIAMETER = Units.Inches.of(
-      2.256
-    );
+    public static final double GEAR_RATIO = 3.2142857143;
+
+    public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
+    public static final double OUTPUT_PULLEY_NUMBER_OF_TEETH = 28;
+    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
+      HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
 
     public static final double AXIS_MAX_SPEED = 0.25;
   }
@@ -82,6 +84,13 @@ public final class Constants {
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
+
+    public static final double GEAR_RATIO = 5;
+    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
+      46.188
+    );
+    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
+      OUTPUT_PULLEY_DIAMETER.times(Math.PI);
   }
 
   public static final class ALGAE_PIVOT {
