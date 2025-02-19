@@ -20,8 +20,7 @@ import frc.robot.Constants.LATERATOR;
 
 public class LateratorTuningSubsystem {
 
-  private SparkMax m_motorLeft;
-  private SparkMax m_motorRight;
+  private SparkMax m_motor;
 
   private double kP = 0;
   private double kI = 0;
@@ -30,7 +29,7 @@ public class LateratorTuningSubsystem {
   private double maxVel = 0;
   private double maxAcc = 0;
 
-  private SparkBaseConfig m_motorconfig = LATERATOR.MOTOR_CONFIG_LEFT;
+  private SparkBaseConfig m_motorconfig = LATERATOR.MOTOR_CONFIG;
 
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
@@ -38,30 +37,19 @@ public class LateratorTuningSubsystem {
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
   public LateratorTuningSubsystem() {
-    m_motorLeft = new SparkMax(CAN_ID.LATERATOR_MOTOR, MotorType.kBrushless);
-
-    m_motorRight = new SparkMax(
-      CAN_ID.LATERATOR_MOTOR_RIGHT,
-      MotorType.kBrushless
-    );
+    m_motor = new SparkMax(CAN_ID.LATERATOR_MOTOR, MotorType.kBrushless);
 
     updatePIDs();
 
-    m_motorLeft.configure(
+    m_motor.configure(
       m_motorconfig,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
 
-    m_motorRight.configure(
-      LATERATOR.MOTOR_CONFIG_RIGHT,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+    m_PIDController = m_motor.getClosedLoopController();
 
-    m_PIDController = m_motorLeft.getClosedLoopController();
-
-    m_encoder = m_motorLeft.getEncoder();
+    m_encoder = m_motor.getEncoder();
   }
 
   public void displayDashboard() {
@@ -148,18 +136,18 @@ public class LateratorTuningSubsystem {
   }
 
   public void setSpeed(double speed) {
-    m_motorLeft.set(speed);
+    m_motor.set(speed);
     m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 
   public void setAxisSpeed(double axisSpeed) {
     axisSpeed *= LATERATOR.AXIS_MAX_SPEED;
-    m_motorLeft.set(axisSpeed);
+    m_motor.set(axisSpeed);
     m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 
   public void stop() {
-    m_motorLeft.stopMotor();
+    m_motor.stopMotor();
     m_targetRotations = Units.Rotations.of(Double.NaN);
   }
 }

@@ -1,21 +1,22 @@
 package frc.robot.commands.coralRunner;
 
-import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
+import frc.robot.controls.util.AxisInterface;
 
-public class CoralRunnerSetVelocity extends Command {
+public class CoralRunnerSetSpeed extends Command {
 
-  private AngularVelocity m_velocity;
+  private Dimensionless m_percent;
 
-  public CoralRunnerSetVelocity(AngularVelocity velocity) {
-    m_velocity = velocity;
+  public CoralRunnerSetSpeed(Dimensionless percent) {
+    m_percent = percent;
     addRequirements(Robot.coralRunner);
   }
 
   @Override
   public void initialize() {
-    Robot.coralRunner.setTargetVelocity(m_velocity);
+    Robot.coralRunner.setSpeed(m_percent);
   }
 
   @Override
