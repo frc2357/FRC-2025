@@ -90,7 +90,10 @@ public class Elevator extends SubsystemBase {
 
   public void setTargetDistance(Distance targetDistance) {
     Angle rotations = Units.Rotations.of(
-      targetDistance.div(ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER).magnitude()
+      targetDistance
+        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
+        .times(ELEVATOR.GEAR_RATIO)
+        .magnitude()
     );
     setTargetRotations(rotations);
   }
@@ -113,7 +116,9 @@ public class Elevator extends SubsystemBase {
 
   public Distance getDistance() {
     return (
-      ELEVATOR.MOTOR_PULLEY_PITCH_DIAMETER.times(m_encoder.getPosition())
+      ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
+        getRotations().div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
+      )
     );
   }
 

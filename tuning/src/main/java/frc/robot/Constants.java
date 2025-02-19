@@ -17,12 +17,11 @@ public final class Constants {
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
-    public static final int LATERATOR_MOTOR_LEFT = 28;
-    public static final int LATERATOR_MOTOR_RIGHT = 29;
+    public static final int LEFT_ALGAE_PIVOT_MOTOR = 25;
+    public static final int RIGHT_ALGAE_PIVOT_MOTOR = 26;
 
-    public static final int CORAL_RUNNER_MOTOR = 30;
-    public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
-    public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
+    public static final int LATERATOR_MOTOR = 27;
+    public static final int CORAL_RUNNER_MOTOR = 28;
   }
 
   public static final class ELEVATOR {
@@ -101,7 +100,7 @@ public final class Constants {
         .inverted(true)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .follow(CAN_ID.LATERATOR_MOTOR_LEFT);
+        .follow(CAN_ID.LATERATOR_MOTOR);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop.outputRange(-1, 1);

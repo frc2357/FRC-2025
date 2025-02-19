@@ -80,14 +80,12 @@ public final class Constants {
     public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
     public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
 
-    public static final int LATERATOR_MOTOR_LEFT = 28;
-    public static final int LATERATOR_MOTOR_RIGHT = 29;
+    public static final int LATERATOR_MOTOR = 28;
+    public static final int CORAL_RUNNER_MOTOR = 29;
 
-    public static final int CORAL_RUNNER_MOTOR = 30;
-
-    public static final int CLIMBER_MOTOR_ONE = 31;
-    public static final int CLIMBER_MOTOR_TWO = 32;
-    public static final int CLIMBER_MOTOR_THREE = 33;
+    public static final int CLIMBER_MOTOR_ONE = 30;
+    public static final int CLIMBER_MOTOR_TWO = 31;
+    public static final int CLIMBER_MOTOR_THREE = 32;
   }
 
   public final class DIGITAL_INPUT {
@@ -141,7 +139,7 @@ public final class Constants {
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
-      .smartCurrentLimit(30, 30)
+      .smartCurrentLimit(40, 40)
       .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
@@ -149,7 +147,7 @@ public final class Constants {
         .idleMode(IdleMode.kBrake)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .smartCurrentLimit(30, 30)
+        .smartCurrentLimit(40, 40)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
     public static final double LEFT_MOTOR_P = 0.008;
@@ -170,11 +168,17 @@ public final class Constants {
         .maxVelocity(4600);
 
     public static final int ENCODER_COUNTS_PER_REV = 8196;
-    public static final double GEAR_RATIO = 50 / 14;
-    public static final Distance MOTOR_PULLEY_PITCH_DIAMETER = Units.Inches.of(
+    public static final double GEAR_RATIO = 3.2142857143;
+    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Inches.of(
       2.256
     );
-    public static final double AXIS_MAX_SPEED = 0.25;
+
+    public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
+    public static final double OUTPUT_PULLEY_NUMBER_OF_TEETH = 28;
+    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
+      HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
+
+    public static final double AXIS_MAX_SPEED = 0.5;
 
     public static final class SETPOINTS {
 
@@ -190,20 +194,12 @@ public final class Constants {
 
   public static final class LATERATOR {
 
-    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
-      .voltageCompensation(12);
-
-    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
-      new SparkMaxConfig()
-        .idleMode(IdleMode.kBrake)
-        .inverted(true)
-        .openLoopRampRate(.25)
-        .voltageCompensation(12)
-        .follow(CAN_ID.LATERATOR_MOTOR_LEFT)
-        .apply(new AbsoluteEncoderConfig());
+      .voltageCompensation(12)
+      .smartCurrentLimit(20, 20);
 
     public static final double MOTOR_P = 0;
     public static final double MOTOR_I = 0;
@@ -212,23 +208,26 @@ public final class Constants {
 
     // Set feedback sensor to alternate encoder
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
-      MOTOR_CONFIG_LEFT.closedLoop
+      MOTOR_CONFIG.closedLoop
         .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
-        .outputRange(-1, 1)
-        .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder);
+        .outputRange(-1, 1);
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
-    public static final double AXIS_MAX_SPEED = 0.1;
-
-    public static final EncoderConfig ALTERNATE_ENCODER_CONFIG_LEFT =
-      MOTOR_CONFIG_LEFT.encoder.countsPerRevolution(8196);
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
+
+    public static final double GEAR_RATIO = 5;
+    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
+      46.188
+    );
+    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
+      OUTPUT_PULLEY_DIAMETER.times(Math.PI);
 
     public static final class SETPOINTS {
 
@@ -244,20 +243,14 @@ public final class Constants {
 
   public static final class CORAL_RUNNER {
 
-    public static final AngularVelocity FAST_INTAKE_VELOCITY =
-      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
-    public static final AngularVelocity SLOW_INTAKE_VELOCITY =
-      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
-    public static final AngularVelocity SCORING_VELOCITY =
-      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
-
     public static final double SCORING_WAIT_TIME = .25;
 
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
-      .voltageCompensation(12);
+      .voltageCompensation(12)
+      .smartCurrentLimit(20, 20);
 
     public static final double MOTOR_P = 0;
     public static final double MOTOR_I = 0;
@@ -271,7 +264,7 @@ public final class Constants {
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
-    public static final double AXIS_MAX_SPEED = 0.1;
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG =
       CLOSED_LOOP_CONFIG.maxMotion
@@ -280,6 +273,13 @@ public final class Constants {
         .maxVelocity(0);
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+
+    public static final AngularVelocity FAST_INTAKE_VELOCITY =
+      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
+    public static final AngularVelocity SLOW_INTAKE_VELOCITY =
+      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
+    public static final AngularVelocity SCORING_VELOCITY =
+      AngularVelocity.ofBaseUnits(0, null); //TODO: Tune Speed
   }
 
   public static final class ALGAE_RUNNER {

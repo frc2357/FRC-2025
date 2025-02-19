@@ -38,10 +38,7 @@ public class LateratorTuningSubsystem {
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
   public LateratorTuningSubsystem() {
-    m_motorLeft = new SparkMax(
-      CAN_ID.LATERATOR_MOTOR_LEFT,
-      MotorType.kBrushless
-    );
+    m_motorLeft = new SparkMax(CAN_ID.LATERATOR_MOTOR, MotorType.kBrushless);
 
     m_motorRight = new SparkMax(
       CAN_ID.LATERATOR_MOTOR_RIGHT,
