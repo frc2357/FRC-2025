@@ -17,11 +17,10 @@ public final class Constants {
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
-    public static final int LEFT_ALGAE_PIVOT_MOTOR = 25;
-    public static final int RIGHT_ALGAE_PIVOT_MOTOR = 26;
+    public static final int ALGAE_PIVOT_LEFT_MOTOR = 25;
+    public static final int ALGAE_PIVOT_RIGHT_MOTOR = 26;
 
     public static final int LATERATOR_MOTOR = 27;
-    public static final int CORAL_RUNNER_MOTOR = 28;
   }
 
   public static final class ELEVATOR {
@@ -95,28 +94,33 @@ public final class Constants {
 
   public static final class ALGAE_PIVOT {
 
-    public static final double AXIS_MAX_SPEED = 0.8;
+    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
+      .idleMode(IdleMode.kBrake)
+      .inverted(false)
+      .openLoopRampRate(.25)
+      .smartCurrentLimit(20, 20)
+      .voltageCompensation(12);
 
-    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
-
-    public static final boolean MOTOR_INVERTED = false;
-
-    public static final Angle MIN_ANGLE = Units.Degrees.of(0);
-    public static final Angle MAX_ANGLE = Units.Degrees.of(90);
-
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0;
-
-    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
-      .idleMode(IDLE_MODE)
-      .inverted(MOTOR_INVERTED);
-
-    public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
+    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
-        .idleMode(IDLE_MODE)
-        .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR);
+        .idleMode(IdleMode.kBrake)
+        .openLoopRampRate(.25)
+        .voltageCompensation(12)
+        .smartCurrentLimit(20, 20)
+        .follow(CAN_ID.ALGAE_PIVOT_LEFT_MOTOR, true);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
-      LEFT_MOTOR_CONFIG.closedLoop.outputRange(-1, 1);
+      MOTOR_CONFIG_LEFT.closedLoop.outputRange(-1, 1);
+
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+
+    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.maxMotion
+        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+        .maxAcceleration(0)
+        .maxVelocity(0);
+
+    public static final double AXIS_MAX_SPEED = 0.25;
   }
 
   public static final class CUSTOM_UNITS {
