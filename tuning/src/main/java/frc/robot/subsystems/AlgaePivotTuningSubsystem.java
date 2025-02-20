@@ -24,7 +24,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.ALGAE_PIVOT;
 
 // TODO: Goal: Unknown
-public class AlgaeTuningSubsystem implements Sendable {
+public class AlgaePivotTuningSubsystem implements Sendable {
 
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
@@ -42,7 +42,7 @@ public class AlgaeTuningSubsystem implements Sendable {
   private SparkBaseConfig m_motorconfig =
     Constants.ALGAE_PIVOT.MOTOR_CONFIG_LEFT;
 
-  public AlgaeTuningSubsystem() {
+  public AlgaePivotTuningSubsystem() {
     m_motorLeft = new SparkMax(
       Constants.CAN_ID.ALGAE_PIVOT_LEFT_MOTOR,
       MotorType.kBrushless
