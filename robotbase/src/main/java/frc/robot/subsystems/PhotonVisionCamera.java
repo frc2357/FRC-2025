@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -17,20 +18,17 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FIELD_CONSTANTS;
-import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Robot;
 import java.util.List;
 import java.util.Optional;
-import javax.sound.midi.MidiSystem;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -72,7 +70,7 @@ public class PhotonVisionCamera extends SubsystemBase {
   protected static final PhotonPoseEstimator m_poseEstimator =
     new PhotonPoseEstimator(
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField),
-      PHOTON_VISION.PRIMARY_STRATEGY,
+      PRIMARY_STRATEGY,
       new Transform3d()
     );
 
@@ -99,7 +97,7 @@ public class PhotonVisionCamera extends SubsystemBase {
   private static final BooleanEntry m_turboSwitch =
     NetworkTableInstance.create()
       .getBooleanTopic("/photonvision/use_new_cscore_frametime")
-      .getEntry(PHOTON_VISION.ACTIVATE_TURBO_SWITCH);
+      .getEntry(ACTIVATE_TURBO_SWITCH);
 
   public PhotonVisionCamera(
     String cameraName,
@@ -132,10 +130,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (!m_camera.isConnected() && !m_connectionLost) {
       m_connectionLost = true;
       DriverStation.reportError(
-        "[" +
-        m_camera.getName() +
-        "]\n" +
-        PHOTON_VISION.LOST_CONNECTION_ERROR_MESSAGE,
+        "[" + m_camera.getName() + "]\n" + LOST_CONNECTION_ERROR_MESSAGE,
         false
       );
       return;
@@ -168,29 +163,62 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (m_connectionLost) {
       m_connectionLost = false;
       DriverStation.reportWarning(
-        "[" +
-        m_camera.getName() +
-        "]\n" +
-        PHOTON_VISION.CONNECTION_REGAINED_MESSAGE,
+        "[" + m_camera.getName() + "]\n" + CONNECTION_REGAINED_MESSAGE,
         false
       );
     }
     updatePose(); // update pose based on the new result
   }
 
-  private void updatePose() {
-    updateHeading();
-    // update reference pose incase we want that strategy
-    m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+  /**
+   * Gets the {@link #m_poseEstimator pose estimator} ready to work for the camera that this instance is running.
+   * <strong>This should be ran every time {@link #updatePose()} is called, at the very top.</strong>
+   */
+  private void readyPoseEstimator() {
+    // does whatever we need to make the strategy work
+    switch (PRIMARY_STRATEGY) {
+      case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
+        updateHeading();
+        break;
+      case CLOSEST_TO_REFERENCE_POSE:
+        m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+        break;
+      case CLOSEST_TO_LAST_POSE:
+        m_poseEstimator.setLastPose(m_lastEstimatedPose.estimatedPose);
+        break;
+      default:
+        break;
+    }
+    switch (FALLBACK_STRATEGY) {
+      case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
+        // if our primary strategy already needs us to update the heading, we dont want to call more hardware.
+        // they get upset if you call them enough, and its a waste of time.
+        if (
+          PRIMARY_STRATEGY == PoseStrategy.CONSTRAINED_SOLVEPNP ||
+          PRIMARY_STRATEGY == PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
+        ) {
+          break;
+        }
+        updateHeading();
+        break;
+      case CLOSEST_TO_REFERENCE_POSE:
+        m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+        break;
+      case CLOSEST_TO_LAST_POSE:
+        m_poseEstimator.setLastPose(m_lastEstimatedPose.estimatedPose);
+        break;
+      default:
+        break;
+    }
+
     // change pose estimator settings to be correct for the current camera
     m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
+  }
+
+  private void updatePose() {
+    readyPoseEstimator();
     m_lastEstimatedPose = m_poseEstimator
-      .update(
-        m_result,
-        m_cameraMatrix,
-        m_distCoeefs,
-        PHOTON_VISION.POSE_EST_PARAMS
-      )
+      .update(m_result, m_cameraMatrix, m_distCoeefs, POSE_EST_PARAMS)
       .orElse(null);
     if (m_lastEstimatedPose == null) {
       return;
@@ -205,37 +233,33 @@ public class PhotonVisionCamera extends SubsystemBase {
     averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
     if ( // checks whether the estimated pose is in the field or not, and chucks it out if it isnt
       m_lastEstimatedPose.estimatedPose.getX() <
-        -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+        -FIELD_BORDER_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getX() >
       FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+      FIELD_BORDER_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getY() <
-      -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+      -FIELD_BORDER_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getY() >
       FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() <
-      -PHOTON_VISION.Z_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() >
-      PHOTON_VISION.Z_MARGIN.in(Meters)
+      FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() < -Z_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() > Z_MARGIN.in(Meters)
     ) {
       return;
     }
 
     if (
       Robot.swerve.getTranslationalVelocity().in(MetersPerSecond) >
-      PHOTON_VISION.MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
+      MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
     ) {
       return;
     }
 
     // the higher the confidence is, the less the estimated measurment is trusted.
-    double xVelocityConf = Math.abs(
-      0.2 + Robot.swerve.getXVelocity().in(MetersPerSecond)
-    );
-    double yVelocityConf = Math.abs(
-      0.2 + Robot.swerve.getYVelocity().in(MetersPerSecond)
-    );
+    double xVelocityConf =
+      0.2 + Math.abs(Robot.swerve.getXVelocity().in(MetersPerSecond));
+    double yVelocityConf =
+      0.2 + Math.abs(Robot.swerve.getYVelocity().in(MetersPerSecond));
     // we add 0.2 so that if were sitting still, it doesnt spiral into infinity.
     // its a partialy magic number, and will need tuning because of that.
 
@@ -250,13 +274,18 @@ public class PhotonVisionCamera extends SubsystemBase {
       m_lastEstimatedPose.estimatedPose.toPose2d(),
       Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
       VecBuilder.fill(
-        xCoordinateConfidence * PHOTON_VISION.X_STD_DEV_COEFFIECIENT,
-        yCoordinateConfidence * PHOTON_VISION.Y_STD_DEV_COEFFIECIENT,
-        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision
+        xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
+        yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
       )
     );
   }
 
+  /**
+   * <strong>This MUST be called EVERY FRAME for the pose estimator to work.</strong>
+   * <p>
+   * It has already been put into the {@link #updatePose()} function, and should NOT be removed, for any reason.
+   */
   private void updateHeading() {
     double timestamp = Utils.fpgaToCurrentTime(RobotController.getFPGATime());
     m_poseEstimator.addHeadingData(
@@ -305,8 +334,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     List<PhotonTrackedTarget> targetList
   ) {
     double highestPitch =
-      targetList.get(0).getPitch() +
-      PHOTON_VISION.BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
+      targetList.get(0).getPitch() + BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
     PhotonTrackedTarget bestTarget = targetList.get(0);
     for (PhotonTrackedTarget targetSeen : targetList) {
       if (
@@ -363,8 +391,8 @@ public class PhotonVisionCamera extends SubsystemBase {
 
   //   return (
   //     target.timestamp > then ||
-  //     Math.abs(target.yaw) > PHOTON_VISION.MAX_ANGLE.in(Degrees) ||
-  //     Math.abs(target.pitch) > PHOTON_VISION.MAX_ANGLE.in(Degrees)
+  //     Math.abs(target.yaw) > MAX_ANGLE.in(Degrees) ||
+  //     Math.abs(target.pitch) > MAX_ANGLE.in(Degrees)
   //   );
   // }
 
@@ -485,10 +513,10 @@ public class PhotonVisionCamera extends SubsystemBase {
     double resultReprojectionError = result.estimatedPose.bestReprojErr;
     double resultAmbiguity = result.estimatedPose.ambiguity;
 
-    if (resultAmbiguity > PHOTON_VISION.MAX_AMBIGUITY_TOLERANCE) {
+    if (resultAmbiguity > MAX_AMBIGUITY_TOLERANCE) {
       return null;
     }
-    if (resultReprojectionError > PHOTON_VISION.MAX_REPROJECTION_ERROR_PIXELS) {
+    if (resultReprojectionError > MAX_REPROJECTION_ERROR_PIXELS) {
       return null;
     }
     return new Pose3d(
