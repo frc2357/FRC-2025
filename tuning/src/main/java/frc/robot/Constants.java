@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -110,7 +111,9 @@ public final class Constants {
         .follow(CAN_ID.ALGAE_PIVOT_LEFT_MOTOR, true);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
-      MOTOR_CONFIG_LEFT.closedLoop.outputRange(-1, 1);
+      MOTOR_CONFIG_LEFT.closedLoop
+        .outputRange(-1, 1)
+        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 

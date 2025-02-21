@@ -11,7 +11,6 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -64,8 +63,6 @@ public class AlgaePivotTuningSubsystem implements Sendable {
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-
-    m_motorconfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
     m_PIDController = m_motorLeft.getClosedLoopController();
 
