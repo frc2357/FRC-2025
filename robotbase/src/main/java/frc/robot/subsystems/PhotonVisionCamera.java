@@ -52,7 +52,7 @@ public class PhotonVisionCamera extends SubsystemBase {
   // which are only extended so we can control which pipelines we are using.
 
   /** The actual camera object that we get everything from. */
-  protected PhotonCamera m_camera;
+  protected final PhotonCamera m_camera;
 
   /** The result we fecth from PhotonLib each loop. */
   protected PhotonPipelineResult m_result;
@@ -252,7 +252,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       VecBuilder.fill(
         xCoordinateConfidence * PHOTON_VISION.X_STD_DEV_COEFFIECIENT,
         yCoordinateConfidence * PHOTON_VISION.Y_STD_DEV_COEFFIECIENT,
-        Double.POSITIVE_INFINITY // Theta conf, should usually never change gyro from vision
+        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision
       )
     );
   }
