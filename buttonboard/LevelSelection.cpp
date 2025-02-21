@@ -1,20 +1,21 @@
 #include "LevelSelection.h"
 
-Adafruit_NeoKey_1x4 LevelSelection::leftKeypad;
-Adafruit_NeoKey_1x4 LevelSelection::rightKeypad;
-
-LevelSelection::Level LevelSelection::selection = LevelSelection::Level::NONE;
-
-void LevelSelection::init(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress, byte interruptPin)
+LevelSelection::LevelSelection(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress)
+    : m_leftKeypadI2CAddress(leftKeypadI2CAddress),
+      m_rightKeypadI2CAddress(rightKeypadI2CAddress)
 {
-    if (!LevelSelection::leftKeypad.begin(leftKeypadI2CAddress))
+}
+
+void LevelSelection::init()
+{
+    if (!m_leftKeypad.begin(m_leftKeypadI2CAddress))
     {
         Serial.println("Failed to establish communication with the left Scoring Level Selection Keypad I2C device");
         while (true)
             ;
     }
 
-    if (!LevelSelection::rightKeypad.begin(rightKeypadI2CAddress))
+    if (!m_rightKeypad.begin(m_rightKeypadI2CAddress))
     {
         Serial.println("Failed to establish communication with the right Scoring Level Selection Keypad I2C device");
         while (true)
@@ -23,43 +24,54 @@ void LevelSelection::init(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress,
 
     for (uint8_t i = 0; i < NUM_BUTTONS; i++)
     {
-        LevelSelection::setLedState(i, false);
+        setLedState(i, false);
     }
-    LevelSelection::showLEDs();
-
-    // Keypad interrupts enabled by default. Pin goes LOW when a button pressed
-    pinMode(interruptPin, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(interruptPin), LevelSelection::updateSelection, FALLING);
+    showLEDs();
 }
 
-void LevelSelection::updateSelection()
+void LevelSelection::update()
 {
-    uint8_t state = LevelSelection::leftKeypad.read() | LevelSelection::rightKeypad.read();
+    // uint8_t state = m_leftKeypad.read() | m_rightKeypad.read();
+    uint8_t state = m_leftKeypad.read();
 
-    if (state != 0)
+    if (state != 0 && m_hasReleased)
     {
         // Calculate log base 2 of the combined state
         // This gives us the most significant bit that is set to 1
         int sel = log_2(state);
 
-        bool isSelecting = sel == LevelSelection::selection;
+        setLedState(m_selection, false);
+        XInput.release(SCORING_LEVEL_XBOX_BUTTONS[m_selection]);
 
-        LevelSelection::selection = static_cast<LevelSelection::Level>(isSelecting ? selection : -1);
-        LevelSelection::setLedState(selection, isSelecting);
-        XInput.setButton(SCORING_LEVEL_XBOX_BUTTONS[selection], isSelecting);
+        if (sel == m_selection)
+        {
+            m_selection = Level::NONE;
+        }
+        else
+        {
+            m_selection = sel;
+            setLedState(m_selection, true);
+            XInput.press(SCORING_LEVEL_XBOX_BUTTONS[m_selection]);
+        }
 
-        LevelSelection::showLEDs();
+        showLEDs();
+
+        m_hasReleased = false;
+    }
+    else if (state == 0)
+    {
+        m_hasReleased = true;
     }
 }
 
 void LevelSelection::setLedState(int index, bool on)
 {
-    LevelSelection::leftKeypad.pixels.setPixelColor(index, on ? COLOR_ON : COLOR_OFF);
-    LevelSelection::rightKeypad.pixels.setPixelColor(index, on ? COLOR_ON : COLOR_OFF);
+    m_leftKeypad.pixels.setPixelColor(index, on ? COLOR_ON : COLOR_OFF);
+    m_rightKeypad.pixels.setPixelColor(index, on ? COLOR_ON : COLOR_OFF);
 }
 
 void LevelSelection::showLEDs()
 {
-    LevelSelection::leftKeypad.pixels.show();
-    LevelSelection::rightKeypad.pixels.show();
+    m_leftKeypad.pixels.show();
+    m_rightKeypad.pixels.show();
 }

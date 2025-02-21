@@ -31,15 +31,18 @@ public:
         L4 = 3
     };
 
-    static void init(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress, byte interruptPin);
+    LevelSelection(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress);
+    void init();
+    void update();
 
 private:
-    static void updateSelection();
-    static void setLedState(int index, bool on);
-    static void showLEDs();
+    void setLedState(int index, bool on);
+    void showLEDs();
 
-    static Adafruit_NeoKey_1x4 leftKeypad, rightKeypad;
-    static LevelSelection::Level selection;
+    byte m_leftKeypadI2CAddress, m_rightKeypadI2CAddress;
+    Adafruit_NeoKey_1x4 m_leftKeypad, m_rightKeypad;
+    LevelSelection::Level m_selection = LevelSelection::Level::NONE;
+    bool m_hasReleased = true;
 };
 
 #endif // LEVEL_SELECTION_H
