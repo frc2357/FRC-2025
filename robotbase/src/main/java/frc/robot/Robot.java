@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.PHOTON_VISION.*;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,7 +14,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
@@ -80,20 +81,28 @@ public class Robot extends TimedRobot {
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
     // climber = new Climber();
     frontCam = new PhotonVisionCamera(
-      PHOTON_VISION.FRONT_CAMERA_NAME,
-      PHOTON_VISION.FRONT_CAMERA_TRANSFORM
+      FRONT_CAM.NAME,
+      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM,
+      FRONT_CAM.CAMERA_MATRIX,
+      FRONT_CAM.DIST_COEFFS
     );
     backCam = new PhotonVisionCamera(
-      PHOTON_VISION.BACK_CAMERA_NAME,
-      PHOTON_VISION.BACK_CAMERA_TRANSFORM
+      BACK_CAM.NAME,
+      BACK_CAM.ROBOT_TO_CAM_TRANSFORM,
+      BACK_CAM.CAMERA_MATRIX,
+      BACK_CAM.DIST_COEEFS
     );
     leftCam = new PhotonVisionCamera(
-      PHOTON_VISION.LEFT_CAMERA_NAME,
-      PHOTON_VISION.LEFT_CAMERA_TRANSFORM
+      LEFT_CAM.NAME,
+      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
+      LEFT_CAM.CAMERA_MATRIX,
+      LEFT_CAM.DIST_COEEFS
     );
     rightCam = new PhotonVisionCamera(
-      PHOTON_VISION.RIGHT_CAMERA_NAME,
-      PHOTON_VISION.RIGHT_CAMERA_TRANSFORM
+      RIGHT_CAM.NAME,
+      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
+      RIGHT_CAM.CAMERA_MATRIX,
+      RIGHT_CAM.DIST_COEEFS
     );
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();

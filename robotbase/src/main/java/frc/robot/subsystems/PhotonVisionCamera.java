@@ -7,21 +7,27 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Robot;
 import java.util.List;
 import java.util.Optional;
+import javax.sound.midi.MidiSystem;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -70,7 +76,11 @@ public class PhotonVisionCamera extends SubsystemBase {
       new Transform3d()
     );
 
-  protected Transform3d m_robotToCameraTranform;
+  protected final Transform3d m_robotToCameraTranform;
+
+  protected final Optional<Matrix<N3, N3>> m_cameraMatrix;
+
+  protected final Optional<Matrix<N8, N1>> m_distCoeefs;
 
   protected static EstimatedRobotPose m_lastEstimatedPose;
 
@@ -91,7 +101,12 @@ public class PhotonVisionCamera extends SubsystemBase {
       .getBooleanTopic("/photonvision/use_new_cscore_frametime")
       .getEntry(PHOTON_VISION.ACTIVATE_TURBO_SWITCH);
 
-  public PhotonVisionCamera(String cameraName, Transform3d cameraTransform) {
+  public PhotonVisionCamera(
+    String cameraName,
+    Transform3d cameraTransform,
+    Matrix<N3, N3> cameraMatrix,
+    Matrix<N8, N1> distCoeefs
+  ) {
     m_camera = new PhotonCamera(cameraName);
 
     // 1-22 correspond to apriltag fiducial IDs, 0 is for gamepeices.
@@ -101,6 +116,8 @@ public class PhotonVisionCamera extends SubsystemBase {
     }
 
     m_robotToCameraTranform = cameraTransform;
+    m_cameraMatrix = Optional.of(cameraMatrix);
+    m_distCoeefs = Optional.of(distCoeefs);
   }
 
   /**
@@ -162,11 +179,19 @@ public class PhotonVisionCamera extends SubsystemBase {
   }
 
   private void updatePose() {
+    updateHeading();
     // update reference pose incase we want that strategy
     m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
     // change pose estimator settings to be correct for the current camera
     m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
-    m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
+    m_lastEstimatedPose = m_poseEstimator
+      .update(
+        m_result,
+        m_cameraMatrix,
+        m_distCoeefs,
+        PHOTON_VISION.POSE_EST_PARAMS
+      )
+      .orElse(null);
     if (m_lastEstimatedPose == null) {
       return;
     }
@@ -229,6 +254,14 @@ public class PhotonVisionCamera extends SubsystemBase {
         yCoordinateConfidence * PHOTON_VISION.Y_STD_DEV_COEFFIECIENT,
         Double.POSITIVE_INFINITY // Theta conf, should usually never change gyro from vision
       )
+    );
+  }
+
+  private void updateHeading() {
+    double timestamp = Utils.fpgaToCurrentTime(RobotController.getFPGATime());
+    m_poseEstimator.addHeadingData(
+      Utils.fpgaToCurrentTime(RobotController.getFPGATime()),
+      Robot.swerve.getFieldRelativePose2d().getRotation()
     );
   }
 
