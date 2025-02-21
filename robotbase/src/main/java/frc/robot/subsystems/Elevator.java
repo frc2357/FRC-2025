@@ -9,19 +9,21 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
 public class Elevator extends SubsystemBase {
-
+  
+  private DigitalInput m_hall_effect;
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
@@ -131,6 +133,10 @@ public class Elevator extends SubsystemBase {
 
   public boolean isAtTarget() {
     return isAtTargetRotations();
+  }
+
+  public boolean isAtZero() {
+    return m_hall_effect.get();
   }
 
   public void setZero() {
