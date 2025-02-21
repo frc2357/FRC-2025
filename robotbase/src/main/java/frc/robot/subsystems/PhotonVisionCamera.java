@@ -39,12 +39,12 @@ public class PhotonVisionCamera extends SubsystemBase {
   /*
    * The class for the object we use to cache our target data
    */
-  private static class TargetInfo {
+  // private static class TargetInfo {
 
-    public double yaw = Double.NaN;
-    public double pitch = Double.NaN;
-    public long timestamp = 0;
-  }
+  //   public double yaw = Double.NaN;
+  //   public double pitch = Double.NaN;
+  //   public long timestamp = 0;
+  // }
 
   // all of these are private so we can use them in the extended classes
   // which are only extended so we can control which pipelines we are using.
@@ -287,7 +287,6 @@ public class PhotonVisionCamera extends SubsystemBase {
    * It has already been put into the {@link #updatePose()} function, and should NOT be removed, for any reason.
    */
   private void updateHeading() {
-    double timestamp = Utils.fpgaToCurrentTime(RobotController.getFPGATime());
     m_poseEstimator.addHeadingData(
       Utils.fpgaToCurrentTime(RobotController.getFPGATime()),
       Robot.swerve.getFieldRelativePose2d().getRotation()
