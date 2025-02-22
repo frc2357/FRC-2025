@@ -425,8 +425,7 @@ public final class Constants {
 
     public static final Angle MAX_ANGLE = Units.Degrees.of(35);
 
-    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable
-    // degree.
+    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable degree.
     public static final double MAX_AMBIGUITY_TOLERANCE = 4; // TODO: tune this until its reasonable.
 
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
@@ -436,8 +435,7 @@ public final class Constants {
     public static final PoseStrategy FALLBACK_STRATEGY =
       PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
 
-    // coeffiecients for pose trust from vision. Can be raised or lowered depending
-    // on how much we trust them.
+    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
     // yes, these are essentially magic numbers
     public static final double X_STD_DEV_COEFFIECIENT = 0.4;
     public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
@@ -446,8 +444,7 @@ public final class Constants {
     public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
       Units.MetersPerSecond.of(3.5);
 
-    // how close the estimated pose can get to the field border before we invalidate
-    // it
+    // how close the estimated pose can get to the field border before we invalidate it
     public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.5);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
@@ -512,8 +509,7 @@ public final class Constants {
       COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(1.5));
 
     /**
-     * The slot number, starting at 1, from the alliance wall out, that we want to
-     * use. this can be changed on a per-match basis.
+     * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
      */
     public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 2;
   }
@@ -526,8 +522,7 @@ public final class Constants {
     public static final Distance COLLISION_TOLERANCE = Units.Inches.of(4);
 
     /**
-     * How close we want to get to the reef at any point in time. If were closer
-     * than this when traveling, a collision is likely.
+     * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
      */
     public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
       .plus(ROBOT_CONFIGURATION.BOUNDARY)
@@ -731,14 +726,11 @@ public final class Constants {
   }
 
   /**
-   * Class for numbers like the robots weight, its dimensions, bumper thickness,
-   * and anything else that should be written down about the robot.
+   * Class for numbers like the robots weight, its dimensions, bumper thickness, and anything else that should be written down about the robot.
    */
   public static class ROBOT_CONFIGURATION {
 
-    public static final double WEIGHT_POUNDS = 105; // TODO: currently estimated. get weight once laterator
-    // is on,
-    // and then final weight.
+    public static final double WEIGHT_POUNDS = 105; // TODO: currently estimated. get weight once laterator is on, and then final weight.
 
     public static final Distance FRAME_LENGTH = Units.Inches.of(26);
     public static final Distance FRAME_WIDTH = Units.Inches.of(26);
@@ -778,8 +770,7 @@ public final class Constants {
       );
 
     /**
-     * The distance that for any given object, if it is closer to the robot than
-     * this, it is hitting it, or will hit it when the robot turns.
+     * The distance that for any given object, if it is closer to the robot than this, it is hitting it, or will hit it when the robot turns.
      * Do not let anything get inside this.
      */
     public static final Distance BOUNDARY = Units.Inches.of(
