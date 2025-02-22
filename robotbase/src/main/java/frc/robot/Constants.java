@@ -173,6 +173,8 @@ public final class Constants {
       public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
       public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
 
   public static final class LATERATOR {
@@ -222,6 +224,8 @@ public final class Constants {
       public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
       public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
 
   public static final class CORAL_RUNNER {
