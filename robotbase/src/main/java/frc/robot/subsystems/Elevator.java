@@ -10,6 +10,7 @@ import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -22,8 +23,9 @@ import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
 public class Elevator extends SubsystemBase {
-  
+
   private DigitalInput m_hall_effect;
+  private Debouncer m_debouncer;
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
@@ -31,36 +33,33 @@ public class Elevator extends SubsystemBase {
 
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
   private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
-    Double.NaN
-  );
+      Double.NaN);
   private MutAngle m_currentRotationsHolder = Units.Rotations.mutable(
-    Double.NaN
-  );
+      Double.NaN);
 
   public Elevator() {
     m_motorLeft = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_LEFT_MOTOR,
-      MotorType.kBrushless
-    );
+        Constants.CAN_ID.ELEVATOR_LEFT_MOTOR,
+        MotorType.kBrushless);
     m_motorRight = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_RIGHT_MOTOR,
-      MotorType.kBrushless
-    );
+        Constants.CAN_ID.ELEVATOR_RIGHT_MOTOR,
+        MotorType.kBrushless);
 
     m_motorLeft.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_LEFT,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+        Constants.ELEVATOR.MOTOR_CONFIG_LEFT,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
     m_motorRight.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+        Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
 
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
+
+    m_hall_effect = new DigitalInput(Constants.DIGITAL_INPUT.ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID);
+    m_debouncer = new Debouncer(Constants.ELEVATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -82,53 +81,45 @@ public class Elevator extends SubsystemBase {
   private void setTargetRotations(Angle targetRotations) {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
-      m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl,
-      ClosedLoopSlot.kSlot0,
-      ELEVATOR.LEFT_MOTOR_ARB_F,
-      ArbFFUnits.kVoltage
-    );
+        m_targetRotations.in(Units.Rotations),
+        ControlType.kMAXMotionPositionControl,
+        ClosedLoopSlot.kSlot0,
+        ELEVATOR.LEFT_MOTOR_ARB_F,
+        ArbFFUnits.kVoltage);
   }
 
   public void setTargetDistance(Distance targetDistance) {
     Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(ELEVATOR.GEAR_RATIO)
-        .magnitude()
-    );
+        targetDistance
+            .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
+            .times(ELEVATOR.GEAR_RATIO)
+            .magnitude());
     setTargetRotations(rotations);
   }
 
   public AngularVelocity getVelocity() {
     m_currentAngularVelocityHolder.mut_replace(
-      m_encoder.getVelocity(),
-      Units.RPM
-    );
+        m_encoder.getVelocity(),
+        Units.RPM);
     return m_currentAngularVelocityHolder;
   }
 
   private Angle getRotations() {
     m_currentRotationsHolder.mut_replace(
-      m_encoder.getPosition(),
-      Units.Rotations
-    );
+        m_encoder.getPosition(),
+        Units.Rotations);
     return m_currentRotationsHolder;
   }
 
   public Distance getDistance() {
-    return (
-      ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
-      )
-    );
+    return (ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
+        getRotations().div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)));
   }
 
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
-      getRotations(),
-      ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
-    );
+        getRotations(),
+        ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT);
   }
 
   public boolean isAtTarget() {
@@ -136,7 +127,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_hall_effect.get();
+    return m_debouncer.calculate(m_hall_effect.get());
   }
 
   public void setZero() {
@@ -145,6 +136,6 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    //SmartDashboard.putNumber("Elevator RPM", m_encoder.getVelocity());
+    // SmartDashboard.putNumber("Elevator RPM", m_encoder.getVelocity());
   }
 }

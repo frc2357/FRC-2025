@@ -23,34 +23,34 @@ public class CoralRunner extends SubsystemBase {
 
   private DigitalInput m_beamBreakIntake;
   private DigitalInput m_beamBreakOuttake;
-  private Debouncer m_debouncer;
+  private Debouncer m_debouncerOuttake;
+  private Debouncer m_debouncerIntake;
   private RelativeEncoder m_encoder;
 
   private MutAngularVelocity m_currentVelocityHolder = Units.RPM.mutable(
-    Double.NaN
-  );
+      Double.NaN);
 
   public CoralRunner() {
     m_motor = new SparkMax(CAN_ID.CORAL_RUNNER_MOTOR, MotorType.kBrushless);
     m_motor.configure(
-      CORAL_RUNNER.MOTOR_CONFIG,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+        CORAL_RUNNER.MOTOR_CONFIG,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
 
     m_encoder = m_motor.getEncoder();
 
-    m_debouncer = new Debouncer(
-      CORAL_RUNNER.DEBOUNCE_TIME_SECONDS,
-      DebounceType.kBoth
-    );
+    m_debouncerIntake = new Debouncer(
+        CORAL_RUNNER.DEBOUNCE_TIME_SECONDS,
+        DebounceType.kBoth);
+
+    m_debouncerOuttake = new Debouncer(
+        CORAL_RUNNER.DEBOUNCE_TIME_SECONDS,
+        DebounceType.kBoth);
 
     m_beamBreakIntake = new DigitalInput(
-      DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_INTAKE_ID
-    );
+        DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_INTAKE_ID);
     m_beamBreakOuttake = new DigitalInput(
-      DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID
-    );
+        DIGITAL_INPUT.CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID);
   }
 
   public void setSpeed(double percentOutput) {
@@ -76,10 +76,10 @@ public class CoralRunner extends SubsystemBase {
   }
 
   public boolean isIntakeBeamBroken() {
-    return m_debouncer.calculate(m_beamBreakIntake.get());
+    return m_debouncerOuttake.calculate(m_beamBreakIntake.get());
   }
 
   public boolean isOuttakeBeamBroken() {
-    return m_debouncer.calculate(m_beamBreakOuttake.get());
+    return m_debouncerIntake.calculate(m_beamBreakOuttake.get());
   }
 }
