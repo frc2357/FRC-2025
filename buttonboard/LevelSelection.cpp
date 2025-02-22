@@ -36,8 +36,7 @@ void LevelSelection::update()
         return;
     };
 
-    // uint8_t state = m_leftKeypad.read() | m_rightKeypad.read();
-    uint8_t state = m_leftKeypad.read();
+    uint8_t state = m_leftKeypad.read() | m_rightKeypad.read();
 
     if (state != 0 && m_prevState != state)
     {

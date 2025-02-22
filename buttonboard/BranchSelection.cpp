@@ -1,58 +1,43 @@
 #include "BranchSelection.h"
 
-int BranchSelection::pins[NUM_BUTTONS] = {
-    BranchSelection::Branch::A,
-    BranchSelection::Branch::B,
-    BranchSelection::Branch::C,
-    BranchSelection::Branch::D,
-    BranchSelection::Branch::E,
-    BranchSelection::Branch::F,
-    BranchSelection::Branch::G,
-    BranchSelection::Branch::H,
-    BranchSelection::Branch::I,
-    BranchSelection::Branch::J,
-    BranchSelection::Branch::K,
-    BranchSelection::Branch::L,
-};
-
-FTDebouncer BranchSelection::debouncer(PIN_DEBOUNCE_TIME_MILLIS);
-
-BranchSelection::Branch BranchSelection::selection;
+BranchSelection::BranchSelection() : m_debouncer(PIN_DEBOUNCE_TIME_MILLIS)
+{
+}
 
 void BranchSelection::init()
 {
-    for (int pin : BranchSelection::pins)
+    for (int pin : PINS)
     {
-        BranchSelection::debouncer.addPin(pin, HIGH, INPUT_PULLUP);
+        m_debouncer.addPin(pin, HIGH, INPUT_PULLUP);
     }
-    BranchSelection::debouncer.begin();
+    m_debouncer.begin();
 }
 
 void BranchSelection::update()
 {
-    BranchSelection::debouncer.update();
+    m_debouncer.update();
 }
 
 BranchSelection::Branch BranchSelection::getSelection()
 {
-    return BranchSelection::selection;
+    return m_selection;
 }
 
 void BranchSelection::onPinActivated(int pin)
 {
-    BranchSelection::Branch branch = static_cast<BranchSelection::Branch>(pin);
+    Branch branch = static_cast<Branch>(pin);
 
-    if (branch == BranchSelection::selection)
+    // Deselect already selected branch
+    setXboxButtonsForBranch(m_selection, false);
+
+    if (branch == m_selection)
     {
-        // Deselect already selected branch
-        BranchSelection::setXboxButtonsForBranch(BranchSelection::selection, false);
-        BranchSelection::selection = BranchSelection::Branch::NONE;
+        m_selection = Branch::NONE;
     }
     else
     {
-        BranchSelection::setXboxButtonsForBranch(BranchSelection::selection, false);
-        BranchSelection::setXboxButtonsForBranch(branch, true);
-        BranchSelection::selection = branch;
+        setXboxButtonsForBranch(branch, true);
+        m_selection = branch;
     }
 }
 

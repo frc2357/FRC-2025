@@ -36,24 +36,39 @@ public:
         H = 11,
         I = 12,
         J = 13,
-        K = 16,
-        L = 17,
+        K = 14,
+        L = 16,
     };
-    static int pins[NUM_BUTTONS];
+    int PINS[NUM_BUTTONS] = {
+        Branch::A,
+        Branch::B,
+        Branch::C,
+        Branch::D,
+        Branch::E,
+        Branch::F,
+        Branch::G,
+        Branch::H,
+        Branch::I,
+        Branch::J,
+        Branch::K,
+        Branch::L,
+    };
 
-    static void init();
-    static void update();
+    BranchSelection();
 
-    static BranchSelection::Branch getSelection();
+    void init();
+    void update();
 
-    static void onPinActivated(int pin);
-    static void onPinDeactivated(int pin);
+    BranchSelection::Branch getSelection();
+
+    void onPinActivated(int pin);
+    void onPinDeactivated(int pin);
 
 private:
-    static void setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
+    void setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
 
-    static FTDebouncer debouncer;
-    static BranchSelection::Branch selection;
+    FTDebouncer m_debouncer;
+    BranchSelection::Branch m_selection;
 };
 
 #endif // BRANCH_SELECTION_H

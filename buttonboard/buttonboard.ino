@@ -5,6 +5,7 @@
 #define RIGHT_LEVEL_KEYPAD_ADDRESS 0x31
 
 LevelSelection level(LEFT_LEVEL_KEYPAD_ADDRESS, RIGHT_LEVEL_KEYPAD_ADDRESS);
+BranchSelection branch;
 
 void setup()
 {
@@ -15,22 +16,22 @@ void setup()
   XInput.begin();
 
   level.init();
-  BranchSelection::init();
+  branch.init();
 }
 
 void loop()
 {
   level.update();
-  BranchSelection::update();
+  branch.update();
 }
 
 // Reef branch selection debouncer methods
 void onPinActivated(int pin)
 {
-  BranchSelection::onPinActivated(pin);
+  branch.onPinActivated(pin);
 }
 
 void onPinDeactivated(int pin)
 {
-  BranchSelection::onPinDeactivated(pin);
+  branch.onPinDeactivated(pin);
 }
