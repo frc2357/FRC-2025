@@ -31,10 +31,15 @@ void LevelSelection::init()
 
 void LevelSelection::update()
 {
+    if (millis() < m_lastEventMillis + DEBOUNCE_MILLIS)
+    {
+        return;
+    };
+
     // uint8_t state = m_leftKeypad.read() | m_rightKeypad.read();
     uint8_t state = m_leftKeypad.read();
 
-    if (state != 0 && m_hasReleased)
+    if (state != 0 && m_prevState != state)
     {
         // Calculate log base 2 of the combined state
         // This gives us the most significant bit that is set to 1
@@ -56,12 +61,9 @@ void LevelSelection::update()
 
         showLEDs();
 
-        m_hasReleased = false;
+        m_lastEventMillis = millis();
     }
-    else if (state == 0)
-    {
-        m_hasReleased = true;
-    }
+    m_prevState = state;
 }
 
 void LevelSelection::setLedState(int index, bool on)
