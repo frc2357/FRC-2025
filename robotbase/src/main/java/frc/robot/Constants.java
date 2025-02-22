@@ -70,9 +70,11 @@ public final class Constants {
 
   public final class DIGITAL_INPUT {
 
-    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
-    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 1;
-    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 2;
+    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 9;
+    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
+    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 7;
+
+    public static final int ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
   }
 
   public static final class SWERVE {
@@ -159,6 +161,7 @@ public final class Constants {
       HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
 
     public static final double AXIS_MAX_SPEED = 0.5;
+    public static final double ZERO_SPEED = -0.05;
 
     public static final class SETPOINTS {
 
@@ -170,6 +173,8 @@ public final class Constants {
       public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
       public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
 
   public static final class LATERATOR {
@@ -219,6 +224,8 @@ public final class Constants {
       public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
       public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
 
   public static final class CORAL_RUNNER {

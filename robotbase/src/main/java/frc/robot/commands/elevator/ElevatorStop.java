@@ -9,10 +9,12 @@ public class ElevatorStop extends Command {
     addRequirements(Robot.elevator);
   }
 
+  @Override
   public boolean isFinished() {
     return true;
   }
 
+  @Override
   public void end(boolean wasInterupted) {
     Robot.elevator.stop();
   }
