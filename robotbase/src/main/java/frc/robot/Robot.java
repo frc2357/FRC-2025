@@ -72,7 +72,8 @@ public class Robot extends TimedRobot {
    */
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(
-        !DriverStation.isFMSAttached()); // TODO: turn this off at comp, just in case.
+      !DriverStation.isFMSAttached()
+    ); // TODO: turn this off at comp, just in case.
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -85,30 +86,38 @@ public class Robot extends TimedRobot {
     // NOT on the robot, and it will not run without them commented out.
     // climber = new Climber();
     frontCam = new PhotonVisionCamera(
-        PHOTON_VISION.FRONT_CAMERA_NAME,
-        PHOTON_VISION.FRONT_CAMERA_TRANSFORM);
+      PHOTON_VISION.FRONT_CAMERA_NAME,
+      PHOTON_VISION.FRONT_CAMERA_TRANSFORM
+    );
     backCam = new PhotonVisionCamera(
-        PHOTON_VISION.BACK_CAMERA_NAME,
-        PHOTON_VISION.BACK_CAMERA_TRANSFORM);
+      PHOTON_VISION.BACK_CAMERA_NAME,
+      PHOTON_VISION.BACK_CAMERA_TRANSFORM
+    );
     leftCam = new PhotonVisionCamera(
-        PHOTON_VISION.LEFT_CAMERA_NAME,
-        PHOTON_VISION.LEFT_CAMERA_TRANSFORM);
+      PHOTON_VISION.LEFT_CAMERA_NAME,
+      PHOTON_VISION.LEFT_CAMERA_TRANSFORM
+    );
     rightCam = new PhotonVisionCamera(
-        PHOTON_VISION.RIGHT_CAMERA_NAME,
-        PHOTON_VISION.RIGHT_CAMERA_TRANSFORM);
+      PHOTON_VISION.RIGHT_CAMERA_NAME,
+      PHOTON_VISION.RIGHT_CAMERA_TRANSFORM
+    );
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
 
     // Define controls
     buttonboard = new Buttonboard(
-        new CommandButtonboardController(
-            Constants.CONTROLLER.BUTTONBOARD_CONTROLLER_PORT));
+      new CommandButtonboardController(
+        Constants.CONTROLLER.BUTTONBOARD_CONTROLLER_PORT
+      )
+    );
     driverControls = new DriverControls(
-        new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
-        Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND);
+      new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
+      Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
+    );
     codriverControls = new CodriverControls(
-        new CommandXboxController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT),
-        Constants.CONTROLLER.CODRIVE_CONTROLLER_DEADBAND);
+      new CommandXboxController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT),
+      Constants.CONTROLLER.CODRIVE_CONTROLLER_DEADBAND
+    );
 
     // Define network table tools
     m_autoChooserManager = new AutoChooserManager();
@@ -137,7 +146,8 @@ public class Robot extends TimedRobot {
     new InitRobotCommand().schedule();
 
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
-        new DriveSetCoast());
+      new DriveSetCoast()
+    );
   }
 
   /**
@@ -157,7 +167,8 @@ public class Robot extends TimedRobot {
     leftCam.updateResult();
     rightCam.updateResult();
     elasticFieldManager.swerveFieldRep.setRobotPose(
-        swerve.getFieldRelativePose2d());
+      swerve.getFieldRelativePose2d()
+    );
     CommandScheduler.getInstance().run();
   }
 
@@ -168,8 +179,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {
-  }
+  public void disabledPeriodic() {}
 
   /**
    * This autonomous runs the autonomous command selected by your
@@ -187,8 +197,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {
-  }
+  public void autonomousPeriodic() {}
 
   @Override
   public void teleopInit() {
@@ -207,8 +216,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-  }
+  public void teleopPeriodic() {}
 
   @Override
   public void testInit() {
@@ -218,16 +226,13 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {
-  }
+  public void testPeriodic() {}
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {
-  }
+  public void simulationInit() {}
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {
-  }
+  public void simulationPeriodic() {}
 }
