@@ -167,68 +167,69 @@ public class PhotonVisionCamera extends SubsystemBase {
     // change pose estimator settings to be correct for the current camera
     m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
     m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
-    if (m_lastEstimatedPose != null) {
-      double averageTargetDistance = 0;
-      for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
-        averageTargetDistance += target
-          .getBestCameraToTarget()
-          .getMeasureX()
-          .in(Meters);
-      }
-      averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
-      if ( // checks whether the estimated pose is in the field or not, and chucks it out if it isnt
-        m_lastEstimatedPose.estimatedPose.getX() <
-          -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-        m_lastEstimatedPose.estimatedPose.getX() >
-        FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-        PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-        m_lastEstimatedPose.estimatedPose.getY() <
-        -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-        m_lastEstimatedPose.estimatedPose.getY() >
-        FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-        PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-        m_lastEstimatedPose.estimatedPose.getZ() <
-        -PHOTON_VISION.Z_MARGIN.in(Meters) ||
-        m_lastEstimatedPose.estimatedPose.getZ() >
-        PHOTON_VISION.Z_MARGIN.in(Meters)
-      ) {
-        return;
-      }
-
-      if (
-        Robot.swerve.getTranslationalVelocity().in(MetersPerSecond) >
-        PHOTON_VISION.MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
-      ) {
-        return;
-      }
-
-      // the higher the confidence is, the less the estimated measurment is trusted.
-      double xVelocityConf = Math.abs(
-        0.2 + Robot.swerve.getXVelocity().in(MetersPerSecond)
-      );
-      double yVelocityConf = Math.abs(
-        0.2 + Robot.swerve.getYVelocity().in(MetersPerSecond)
-      );
-      // we add 0.2 so that if were sitting still, it doesnt spiral into infinity.
-      // its a partialy magic number, and will need tuning because of that.
-
-      double xCoordinateConfidence =
-        (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-          ((averageTargetDistance / 2) * xVelocityConf));
-      double yCoordinateConfidence =
-        (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-          ((averageTargetDistance / 2) * yVelocityConf));
-
-      Robot.swerve.addVisionMeasurement(
-        m_lastEstimatedPose.estimatedPose.toPose2d(),
-        Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
-        VecBuilder.fill(
-          xCoordinateConfidence * PHOTON_VISION.X_STD_DEV_COEFFIECIENT,
-          yCoordinateConfidence * PHOTON_VISION.Y_STD_DEV_COEFFIECIENT,
-          Double.POSITIVE_INFINITY // Theta conf, should usually never change gyro from vision
-        )
-      );
+    if (m_lastEstimatedPose == null) {
+      return;
     }
+    double averageTargetDistance = 0;
+    for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
+      averageTargetDistance += target
+        .getBestCameraToTarget()
+        .getMeasureX()
+        .in(Meters);
+    }
+    averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
+    if ( // checks whether the estimated pose is in the field or not, and chucks it out if it isnt
+      m_lastEstimatedPose.estimatedPose.getX() <
+        -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getX() >
+      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+      PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getY() <
+      -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getY() >
+      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+      PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() <
+      -PHOTON_VISION.Z_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() >
+      PHOTON_VISION.Z_MARGIN.in(Meters)
+    ) {
+      return;
+    }
+
+    if (
+      Robot.swerve.getTranslationalVelocity().in(MetersPerSecond) >
+      PHOTON_VISION.MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
+    ) {
+      return;
+    }
+
+    // the higher the confidence is, the less the estimated measurment is trusted.
+    double xVelocityConf = Math.abs(
+      0.2 + Robot.swerve.getXVelocity().in(MetersPerSecond)
+    );
+    double yVelocityConf = Math.abs(
+      0.2 + Robot.swerve.getYVelocity().in(MetersPerSecond)
+    );
+    // we add 0.2 so that if were sitting still, it doesnt spiral into infinity.
+    // its a partialy magic number, and will need tuning because of that.
+
+    double xCoordinateConfidence =
+      (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
+        ((averageTargetDistance / 2) * xVelocityConf));
+    double yCoordinateConfidence =
+      (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
+        ((averageTargetDistance / 2) * yVelocityConf));
+
+    Robot.swerve.addVisionMeasurement(
+      m_lastEstimatedPose.estimatedPose.toPose2d(),
+      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
+      VecBuilder.fill(
+        xCoordinateConfidence * PHOTON_VISION.X_STD_DEV_COEFFIECIENT,
+        yCoordinateConfidence * PHOTON_VISION.Y_STD_DEV_COEFFIECIENT,
+        Double.POSITIVE_INFINITY // Theta conf, should usually never change gyro from vision
+      )
+    );
   }
 
   /**

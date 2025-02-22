@@ -64,6 +64,8 @@ public final class Constants {
     public static final int CLIMBER_MOTOR_ONE = 30;
     public static final int CLIMBER_MOTOR_TWO = 31;
     public static final int CLIMBER_MOTOR_THREE = 32;
+
+    public static final int ALGAE_KNOCKER_MOTOR = 33;
   }
 
   public final class DIGITAL_INPUT {
@@ -81,9 +83,9 @@ public final class Constants {
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
 
     public static final LinearAcceleration MAXIMUM_LINEAR_ACCELERATION =
-      Units.MetersPerSecondPerSecond.of(4.5); //TODO: tune this
+      Units.MetersPerSecondPerSecond.of(4.5); // TODO: tune this
     public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
-      Units.DegreesPerSecondPerSecond.of(120); //TODO: tune this
+      Units.DegreesPerSecondPerSecond.of(120); // TODO: tune this
 
     public static final Time TIME_TO_COAST = Units.Seconds.of(3);
 
@@ -160,13 +162,13 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
   }
 
@@ -209,13 +211,13 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
   }
 
@@ -266,6 +268,28 @@ public final class Constants {
     public static final double ALGAE_EJECTOR_SPEED = 0;
   }
 
+  public static final class ALGAE_KNOCKER {
+
+    public static final double AXIS_MAX_SPEED = 0.25;
+
+    public static final IdleMode IDLE_MODE = IdleMode.kCoast;
+    public static final boolean MOTOR_INVERTED = false;
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+    public static final double RAMP_RATE = .25;
+
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .inverted(MOTOR_INVERTED)
+      .smartCurrentLimit(
+        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
+        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
+      )
+      .openLoopRampRate(RAMP_RATE);
+
+    public static final double ALGAE_KNOCK_SPEED = 0;
+  }
+
   public static final class ALGAE_PIVOT {
 
     public static final double AXIS_MAX_SPEED = 0.25;
@@ -311,7 +335,7 @@ public final class Constants {
       LEFT_MOTOR_CONFIG.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
         .outputRange(-1, 1);
-    //.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+    // .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
@@ -320,7 +344,7 @@ public final class Constants {
         .maxVelocity(0);
 
     // public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
-    //   LEFT_MOTOR_CONFIG.absoluteEncoder;
+    // LEFT_MOTOR_CONFIG.absoluteEncoder;
 
     public static final Angle ALGAE_INTAKE_ANGLE = Units.Degrees.of(0);
   }
@@ -343,15 +367,48 @@ public final class Constants {
 
   public static final class PHOTON_VISION {
 
-    public static final String FRONT_CAMERA_NAME = "shooter_camera";
+    public static final String FRONT_CAMERA_NAME = "frontCam";
     public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
-      0,
-      0,
-      0,
+      Units.Inches.of(7.951),
+      Units.Inches.of(.624),
+      Units.Inches.of(22.243),
       new Rotation3d(
         Units.Degrees.of(0),
-        Units.Degrees.of(30),
+        Units.Degrees.of(10),
+        Units.Degrees.of(0)
+      )
+    );
+    public static final String BACK_CAMERA_NAME = "backCam";
+    public static final Transform3d BACK_CAMERA_TRANSFORM = new Transform3d(
+      Units.Inches.of(-6.516),
+      Units.Inches.of(-5.028),
+      Units.Inches.of(21.137),
+      new Rotation3d(
+        Units.Degrees.of(0),
+        Units.Degrees.of(-10),
         Units.Degrees.of(180)
+      )
+    );
+    public static final String RIGHT_CAMERA_NAME = "rightCam";
+    public static final Transform3d RIGHT_CAMERA_TRANSFORM = new Transform3d(
+      Units.Inches.of(-8.887),
+      Units.Inches.of(-3.001),
+      Units.Inches.of(16.578),
+      new Rotation3d(
+        Units.Degrees.of(-10),
+        Units.Degrees.of(0),
+        Units.Degrees.of(90)
+      )
+    );
+    public static final String LEFT_CAMERA_NAME = "leftCam";
+    public static final Transform3d LEFT_CAMERA_TRANSFORM = new Transform3d(
+      Units.Inches.of(8.887),
+      Units.Inches.of(-3.001),
+      Units.Inches.of(16.579),
+      new Rotation3d(
+        Units.Degrees.of(10),
+        Units.Degrees.of(0),
+        Units.Degrees.of(270)
       )
     );
 
@@ -364,8 +421,8 @@ public final class Constants {
 
     public static final Angle MAX_ANGLE = Units.Degrees.of(35);
 
-    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; //TODO: tune this to a reasonable degree.
-    public static final double MAX_AMBIGUITY_TOLERANCE = 4; //TODO: tune this until its reasonable.
+    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable degree.
+    public static final double MAX_AMBIGUITY_TOLERANCE = 4; // TODO: tune this until its reasonable.
 
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
@@ -596,7 +653,7 @@ public final class Constants {
 
     public static class CORAL_STATION {
 
-      public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = //TODO: tune this to field
+      public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
         new Pose2d(
           0.5548880100250244,
           6.694406032562256,
@@ -616,7 +673,7 @@ public final class Constants {
           )
         );
 
-      public static final Pose2d LOWER_STATION_LEFTMOST_USABLE_SLOT = //TODO: tune this to field
+      public static final Pose2d LOWER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
         new Pose2d(
           0.5548880100250244,
           1.3386709690093994,
@@ -725,7 +782,7 @@ public final class Constants {
      */
     public static final double MOMENT_OF_INERTIA_SIMPLIFIED_DISTRIBUTION =
       (1.0 / 12) *
-      (WEIGHT_POUNDS / 2.205) */*pounds to kilograms conversion is / 2.205*/
+      (WEIGHT_POUNDS / 2.205) */* pounds to kilograms conversion is / 2.205 */
       (Math.pow(FULL_LENGTH.in(Units.Meters), 2) +
         Math.pow(FULL_WIDTH.in(Units.Meters), 2));
   }

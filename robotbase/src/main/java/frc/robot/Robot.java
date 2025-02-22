@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
@@ -40,8 +41,13 @@ public class Robot extends TimedRobot {
   public static Laterator laterator;
   public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
+  public static AlgaeKnocker algaeKnocker;
   public static AlgaePivot algaePivot;
   public static Climber climber;
+  public static PhotonVisionCamera frontCam;
+  public static PhotonVisionCamera backCam;
+  public static PhotonVisionCamera leftCam;
+  public static PhotonVisionCamera rightCam;
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
   public static Buttonboard buttonboard;
@@ -58,13 +64,13 @@ public class Robot extends TimedRobot {
   private SysIdChooser m_sysIdChooser;
 
   /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
+   * This function is run when the robot is first started up
+   * and should be used for any initialization code.
    */
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
-    ); //TODO: turn this off at comp, just in case.
+    ); // TODO: turn this off at comp, just in case.
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -72,8 +78,25 @@ public class Robot extends TimedRobot {
     laterator = new Laterator();
     coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
+    // algaeKnocker = new AlgaeKnocker();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
     // climber = new Climber();
+    frontCam = new PhotonVisionCamera(
+      PHOTON_VISION.FRONT_CAMERA_NAME,
+      PHOTON_VISION.FRONT_CAMERA_TRANSFORM
+    );
+    backCam = new PhotonVisionCamera(
+      PHOTON_VISION.BACK_CAMERA_NAME,
+      PHOTON_VISION.BACK_CAMERA_TRANSFORM
+    );
+    leftCam = new PhotonVisionCamera(
+      PHOTON_VISION.LEFT_CAMERA_NAME,
+      PHOTON_VISION.LEFT_CAMERA_TRANSFORM
+    );
+    rightCam = new PhotonVisionCamera(
+      PHOTON_VISION.RIGHT_CAMERA_NAME,
+      PHOTON_VISION.RIGHT_CAMERA_TRANSFORM
+    );
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
 
@@ -132,6 +155,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    frontCam.updateResult();
+    backCam.updateResult();
+    leftCam.updateResult();
+    rightCam.updateResult();
     elasticFieldManager.swerveFieldRep.setRobotPose(
       swerve.getFieldRelativePose2d()
     );
