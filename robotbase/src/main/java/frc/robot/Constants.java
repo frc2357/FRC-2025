@@ -83,13 +83,9 @@ public final class Constants {
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
 
     public static final LinearAcceleration MAXIMUM_LINEAR_ACCELERATION =
-      Units.MetersPerSecondPerSecond.of(4.5); // TODO:
-    // tune
-    // this
+      Units.MetersPerSecondPerSecond.of(4.5); // TODO: tune this
     public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
-      Units.DegreesPerSecondPerSecond.of(120); // TODO:
-    // tune
-    // this
+      Units.DegreesPerSecondPerSecond.of(120); // TODO: tune this
 
     public static final Time TIME_TO_COAST = Units.Seconds.of(3);
 
