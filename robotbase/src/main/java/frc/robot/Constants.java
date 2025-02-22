@@ -343,15 +343,48 @@ public final class Constants {
 
   public static final class PHOTON_VISION {
 
-    public static final String FRONT_CAMERA_NAME = "shooter_camera";
+    public static final String FRONT_CAMERA_NAME = "frontCam";
     public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
-      0,
-      0,
-      0,
+      Units.Inches.of(7.951),
+      Units.Inches.of(.624),
+      Units.Inches.of(22.243),
       new Rotation3d(
         Units.Degrees.of(0),
-        Units.Degrees.of(30),
+        Units.Degrees.of(10),
+        Units.Degrees.of(0)
+      )
+    );
+    public static final String BACK_CAMERA_NAME = "backCam";
+    public static final Transform3d BACK_CAMERA_TRANSFORM = new Transform3d(
+      Units.Inches.of(-6.516),
+      Units.Inches.of(-5.028),
+      Units.Inches.of(21.137),
+      new Rotation3d(
+        Units.Degrees.of(0),
+        Units.Degrees.of(-10),
         Units.Degrees.of(180)
+      )
+    );
+    public static final String RIGHT_CAMERA_NAME = "rightCam";
+    public static final Transform3d RIGHT_CAMERA_TRANSFORM = new Transform3d(
+      Units.Inches.of(-8.887),
+      Units.Inches.of(-3.001),
+      Units.Inches.of(16.578),
+      new Rotation3d(
+        Units.Degrees.of(-10),
+        Units.Degrees.of(0),
+        Units.Degrees.of(90)
+      )
+    );
+    public static final String LEFT_CAMERA_NAME = "leftCam";
+    public static final Transform3d LEFT_CAMERA_TRANSFORM = new Transform3d(
+      Units.Inches.of(8.887),
+      Units.Inches.of(-3.001),
+      Units.Inches.of(16.579),
+      new Rotation3d(
+        Units.Degrees.of(10),
+        Units.Degrees.of(0),
+        Units.Degrees.of(270)
       )
     );
 
