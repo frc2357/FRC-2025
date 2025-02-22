@@ -37,17 +37,34 @@ public:
         CLIMBER_OUT = 10,
         CLIMBER_IN = 11,
     };
-    static int pins[NUM_BUTTONS];
+    int PINS[NUM_BUTTONS] = {
+        MechanismControl::CORAL_FORWARD,
+        MechanismControl::CORAL_REVERSE,
+        MechanismControl::ALGAE_FORWARD,
+        MechanismControl::ALGAE_REVERSE,
+        MechanismControl::ELEVATOR_UP,
+        MechanismControl::ELEVATOR_DOWN,
+        MechanismControl::LATERATOR_FORWARD,
+        MechanismControl::LATERATOR_REVERSE,
+        MechanismControl::ALGAE_OUT,
+        MechanismControl::ALGAE_IN,
+        MechanismControl::CLIMBER_OUT,
+        MechanismControl::CLIMBER_IN,
+    };
 
-    static void init(byte mcpI2CAddress, byte intPin);
-    static void update();
+    PanicControls::PanicControls(byte mcpI2CAddress, byte intPin);
+
+    void init();
+    void update();
 
 private:
-    static void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism);
+    void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism);
+    void resetJoysticks();
 
-    static int interruptPin;
-    static Adafruit_MCP23X17 mcp;
-    static PanicControls::MechanismControl selection;
+    byte m_mcpI2CAddress, m_interruptPin;
+    Adafruit_MCP23X17 m_mcp;
+    PanicControls::MechanismControl m_selection = -1;
+    bool m_joysticksReset;
 };
 
 #endif // PANIC_CONTROLS_H

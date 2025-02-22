@@ -1,41 +1,25 @@
 #include "PanicControls.h"
 
-int PanicControls::pins[NUM_BUTTONS] = {
-    PanicControls::MechanismControl::CORAL_FORWARD,
-    PanicControls::MechanismControl::CORAL_REVERSE,
-    PanicControls::MechanismControl::ALGAE_FORWARD,
-    PanicControls::MechanismControl::ALGAE_REVERSE,
-    PanicControls::MechanismControl::ELEVATOR_UP,
-    PanicControls::MechanismControl::ELEVATOR_DOWN,
-    PanicControls::MechanismControl::LATERATOR_FORWARD,
-    PanicControls::MechanismControl::LATERATOR_REVERSE,
-    PanicControls::MechanismControl::ALGAE_OUT,
-    PanicControls::MechanismControl::ALGAE_IN,
-    PanicControls::MechanismControl::CLIMBER_OUT,
-    PanicControls::MechanismControl::CLIMBER_IN,
-};
-
-int PanicControls::interruptPin;
-Adafruit_MCP23X17 PanicControls::mcp;
-PanicControls::MechanismControl PanicControls::selection = -1;
-
-void PanicControls::init(byte mcpI2CAddress, byte intPin)
+PanicControls::PanicControls(byte mcpI2CAddress, byte intPin) : m_mcpI2CAddress(mcpI2CAddress), m_interruptPin(intPin)
 {
-  if (!PanicControls::mcp.begin_I2C(mcpI2CAddress))
+}
+
+void PanicControls::init()
+{
+  if (!m_mcp.begin_I2C(m_mcpI2CAddress))
   {
     Serial.println("Failed to establish communication with the Panic Controls MCP23017 I2C device");
     while (1)
       ;
   }
 
-  PanicControls::interruptPin = intPin;
-  pinMode(intPin, INPUT_PULLUP);
-  PanicControls::mcp.setupInterrupts(true, false, INTERRUPT_SET_STATE);
+  pinMode(m_interruptPin, INPUT_PULLUP);
+  m_mcp.setupInterrupts(true, false, INTERRUPT_SET_STATE);
 
-  for (int pin : PanicControls::pins)
+  for (int pin : PINS)
   {
-    PanicControls::mcp.pinMode(pin, INPUT_PULLUP);
-    PanicControls::mcp.setupInterruptPin(pin, BUTTON_PRESSED_STATE);
+    m_mcp.pinMode(pin, INPUT_PULLUP);
+    m_mcp.setupInterruptPin(pin, BUTTON_PRESSED_STATE);
   }
 
   XInput.setTriggerRange(POT_MIN_VALUE, POT_MAX_VALUE);
@@ -44,25 +28,26 @@ void PanicControls::init(byte mcpI2CAddress, byte intPin)
 
 void PanicControls::update()
 {
-  if (digitalRead(PanicControls::interruptPin) == INTERRUPT_SET_STATE)
+  if (digitalRead(m_interruptPin) == INTERRUPT_SET_STATE)
   {
-    int pin = PanicControls::mcp.getLastInterruptPin();
-    if (pin != PanicControls::selection)
+    int pin = m_mcp.getLastInterruptPin();
+    if (pin != m_selection)
     {
-      XInput.releaseAll();
+      resetJoysticks();
     }
-    PanicControls::setXboxControlsForMechanism(pin);
-    PanicControls::selection = pin;
-    PanicControls::mcp.clearInterrupts();
+    setXboxControlsForMechanism(pin);
+    m_selection = pin;
+    m_mcp.clearInterrupts();
   }
   else
   {
-    XInput.releaseAll();
+    resetJoysticks();
   }
 }
 
 void PanicControls::setXboxControlsForMechanism(PanicControls::MechanismControl mechanism)
 {
+  m_joysticksReset = false;
   switch (mechanism)
   {
   case CORAL_FORWARD:
@@ -106,4 +91,17 @@ void PanicControls::setXboxControlsForMechanism(PanicControls::MechanismControl 
     XInput.setJoystickY(XInputControl::JOY_LEFT, -analogRead(MOVEMENT_POT_PIN));
     break;
   }
+}
+
+void PanicControls::resetJoysticks()
+{
+  if (m_joysticksReset) return;
+  XInput.setTrigger(XInputControl::TRIGGER_RIGHT, 0);
+  XInput.setTrigger(XInputControl::TRIGGER_LEFT, 0);
+  XInput.setJoystickY(XInputControl::JOY_RIGHT, 0);
+  XInput.setJoystickX(XInputControl::JOY_RIGHT, 0);
+  XInput.setJoystickX(XInputControl::JOY_LEFT, 0);
+  XInput.setJoystickY(XInputControl::JOY_LEFT, 0);
+  XInput.release(ROLLER_NEGATIVE_INDICATOR_BUTTON);
+  m_joysticksReset = true;
 }
