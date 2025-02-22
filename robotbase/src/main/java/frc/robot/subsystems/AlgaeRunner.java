@@ -16,9 +16,10 @@ public class AlgaeRunner extends SubsystemBase {
     m_motor = new SparkMax(CAN_ID.ALGAE_RUNNER_MOTOR, MotorType.kBrushless);
 
     m_motor.configure(
-        ALGAE_RUNNER.MOTOR_CONFIG,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+      ALGAE_RUNNER.MOTOR_CONFIG,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
   }
 
   public void setSpeed(double percentOutput) {
