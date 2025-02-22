@@ -4,6 +4,8 @@
 #include <Adafruit_NeoKey_1x4.h>
 #include <XInput.h>
 
+#define DEBOUNCE_MILLIS 30
+
 #define COLOR_ON 0xFFFFFFFF
 #define COLOR_OFF 0x00000000
 
@@ -42,7 +44,8 @@ private:
     byte m_leftKeypadI2CAddress, m_rightKeypadI2CAddress;
     Adafruit_NeoKey_1x4 m_leftKeypad, m_rightKeypad;
     LevelSelection::Level m_selection = LevelSelection::Level::NONE;
-    bool m_hasReleased = true;
+    uint8_t m_prevState;
+    long m_lastEventMillis;
 };
 
 #endif // LEVEL_SELECTION_H
