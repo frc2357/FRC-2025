@@ -1,0 +1,70 @@
+#ifndef PANIC_CONTROLS_H
+#define PANIC_CONTROLS_H
+
+#include <Adafruit_MCP23X17.h>
+#include <Xinput.h>
+
+#define NUM_BUTTONS 12
+#define BUTTON_PRESSED_STATE LOW
+#define INTERRUPT_SET_STATE LOW
+
+#define POT_MIN_VALUE 0
+#define POT_MAX_VALUE 1023
+
+#define ROLLER_POT_PIN A0
+#define MOVEMENT_POT_PIN A1
+
+// Button to indicate if the roller mechanism panic controls are reversed or not
+#define ROLLER_NEGATIVE_INDICATOR_BUTTON XInputControl::BUTTON_R3
+
+class PanicControls
+{
+public:
+    // integer values correspond to pin numbers
+    enum MechanismControl
+    {
+        NONE = -1,
+        CORAL_FORWARD = 0,
+        CORAL_REVERSE = 1,
+        ALGAE_FORWARD = 2,
+        ALGAE_REVERSE = 3,
+        ELEVATOR_UP = 4,
+        ELEVATOR_DOWN = 5,
+        LATERATOR_FORWARD = 6,
+        LATERATOR_REVERSE = 7,
+        ALGAE_OUT = 8,
+        ALGAE_IN = 9,
+        CLIMBER_OUT = 10,
+        CLIMBER_IN = 11,
+    };
+    int PINS[NUM_BUTTONS] = {
+        MechanismControl::CORAL_FORWARD,
+        MechanismControl::CORAL_REVERSE,
+        MechanismControl::ALGAE_FORWARD,
+        MechanismControl::ALGAE_REVERSE,
+        MechanismControl::ELEVATOR_UP,
+        MechanismControl::ELEVATOR_DOWN,
+        MechanismControl::LATERATOR_FORWARD,
+        MechanismControl::LATERATOR_REVERSE,
+        MechanismControl::ALGAE_OUT,
+        MechanismControl::ALGAE_IN,
+        MechanismControl::CLIMBER_OUT,
+        MechanismControl::CLIMBER_IN,
+    };
+
+    PanicControls::PanicControls(byte mcpI2CAddress, byte intPin);
+
+    void init();
+    void update();
+
+private:
+    void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism);
+    void resetJoysticks();
+
+    byte m_mcpI2CAddress, m_interruptPin;
+    Adafruit_MCP23X17 m_mcp;
+    PanicControls::MechanismControl m_selection = -1;
+    bool m_joysticksReset;
+};
+
+#endif // PANIC_CONTROLS_H

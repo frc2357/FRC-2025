@@ -8,7 +8,7 @@
 
 #define COLOR_ON 0xFFFFFFFF
 #define COLOR_OFF 0x00000000
-
+ 
 #define NUM_BUTTONS 4
 
 #define log_2(x) (log(x) / log(2))
