@@ -46,7 +46,7 @@ public class PhotonVisionCamera extends SubsystemBase {
   //   public long timestamp = 0;
   // }
 
-  // all of these are private so we can use them in the extended classes
+  // all of these are protected so we can use them in extended classes
   // which are only extended so we can control which pipelines we are using.
 
   /** The actual camera object that we get everything from. */
