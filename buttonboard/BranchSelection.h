@@ -39,20 +39,7 @@ public:
         K = 14,
         L = 16,
     };
-    int PINS[NUM_BUTTONS] = {
-        Branch::A,
-        Branch::B,
-        Branch::C,
-        Branch::D,
-        Branch::E,
-        Branch::F,
-        Branch::G,
-        Branch::H,
-        Branch::I,
-        Branch::J,
-        Branch::K,
-        Branch::L,
-    };
+    static int PINS[NUM_BUTTONS];
 
     BranchSelection();
 
