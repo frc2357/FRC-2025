@@ -111,7 +111,7 @@ public class PhotonVisionCamera extends SubsystemBase {
   /**
    * A list of all instances of this class, in order of instantiation
    */
-  private static final ArrayList<PhotonVisionCamera> m_robotsCameras =
+  private static final ArrayList<PhotonVisionCamera> m_robotCameras =
     new ArrayList<PhotonVisionCamera>();
 
   /**
@@ -156,7 +156,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     Matrix<N8, N1> distCoeefs
   ) {
     m_camera = new PhotonCamera(cameraName);
-    m_robotsCameras.add(this);
+    m_robotCameras.add(this);
 
     // 1-22 correspond to apriltag fiducial IDs, 0 is for gamepeices.
     // m_aprilTagInfo = new TargetInfo[23];
@@ -174,7 +174,7 @@ public class PhotonVisionCamera extends SubsystemBase {
    * <p><h1> For the top of {@link Robot#robotPeriodic() the robot periodic} only.
    */
   public static void updateAllCameras() {
-    for (PhotonVisionCamera camera : m_robotsCameras) {
+    for (PhotonVisionCamera camera : m_robotCameras) {
       camera.updateResult();
     }
     for (int i = 0; i < m_pnpInfo.length; i++) {
@@ -480,6 +480,28 @@ public class PhotonVisionCamera extends SubsystemBase {
   }
 
   /**
+   * Returns whether or not the provided pose is within the field margin constants.
+   * @param pose The pose that will be checked
+   * @return Whether or not the provided pose is in the field
+   */
+  public static boolean isPoseInField(Pose3d pose) {
+    return !(
+      m_lastEstimatedPose.estimatedPose.getX() <
+        -FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getX() >
+      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+      FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getY() <
+      -FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getY() >
+      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+      FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() < -Z_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() > Z_MARGIN.in(Meters)
+    );
+  }
+
+  /**
    * @return Whether or not the camera is connected.
    */
   public boolean isConnected() {
@@ -676,27 +698,5 @@ public class PhotonVisionCamera extends SubsystemBase {
    */
   public boolean hasTarget() {
     return m_result.hasTargets();
-  }
-
-  /**
-   * Returns whether or not the provided pose is within the field margin constants.
-   * @param pose The pose that will be checked
-   * @return Whether or not the provided pose is in the field
-   */
-  public static boolean isPoseInField(Pose3d pose) {
-    return !(
-      m_lastEstimatedPose.estimatedPose.getX() <
-        -FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getX() >
-      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getY() <
-      -FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getY() >
-      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() < -Z_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() > Z_MARGIN.in(Meters)
-    );
   }
 }
