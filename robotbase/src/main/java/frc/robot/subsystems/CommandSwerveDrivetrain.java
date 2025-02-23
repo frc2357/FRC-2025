@@ -139,6 +139,9 @@ public class CommandSwerveDrivetrain
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
       .withHeadingPID(FACING_ANGLE_P, FACING_ANGLE_I, FACING_ANGLE_D); // Use open-loop control for drive motors;
 
+  private final SwerveRequest.SwerveDriveBrake m_brakeRequest =
+    new SwerveRequest.SwerveDriveBrake();
+
   private Twist2d m_fieldVelocity = new Twist2d();
 
   /**
@@ -341,6 +344,13 @@ public class CommandSwerveDrivetrain
         .withVelocityY(velocityYMetersPerSecond)
         .withTargetDirection(targetAngle)
     );
+  }
+
+  /**
+   * The method to use to set the drivetrain into brake mode.
+   */
+  public void driveBrake() {
+    setControl(m_brakeRequest);
   }
 
   public void followChoreoPath(SwerveSample sample) {
