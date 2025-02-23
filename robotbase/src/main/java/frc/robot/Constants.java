@@ -578,6 +578,10 @@ public final class Constants {
 
     // how far off on the z axis the estimated pose can be before we invalidate it
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
+
+    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.12);
+
+    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
   }
 
   public static final class FIELD_CONSTANTS {

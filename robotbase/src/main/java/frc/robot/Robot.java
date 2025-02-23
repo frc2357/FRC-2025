@@ -164,10 +164,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    frontCam.updateResult();
-    backCam.updateResult();
-    leftCam.updateResult();
-    rightCam.updateResult();
+    PhotonVisionCamera.updateAllCameras();
     elasticFieldManager.swerveFieldRep.setRobotPose(
       swerve.getFieldRelativePose2d()
     );
