@@ -226,6 +226,8 @@ public final class Constants {
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+
+    public static final double RETURN_SPEED = 0.1;
   }
 
   public static final class CORAL_RUNNER {
