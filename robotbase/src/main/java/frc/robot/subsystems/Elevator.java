@@ -9,19 +9,22 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
 public class Elevator extends SubsystemBase {
 
+  private DigitalInput m_hall_effect;
+  private Debouncer m_debouncer;
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
@@ -59,6 +62,11 @@ public class Elevator extends SubsystemBase {
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
+
+    m_hall_effect = new DigitalInput(
+      Constants.DIGITAL_INPUT.ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID
+    );
+    m_debouncer = new Debouncer(Constants.ELEVATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -133,12 +141,16 @@ public class Elevator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
+  public boolean isAtZero() {
+    return m_debouncer.calculate(m_hall_effect.get());
+  }
+
   public void setZero() {
     m_encoder.setPosition(0);
   }
 
   @Override
   public void periodic() {
-    //SmartDashboard.putNumber("Elevator RPM", m_encoder.getVelocity());
+    // SmartDashboard.putNumber("Elevator RPM", m_encoder.getVelocity());
   }
 }

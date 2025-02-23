@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
   public static Laterator laterator;
   public static CoralRunner coralRunner;
   public static AlgaeRunner algaeRunner;
+  public static AlgaeKnocker algaeKnocker;
   public static AlgaePivot algaePivot;
   public static Climber climber;
   public static PhotonVisionCamera frontCam;
@@ -64,13 +65,13 @@ public class Robot extends TimedRobot {
   private SysIdChooser m_sysIdChooser;
 
   /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
+   * This function is run when the robot is first started up
+   * and should be used for any initialization code.
    */
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
-    ); //TODO: turn this off at comp, just in case.
+    ); // TODO: turn this off at comp, just in case.
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -78,6 +79,7 @@ public class Robot extends TimedRobot {
     laterator = new Laterator();
     coralRunner = new CoralRunner();
     // algaeRunner = new AlgaeRunner();
+    // algaeKnocker = new AlgaeKnocker();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
     // climber = new Climber();
     frontCam = new PhotonVisionCamera(

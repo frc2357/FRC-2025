@@ -6,13 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.subsystems.AlgaePivotTuningSubsystem;
 import frc.robot.subsystems.ElevatorTuningSubsystem;
 
 public class Robot extends TimedRobot {
 
   ElevatorTuningSubsystem elevator;
-  AlgaePivotTuningSubsystem algaePivot;
 
   XboxController m_controller;
 
@@ -20,7 +18,6 @@ public class Robot extends TimedRobot {
     m_controller = new XboxController(0);
 
     elevator = new ElevatorTuningSubsystem();
-    // algaePivot = new AlgaePivotTuningSubsystem();
   }
 
   @Override
@@ -34,7 +31,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     elevator.teleopPeriodic();
-    // algaePivot.teleopPeriodic();
   }
 
   @Override
