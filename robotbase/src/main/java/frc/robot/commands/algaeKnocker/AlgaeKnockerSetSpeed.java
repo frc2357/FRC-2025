@@ -14,7 +14,7 @@ public class AlgaeKnockerSetSpeed extends Command {
 
   @Override
   public void initialize() {
-    Robot.algaeRunner.setSpeed(m_speed);
+    Robot.algaeKnocker.setSpeed(m_speed);
   }
 
   @Override
@@ -24,6 +24,6 @@ public class AlgaeKnockerSetSpeed extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    Robot.algaeRunner.stop();
+    Robot.algaeKnocker.stop();
   }
 }
