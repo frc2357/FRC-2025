@@ -55,7 +55,7 @@ private:
     void setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
 
     FTDebouncer m_debouncer;
-    BranchSelection::Branch m_selection;
+    BranchSelection::Branch m_selection = BranchSelection::Branch::NONE;
 };
 
 #endif // BRANCH_SELECTION_H

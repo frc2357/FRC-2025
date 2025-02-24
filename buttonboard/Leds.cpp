@@ -13,7 +13,17 @@ void Leds::init()
             ;
     }
 
-    resetLeds();
+    for (int rowPin : ROW_PINS)
+    {
+        m_mcp.pinMode(rowPin, OUTPUT);
+        m_mcp.digitalWrite(rowPin, ROW_OFF);
+    }
+
+    for (int colPin : COL_PINS)
+    {
+        m_mcp.pinMode(colPin, OUTPUT);
+        m_mcp.digitalWrite(colPin, COL_OFF);
+    }
 }
 
 void Leds::update(LevelSelection::Level lvl, BranchSelection::Branch branch)
@@ -24,8 +34,12 @@ void Leds::update(LevelSelection::Level lvl, BranchSelection::Branch branch)
     // TODO: Do whatever cool effects we want to do with this
     if (rowPin != -1 && colPin != -1)
     {
-        digitalWrite(rowPin, ROW_ON);
-        digitalWrite(colPin, COL_ON);
+        m_mcp.digitalWrite(rowPin, ROW_ON);
+        m_mcp.digitalWrite(colPin, COL_ON);
+    }
+    else
+    {
+        resetLeds();
     }
 }
 
@@ -33,14 +47,12 @@ void Leds::resetLeds()
 {
     for (int rowPin : ROW_PINS)
     {
-        pinMode(rowPin, OUTPUT);
-        digitalWrite(rowPin, ROW_OFF);
+        m_mcp.digitalWrite(rowPin, ROW_OFF);
     }
 
     for (int colPin : COL_PINS)
     {
-        pinMode(colPin, OUTPUT);
-        digitalWrite(colPin, COL_OFF);
+        m_mcp.digitalWrite(colPin, COL_OFF);
     }
 }
 
