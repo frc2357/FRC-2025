@@ -46,6 +46,15 @@ public class PhotonVisionCamera extends SubsystemBase {
     public Optional<Matrix<N8, N1>> distCoeefs = null;
     public Transform3d robotToCameraTransform = null;
 
+    public TimestampedPNPInfo() {
+      result = null;
+      heading = null;
+      headingTimestampSeconds = Double.NaN;
+      camMatrix = null;
+      distCoeefs = null;
+      robotToCameraTransform = null;
+    }
+
     public void replaceInfo(
       PhotonPipelineResult result,
       Rotation3d heading,
@@ -69,6 +78,15 @@ public class PhotonVisionCamera extends SubsystemBase {
       camMatrix = null;
       distCoeefs = null;
       robotToCameraTransform = null;
+    }
+
+    public static TimestampedPNPInfo[] makePNPInfoList() {
+      TimestampedPNPInfo[] list =
+        new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
+      for (int i = 0; i < list.length; i++) {
+        list[i] = new TimestampedPNPInfo();
+      }
+      return list;
     }
   }
 
@@ -106,7 +124,7 @@ public class PhotonVisionCamera extends SubsystemBase {
    * <p> this data is used to figure out which results are the most worthwhile to use for pose est
    */
   private static final TimestampedPNPInfo[] m_pnpInfo =
-    new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
+    TimestampedPNPInfo.makePNPInfoList();
 
   /**
    * A list of all instances of this class, in order of instantiation
@@ -178,8 +196,16 @@ public class PhotonVisionCamera extends SubsystemBase {
       camera.updateResult();
     }
     for (int i = 0; i < m_pnpInfo.length; i++) {
+      if (m_pnpInfo[i].result == null) {
+        continue;
+      }
       updatePoseFromPNPInfo(m_pnpInfo[i]);
       m_pnpInfo[i].invalidateInfo();
+    }
+    if (m_lastEstimatedPose != null) {
+      Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
+        m_lastEstimatedPose.estimatedPose.toPose2d()
+      );
     }
   }
 
@@ -325,7 +351,11 @@ public class PhotonVisionCamera extends SubsystemBase {
     double yCoordinateConfidence =
       (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
         ((averageTargetDistance / 2) * yVelocityConf));
-
+    System.out.println("CURR TIME: " + Utils.getCurrentTimeSeconds());
+    System.out.println(
+      "FRAME TIME: " +
+      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds)
+    );
     Robot.swerve.addVisionMeasurement(
       m_lastEstimatedPose.estimatedPose.toPose2d(),
       Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
@@ -350,9 +380,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       return;
     }
     double frameTimeSeconds = result.getTimestampSeconds();
-    double currTimeSeconds = Utils.fpgaToCurrentTime(
-      RobotController.getFPGATime()
-    );
+    double currTimeSeconds = RobotController.getFPGATime() * 1e-6;
     // if result is older than allowed, do not store it
     if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
       return;
@@ -363,7 +391,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     int indexToReplace = -1;
     for (int i = 0; i < m_pnpInfo.length; i++) {
       // if selected info does not exist, replace it and stop the loop
-      if (m_pnpInfo[i] == null) {
+      if (m_pnpInfo[i].result == null) {
         m_pnpInfo[i].replaceInfo(
             result,
             heading,

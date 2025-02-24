@@ -384,6 +384,51 @@ public final class Constants {
 
   public static final class PHOTON_VISION {
 
+    public static final String LOST_CONNECTION_ERROR_MESSAGE =
+      "**************LOST CONNECTION WITH ORANGE PI";
+    public static final String CONNECTION_REGAINED_MESSAGE =
+      "CONNECTION REGAINED WITH ORANGE PI*********";
+
+    public static final Angle BEST_TARGET_PITCH_TOLERANCE = Units.Degrees.of(4);
+
+    public static final Angle MAX_ANGLE = Units.Degrees.of(35);
+
+    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable degree.
+    public static final double MAX_AMBIGUITY_TOLERANCE = 4; // TODO: tune this until its reasonable.
+
+    public static final boolean ACTIVATE_TURBO_SWITCH = false;
+
+    public static final PoseStrategy PRIMARY_STRATEGY =
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+    public static final PoseStrategy FALLBACK_STRATEGY =
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+
+    public static final double PNP_HEADING_SCALE_FACTOR = 2.0;
+
+    public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
+      Optional.of(
+        new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
+      ); // TODO: tune this throughout normal operation. This is for max to do.
+
+    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
+    // yes, these are essentially magic numbers
+    public static final double X_STD_DEV_COEFFIECIENT = 0.4;
+    public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
+
+    // if were going faster than this, we wont accept any pose est.
+    public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
+      Units.MetersPerSecond.of(3.5);
+
+    // how close the estimated pose can get to the field border before we invalidate it
+    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.5);
+
+    // how far off on the z axis the estimated pose can be before we invalidate it
+    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
+
+    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.2);
+
+    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
+
     public static final class FRONT_CAM {
 
       public static final String NAME = "frontCam";
@@ -543,47 +588,6 @@ public final class Constants {
         )
       );
     }
-
-    public static final String LOST_CONNECTION_ERROR_MESSAGE =
-      "**************LOST CONNECTION WITH ORANGE PI";
-    public static final String CONNECTION_REGAINED_MESSAGE =
-      "CONNECTION REGAINED WITH ORANGE PI*********";
-
-    public static final Angle BEST_TARGET_PITCH_TOLERANCE = Units.Degrees.of(4);
-
-    public static final Angle MAX_ANGLE = Units.Degrees.of(35);
-
-    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable degree.
-    public static final double MAX_AMBIGUITY_TOLERANCE = 4; // TODO: tune this until its reasonable.
-
-    public static final boolean ACTIVATE_TURBO_SWITCH = false;
-
-    public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.CONSTRAINED_SOLVEPNP;
-    public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
-
-    public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
-      Optional.of(new ConstrainedSolvepnpParams(false, 2)); // TODO: tune this throughout normal operation. This is for max to do.
-
-    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
-    // yes, these are essentially magic numbers
-    public static final double X_STD_DEV_COEFFIECIENT = 0.4;
-    public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
-
-    // if were going faster than this, we wont accept any pose est.
-    public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
-      Units.MetersPerSecond.of(3.5);
-
-    // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.5);
-
-    // how far off on the z axis the estimated pose can be before we invalidate it
-    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
-
-    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.12);
-
-    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
   }
 
   public static final class FIELD_CONSTANTS {

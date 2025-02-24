@@ -137,6 +137,7 @@ public class Robot extends TimedRobot {
 
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
+    elasticFieldManager.setupShooterField();
 
     // Logging
     DataLogManager.logNetworkTables(true); // enable/disable automatic NetworksTable Logging
