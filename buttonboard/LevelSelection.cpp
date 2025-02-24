@@ -65,6 +65,11 @@ void LevelSelection::update()
     m_prevState = state;
 }
 
+LevelSelection::Level LevelSelection::getSelection()
+{
+    return m_selection;
+}
+
 void LevelSelection::setLedState(int index, bool on)
 {
     m_leftKeypad.pixels.setPixelColor(index, on ? COLOR_ON : COLOR_OFF);

@@ -39,20 +39,7 @@ public:
         K = 14,
         L = 16,
     };
-    int PINS[NUM_BUTTONS] = {
-        Branch::A,
-        Branch::B,
-        Branch::C,
-        Branch::D,
-        Branch::E,
-        Branch::F,
-        Branch::G,
-        Branch::H,
-        Branch::I,
-        Branch::J,
-        Branch::K,
-        Branch::L,
-    };
+    static int PINS[NUM_BUTTONS];
 
     BranchSelection();
 
@@ -68,7 +55,7 @@ private:
     void setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
 
     FTDebouncer m_debouncer;
-    BranchSelection::Branch m_selection;
+    BranchSelection::Branch m_selection = BranchSelection::Branch::NONE;
 };
 
 #endif // BRANCH_SELECTION_H

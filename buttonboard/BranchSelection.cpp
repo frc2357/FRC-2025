@@ -1,12 +1,27 @@
 #include "BranchSelection.h"
 
+int BranchSelection::PINS[NUM_BUTTONS] = {
+    Branch::A,
+    Branch::B,
+    Branch::C,
+    Branch::D,
+    Branch::E,
+    Branch::F,
+    Branch::G,
+    Branch::H,
+    Branch::I,
+    Branch::J,
+    Branch::K,
+    Branch::L,
+};
+
 BranchSelection::BranchSelection() : m_debouncer(PIN_DEBOUNCE_TIME_MILLIS)
 {
 }
 
 void BranchSelection::init()
 {
-    for (int pin : PINS)
+    for (int pin : BranchSelection::PINS)
     {
         m_debouncer.addPin(pin, HIGH, INPUT_PULLUP);
     }
