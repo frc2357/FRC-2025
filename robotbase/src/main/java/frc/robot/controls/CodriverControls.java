@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
+import frc.robot.commands.algaePivot.AlgaePivotAxis;
+import frc.robot.commands.algaeRunner.AlgaeRunnerAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.laterator.LateratorAxis;
@@ -56,6 +58,20 @@ public class CodriverControls {
       .povRight()
       .and(m_controller.b())
       .whileTrue(new AlgaeKnockerSetSpeed(-0.25));
+
+    m_controller
+      .povLeft()
+      .and(m_leftTrigger)
+      .whileTrue(new AlgaeRunnerAxis(() -> -m_controller.getLeftTriggerAxis()));
+    m_controller
+      .povLeft()
+      .and(m_rightTrigger)
+      .whileTrue(new AlgaeRunnerAxis(() -> m_controller.getRightTriggerAxis()));
+    m_controller
+      .povLeft()
+      .whileTrue(
+        new AlgaePivotAxis(() -> modifyAxis(m_controller.getRightY()))
+      );
   }
 
   public double deadband(double value, double deadband) {

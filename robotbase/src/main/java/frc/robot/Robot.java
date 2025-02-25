@@ -77,9 +77,9 @@ public class Robot extends TimedRobot {
     elevator = new Elevator();
     laterator = new Laterator();
     coralRunner = new CoralRunner();
-    // algaeRunner = new AlgaeRunner();
+    algaeRunner = new AlgaeRunner();
     algaeKnocker = new AlgaeKnocker();
-    // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
+    algaePivot = new AlgaePivot();
     // climber = new Climber();
     frontCam = new PhotonVisionCamera(
       PHOTON_VISION.FRONT_CAMERA_NAME,
