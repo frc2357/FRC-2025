@@ -1,21 +1,21 @@
 package frc.robot.commands.elevator;
 
-import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
 public class ElevatorSetDistance extends Command {
 
-  private Distance m_distance;
+  private Angle m_rotations;
 
-  public ElevatorSetDistance(Distance distance) {
-    m_distance = distance;
+  public ElevatorSetDistance(Angle rotations) {
+    m_rotations = rotations;
     addRequirements(Robot.elevator);
   }
 
   @Override
   public void initialize() {
-    Robot.elevator.setTargetDistance(m_distance);
+    Robot.elevator.setTargetRotations(m_rotations);
   }
 
   @Override

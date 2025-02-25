@@ -6,10 +6,6 @@ import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
 
 public final class Constants {
 
@@ -52,15 +48,6 @@ public final class Constants {
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    public static final int ENCODER_COUNTS_PER_REV = 8196;
-
-    public static final double GEAR_RATIO = 3.2142857143;
-
-    public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
-    public static final double OUTPUT_PULLEY_NUMBER_OF_TEETH = 28;
-    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
-      HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
-
     public static final double AXIS_MAX_SPEED = 0.25;
   }
 
@@ -84,13 +71,6 @@ public final class Constants {
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
-
-    public static final double GEAR_RATIO = 5;
-    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
-      46.188
-    );
-    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
-      OUTPUT_PULLEY_DIAMETER.times(Math.PI);
   }
 
   public static final class ALGAE_PIVOT {
@@ -124,21 +104,5 @@ public final class Constants {
         .maxVelocity(0);
 
     public static final double AXIS_MAX_SPEED = 0.25;
-  }
-
-  public static final class CUSTOM_UNITS {
-
-    // These units are ONLY for the output shaft on the neo. Any pulley will require
-    // the addition of a gear ratio.
-    public static final Distance NEO_SHAFT_CIRCUMFERENCE = Units.Millimeters.of(
-      8 * Math.PI
-    );
-    public static final AngleUnit NEO_ENCODER_TICK = Units.derive(
-      Units.Revolutions
-    )
-      .splitInto(42)
-      .named("Neo Encoder Tick")
-      .symbol("NET")
-      .make();
   }
 }

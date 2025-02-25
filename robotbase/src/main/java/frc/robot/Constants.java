@@ -149,29 +149,18 @@ public final class Constants {
         .maxAcceleration(5000)
         .maxVelocity(4600);
 
-    public static final int ENCODER_COUNTS_PER_REV = 8196;
-    public static final double GEAR_RATIO = 3.2142857143;
-    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Inches.of(
-      2.256
-    );
-
-    public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
-    public static final double OUTPUT_PULLEY_NUMBER_OF_TEETH = 28;
-    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
-      HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
-
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final double ZERO_SPEED = -0.05;
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Angle HOME = Units.Rotations.of(0); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Angle INTAKE_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L1_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L2_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L3_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L4_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
@@ -207,22 +196,15 @@ public final class Constants {
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    public static final double GEAR_RATIO = 5;
-    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
-      46.188
-    );
-    public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
-      OUTPUT_PULLEY_DIAMETER.times(Math.PI);
-
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Angle HOME = Units.Rotations.of(0); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Angle INTAKE_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L1_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L2_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L3_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
+      public static final Angle L4_PREPOSE = Units.Rotations.of(0); // TODO: Tune Setpoint
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
@@ -312,8 +294,8 @@ public final class Constants {
 
     public static final double RAMP_RATE = .25;
 
-    public static final Angle MIN_ANGLE = Units.Degrees.of(0);
-    public static final Angle MAX_ANGLE = Units.Degrees.of(90);
+    public static final Angle MIN_ROTATIONS = Units.Degrees.of(0);
+    public static final Angle MAX_ROTATIONS = Units.Degrees.of(90);
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0;
 
@@ -344,7 +326,6 @@ public final class Constants {
       LEFT_MOTOR_CONFIG.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
         .outputRange(-1, 1);
-    // .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
@@ -352,26 +333,7 @@ public final class Constants {
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    // public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
-    // LEFT_MOTOR_CONFIG.absoluteEncoder;
-
-    public static final Angle ALGAE_INTAKE_ANGLE = Units.Degrees.of(0);
-  }
-
-  public static final class CUSTOM_UNITS {
-
-    // These units are ONLY for the output shaft on the neo. Any pulley will require
-    // the addition of a gear ratio.
-    public static final Distance NEO_SHAFT_CIRCUMFERENCE = Units.Millimeters.of(
-      8 * Math.PI
-    );
-    public static final AngleUnit NEO_ENCODER_TICK = Units.derive(
-      Units.Revolutions
-    )
-      .splitInto(42)
-      .named("Neo Encoder Tick")
-      .symbol("NET")
-      .make();
+    public static final Angle ALGAE_INTAKE_ROTATIONS = Units.Degrees.of(0);
   }
 
   public static final class PHOTON_VISION {

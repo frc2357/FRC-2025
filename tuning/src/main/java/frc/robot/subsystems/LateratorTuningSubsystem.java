@@ -15,7 +15,6 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Preferences;
@@ -81,7 +80,6 @@ public class LateratorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
     SmartDashboard.putNumber("Laterator Setpoint", 0);
     SmartDashboard.putData("Save Laterator Config", this);
   }
@@ -114,7 +112,6 @@ public class LateratorTuningSubsystem implements Sendable {
       SmartDashboard.getNumber("Laterator Setpoint", 0)
     );
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
 
     if (
       newP != P ||
@@ -135,16 +132,7 @@ public class LateratorTuningSubsystem implements Sendable {
   }
 
   public void teleopPeriodic() {
-    // if (SmartDashboard.getBoolean("UseDistance", false)) {
-
-    // double distanceSetpoint;
-    // distanceSetpoint = SmartDashboard.getNumber("Laterator Distance Setpoint", 0);
-    // setTargetDistance(Units.Feet.of(distanceSetpoint));
-    // } else {
-
     setTargetRotations(m_targetRotations);
-    // }
-
   }
 
   public void setSpeed(double speed) {
@@ -173,14 +161,6 @@ public class LateratorTuningSubsystem implements Sendable {
     return Units.Rotations.of(m_encoder.getPosition());
   }
 
-  public Distance getDistance() {
-    return (
-      LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
-      )
-    );
-  }
-
   private void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
@@ -190,16 +170,6 @@ public class LateratorTuningSubsystem implements Sendable {
       arbFF,
       ArbFFUnits.kVoltage
     );
-  }
-
-  public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(LATERATOR.GEAR_RATIO)
-        .magnitude()
-    );
-    setTargetRotations(rotations);
   }
 
   private boolean isAtTargetRotations() {
