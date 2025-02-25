@@ -307,8 +307,8 @@ public final class Constants {
 
     public static final boolean MOTOR_INVERTED = false;
 
-    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
-    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(40);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(40);
 
     public static final double RAMP_RATE = .25;
 
