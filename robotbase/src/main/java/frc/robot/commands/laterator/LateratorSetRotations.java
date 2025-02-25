@@ -1,21 +1,21 @@
 package frc.robot.commands.laterator;
 
-import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
-public class LateratorSetDistance extends Command {
+public class LateratorSetRotations extends Command {
 
-  private Distance m_distance;
+  private Angle m_rotations;
 
-  public LateratorSetDistance(Distance distance) {
-    m_distance = distance;
+  public LateratorSetRotations(Angle rotations) {
+    m_rotations = rotations;
     addRequirements(Robot.laterator);
   }
 
   @Override
   public void initialize() {
-    Robot.laterator.setTargetDistance(m_distance);
+    Robot.laterator.setTargetRotations(m_rotations);
   }
 
   @Override

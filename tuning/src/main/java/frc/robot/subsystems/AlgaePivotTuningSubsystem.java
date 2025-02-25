@@ -92,7 +92,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Algae Pivot MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
-    SmartDashboard.putBoolean("Is At Target", isAtTargetAngle());
+    SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
     SmartDashboard.putNumber("Algae Pivot Setpoint", 0);
     SmartDashboard.putData("Save Algae Pivot Config", this);
   }
@@ -124,7 +124,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
     m_targetRotations = Rotations.of(
       SmartDashboard.getNumber("Algae Pivot Setpoint", 0)
     );
-    SmartDashboard.putBoolean("Is At Target", isAtTargetAngle());
+    SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
 
     if (
       newP != P ||
@@ -145,16 +145,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
   }
 
   public void teleopPeriodic() {
-    // if (SmartDashboard.getBoolean("UseDistance", false)) {
-
-    // double distanceSetpoint;
-    // distanceSetpoint = SmartDashboard.getNumber("Algae Pivot Distance Setpoint", 0);
-    // setTargetDistance(Units.Feet.of(distanceSetpoint));
-    // } else {
-
-    setTargetAngle(m_targetRotations);
-    // }
-
+    setTargetRotations(m_targetRotations);
   }
 
   public void setSpeed(double speed) {
@@ -179,11 +170,11 @@ public class AlgaePivotTuningSubsystem implements Sendable {
     return Units.RPM.of(m_encoder.getVelocity());
   }
 
-  public Angle getAngle() {
+  public Angle getRotations() {
     return Units.Rotations.of(m_encoder.getPosition());
   }
 
-  private void setTargetAngle(Angle targetRotations) {
+  private void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
@@ -194,9 +185,9 @@ public class AlgaePivotTuningSubsystem implements Sendable {
     );
   }
 
-  private boolean isAtTargetAngle() {
+  private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
-      getAngle(),
+      getRotations(),
       ALGAE_PIVOT.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
   }

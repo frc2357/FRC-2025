@@ -11,7 +11,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -74,22 +73,12 @@ public class Laterator extends SubsystemBase {
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
-  private void setTargetRotations(Angle targetRotations) {
+  public void setTargetRotations(Angle targetRotations) {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl
     );
-  }
-
-  public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(LATERATOR.GEAR_RATIO)
-        .magnitude()
-    );
-    setTargetRotations(rotations);
   }
 
   public AngularVelocity getVelocity() {
@@ -106,14 +95,6 @@ public class Laterator extends SubsystemBase {
       Units.Rotations
     );
     return m_currentRotationsHolder;
-  }
-
-  public Distance getDistance() {
-    return (
-      LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
-      )
-    );
   }
 
   private boolean isAtTargetRotations() {

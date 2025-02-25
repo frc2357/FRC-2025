@@ -15,7 +15,6 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Preferences;
@@ -93,7 +92,6 @@ public class ElevatorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
     SmartDashboard.putNumber("Elevator Setpoint", 0);
     SmartDashboard.putData("Save Elevator Config", this);
   }
@@ -126,7 +124,6 @@ public class ElevatorTuningSubsystem implements Sendable {
       SmartDashboard.getNumber("Elevator Setpoint", 0)
     );
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
 
     if (
       newP != P ||
@@ -147,16 +144,7 @@ public class ElevatorTuningSubsystem implements Sendable {
   }
 
   public void teleopPeriodic() {
-    // if (SmartDashboard.getBoolean("UseDistance", false)) {
-
-    // double distanceSetpoint;
-    // distanceSetpoint = SmartDashboard.getNumber("Elevator Distance Setpoint", 0);
-    // setTargetDistance(Units.Feet.of(distanceSetpoint));
-    // } else {
-
     setTargetRotations(m_targetRotations);
-    // }
-
   }
 
   public void setSpeed(double speed) {
@@ -185,14 +173,6 @@ public class ElevatorTuningSubsystem implements Sendable {
     return Units.Rotations.of(m_encoder.getPosition());
   }
 
-  public Distance getDistance() {
-    return (
-      ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
-      )
-    );
-  }
-
   private void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
@@ -202,16 +182,6 @@ public class ElevatorTuningSubsystem implements Sendable {
       arbFF,
       ArbFFUnits.kVoltage
     );
-  }
-
-  public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(ELEVATOR.GEAR_RATIO)
-        .magnitude()
-    );
-    setTargetRotations(rotations);
   }
 
   private boolean isAtTargetRotations() {

@@ -21,8 +21,8 @@ public class AlgaePivot extends SubsystemBase {
   private SparkAbsoluteEncoder m_absoluteEncoder;
   private SparkClosedLoopController m_leftPidController;
 
-  private MutAngle m_targetAngle = Units.Degrees.mutable(Double.NaN);
-  private MutAngle m_currentAngleHolder = Units.Degrees.mutable(Double.NaN);
+  private MutAngle m_targetRotations = Units.Degrees.mutable(Double.NaN);
+  private MutAngle m_currentRotationsHolder = Units.Degrees.mutable(Double.NaN);
 
   public AlgaePivot() {
     m_leftMotor = new SparkMax(
@@ -49,52 +49,52 @@ public class AlgaePivot extends SubsystemBase {
 
   public void setSpeed(double percentOutput) {
     m_leftMotor.set(percentOutput);
-    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void setAxisSpeed(double axisSpeed) {
     axisSpeed *= ALGAE_PIVOT.AXIS_MAX_SPEED;
     setSpeed(axisSpeed);
-    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
-  public Angle getAngle() {
-    m_currentAngleHolder.mut_replace(
+  public Angle getRotations() {
+    m_currentRotationsHolder.mut_replace(
       m_absoluteEncoder.getPosition(),
       Units.Rotations
     );
-    return m_currentAngleHolder;
+    return m_currentRotationsHolder;
   }
 
   public void stop() {
     m_leftMotor.stopMotor();
-    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
-  public void setTargetAngle(Angle angle) {
-    if (angle.lt(ALGAE_PIVOT.MIN_ANGLE)) {
+  public void setTargetRotations(Angle rotations) {
+    if (rotations.lt(ALGAE_PIVOT.MIN_ROTATIONS)) {
       System.err.println("ALGAE PIVOT: Cannot set angle lower than minimum");
       return;
     }
-    if (angle.gt(ALGAE_PIVOT.MAX_ANGLE)) {
+    if (rotations.gt(ALGAE_PIVOT.MAX_ROTATIONS)) {
       System.err.println("ALGAE PIVOT: Cannot set angle higher than minimum");
       return;
     }
 
-    m_targetAngle.mut_replace(angle);
+    m_targetRotations.mut_replace(rotations);
     m_leftPidController.setReference(
-      angle.in(Units.Rotations),
+      rotations.in(Units.Rotations),
       ControlType.kPosition
     );
   }
 
-  public Angle getTargetAngle() {
-    return m_targetAngle;
+  public Angle getTargetRotations() {
+    return m_targetRotations;
   }
 
   public boolean isAtTarget() {
-    return m_targetAngle.isNear(
-      getAngle(),
+    return m_targetRotations.isNear(
+      getRotations(),
       ALGAE_PIVOT.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
   }

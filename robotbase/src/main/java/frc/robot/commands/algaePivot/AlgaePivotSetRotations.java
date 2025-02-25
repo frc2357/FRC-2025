@@ -4,18 +4,18 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
-public class AlgaePivotSetAngle extends Command {
+public class AlgaePivotSetRotations extends Command {
 
-  private Angle m_angle;
+  private Angle m_rotations;
 
-  public AlgaePivotSetAngle(Angle angle) {
-    m_angle = angle;
+  public AlgaePivotSetRotations(Angle rotations) {
+    m_rotations = rotations;
     addRequirements(Robot.algaePivot);
   }
 
   @Override
   public void initialize() {
-    Robot.algaePivot.setTargetAngle(m_angle);
+    Robot.algaePivot.setTargetRotations(m_rotations);
   }
 
   @Override

@@ -13,7 +13,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -85,7 +84,7 @@ public class Elevator extends SubsystemBase {
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
-  private void setTargetRotations(Angle targetRotations) {
+  public void setTargetRotations(Angle targetRotations) {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
@@ -94,16 +93,6 @@ public class Elevator extends SubsystemBase {
       ELEVATOR.LEFT_MOTOR_ARB_F,
       ArbFFUnits.kVoltage
     );
-  }
-
-  public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(ELEVATOR.GEAR_RATIO)
-        .magnitude()
-    );
-    setTargetRotations(rotations);
   }
 
   public AngularVelocity getVelocity() {
@@ -120,14 +109,6 @@ public class Elevator extends SubsystemBase {
       Units.Rotations
     );
     return m_currentRotationsHolder;
-  }
-
-  public Distance getDistance() {
-    return (
-      ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
-      )
-    );
   }
 
   private boolean isAtTargetRotations() {
