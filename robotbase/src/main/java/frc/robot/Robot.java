@@ -16,6 +16,7 @@ import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
+import frc.robot.commands.elevator.ElevatorHoldPosition;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.Buttonboard;
@@ -144,6 +145,8 @@ public class Robot extends TimedRobot {
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
       new DriveSetCoast()
     );
+
+    elevator.setDefaultCommand(new ElevatorHoldPosition());
   }
 
   /**

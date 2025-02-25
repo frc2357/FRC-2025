@@ -85,7 +85,7 @@ public class Elevator extends SubsystemBase {
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
-  private void setTargetRotations(Angle targetRotations) {
+  public void setTargetRotations(Angle targetRotations) {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
@@ -114,7 +114,7 @@ public class Elevator extends SubsystemBase {
     return m_currentAngularVelocityHolder;
   }
 
-  private Angle getRotations() {
+  public Angle getRotations() {
     m_currentRotationsHolder.mut_replace(
       m_encoder.getPosition(),
       Units.Rotations
