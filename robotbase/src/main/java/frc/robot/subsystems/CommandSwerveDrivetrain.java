@@ -14,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
@@ -127,9 +128,11 @@ public class CommandSwerveDrivetrain
   private final SwerveRequest.RobotCentric m_robotRelative =
     new SwerveRequest.RobotCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+
   private final SwerveRequest.FieldCentric m_fieldRelative =
     new SwerveRequest.FieldCentric()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+
   private final SwerveRequest.ApplyFieldSpeeds m_fieldSpeedsRequest =
     new SwerveRequest.ApplyFieldSpeeds()
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
@@ -509,5 +512,12 @@ public class CommandSwerveDrivetrain
         .getValue()
         .in(Units.RadiansPerSecond)
     );
+  }
+
+  /**
+   * @return A list of module states in the order Front Left, Front Right, Back Left, Back Right
+   */
+  public SwerveModuleState[] getModuleStates() {
+    return super.getState().ModuleStates;
   }
 }

@@ -13,6 +13,7 @@ import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
+import frc.robot.commands.drive.VelDrive;
 import frc.robot.commands.scoring.coral.CoralHumanPrepose;
 import frc.robot.commands.scoring.coral.CoralScore;
 
@@ -61,6 +62,8 @@ public class DriverControls {
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
+
+    m_controller.b().whileTrue(new VelDrive());
     // Manual Coral Scoring
     // CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
     // m_controller.leftBumper().onTrue(humanPrepose.getSelectCommand());
