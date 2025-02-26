@@ -25,7 +25,7 @@ public class DefaultDrive extends Command {
     double rotation = Robot.driverControls.getRotation();
 
     if (x == 0 && y == 0 && rotation == 0) {
-      Robot.swerve.driveBrake();
+      Robot.swerve.stopMotors();
     } else {
       Robot.swerve.driveFieldRelative(
         y * m_speedAt12VoltsMPS,
