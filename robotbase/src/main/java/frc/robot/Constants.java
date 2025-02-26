@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -113,6 +115,9 @@ public final class Constants {
       true,
       Robot.swerve
     );
+
+    public static final double PREPOSE_SECONDS =
+      ELEVATOR.FULL_EXTENSION_TIME.in(Seconds) + 0.05;
   }
 
   public static final class ELEVATOR {
@@ -175,6 +180,8 @@ public final class Constants {
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+
+    public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
   }
 
   public static final class LATERATOR {
