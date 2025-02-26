@@ -127,19 +127,19 @@ public class CommandSwerveDrivetrain
 
   private final SwerveRequest.RobotCentric m_robotRelative =
     new SwerveRequest.RobotCentric()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+      .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors;
 
   private final SwerveRequest.FieldCentric m_fieldRelative =
     new SwerveRequest.FieldCentric()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+      .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors;
 
   private final SwerveRequest.ApplyFieldSpeeds m_fieldSpeedsRequest =
     new SwerveRequest.ApplyFieldSpeeds()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+      .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors;
 
   private final SwerveRequest.FieldCentricFacingAngle m_fieldCentricFacingAngle =
     new SwerveRequest.FieldCentricFacingAngle()
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+      .withDriveRequestType(DriveRequestType.Velocity)
       .withHeadingPID(FACING_ANGLE_P, FACING_ANGLE_I, FACING_ANGLE_D); // Use open-loop control for drive motors;
 
   private final SwerveRequest.SwerveDriveBrake m_brakeRequest =
