@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -15,6 +16,7 @@ import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.LATERATOR;
@@ -24,6 +26,7 @@ public class Laterator extends SubsystemBase {
   private SparkMax m_motor;
 
   private DigitalInput m_hallEffectSensor;
+  private Debouncer m_debouncer;
 
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
@@ -52,6 +55,7 @@ public class Laterator extends SubsystemBase {
     m_hallEffectSensor = new DigitalInput(
       DIGITAL_INPUT.LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID
     );
+    m_debouncer = new Debouncer(Constants.LATERATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -128,6 +132,6 @@ public class Laterator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_hallEffectSensor.get();
+    return m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 }

@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.auto.AutoBase;
-import frc.robot.commands.auto.RobotRelativeTest;
+import frc.robot.commands.auto.CB3BlueStation2Peice;
 import java.util.Map;
 
 public class AutoChooserManager {
@@ -17,7 +17,7 @@ public class AutoChooserManager {
   // The auto routines that will show up on the auto command chooser.
   private AutoBase[] m_autos = {
     new AutoBase("CubeTestPath"),
-    new RobotRelativeTest(),
+    new CB3BlueStation2Peice(),
   };
 
   private AutoChooser m_autoChooser = new AutoChooser();

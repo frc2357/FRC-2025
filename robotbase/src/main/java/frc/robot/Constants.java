@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -64,13 +66,17 @@ public final class Constants {
     public static final int CLIMBER_MOTOR_ONE = 30;
     public static final int CLIMBER_MOTOR_TWO = 31;
     public static final int CLIMBER_MOTOR_THREE = 32;
+
+    public static final int ALGAE_KNOCKER_MOTOR = 33;
   }
 
   public final class DIGITAL_INPUT {
 
-    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
-    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 1;
-    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 2;
+    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 9;
+    public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
+    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 7;
+
+    public static final int ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
   }
 
   public static final class SWERVE {
@@ -81,9 +87,9 @@ public final class Constants {
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
 
     public static final LinearAcceleration MAXIMUM_LINEAR_ACCELERATION =
-      Units.MetersPerSecondPerSecond.of(4.5); //TODO: tune this
+      Units.MetersPerSecondPerSecond.of(4.5); // TODO: tune this
     public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
-      Units.DegreesPerSecondPerSecond.of(120); //TODO: tune this
+      Units.DegreesPerSecondPerSecond.of(120); // TODO: tune this
 
     public static final Time TIME_TO_COAST = Units.Seconds.of(3);
 
@@ -109,6 +115,9 @@ public final class Constants {
       true,
       Robot.swerve
     );
+
+    public static final double PREPOSE_SECONDS =
+      ELEVATOR.FULL_EXTENSION_TIME.in(Seconds) + 0.05;
   }
 
   public static final class ELEVATOR {
@@ -157,17 +166,22 @@ public final class Constants {
       HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
 
     public static final double AXIS_MAX_SPEED = 0.5;
+    public static final double ZERO_SPEED = -0.05;
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+
+    public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
   }
 
   public static final class LATERATOR {
@@ -179,9 +193,9 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
-    public static final double MOTOR_P = 0;
+    public static final double MOTOR_P = 0.3;
     public static final double MOTOR_I = 0;
-    public static final double MOTOR_D = 0;
+    public static final double MOTOR_D = 1;
     public static final double MOTOR_F = 0;
 
     // Set feedback sensor to alternate encoder
@@ -197,26 +211,29 @@ public final class Constants {
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(0)
-        .maxVelocity(0);
+        .maxAcceleration(13000)
+        .maxVelocity(4600);
 
-    public static final double GEAR_RATIO = 5;
-    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
-      46.188
-    );
+    public static final double GEAR_RATIO = 15;
+    public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
+      Units.Millimeters.of(46.188);
     public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
-      OUTPUT_PULLEY_DIAMETER.times(Math.PI);
+      OUTPUT_PULLEY_PITCH_DIAMETER.times(Math.PI);
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); //TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
     }
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+
+    public static final double RETURN_SPEED = 0.1;
   }
 
   public static final class CORAL_RUNNER {
@@ -266,6 +283,28 @@ public final class Constants {
     public static final double ALGAE_EJECTOR_SPEED = 0;
   }
 
+  public static final class ALGAE_KNOCKER {
+
+    public static final double AXIS_MAX_SPEED = 0.25;
+
+    public static final IdleMode IDLE_MODE = IdleMode.kCoast;
+    public static final boolean MOTOR_INVERTED = false;
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+    public static final double RAMP_RATE = .25;
+
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IDLE_MODE)
+      .inverted(MOTOR_INVERTED)
+      .smartCurrentLimit(
+        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
+        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
+      )
+      .openLoopRampRate(RAMP_RATE);
+
+    public static final double ALGAE_KNOCK_SPEED = 0;
+  }
+
   public static final class ALGAE_PIVOT {
 
     public static final double AXIS_MAX_SPEED = 0.25;
@@ -274,8 +313,8 @@ public final class Constants {
 
     public static final boolean MOTOR_INVERTED = false;
 
-    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
-    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(40);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(40);
 
     public static final double RAMP_RATE = .25;
 
@@ -311,7 +350,7 @@ public final class Constants {
       LEFT_MOTOR_CONFIG.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
         .outputRange(-1, 1);
-    //.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+    // .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
@@ -320,7 +359,7 @@ public final class Constants {
         .maxVelocity(0);
 
     // public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
-    //   LEFT_MOTOR_CONFIG.absoluteEncoder;
+    // LEFT_MOTOR_CONFIG.absoluteEncoder;
 
     public static final Angle ALGAE_INTAKE_ANGLE = Units.Degrees.of(0);
   }
@@ -397,8 +436,8 @@ public final class Constants {
 
     public static final Angle MAX_ANGLE = Units.Degrees.of(35);
 
-    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; //TODO: tune this to a reasonable degree.
-    public static final double MAX_AMBIGUITY_TOLERANCE = 4; //TODO: tune this until its reasonable.
+    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable degree.
+    public static final double MAX_AMBIGUITY_TOLERANCE = 4; // TODO: tune this until its reasonable.
 
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
@@ -629,7 +668,7 @@ public final class Constants {
 
     public static class CORAL_STATION {
 
-      public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = //TODO: tune this to field
+      public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
         new Pose2d(
           0.5548880100250244,
           6.694406032562256,
@@ -649,7 +688,7 @@ public final class Constants {
           )
         );
 
-      public static final Pose2d LOWER_STATION_LEFTMOST_USABLE_SLOT = //TODO: tune this to field
+      public static final Pose2d LOWER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
         new Pose2d(
           0.5548880100250244,
           1.3386709690093994,
@@ -758,7 +797,7 @@ public final class Constants {
      */
     public static final double MOMENT_OF_INERTIA_SIMPLIFIED_DISTRIBUTION =
       (1.0 / 12) *
-      (WEIGHT_POUNDS / 2.205) */*pounds to kilograms conversion is / 2.205*/
+      (WEIGHT_POUNDS / 2.205) */* pounds to kilograms conversion is / 2.205 */
       (Math.pow(FULL_LENGTH.in(Units.Meters), 2) +
         Math.pow(FULL_WIDTH.in(Units.Meters), 2));
   }
