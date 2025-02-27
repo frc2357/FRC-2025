@@ -70,9 +70,9 @@ public final class Constants {
 
   public final class DIGITAL_INPUT {
 
-    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 9;
+    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 9;
     public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
-    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 7;
+    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 7;
 
     public static final int ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
   }

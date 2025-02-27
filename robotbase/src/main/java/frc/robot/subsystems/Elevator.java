@@ -142,7 +142,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_debouncer.calculate(m_hall_effect.get());
+    return m_debouncer.calculate(!m_hall_effect.get());
   }
 
   public void setZero() {
