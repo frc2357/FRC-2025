@@ -1,8 +1,12 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Percent;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -14,6 +18,9 @@ import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.VelDrive;
+import frc.robot.commands.intake.CoralIntake;
+import frc.robot.commands.intake.CoralPreposeIntake;
+import frc.robot.commands.laterator.LateratorZero;
 import frc.robot.commands.scoring.coral.CoralHumanPrepose;
 import frc.robot.commands.scoring.coral.CoralScore;
 
@@ -42,28 +49,30 @@ public class DriverControls {
   }
 
   public void mapControls() {
-    m_controller.a().whileTrue(new DriveToPoseHandler(RouteAroundReef.Fastest));
-    m_controller
-      .b()
-      .whileTrue(
-        new DriveToCoralStation(StationToGoTo.Fastest, RouteAroundReef.Fastest)
-      );
+    m_controller.a().whileTrue(new CoralIntake());
+    m_controller.x().onTrue(new LateratorZero());
+    m_controller.b().whileTrue(new CoralPreposeIntake());
+    // m_controller.a().whileTrue(new DriveToPoseHandler(RouteAroundReef.Fastest));
+    // m_controller
+    //   .b()
+    //   .whileTrue(
+    //     new DriveToCoralStation(StationToGoTo.Fastest, RouteAroundReef.Fastest)
+    //   );
 
-    m_controller
-      .x()
-      .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetPose(
-            REEF.BRANCH_C.plus(new Transform2d(0, -1, Rotation2d.kZero))
-          )
-        )
-      );
+    // m_controller
+    //   .x()
+    //   .onTrue(
+    //     new InstantCommand(() ->
+    //       Robot.swerve.resetPose(
+    //         REEF.BRANCH_C.plus(new Transform2d(0, -1, Rotation2d.kZero))
+    //       )
+    //     )
+    //   );
 
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-
-    m_controller.b().whileTrue(new VelDrive());
+    // m_controller.b().whileTrue(new VelDrive());
     // Manual Coral Scoring
     // CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
     // m_controller.leftBumper().onTrue(humanPrepose.getSelectCommand());

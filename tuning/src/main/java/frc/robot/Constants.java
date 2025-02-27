@@ -30,7 +30,7 @@ public final class Constants {
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
-      .smartCurrentLimit(40, 40)
+      .smartCurrentLimit(60, 40)
       .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
@@ -38,7 +38,7 @@ public final class Constants {
         .idleMode(IdleMode.kBrake)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .smartCurrentLimit(40, 40)
+        .smartCurrentLimit(60, 40)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
@@ -54,7 +54,7 @@ public final class Constants {
 
     public static final int ENCODER_COUNTS_PER_REV = 8196;
 
-    public static final double GEAR_RATIO = 3.2142857143;
+    public static final double GEAR_RATIO = 5.14;
 
     public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
     public static final double OUTPUT_PULLEY_NUMBER_OF_TEETH = 28;
