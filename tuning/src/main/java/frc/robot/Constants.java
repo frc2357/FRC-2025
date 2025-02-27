@@ -69,6 +69,7 @@ public final class Constants {
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
+      .smartCurrentLimit(15)
       .voltageCompensation(12);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
@@ -76,7 +77,7 @@ public final class Constants {
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
-    public static final double AXIS_MAX_SPEED = 0.1;
+    public static final double AXIS_MAX_SPEED = 0.75;
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG =
       CLOSED_LOOP_CONFIG.maxMotion
