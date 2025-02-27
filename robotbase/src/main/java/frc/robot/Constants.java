@@ -155,9 +155,9 @@ public final class Constants {
         .maxVelocity(4600);
 
     public static final int ENCODER_COUNTS_PER_REV = 8196;
-    public static final double GEAR_RATIO = 3.2142857143;
+    public static final double GEAR_RATIO = 5.14;
     public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Inches.of(
-      2.256
+      1.709
     );
 
     public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
@@ -239,9 +239,13 @@ public final class Constants {
   public static final class CORAL_RUNNER {
 
     // TODO: Tune speeds
-    public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(0);
-    public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(0);
-    public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0);
+    public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(
+      -0.5
+    );
+    public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(
+      -0.2
+    );
+    public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0.5);
     public static final double SCORING_WAIT_TIME = .5;
 
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
