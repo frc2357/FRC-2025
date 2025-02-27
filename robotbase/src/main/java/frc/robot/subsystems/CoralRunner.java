@@ -82,10 +82,10 @@ public class CoralRunner extends SubsystemBase {
   }
 
   public boolean isIntakeBeamBroken() {
-    return m_debouncerOuttake.calculate(m_beamBreakIntake.get());
+    return m_debouncerOuttake.calculate(!m_beamBreakIntake.get());
   }
 
   public boolean isOuttakeBeamBroken() {
-    return m_debouncerIntake.calculate(m_beamBreakOuttake.get());
+    return m_debouncerIntake.calculate(!m_beamBreakOuttake.get());
   }
 }
