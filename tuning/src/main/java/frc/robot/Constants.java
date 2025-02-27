@@ -8,7 +8,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 
 public final class Constants {
@@ -18,10 +17,10 @@ public final class Constants {
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
-    public static final int ALGAE_PIVOT_LEFT_MOTOR = 25;
-    public static final int ALGAE_PIVOT_RIGHT_MOTOR = 26;
+    public static final int ALGAE_PIVOT_LEFT_MOTOR = 26;
+    public static final int ALGAE_PIVOT_RIGHT_MOTOR = 27;
 
-    public static final int LATERATOR_MOTOR = 27;
+    public static final int LATERATOR_MOTOR = 28;
   }
 
   public static final class ELEVATOR {
@@ -70,6 +69,7 @@ public final class Constants {
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
+      .smartCurrentLimit(15)
       .voltageCompensation(12);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
@@ -77,7 +77,7 @@ public final class Constants {
 
     public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
-    public static final double AXIS_MAX_SPEED = 0.1;
+    public static final double AXIS_MAX_SPEED = 0.75;
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG =
       CLOSED_LOOP_CONFIG.maxMotion
@@ -99,7 +99,7 @@ public final class Constants {
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
-      .smartCurrentLimit(20, 20)
+      .smartCurrentLimit(40, 20)
       .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
@@ -107,7 +107,7 @@ public final class Constants {
         .idleMode(IdleMode.kBrake)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .smartCurrentLimit(20, 20)
+        .smartCurrentLimit(40, 20)
         .follow(CAN_ID.ALGAE_PIVOT_LEFT_MOTOR, true);
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
@@ -123,7 +123,7 @@ public final class Constants {
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    public static final double AXIS_MAX_SPEED = 0.25;
+    public static final double AXIS_MAX_SPEED = 0.75;
   }
 
   public static final class CUSTOM_UNITS {
