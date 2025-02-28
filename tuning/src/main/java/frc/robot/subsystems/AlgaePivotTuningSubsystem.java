@@ -2,8 +2,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Rotations;
 
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -28,7 +28,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
-  private RelativeEncoder m_encoder;
+  private SparkAbsoluteEncoder m_absoluteEncoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
   private double P = 0.0;
@@ -39,7 +39,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
   private double maxAcc = 500; // Desired: 18400
 
   private SparkBaseConfig m_motorconfig =
-    Constants.ALGAE_PIVOT.MOTOR_CONFIG_LEFT;
+    Constants.ALGAE_PIVOT.MOTOR_CONFIG_RIGHT;
 
   public AlgaePivotTuningSubsystem() {
     m_motorLeft = new SparkMax(
@@ -52,19 +52,20 @@ public class AlgaePivotTuningSubsystem implements Sendable {
     );
 
     m_motorLeft.configure(
+      Constants.ALGAE_PIVOT.MOTOR_CONFIG_LEFT,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
+
+    m_motorRight.configure(
       m_motorconfig,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-    m_encoder = m_motorLeft.getEncoder();
 
-    m_motorRight.configure(
-      Constants.ALGAE_PIVOT.MOTOR_CONFIG_RIGHT,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+    m_absoluteEncoder = m_motorRight.getAbsoluteEncoder();
 
-    m_PIDController = m_motorLeft.getClosedLoopController();
+    m_PIDController = m_motorRight.getClosedLoopController();
 
     Preferences.initDouble("algaePivotP", 0);
     Preferences.initDouble("algaePivotI", 0);
@@ -90,8 +91,11 @@ public class AlgaePivotTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Algae Pivot arbFF", arbFF);
     SmartDashboard.putNumber("Algae Pivot MaxVel", maxVel);
     SmartDashboard.putNumber("Algae Pivot MaxAcc", maxAcc);
-    SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
-    SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
+    SmartDashboard.putNumber(
+      "Motor Rotations",
+      m_absoluteEncoder.getPosition()
+    );
+    SmartDashboard.putNumber("Motor Velocity", m_absoluteEncoder.getVelocity());
     SmartDashboard.putBoolean("Is At Target", isAtTargetAngle());
     SmartDashboard.putNumber("Algae Pivot Setpoint", 0);
     SmartDashboard.putData("Save Algae Pivot Config", this);
@@ -105,7 +109,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
       .maxAcceleration(maxAcc)
       .maxVelocity(maxVel);
 
-    m_motorLeft.configure(
+    m_motorRight.configure(
       m_motorconfig,
       ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
@@ -119,8 +123,11 @@ public class AlgaePivotTuningSubsystem implements Sendable {
     double newFF = SmartDashboard.getNumber("Algae Pivot arbFF", arbFF);
     double newMaxVel = SmartDashboard.getNumber("Algae Pivot MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Algae Pivot MaxAcc", maxAcc);
-    SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
-    SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
+    SmartDashboard.putNumber(
+      "Motor Rotations",
+      m_absoluteEncoder.getPosition()
+    );
+    SmartDashboard.putNumber("Motor Velocity", m_absoluteEncoder.getVelocity());
     m_targetRotations = Rotations.of(
       SmartDashboard.getNumber("Algae Pivot Setpoint", 0)
     );
@@ -158,29 +165,25 @@ public class AlgaePivotTuningSubsystem implements Sendable {
   }
 
   public void setSpeed(double speed) {
-    m_motorLeft.set(speed);
+    m_motorRight.set(speed);
   }
 
   public void setAxisSpeed(double speed) {
     m_targetRotations = Units.Rotations.of(Double.NaN);
     speed *= ALGAE_PIVOT.AXIS_MAX_SPEED;
-    m_motorLeft.set(speed);
-  }
-
-  public void setZero() {
-    m_encoder.setPosition(0);
+    m_motorRight.set(speed);
   }
 
   public void stop() {
-    m_motorLeft.stopMotor();
+    m_motorRight.stopMotor();
   }
 
   public AngularVelocity getVelocity() {
-    return Units.RPM.of(m_encoder.getVelocity());
+    return Units.RPM.of(m_absoluteEncoder.getVelocity());
   }
 
   public Angle getAngle() {
-    return Units.Rotations.of(m_encoder.getPosition());
+    return Units.Rotations.of(m_absoluteEncoder.getPosition());
   }
 
   private void setTargetAngle(Angle targetRotations) {

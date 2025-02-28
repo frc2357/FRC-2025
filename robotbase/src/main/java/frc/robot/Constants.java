@@ -126,7 +126,7 @@ public final class Constants {
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
-      .smartCurrentLimit(40, 40)
+      .smartCurrentLimit(60, 40)
       .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
@@ -134,7 +134,7 @@ public final class Constants {
         .idleMode(IdleMode.kBrake)
         .openLoopRampRate(.25)
         .voltageCompensation(12)
-        .smartCurrentLimit(40, 40)
+        .smartCurrentLimit(60, 40)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
     public static final double LEFT_MOTOR_P = 0.008;
@@ -341,9 +341,9 @@ public final class Constants {
         )
         .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR, true);
 
-    public static final double LEFT_MOTOR_P = 0;
+    public static final double LEFT_MOTOR_P = 0.01;
     public static final double LEFT_MOTOR_I = 0;
-    public static final double LEFT_MOTOR_D = 0;
+    public static final double LEFT_MOTOR_D = 0.01;
     public static final double LEFT_MOTOR_F = 0;
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
@@ -355,8 +355,8 @@ public final class Constants {
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(0)
-        .maxVelocity(0);
+        .maxAcceleration(10000)
+        .maxVelocity(4600);
 
     // public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
     // LEFT_MOTOR_CONFIG.absoluteEncoder;
