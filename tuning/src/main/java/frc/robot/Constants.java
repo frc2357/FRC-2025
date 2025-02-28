@@ -60,7 +60,7 @@ public final class Constants {
     public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
       HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
 
-    public static final double AXIS_MAX_SPEED = 0.25;
+    public static final double AXIS_MAX_SPEED = 0.5;
   }
 
   public static final class LATERATOR {
