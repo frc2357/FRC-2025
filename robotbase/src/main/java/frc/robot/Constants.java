@@ -8,16 +8,25 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
+import java.util.Optional;
+import org.ejml.simple.SimpleMatrix;
+import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
@@ -57,8 +66,8 @@ public final class Constants {
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
     public static final int ALGAE_RUNNER_MOTOR = 25;
-    public static final int LEFT_ALGAE_PIVOT_MOTOR = 26;
-    public static final int RIGHT_ALGAE_PIVOT_MOTOR = 27;
+    public static final int ALGAE_PIVOT_LEFT_MOTOR = 26;
+    public static final int ALGAE_PIVOT_RIGHT_MOTOR = 27;
 
     public static final int LATERATOR_MOTOR = 28;
     public static final int CORAL_RUNNER_MOTOR = 29;
@@ -126,15 +135,12 @@ public final class Constants {
       .idleMode(IdleMode.kBrake)
       .inverted(false)
       .openLoopRampRate(.25)
-      .smartCurrentLimit(40, 40)
+      .smartCurrentLimit(60, 40)
       .voltageCompensation(12);
 
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig()
-        .idleMode(IdleMode.kBrake)
-        .openLoopRampRate(.25)
-        .voltageCompensation(12)
-        .smartCurrentLimit(40, 40)
+        .apply(MOTOR_CONFIG_LEFT)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
     public static final double LEFT_MOTOR_P = 0.008;
@@ -154,11 +160,7 @@ public final class Constants {
         .maxAcceleration(5000)
         .maxVelocity(4600);
 
-    public static final int ENCODER_COUNTS_PER_REV = 8196;
-    public static final double GEAR_RATIO = 3.2142857143;
-    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Inches.of(
-      2.256
-    );
+    public static final double GEAR_RATIO = (38.0 / 14.0) * 2.0;
 
     public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
     public static final double OUTPUT_PULLEY_NUMBER_OF_TEETH = 28;
@@ -238,45 +240,35 @@ public final class Constants {
 
   public static final class CORAL_RUNNER {
 
-    // TODO: Tune speeds
-    public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(0);
-    public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(0);
-    public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0);
-    public static final double SCORING_WAIT_TIME = .5;
-
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
-      .inverted(false)
+      .inverted(true)
       .openLoopRampRate(.25)
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
-    public static final double AXIS_MAX_SPEED = 0.5;
-
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+
+    public static final double AXIS_MAX_SPEED = 0.5;
+    public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(
+      0.5
+    );
+    public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(
+      0.2
+    );
+    public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0.5);
+    public static final double SCORING_WAIT_TIME = 0.5;
   }
 
   public static final class ALGAE_RUNNER {
 
-    public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
-
-    public static final boolean MOTOR_INVERTED = false;
-
-    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
-    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
-
-    public static final double RAMP_RATE = .25;
-
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
-      .idleMode(IDLE_MODE)
-      .inverted(MOTOR_INVERTED)
-      .smartCurrentLimit(
-        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
-        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-      )
-      .openLoopRampRate(RAMP_RATE);
+      .idleMode(IdleMode.kBrake)
+      .inverted(false)
+      .smartCurrentLimit(30, 30)
+      .openLoopRampRate(0.25);
+
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final double ALGAE_INTAKE_SPEED = 0;
 
@@ -285,83 +277,78 @@ public final class Constants {
 
   public static final class ALGAE_KNOCKER {
 
-    public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final IdleMode IDLE_MODE = IdleMode.kCoast;
-    public static final boolean MOTOR_INVERTED = false;
-    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
-    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
-    public static final double RAMP_RATE = .25;
-
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
-      .idleMode(IDLE_MODE)
-      .inverted(MOTOR_INVERTED)
-      .smartCurrentLimit(
-        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
-        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-      )
-      .openLoopRampRate(RAMP_RATE);
+      .idleMode(IdleMode.kCoast)
+      .inverted(false)
+      .smartCurrentLimit(20, 20)
+      .openLoopRampRate(0.25);
 
+    public static final double AXIS_MAX_SPEED = 0.25;
     public static final double ALGAE_KNOCK_SPEED = 0;
   }
 
   public static final class ALGAE_PIVOT {
 
-    public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final IdleMode IDLE_MODE = IdleMode.kBrake;
-
-    public static final boolean MOTOR_INVERTED = false;
-
-    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(40);
-    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(40);
-
-    public static final double RAMP_RATE = .25;
-
-    public static final Angle MIN_ANGLE = Units.Degrees.of(0);
-    public static final Angle MAX_ANGLE = Units.Degrees.of(90);
-
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0;
-
-    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
-      .idleMode(IDLE_MODE)
-      .smartCurrentLimit(
-        (int) MOTOR_STALL_LIMIT.in(Units.Amps),
-        (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-      )
-      .openLoopRampRate(RAMP_RATE);
-
     public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
       new SparkMaxConfig()
-        .idleMode(IDLE_MODE)
-        .openLoopRampRate(RAMP_RATE)
-        .smartCurrentLimit(
-          (int) MOTOR_STALL_LIMIT.in(Units.Amps),
-          (int) MOTOR_FREE_LIMIT.in(Units.Amps)
-        )
-        .follow(CAN_ID.LEFT_ALGAE_PIVOT_MOTOR, true);
+        .idleMode(IdleMode.kBrake)
+        .inverted(false)
+        .openLoopRampRate(.25)
+        .smartCurrentLimit(40, 20)
+        .voltageCompensation(12);
 
-    public static final double LEFT_MOTOR_P = 0;
-    public static final double LEFT_MOTOR_I = 0;
-    public static final double LEFT_MOTOR_D = 0;
-    public static final double LEFT_MOTOR_F = 0;
+    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
+      .apply(RIGHT_MOTOR_CONFIG)
+      .follow(CAN_ID.ALGAE_PIVOT_RIGHT_MOTOR, true);
 
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
-      LEFT_MOTOR_CONFIG.closedLoop
-        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_F)
-        .outputRange(-1, 1);
-    // .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+    public static final double RIGHT_MOTOR_P = 0.01;
+    public static final double RIGHT_MOTOR_I = 0;
+    public static final double RIGHT_MOTOR_D = 0.01;
+    public static final double RIGHT_MOTOR_F = 0;
 
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
+    public static final ClosedLoopConfig RIGHT_CLOSED_LOOP_CONFIG =
+      RIGHT_MOTOR_CONFIG.closedLoop
+        .pidf(RIGHT_MOTOR_P, RIGHT_MOTOR_I, RIGHT_MOTOR_D, RIGHT_MOTOR_F)
+        .outputRange(-1, 1)
+        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .positionWrappingEnabled(true);
+
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+
+    public static final MAXMotionConfig RIGHT_MAX_MOTION_CONFIG =
+      RIGHT_CLOSED_LOOP_CONFIG.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    // public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
-    // LEFT_MOTOR_CONFIG.absoluteEncoder;
+    public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
+      RIGHT_MOTOR_CONFIG.absoluteEncoder;
+
+    public static final Angle MIN_ANGLE = Units.Degrees.of(0);
+    public static final Angle MAX_ANGLE = Units.Degrees.of(90);
+
+    public static final double AXIS_MAX_SPEED = 0.25;
 
     public static final Angle ALGAE_INTAKE_ANGLE = Units.Degrees.of(0);
+  }
+
+  public static class CLIMBER {
+
+    public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
+      .idleMode(IdleMode.kBrake)
+      .smartCurrentLimit(30)
+      .openLoopRampRate(1)
+      .inverted(false);
+    public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
+      .apply(MOTOR_CONFIG_ONE)
+      .follow(CAN_ID.CLIMBER_MOTOR_ONE);
+    public static final SparkBaseConfig MOTOR_CONFIG_THREE =
+      new SparkMaxConfig()
+        .apply(MOTOR_CONFIG_ONE)
+        .follow(CAN_ID.CLIMBER_MOTOR_ONE);
+
+    public static final double AXIS_MAX_SPEED = 0.25;
+    public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);
   }
 
   public static final class CUSTOM_UNITS {
@@ -382,51 +369,6 @@ public final class Constants {
 
   public static final class PHOTON_VISION {
 
-    public static final String FRONT_CAMERA_NAME = "frontCam";
-    public static final Transform3d FRONT_CAMERA_TRANSFORM = new Transform3d(
-      Units.Inches.of(7.951),
-      Units.Inches.of(.624),
-      Units.Inches.of(22.243),
-      new Rotation3d(
-        Units.Degrees.of(0),
-        Units.Degrees.of(10),
-        Units.Degrees.of(0)
-      )
-    );
-    public static final String BACK_CAMERA_NAME = "backCam";
-    public static final Transform3d BACK_CAMERA_TRANSFORM = new Transform3d(
-      Units.Inches.of(-6.516),
-      Units.Inches.of(-5.028),
-      Units.Inches.of(21.137),
-      new Rotation3d(
-        Units.Degrees.of(0),
-        Units.Degrees.of(-10),
-        Units.Degrees.of(180)
-      )
-    );
-    public static final String RIGHT_CAMERA_NAME = "rightCam";
-    public static final Transform3d RIGHT_CAMERA_TRANSFORM = new Transform3d(
-      Units.Inches.of(-8.887),
-      Units.Inches.of(-3.001),
-      Units.Inches.of(16.578),
-      new Rotation3d(
-        Units.Degrees.of(-10),
-        Units.Degrees.of(0),
-        Units.Degrees.of(90)
-      )
-    );
-    public static final String LEFT_CAMERA_NAME = "leftCam";
-    public static final Transform3d LEFT_CAMERA_TRANSFORM = new Transform3d(
-      Units.Inches.of(8.887),
-      Units.Inches.of(-3.001),
-      Units.Inches.of(16.579),
-      new Rotation3d(
-        Units.Degrees.of(10),
-        Units.Degrees.of(0),
-        Units.Degrees.of(270)
-      )
-    );
-
     public static final String LOST_CONNECTION_ERROR_MESSAGE =
       "**************LOST CONNECTION WITH ORANGE PI";
     public static final String CONNECTION_REGAINED_MESSAGE =
@@ -442,9 +384,16 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+
+    public static final double PNP_HEADING_SCALE_FACTOR = 2.0;
+
+    public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
+      Optional.of(
+        new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
+      ); // TODO: tune this throughout normal operation. This is for max to do.
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
     // yes, these are essentially magic numbers
@@ -460,6 +409,170 @@ public final class Constants {
 
     // how far off on the z axis the estimated pose can be before we invalidate it
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
+
+    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.2);
+
+    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
+
+    public static final class FRONT_CAM {
+
+      public static final String NAME = "frontCam";
+      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+        Units.Inches.of(7.951),
+        Units.Inches.of(.624),
+        Units.Inches.of(22.243),
+        new Rotation3d(
+          Units.Degrees.of(0),
+          Units.Degrees.of(10),
+          Units.Degrees.of(0)
+        )
+      );
+
+      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
+        new SimpleMatrix(
+          new double[][] {
+            { 734.557836120221, 0.0, 634.8211156347711 },
+            { 0.0, 734.4550563158114, 504.1277599678814 },
+            { 0.0, 0.0, 1.0 },
+          }
+        )
+      );
+
+      public static final Matrix<N8, N1> DIST_COEFFS = new Matrix<N8, N1>(
+        new SimpleMatrix(
+          new double[] {
+            0.03900951112544531,
+            -0.06701313537480716,
+            -3.107885230659201E-4,
+            -1.1708847785696965E-4,
+            0.03884449647452857,
+            -0.009013057952936134,
+            0.012070659734909549,
+            0.017173063089175628,
+          }
+        )
+      );
+    }
+
+    public static final class BACK_CAM {
+
+      public static final String NAME = "backCam";
+      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+        Units.Inches.of(-6.516),
+        Units.Inches.of(-5.028),
+        Units.Inches.of(21.137),
+        new Rotation3d(
+          Units.Degrees.of(0),
+          Units.Degrees.of(-10),
+          Units.Degrees.of(180)
+        )
+      );
+
+      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
+        new SimpleMatrix(
+          new double[][] {
+            { 731.8691015421067, 0.0, 647.4317928911091 },
+            { 0.0, 732.0244798620424, 507.99253293961715 },
+            { 0.0, 0.0, 1.0 },
+          }
+        )
+      );
+
+      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
+        new SimpleMatrix(
+          new double[] {
+            0.038342519503234494,
+            -0.0671687056289058,
+            6.87360479856246E-5,
+            4.596192020596837E-6,
+            0.041912648539022886,
+            -0.010420972593061864,
+            0.014191022936485371,
+            0.019150102220730315,
+          }
+        )
+      );
+    }
+
+    public static final class RIGHT_CAM {
+
+      public static final String NAME = "rightCam";
+      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+        Units.Inches.of(-8.887),
+        Units.Inches.of(-3.001),
+        Units.Inches.of(16.578),
+        new Rotation3d(
+          Units.Degrees.of(-10),
+          Units.Degrees.of(0),
+          Units.Degrees.of(90)
+        )
+      );
+
+      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
+        new SimpleMatrix(
+          new double[][] {
+            { 729.6608690553459, 0.0, 649.1575608574531 },
+            { 0.0, 729.8029659622256, 529.4303396485709 },
+            { 0.0, 0.0, 1.0 },
+          }
+        )
+      );
+
+      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
+        new SimpleMatrix(
+          new double[] {
+            0.04116716900792142,
+            -0.0683155445538715,
+            -7.724921691039068E-5,
+            -8.847337357162373E-5,
+            0.03570970592766647,
+            -0.007563612386900275,
+            0.012708454838216305,
+            0.01479948909867507,
+          }
+        )
+      );
+    }
+
+    public static final class LEFT_CAM {
+
+      public static final String NAME = "leftCam";
+      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+        Units.Inches.of(8.887),
+        Units.Inches.of(-3.001),
+        Units.Inches.of(16.579),
+        new Rotation3d(
+          Units.Degrees.of(10),
+          Units.Degrees.of(0),
+          Units.Degrees.of(270)
+        )
+      );
+
+      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
+        new SimpleMatrix(
+          new double[][] {
+            { 733.181868108721, 0.0, 652.9883355143077 },
+            { 0.0, 732.9765658876138, 499.036857675139 },
+            { 0.0, 0.0, 1.0 },
+          }
+        )
+      );
+
+      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
+        new SimpleMatrix(
+          new double[] {
+            0.03808488979739667,
+            -0.06777007253553732,
+            -2.660953485058089E-4,
+            2.389317050257177E-4,
+            0.03942586698262671,
+            -0.00896070145798233,
+            0.011891179064366236,
+            0.017476606427208132,
+          }
+        )
+      );
+    }
   }
 
   public static final class FIELD_CONSTANTS {
@@ -708,32 +821,6 @@ public final class Constants {
           )
         );
     }
-  }
-
-  public static class CLIMBER {
-
-    public static final IdleMode IDLE_MODE = SparkBaseConfig.IdleMode.kBrake;
-    public static final Current STALL_LIMIT = Units.Amps.of(30);
-    public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);
-
-    public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
-      .idleMode(IDLE_MODE)
-      .smartCurrentLimit((int) STALL_LIMIT.in(Units.Amps))
-      .openLoopRampRate(1)
-      .inverted(false);
-    public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
-      .idleMode(IDLE_MODE)
-      .smartCurrentLimit((int) STALL_LIMIT.in(Units.Amps))
-      .openLoopRampRate(1)
-      .follow(CAN_ID.CLIMBER_MOTOR_ONE);
-    public static final SparkBaseConfig MOTOR_CONFIG_THREE =
-      new SparkMaxConfig()
-        .idleMode(IDLE_MODE)
-        .smartCurrentLimit((int) STALL_LIMIT.in(Units.Amps))
-        .openLoopRampRate(1)
-        .follow(CAN_ID.CLIMBER_MOTOR_ONE);
   }
 
   /**

@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -28,7 +29,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
-  private RelativeEncoder m_encoder;
+  private SparkAbsoluteEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
   private double P = 0.0;
@@ -56,7 +57,6 @@ public class AlgaePivotTuningSubsystem implements Sendable {
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-    m_encoder = m_motorLeft.getEncoder();
 
     m_motorRight.configure(
       Constants.ALGAE_PIVOT.MOTOR_CONFIG_RIGHT,
@@ -64,7 +64,8 @@ public class AlgaePivotTuningSubsystem implements Sendable {
       PersistMode.kPersistParameters
     );
 
-    m_PIDController = m_motorLeft.getClosedLoopController();
+    m_encoder = m_motorRight.getAbsoluteEncoder();
+    m_PIDController = m_motorRight.getClosedLoopController();
 
     Preferences.initDouble("algaePivotP", 0);
     Preferences.initDouble("algaePivotI", 0);
@@ -105,7 +106,7 @@ public class AlgaePivotTuningSubsystem implements Sendable {
       .maxAcceleration(maxAcc)
       .maxVelocity(maxVel);
 
-    m_motorLeft.configure(
+    m_motorRight.configure(
       m_motorconfig,
       ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
@@ -158,21 +159,17 @@ public class AlgaePivotTuningSubsystem implements Sendable {
   }
 
   public void setSpeed(double speed) {
-    m_motorLeft.set(speed);
+    m_motorRight.set(speed);
   }
 
   public void setAxisSpeed(double speed) {
     m_targetRotations = Units.Rotations.of(Double.NaN);
     speed *= ALGAE_PIVOT.AXIS_MAX_SPEED;
-    m_motorLeft.set(speed);
-  }
-
-  public void setZero() {
-    m_encoder.setPosition(0);
+    m_motorRight.set(speed);
   }
 
   public void stop() {
-    m_motorLeft.stopMotor();
+    m_motorRight.stopMotor();
   }
 
   public AngularVelocity getVelocity() {

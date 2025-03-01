@@ -2,9 +2,7 @@ package frc.robot.commands.climber;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.MutDimensionless;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.util.MsvcRuntimeException;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;

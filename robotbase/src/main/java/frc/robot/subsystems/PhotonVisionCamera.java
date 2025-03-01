@@ -3,50 +3,108 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FIELD_CONSTANTS;
-import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Robot;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.targeting.MultiTargetPNPResult;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.*;
 
 /** Controls the photon vision camera options. */
 public class PhotonVisionCamera extends SubsystemBase {
 
+  /**
+   * The class for storing results with all data needed to perform the constrained PNP operation
+   */
+  private static class TimestampedPNPInfo {
+
+    public PhotonPipelineResult result = null;
+    public Rotation3d heading = null;
+    public double headingTimestampSeconds = Double.NaN;
+    public Optional<Matrix<N3, N3>> camMatrix = null;
+    public Optional<Matrix<N8, N1>> distCoeefs = null;
+    public Transform3d robotToCameraTransform = null;
+
+    public TimestampedPNPInfo() {
+      result = null;
+      heading = null;
+      headingTimestampSeconds = Double.NaN;
+      camMatrix = null;
+      distCoeefs = null;
+      robotToCameraTransform = null;
+    }
+
+    public void replaceInfo(
+      PhotonPipelineResult result,
+      Rotation3d heading,
+      double headingTimestamp,
+      Optional<Matrix<N3, N3>> camMatrix,
+      Optional<Matrix<N8, N1>> distCoeefs,
+      Transform3d robotToCamTransform
+    ) {
+      this.result = result;
+      this.heading = heading;
+      this.headingTimestampSeconds = headingTimestamp;
+      this.camMatrix = camMatrix;
+      this.distCoeefs = distCoeefs;
+      this.robotToCameraTransform = robotToCamTransform;
+    }
+
+    public void invalidateInfo() {
+      result = null;
+      heading = null;
+      headingTimestampSeconds = Double.NaN;
+      camMatrix = null;
+      distCoeefs = null;
+      robotToCameraTransform = null;
+    }
+
+    public static TimestampedPNPInfo[] makePNPInfoList() {
+      TimestampedPNPInfo[] list =
+        new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
+      for (int i = 0; i < list.length; i++) {
+        list[i] = new TimestampedPNPInfo();
+      }
+      return list;
+    }
+  }
+
   /*
    * The class for the object we use to cache our target data
    */
-  private static class TargetInfo {
+  // private static class TargetInfo {
 
-    public double yaw = Double.NaN;
-    public double pitch = Double.NaN;
-    public long timestamp = 0;
-  }
+  //   public double yaw = Double.NaN;
+  //   public double pitch = Double.NaN;
+  //   public long timestamp = 0;
+  // }
 
-  // all of these are private so we can use them in the extended classes
+  // all of these are protected so we can use them in extended classes
   // which are only extended so we can control which pipelines we are using.
 
   /** The actual camera object that we get everything from. */
-  protected PhotonCamera m_camera;
+  protected final PhotonCamera m_camera;
 
   /** The result we fecth from PhotonLib each loop. */
   protected PhotonPipelineResult m_result;
@@ -58,19 +116,37 @@ public class PhotonVisionCamera extends SubsystemBase {
    *
    * <p>Index 1-16 are the AprilTags that are on the field.
    */
-  protected final TargetInfo[] m_aprilTagInfo;
+  // protected final TargetInfo[] m_aprilTagInfo;
+
+  /**
+   * The list of {@link TimestampedPNPInfo} objects that we use to store data for the constrainedPNP calculation.
+   *
+   * <p> this data is used to figure out which results are the most worthwhile to use for pose est
+   */
+  private static final TimestampedPNPInfo[] m_pnpInfo =
+    TimestampedPNPInfo.makePNPInfoList();
+
+  /**
+   * A list of all instances of this class, in order of instantiation
+   */
+  private static final ArrayList<PhotonVisionCamera> m_robotCameras =
+    new ArrayList<PhotonVisionCamera>();
 
   /**
    * The pose estimator for all photon cameras.
    */
-  protected static final PhotonPoseEstimator m_poseEstimator =
+  private static final PhotonPoseEstimator m_poseEstimator =
     new PhotonPoseEstimator(
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField),
-      PHOTON_VISION.PRIMARY_STRATEGY,
+      PRIMARY_STRATEGY,
       new Transform3d()
     );
 
-  protected Transform3d m_robotToCameraTranform;
+  protected final Transform3d m_robotToCameraTranform;
+
+  protected final Optional<Matrix<N3, N3>> m_cameraMatrix;
+
+  protected final Optional<Matrix<N8, N1>> m_distCoeefs;
 
   protected static EstimatedRobotPose m_lastEstimatedPose;
 
@@ -82,43 +158,65 @@ public class PhotonVisionCamera extends SubsystemBase {
    *
    * <p>Used for methods that dont take in a fid ID but do some april tag stuff.
    */
-  protected int m_bestTargetFiducialId;
+  // protected int m_bestTargetFiducialId;
 
   // experimental "turbo switch" that has the ability to increase FPS. Do not fiddle with it.
   @SuppressWarnings("unused")
   private static final BooleanEntry m_turboSwitch =
     NetworkTableInstance.create()
       .getBooleanTopic("/photonvision/use_new_cscore_frametime")
-      .getEntry(PHOTON_VISION.ACTIVATE_TURBO_SWITCH);
+      .getEntry(ACTIVATE_TURBO_SWITCH);
 
-  public PhotonVisionCamera(String cameraName, Transform3d cameraTransform) {
+  public PhotonVisionCamera(
+    String cameraName,
+    Transform3d cameraTransform,
+    Matrix<N3, N3> cameraMatrix,
+    Matrix<N8, N1> distCoeefs
+  ) {
     m_camera = new PhotonCamera(cameraName);
+    m_robotCameras.add(this);
 
     // 1-22 correspond to apriltag fiducial IDs, 0 is for gamepeices.
-    m_aprilTagInfo = new TargetInfo[23];
-    for (int i = 0; i < m_aprilTagInfo.length; i++) {
-      m_aprilTagInfo[i] = new TargetInfo();
-    }
+    // m_aprilTagInfo = new TargetInfo[23];
+    // for (int i = 0; i < m_aprilTagInfo.length; i++) {
+    //   m_aprilTagInfo[i] = new TargetInfo();
+    // }
 
     m_robotToCameraTranform = cameraTransform;
+    m_cameraMatrix = Optional.of(cameraMatrix);
+    m_distCoeefs = Optional.of(distCoeefs);
   }
 
   /**
-   * Fetches the latest pipeline result. Dont call this unless you want to break everything.
-   *
-   * <p>
-   *
-   * <h1>YOU SHOULD NEVER CALL THIS! This is for the Robot periodic ONLY. NEVER call this method
-   * outside of it. </h1>
+   * Updates all instances of {@link PhotonVisionCamera} with the latest result, and updates the pose with the updated pnpInfo.
+   * <p><h1> For the top of {@link Robot#robotPeriodic() the robot periodic} only.
    */
-  public void updateResult() {
+  public static void updateAllCameras() {
+    for (PhotonVisionCamera camera : m_robotCameras) {
+      camera.updateResult();
+    }
+    for (int i = 0; i < m_pnpInfo.length; i++) {
+      if (m_pnpInfo[i].result == null) {
+        continue;
+      }
+      updatePoseFromPNPInfo(m_pnpInfo[i]);
+      m_pnpInfo[i].invalidateInfo();
+    }
+    if (m_lastEstimatedPose != null) {
+      Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
+        m_lastEstimatedPose.estimatedPose.toPose2d()
+      );
+    }
+  }
+
+  /**
+   * Fetches the latest pipeline result for this instance
+   */
+  private void updateResult() {
     if (!m_camera.isConnected() && !m_connectionLost) {
       m_connectionLost = true;
       DriverStation.reportError(
-        "[" +
-        m_camera.getName() +
-        "]\n" +
-        PHOTON_VISION.LOST_CONNECTION_ERROR_MESSAGE,
+        "[" + m_camera.getName() + "]\n" + LOST_CONNECTION_ERROR_MESSAGE,
         false
       );
       return;
@@ -141,32 +239,82 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (m_result == null || !m_result.hasTargets()) {
       return;
     }
-    m_bestTargetFiducialId = m_result.getBestTarget().getFiducialId();
-    if (m_bestTargetFiducialId == -1) { // -1 means the ID is not set, so its a gamepeice.
-      cacheForGamepeices(m_result.targets);
-    } else {
-      cacheForAprilTags(m_result.targets);
-    }
+    // m_bestTargetFiducialId = m_result.getBestTarget().getFiducialId();
+    // if (m_bestTargetFiducialId == -1) { // -1 means the ID is not set, so its a gamepeice.
+    //   cacheForGamepeices(m_result.targets);
+    // } else {
+    //   cacheForAprilTags(m_result.targets);
+    // }
 
     if (m_connectionLost) {
       m_connectionLost = false;
       DriverStation.reportWarning(
-        "[" +
-        m_camera.getName() +
-        "]\n" +
-        PHOTON_VISION.CONNECTION_REGAINED_MESSAGE,
+        "[" + m_camera.getName() + "]\n" + CONNECTION_REGAINED_MESSAGE,
         false
       );
     }
-    updatePose(); // update pose based on the new result
+    updatePNPInfo(m_result); // update pnpInfo with the new result
   }
 
-  private void updatePose() {
-    // update reference pose incase we want that strategy
-    m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+  /**
+   * Gets the {@link #m_poseEstimator pose estimator} ready to estimate with the provided and/or relevant information
+   */
+  @SuppressWarnings("incomplete-switch")
+  private static void preparePoseEstimator(
+    Transform3d robotToCamTransform,
+    Rotation3d heading,
+    double headingTimestampSeconds
+  ) {
+    // does whatever we need to make the strategy work
+    switch (PRIMARY_STRATEGY) {
+      case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
+        m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
+        break;
+      case CLOSEST_TO_REFERENCE_POSE:
+        m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+        break;
+      case CLOSEST_TO_LAST_POSE:
+        m_poseEstimator.setLastPose(m_lastEstimatedPose.estimatedPose);
+        break;
+    }
+    switch (FALLBACK_STRATEGY) {
+      case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
+        // if our primary strategy already needs us to update the heading, we dont want to call more hardware.
+        // they get upset if you call them enough, and its a waste of time.
+        if (
+          PRIMARY_STRATEGY == PoseStrategy.CONSTRAINED_SOLVEPNP ||
+          PRIMARY_STRATEGY == PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
+        ) {
+          break;
+        }
+        m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
+        break;
+      case CLOSEST_TO_REFERENCE_POSE:
+        m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+        break;
+      case CLOSEST_TO_LAST_POSE:
+        m_poseEstimator.setLastPose(m_lastEstimatedPose.estimatedPose);
+        break;
+    }
+
     // change pose estimator settings to be correct for the current camera
-    m_poseEstimator.setRobotToCameraTransform(m_robotToCameraTranform);
-    m_lastEstimatedPose = m_poseEstimator.update(m_result).orElse(null);
+    m_poseEstimator.setRobotToCameraTransform(robotToCamTransform);
+  }
+
+  private static void updatePoseFromPNPInfo(TimestampedPNPInfo pnpInfo) {
+    preparePoseEstimator(
+      pnpInfo.robotToCameraTransform,
+      pnpInfo.heading,
+      pnpInfo.headingTimestampSeconds
+    );
+    m_lastEstimatedPose = m_poseEstimator
+      .update(
+        pnpInfo.result,
+        pnpInfo.camMatrix,
+        pnpInfo.distCoeefs,
+        POSE_EST_PARAMS
+      )
+      .orElse(null);
     if (m_lastEstimatedPose == null) {
       return;
     }
@@ -178,39 +326,22 @@ public class PhotonVisionCamera extends SubsystemBase {
         .in(Meters);
     }
     averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
-    if ( // checks whether the estimated pose is in the field or not, and chucks it out if it isnt
-      m_lastEstimatedPose.estimatedPose.getX() <
-        -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getX() >
-      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getY() <
-      -PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getY() >
-      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      PHOTON_VISION.FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() <
-      -PHOTON_VISION.Z_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() >
-      PHOTON_VISION.Z_MARGIN.in(Meters)
-    ) {
+    if (isPoseInField(m_lastEstimatedPose.estimatedPose)) {
       return;
     }
 
     if (
       Robot.swerve.getTranslationalVelocity().in(MetersPerSecond) >
-      PHOTON_VISION.MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
+      MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
     ) {
       return;
     }
 
     // the higher the confidence is, the less the estimated measurment is trusted.
-    double xVelocityConf = Math.abs(
-      0.2 + Robot.swerve.getXVelocity().in(MetersPerSecond)
-    );
-    double yVelocityConf = Math.abs(
-      0.2 + Robot.swerve.getYVelocity().in(MetersPerSecond)
-    );
+    double xVelocityConf =
+      0.2 + Math.abs(Robot.swerve.getXVelocity().in(MetersPerSecond));
+    double yVelocityConf =
+      0.2 + Math.abs(Robot.swerve.getYVelocity().in(MetersPerSecond));
     // we add 0.2 so that if were sitting still, it doesnt spiral into infinity.
     // its a partialy magic number, and will need tuning because of that.
 
@@ -220,16 +351,106 @@ public class PhotonVisionCamera extends SubsystemBase {
     double yCoordinateConfidence =
       (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
         ((averageTargetDistance / 2) * yVelocityConf));
-
+    System.out.println("CURR TIME: " + Utils.getCurrentTimeSeconds());
+    System.out.println(
+      "FRAME TIME: " +
+      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds)
+    );
     Robot.swerve.addVisionMeasurement(
       m_lastEstimatedPose.estimatedPose.toPose2d(),
       Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
       VecBuilder.fill(
-        xCoordinateConfidence * PHOTON_VISION.X_STD_DEV_COEFFIECIENT,
-        yCoordinateConfidence * PHOTON_VISION.Y_STD_DEV_COEFFIECIENT,
-        Double.POSITIVE_INFINITY // Theta conf, should usually never change gyro from vision
+        xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
+        yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
       )
     );
+  }
+
+  /**
+   * Updates the {@link #m_pnpInfo} list with a result, and replaces the worst result, if the provided result is better.
+   *
+   * <p> only works for april tag only cameras.
+   *
+   * @param result The provided {@link PhotonPipelineResult result} to use for updating the pnpInfo list
+   */
+  private void updatePNPInfo(PhotonPipelineResult result) {
+    // if the provided result has no targets, it has no value, so we do not want to store it
+    if (!result.hasTargets()) {
+      return;
+    }
+    double frameTimeSeconds = result.getTimestampSeconds();
+    double currTimeSeconds = RobotController.getFPGATime() * 1e-6;
+    // if result is older than allowed, do not store it
+    if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
+      return;
+    }
+    Rotation3d heading = Robot.swerve.getRotation3d();
+    double headingTimestampSeconds = Robot.swerve.getState().Timestamp;
+    int tarCount = result.targets.size();
+    int indexToReplace = -1;
+    for (int i = 0; i < m_pnpInfo.length; i++) {
+      // if selected info does not exist, replace it and stop the loop
+      if (m_pnpInfo[i].result == null) {
+        m_pnpInfo[i].replaceInfo(
+            result,
+            heading,
+            headingTimestampSeconds,
+            m_cameraMatrix,
+            m_distCoeefs,
+            m_robotToCameraTranform
+          );
+        break;
+      }
+      double storedInfoFrameSeconds = m_pnpInfo[i].result.getTimestampSeconds();
+      // if stored data is older than allowed, invalidate it, and set it to be replaced.
+      if (
+        storedInfoFrameSeconds <=
+        currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)
+      ) {
+        m_pnpInfo[i].invalidateInfo();
+        indexToReplace = i;
+        continue;
+      }
+      // if selected info has less targets than the provided result
+      else if (m_pnpInfo[i].result.targets.size() <= tarCount) {
+        // if we have already selected info to replace
+        if (indexToReplace > -1) {
+          // if we found a worse result
+          if (
+            m_pnpInfo[indexToReplace].result.targets.size() >
+            m_pnpInfo[i].result.targets.size()
+          ) {
+            // replace that one instead
+            indexToReplace = i;
+          }
+          // if both results have the same number of targets
+          else if (
+            m_pnpInfo[indexToReplace].result.targets.size() ==
+            m_pnpInfo[i].result.targets.size()
+          ) {
+            // if (i) was taken later than (indexToReplace), replace (i) instead
+            if (
+              m_pnpInfo[indexToReplace].result.metadata.captureTimestampMicros >
+              m_pnpInfo[i].result.metadata.captureTimestampMicros
+            ) {
+              indexToReplace = i;
+            }
+            // if (i) has worse ambiguity than (indexToReplace), replace (i) instead
+            else if (
+              m_pnpInfo[indexToReplace].result.targets.get(0).poseAmbiguity <
+              m_pnpInfo[i].result.targets.get(0).poseAmbiguity
+            ) {
+              indexToReplace = i;
+            }
+          }
+        }
+        // if we have not already selected something to replace
+        else {
+          indexToReplace = i;
+        }
+      }
+    }
   }
 
   /**
@@ -237,28 +458,28 @@ public class PhotonVisionCamera extends SubsystemBase {
    *
    * @param targetList The list of targets that it pulls data from to cache.
    */
-  private void cacheForGamepeices(List<PhotonTrackedTarget> targetList) {
-    PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
-    TargetInfo aprilTagInfo = m_aprilTagInfo[0];
-    aprilTagInfo.yaw = bestTarget.getYaw();
-    aprilTagInfo.pitch = bestTarget.getPitch();
-    aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
-  }
+  // private void cacheForGamepeices(List<PhotonTrackedTarget> targetList) {
+  //   PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
+  //   TargetInfo aprilTagInfo = m_aprilTagInfo[0];
+  //   aprilTagInfo.yaw = bestTarget.getYaw();
+  //   aprilTagInfo.pitch = bestTarget.getPitch();
+  //   aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
+  // }
 
   /**
    * The method to cache target data for AprilTags.
    *
    * @param targetList The list of targets that it pulls data from to cache.
    */
-  private void cacheForAprilTags(List<PhotonTrackedTarget> targetList) {
-    for (PhotonTrackedTarget targetSeen : targetList) {
-      int id = targetSeen.getFiducialId();
-      TargetInfo aprilTagInfo = m_aprilTagInfo[id];
-      aprilTagInfo.yaw = targetSeen.getYaw();
-      aprilTagInfo.pitch = targetSeen.getPitch();
-      aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
-    }
-  }
+  // private void cacheForAprilTags(List<PhotonTrackedTarget> targetList) {
+  //   for (PhotonTrackedTarget targetSeen : targetList) {
+  //     int id = targetSeen.getFiducialId();
+  //     TargetInfo aprilTagInfo = m_aprilTagInfo[id];
+  //     aprilTagInfo.yaw = targetSeen.getYaw();
+  //     aprilTagInfo.pitch = targetSeen.getPitch();
+  //     aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
+  //   }
+  // }
 
   /**
    * Calculates the best gamepeice in a list of PhotonTrackedTargets.
@@ -272,8 +493,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     List<PhotonTrackedTarget> targetList
   ) {
     double highestPitch =
-      targetList.get(0).getPitch() +
-      PHOTON_VISION.BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
+      targetList.get(0).getPitch() + BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
     PhotonTrackedTarget bestTarget = targetList.get(0);
     for (PhotonTrackedTarget targetSeen : targetList) {
       if (
@@ -285,6 +505,28 @@ public class PhotonVisionCamera extends SubsystemBase {
       // System.out.println(targetSeen.getFiducialId());
     }
     return bestTarget;
+  }
+
+  /**
+   * Returns whether or not the provided pose is within the field margin constants.
+   * @param pose The pose that will be checked
+   * @return Whether or not the provided pose is in the field
+   */
+  public static boolean isPoseInField(Pose3d pose) {
+    return !(
+      m_lastEstimatedPose.estimatedPose.getX() <
+        -FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getX() >
+      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+      FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getY() <
+      -FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getY() >
+      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+      FIELD_BORDER_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() < -Z_MARGIN.in(Meters) ||
+      m_lastEstimatedPose.estimatedPose.getZ() > Z_MARGIN.in(Meters)
+    );
   }
 
   /**
@@ -319,21 +561,21 @@ public class PhotonVisionCamera extends SubsystemBase {
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return If the camera has seen the target within the timeout given
    */
-  public boolean isValidTarget(int targetId, long timeoutMs) {
-    long now = System.currentTimeMillis();
-    long then = now - timeoutMs;
+  // public boolean isValidTarget(int targetId, long timeoutMs) {
+  //   long now = System.currentTimeMillis();
+  //   long then = now - timeoutMs;
 
-    if (targetId >= m_aprilTagInfo.length) {
-      return false;
-    }
-    TargetInfo target = m_aprilTagInfo[targetId];
+  //   if (targetId >= m_aprilTagInfo.length) {
+  //     return false;
+  //   }
+  //   TargetInfo target = m_aprilTagInfo[targetId];
 
-    return (
-      target.timestamp > then ||
-      Math.abs(target.yaw) > PHOTON_VISION.MAX_ANGLE.in(Degrees) ||
-      Math.abs(target.pitch) > PHOTON_VISION.MAX_ANGLE.in(Degrees)
-    );
-  }
+  //   return (
+  //     target.timestamp > then ||
+  //     Math.abs(target.yaw) > MAX_ANGLE.in(Degrees) ||
+  //     Math.abs(target.pitch) > MAX_ANGLE.in(Degrees)
+  //   );
+  // }
 
   /**
    * Sets the pipeline index to make the camera go to.
@@ -360,63 +602,63 @@ public class PhotonVisionCamera extends SubsystemBase {
    *
    * @return The fiducial id of the best target
    */
-  public int getBestTargetFiducialId() {
-    return m_bestTargetFiducialId;
-  }
+  // public int getBestTargetFiducialId() {
+  //   return m_bestTargetFiducialId;
+  // }
 
   /**
    * @param fiducialId The fiducial ID of the target to get the yaw of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
    */
-  public Angle getTargetYaw(int targetId, long timeoutMs) {
-    if (isValidTarget(targetId, timeoutMs)) {
-      return Units.Degrees.of(m_aprilTagInfo[targetId].yaw);
-    }
-    return null;
-  }
+  // public Angle getTargetYaw(int targetId, long timeoutMs) {
+  //   if (isValidTarget(targetId, timeoutMs)) {
+  //     return Units.Degrees.of(m_aprilTagInfo[targetId].yaw);
+  //   }
+  //   return null;
+  // }
 
   /**
    * @param fiducialIds The list of fiducial IDs to check.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the yaw of the first valid target in the list, <strong>or null if none are valid.
    */
-  public Angle getTargetYaw(int[] targetIds, long timeoutMs) {
-    for (int id : targetIds) {
-      Angle yaw = getTargetYaw(id, timeoutMs);
-      if (yaw != null) {
-        return yaw;
-      }
-    }
-    return null;
-  }
+  // public Angle getTargetYaw(int[] targetIds, long timeoutMs) {
+  //   for (int id : targetIds) {
+  //     Angle yaw = getTargetYaw(id, timeoutMs);
+  //     if (yaw != null) {
+  //       return yaw;
+  //     }
+  //   }
+  //   return null;
+  // }
 
   /**
    * @param id The ID of the target to get the pitch of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets pitch, <strong>will be null if the cached data was invalid.
    */
-  public Angle getTargetPitch(int targetId, long timeoutMs) {
-    if (isValidTarget(targetId, timeoutMs)) {
-      return Units.Degrees.of(m_aprilTagInfo[targetId].pitch);
-    }
-    return null;
-  }
+  // public Angle getTargetPitch(int targetId, long timeoutMs) {
+  //   if (isValidTarget(targetId, timeoutMs)) {
+  //     return Units.Degrees.of(m_aprilTagInfo[targetId].pitch);
+  //   }
+  //   return null;
+  // }
 
   /**
    * @param fiducialIds The list of fiducial IDs to check.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the pitch of the first valid id in the list, <strong>or null if none are valid.
    */
-  public Angle getTargetPitch(int[] fiducialIds, long timeoutMs) {
-    for (int id : fiducialIds) {
-      Angle pitch = getTargetPitch(id, timeoutMs);
-      if (pitch != null) {
-        return pitch;
-      }
-    }
-    return null;
-  }
+  // public Angle getTargetPitch(int[] fiducialIds, long timeoutMs) {
+  //   for (int id : fiducialIds) {
+  //     Angle pitch = getTargetPitch(id, timeoutMs);
+  //     if (pitch != null) {
+  //       return pitch;
+  //     }
+  //   }
+  //   return null;
+  // }
 
   /**
    * Gets the last estimated pose from PV's pose estimator.
@@ -452,10 +694,10 @@ public class PhotonVisionCamera extends SubsystemBase {
     double resultReprojectionError = result.estimatedPose.bestReprojErr;
     double resultAmbiguity = result.estimatedPose.ambiguity;
 
-    if (resultAmbiguity > PHOTON_VISION.MAX_AMBIGUITY_TOLERANCE) {
+    if (resultAmbiguity > MAX_AMBIGUITY_TOLERANCE) {
       return null;
     }
-    if (resultReprojectionError > PHOTON_VISION.MAX_REPROJECTION_ERROR_PIXELS) {
+    if (resultReprojectionError > MAX_REPROJECTION_ERROR_PIXELS) {
       return null;
     }
     return new Pose3d(
