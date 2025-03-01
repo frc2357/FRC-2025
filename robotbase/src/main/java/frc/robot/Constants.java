@@ -289,6 +289,8 @@ public final class Constants {
 
   public static final class ALGAE_PIVOT {
 
+    public static final int STALL_CURRENT_VOLTS = 40;
+
     public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
       new SparkMaxConfig()
         .idleMode(IdleMode.kBrake)
@@ -301,35 +303,15 @@ public final class Constants {
       .apply(RIGHT_MOTOR_CONFIG)
       .follow(CAN_ID.ALGAE_PIVOT_RIGHT_MOTOR, true);
 
-    public static final double RIGHT_MOTOR_P = 0.01;
-    public static final double RIGHT_MOTOR_I = 0;
-    public static final double RIGHT_MOTOR_D = 0.01;
-    public static final double RIGHT_MOTOR_F = 0;
-
-    public static final ClosedLoopConfig RIGHT_CLOSED_LOOP_CONFIG =
-      RIGHT_MOTOR_CONFIG.closedLoop
-        .pidf(RIGHT_MOTOR_P, RIGHT_MOTOR_I, RIGHT_MOTOR_D, RIGHT_MOTOR_F)
-        .outputRange(-1, 1)
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .positionWrappingEnabled(true);
-
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-
-    public static final MAXMotionConfig RIGHT_MAX_MOTION_CONFIG =
-      RIGHT_CLOSED_LOOP_CONFIG.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(0)
-        .maxVelocity(0);
-
-    public static final AbsoluteEncoderConfig ABSOLUTE_ENCODER_CONFIG_LEFT =
-      RIGHT_MOTOR_CONFIG.absoluteEncoder;
-
-    public static final Angle MIN_ANGLE = Units.Degrees.of(0);
-    public static final Angle MAX_ANGLE = Units.Degrees.of(90);
-
     public static final double AXIS_MAX_SPEED = 0.25;
 
-    public static final Angle ALGAE_INTAKE_ANGLE = Units.Degrees.of(0);
+    public static final double DEPLOY_SPEED = 0.5;
+    public static final double RETRACT_SPEED = -0.5;
+
+    public static final Time ALGAE_SCORE_TIME = Units.Seconds.of(1);
+    public static final Time ALGAE_MOVEMENT_MIN_TIME = Units.Seconds.of(0.1);
+
+    public static final double ALGAE_HOLD_SPEED = 0.05;
   }
 
   public static class CLIMBER {

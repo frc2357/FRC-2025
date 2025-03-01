@@ -18,11 +18,6 @@ public class AlgaePivot extends SubsystemBase {
 
   private SparkMax m_leftMotor;
   private SparkMax m_rightMotor;
-  private SparkAbsoluteEncoder m_absoluteEncoder;
-  private SparkClosedLoopController m_rightPidController;
-
-  private MutAngle m_targetAngle = Units.Degrees.mutable(Double.NaN);
-  private MutAngle m_currentAngleHolder = Units.Degrees.mutable(Double.NaN);
 
   public AlgaePivot() {
     m_leftMotor = new SparkMax(
@@ -43,59 +38,22 @@ public class AlgaePivot extends SubsystemBase {
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-    m_absoluteEncoder = m_rightMotor.getAbsoluteEncoder();
-    m_rightPidController = m_rightMotor.getClosedLoopController();
   }
 
   public void setSpeed(double percentOutput) {
     m_rightMotor.set(percentOutput);
-    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void setAxisSpeed(double axisSpeed) {
     axisSpeed *= ALGAE_PIVOT.AXIS_MAX_SPEED;
     setSpeed(axisSpeed);
-    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
   }
 
-  public Angle getAngle() {
-    m_currentAngleHolder.mut_replace(
-      m_absoluteEncoder.getPosition(),
-      Units.Rotations
-    );
-    return m_currentAngleHolder;
+  public boolean isStalling() {
+    return (m_rightMotor.getOutputCurrent() >= ALGAE_PIVOT.STALL_CURRENT_VOLTS);
   }
 
   public void stop() {
     m_rightMotor.stopMotor();
-    m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
-  }
-
-  public void setTargetAngle(Angle angle) {
-    if (angle.lt(ALGAE_PIVOT.MIN_ANGLE)) {
-      System.err.println("ALGAE PIVOT: Cannot set angle lower than minimum");
-      return;
-    }
-    if (angle.gt(ALGAE_PIVOT.MAX_ANGLE)) {
-      System.err.println("ALGAE PIVOT: Cannot set angle higher than minimum");
-      return;
-    }
-
-    m_targetAngle.mut_replace(angle);
-    m_rightPidController.setReference(
-      angle.in(Units.Rotations),
-      ControlType.kPosition
-    );
-  }
-
-  public Angle getTargetAngle() {
-    return m_targetAngle;
-  }
-
-  public boolean isAtTarget() {
-    return m_targetAngle.isNear(
-      getAngle(),
-      ALGAE_PIVOT.MAX_MOTION_ALLOWED_ERROR_PERCENT
-    );
   }
 }
