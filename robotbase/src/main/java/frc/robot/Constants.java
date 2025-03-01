@@ -311,8 +311,7 @@ public final class Constants {
     public static final Time ALGAE_SCORE_TIME = Units.Seconds.of(1);
     public static final Time ALGAE_MOVEMENT_MIN_TIME = Units.Seconds.of(0.1);
 
-    public static final Time ALGAE_BACKOFF_TIME = Units.Seconds.of(0.05);
-    public static final double ALGAE_BACKOFF_SPEED = 0.05;
+    public static final double ALGAE_HOLD_SPEED = 0.05;
   }
 
   public static class CLIMBER {

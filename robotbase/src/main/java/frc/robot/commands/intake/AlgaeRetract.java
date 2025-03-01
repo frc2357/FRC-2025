@@ -11,17 +11,12 @@ public class AlgaeRetract extends SequentialCommandGroup {
 
   public AlgaeRetract() {
     super(
-      new AlgaePivotSetSpeed(ALGAE_PIVOT.RETRACT_SPEED)
-        .deadlineFor(
-          new WaitCommand(ALGAE_PIVOT.ALGAE_MOVEMENT_MIN_TIME).andThen(
-            new WaitUntilCommand(() -> Robot.algaePivot.isStalling())
-          )
+      new AlgaePivotSetSpeed(ALGAE_PIVOT.RETRACT_SPEED).deadlineFor(
+        new WaitCommand(ALGAE_PIVOT.ALGAE_MOVEMENT_MIN_TIME).andThen(
+          new WaitUntilCommand(() -> Robot.algaePivot.isStalling())
         )
-        .andThen(
-          new AlgaePivotSetSpeed(-ALGAE_PIVOT.ALGAE_BACKOFF_SPEED).deadlineFor(
-            new WaitCommand(ALGAE_PIVOT.ALGAE_BACKOFF_TIME)
-          )
-        )
+      ),
+      new AlgaePivotSetSpeed(-ALGAE_PIVOT.ALGAE_HOLD_SPEED)
     );
   }
 }
