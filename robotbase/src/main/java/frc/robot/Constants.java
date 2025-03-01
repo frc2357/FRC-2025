@@ -152,7 +152,7 @@ public final class Constants {
         .maxAcceleration(5000)
         .maxVelocity(4600);
 
-    public static final double GEAR_RATIO = (38 / 14) * 2;
+    public static final double GEAR_RATIO = (38.0 / 14.0) * 2.0;
 
     public static final Distance HTD5_PULLEY_PITCH = Units.Millimeters.of(5);
     public static final double OUTPUT_PULLEY_NUMBER_OF_TEETH = 28;
