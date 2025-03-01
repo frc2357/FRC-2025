@@ -24,7 +24,5 @@ public class ElevatorSetDistance extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {
-    Robot.elevator.stop();
-  }
+  public void end(boolean interrupted) {}
 }
