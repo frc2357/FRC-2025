@@ -10,9 +10,10 @@ public class AlgaeScore extends SequentialCommandGroup {
 
   public AlgaeScore() {
     super(
-      new AlgaeRunnerSetSpeed(ALGAE_RUNNER.ALGAE_EJECTOR_SPEED)
-        .deadlineFor(new WaitCommand(ALGAE_PIVOT.ALGAE_SCORE_TIME))
-        .andThen(new AlgaeRetract())
+      new AlgaeRunnerSetSpeed(ALGAE_RUNNER.ALGAE_EJECTOR_SPEED).deadlineFor(
+        new WaitCommand(ALGAE_PIVOT.ALGAE_SCORE_TIME)
+      ),
+      new AlgaeRetract()
     );
   }
 }
