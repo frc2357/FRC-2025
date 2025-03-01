@@ -7,6 +7,7 @@ package frc.robot;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.cscore.OpenCvLoader;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -28,6 +29,7 @@ import frc.robot.networkTables.*;
 import frc.robot.subsystems.*;
 import frc.robot.util.ElasticFieldManager;
 import frc.robot.util.Telemetry;
+import org.photonvision.proto.Photon;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -60,6 +62,7 @@ public class Robot extends TimedRobot {
   private SequentialCommandGroup m_setCoastOnDisable;
   private AutoChooserManager m_autoChooserManager;
   private SignalLoggerManager m_SignalLoggerManager;
+  private boolean m_didOpenCVLoad = false;
 
   @SuppressWarnings("unused")
   private SysIdChooser m_sysIdChooser;
@@ -69,6 +72,20 @@ public class Robot extends TimedRobot {
    * and should be used for any initialization code.
    */
   public Robot() {
+    // forces OpenCV to load. Dont remove this.
+    for (int i = 0; i < 3; i++) {
+      try {
+        OpenCvLoader.forceLoad();
+        m_didOpenCVLoad = true;
+        break;
+      } catch (Exception e) {
+        if (i > 2) {
+          System.err.println(
+            "\n\nOpenCV Load FAILED! ******* TELL MAX ASAP! *******"
+          );
+        }
+      }
+    }
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
@@ -106,6 +123,11 @@ public class Robot extends TimedRobot {
       RIGHT_CAM.CAMERA_MATRIX,
       RIGHT_CAM.DIST_COEEFS
     );
+    // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
+    if (!m_didOpenCVLoad) {
+      PhotonVisionCamera.setPrimaryStrategy(PRIMARY_STRAT_FOR_FAILED_LOAD);
+      PhotonVisionCamera.setFallbackStrategy(FALLBACK_STRAT_FOR_FAILED_LOAD);
+    }
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
 

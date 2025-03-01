@@ -384,8 +384,12 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+      PoseStrategy.CONSTRAINED_SOLVEPNP;
+    public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
+      PoseStrategy.CONSTRAINED_SOLVEPNP;
+    public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
     public static final double PNP_HEADING_SCALE_FACTOR = 2.0;
