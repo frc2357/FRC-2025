@@ -289,15 +289,14 @@ public final class Constants {
 
   public static final class ALGAE_PIVOT {
 
-    public static final int STALL_CURRENT_LIMIT_VOLTS = 40;
-    public static final int FREE_CURRENT_LIMIT_VOLTS = 20;
+    public static final int STALL_CURRENT_VOLTS = 40;
 
     public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
       new SparkMaxConfig()
         .idleMode(IdleMode.kBrake)
         .inverted(false)
         .openLoopRampRate(.25)
-        .smartCurrentLimit(STALL_CURRENT_LIMIT_VOLTS, FREE_CURRENT_LIMIT_VOLTS)
+        .smartCurrentLimit(40, 20)
         .voltageCompensation(12);
 
     public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
@@ -306,10 +305,14 @@ public final class Constants {
 
     public static final double AXIS_MAX_SPEED = 0.25;
 
-    public static final Dimensionless DEPLOY_SPEED = Units.Percent.of(50);
-    public static final Dimensionless RETRACT_SPEED = Units.Percent.of(-50);
+    public static final double DEPLOY_SPEED = 0.5;
+    public static final double RETRACT_SPEED = -0.5;
 
     public static final Time ALGAE_SCORE_TIME = Units.Seconds.of(1);
+    public static final Time ALGAE_MOVEMENT_MIN_TIME = Units.Seconds.of(0.1);
+
+    public static final Time ALGAE_BACKOFF_TIME = Units.Seconds.of(0.05);
+    public static final double ALGAE_BACKOFF_SPEED = 0.05;
   }
 
   public static class CLIMBER {

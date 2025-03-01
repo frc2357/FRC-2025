@@ -50,9 +50,7 @@ public class AlgaePivot extends SubsystemBase {
   }
 
   public boolean isStalling() {
-    return (
-      m_rightMotor.getOutputCurrent() >= ALGAE_PIVOT.STALL_CURRENT_LIMIT_VOLTS
-    );
+    return (m_rightMotor.getOutputCurrent() >= ALGAE_PIVOT.STALL_CURRENT_VOLTS);
   }
 
   public void stop() {
