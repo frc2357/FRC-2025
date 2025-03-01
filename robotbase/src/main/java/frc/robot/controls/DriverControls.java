@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -13,6 +14,7 @@ import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
+import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.drive.VelDrive;
 import frc.robot.commands.scoring.coral.CoralHumanPrepose;
 import frc.robot.commands.scoring.coral.CoralScore;
@@ -70,6 +72,8 @@ public class DriverControls {
     // m_controller
     //   .leftTrigger()
     //   .onTrue(new CoralScore().andThen(humanPrepose.reset()));
+
+    m_controller.back().onTrue(new FlipPerspective());
   }
 
   public double getX() {
