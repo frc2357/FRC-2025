@@ -126,7 +126,7 @@ public class Robot extends TimedRobot {
     // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
     if (!m_didOpenCVLoad) {
       PhotonVisionCamera.setPrimaryStrategy(PRIMARY_STRAT_FOR_FAILED_LOAD);
-      PhotonVisionCamera.setPrimaryStrategy(FALLBACK_STRAT_FOR_FAILED_LOAD);
+      PhotonVisionCamera.setFallbackStrategy(FALLBACK_STRAT_FOR_FAILED_LOAD);
     }
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
