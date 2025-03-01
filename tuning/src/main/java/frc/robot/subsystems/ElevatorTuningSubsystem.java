@@ -32,10 +32,10 @@ public class ElevatorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0.008;
+  private double P = 0.016;
   private double I = 0;
   private double D = 0;
-  private double arbFF = 0.05;
+  private double arbFF = 0.013;
   private double maxVel = 4600; // Desired: 4600, Max: 5600
   private double maxAcc = 5000; // Desired: 18400
 

@@ -3,7 +3,6 @@ package frc.robot.commands.drive;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -25,7 +24,7 @@ public class DefaultDrive extends Command {
     double rotation = Robot.driverControls.getRotation();
 
     if (x == 0 && y == 0 && rotation == 0) {
-      Robot.swerve.driveBrake();
+      Robot.swerve.stopMotors();
     } else {
       Robot.swerve.driveFieldRelative(
         y * m_speedAt12VoltsMPS,

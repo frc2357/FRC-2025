@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -78,9 +80,9 @@ public final class Constants {
 
   public final class DIGITAL_INPUT {
 
-    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 9;
+    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 9;
     public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
-    public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 7;
+    public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 7;
 
     public static final int ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
   }
@@ -121,6 +123,9 @@ public final class Constants {
       true,
       Robot.swerve
     );
+
+    public static final double PREPOSE_SECONDS =
+      ELEVATOR.FULL_EXTENSION_TIME.in(Seconds) + 0.05;
   }
 
   public static final class ELEVATOR {
@@ -183,6 +188,8 @@ public final class Constants {
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+
+    public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
   }
 
   public static final class LATERATOR {
@@ -194,9 +201,9 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
-    public static final double MOTOR_P = 0;
+    public static final double MOTOR_P = 0.3;
     public static final double MOTOR_I = 0;
-    public static final double MOTOR_D = 0;
+    public static final double MOTOR_D = 1;
     public static final double MOTOR_F = 0;
 
     // Set feedback sensor to alternate encoder
@@ -212,15 +219,14 @@ public final class Constants {
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(0)
-        .maxVelocity(0);
+        .maxAcceleration(13000)
+        .maxVelocity(4600);
 
-    public static final double GEAR_RATIO = 5;
-    public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
-      46.188
-    );
+    public static final double GEAR_RATIO = 15;
+    public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
+      Units.Millimeters.of(46.188);
     public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
-      OUTPUT_PULLEY_DIAMETER.times(Math.PI);
+      OUTPUT_PULLEY_PITCH_DIAMETER.times(Math.PI);
 
     public static final class SETPOINTS {
 
@@ -315,8 +321,8 @@ public final class Constants {
 
     public static final boolean MOTOR_INVERTED = false;
 
-    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(50);
-    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(50);
+    public static final Current MOTOR_STALL_LIMIT = Units.Amps.of(40);
+    public static final Current MOTOR_FREE_LIMIT = Units.Amps.of(40);
 
     public static final double RAMP_RATE = .25;
 

@@ -132,6 +132,6 @@ public class Laterator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_debouncer.calculate(m_hallEffectSensor.get());
+    return m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 }

@@ -7,7 +7,6 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.CLIMBER;
-import frc.robot.Constants.ELEVATOR;
 
 public class Climber extends SubsystemBase {
 

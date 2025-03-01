@@ -31,12 +31,12 @@ public class LateratorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0.008;
+  private double P = 0.3;
   private double I = 0;
-  private double D = 0;
-  private double arbFF = 0.05;
+  private double D = 1;
+  private double arbFF = 0;
   private double maxVel = 4600; // Desired: 4600, Max: 5600
-  private double maxAcc = 5000; // Desired: Unknown
+  private double maxAcc = 13000; // Desired: Unknown
 
   private SparkBaseConfig m_motorconfig = Constants.LATERATOR.MOTOR_CONFIG;
 
