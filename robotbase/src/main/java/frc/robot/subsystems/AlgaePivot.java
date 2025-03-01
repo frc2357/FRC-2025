@@ -19,18 +19,18 @@ public class AlgaePivot extends SubsystemBase {
   private SparkMax m_leftMotor;
   private SparkMax m_rightMotor;
   private SparkAbsoluteEncoder m_absoluteEncoder;
-  private SparkClosedLoopController m_leftPidController;
+  private SparkClosedLoopController m_rightPidController;
 
   private MutAngle m_targetAngle = Units.Degrees.mutable(Double.NaN);
   private MutAngle m_currentAngleHolder = Units.Degrees.mutable(Double.NaN);
 
   public AlgaePivot() {
     m_leftMotor = new SparkMax(
-      CAN_ID.LEFT_ALGAE_PIVOT_MOTOR,
+      CAN_ID.ALGAE_PIVOT_LEFT_MOTOR,
       MotorType.kBrushless
     );
     m_rightMotor = new SparkMax(
-      CAN_ID.RIGHT_ALGAE_PIVOT_MOTOR,
+      CAN_ID.ALGAE_PIVOT_RIGHT_MOTOR,
       MotorType.kBrushless
     );
     m_leftMotor.configure(
@@ -43,12 +43,12 @@ public class AlgaePivot extends SubsystemBase {
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-    m_absoluteEncoder = m_leftMotor.getAbsoluteEncoder();
-    m_leftPidController = m_leftMotor.getClosedLoopController();
+    m_absoluteEncoder = m_rightMotor.getAbsoluteEncoder();
+    m_rightPidController = m_rightMotor.getClosedLoopController();
   }
 
   public void setSpeed(double percentOutput) {
-    m_leftMotor.set(percentOutput);
+    m_rightMotor.set(percentOutput);
     m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
   }
 
@@ -67,7 +67,7 @@ public class AlgaePivot extends SubsystemBase {
   }
 
   public void stop() {
-    m_leftMotor.stopMotor();
+    m_rightMotor.stopMotor();
     m_targetAngle.mut_replace(Double.NaN, Units.Rotations);
   }
 
@@ -82,7 +82,7 @@ public class AlgaePivot extends SubsystemBase {
     }
 
     m_targetAngle.mut_replace(angle);
-    m_leftPidController.setReference(
+    m_rightPidController.setReference(
       angle.in(Units.Rotations),
       ControlType.kPosition
     );
