@@ -20,6 +20,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
 import java.util.ArrayList;
@@ -150,6 +151,9 @@ public class PhotonVisionCamera extends SubsystemBase {
 
   protected static EstimatedRobotPose m_lastEstimatedPose;
 
+  private static PoseStrategy m_primaryStrategy = PRIMARY_STRATEGY;
+  private static PoseStrategy m_fallbackStrategy = FALLBACK_STRATEGY;
+
   /** Whether or not we have connection with the camera still */
   protected boolean m_connectionLost;
 
@@ -193,7 +197,18 @@ public class PhotonVisionCamera extends SubsystemBase {
    */
   public static void updateAllCameras() {
     for (PhotonVisionCamera camera : m_robotCameras) {
-      camera.updateResult();
+      if (camera.isConnected()) {
+        camera.updateResult();
+      } else if (
+        RobotModeTriggers.disabled().getAsBoolean() &&
+        RobotController.getMeasureTime().in(Seconds) % 5 <= 0.1
+      ) {
+        System.err.println(
+          "CAMERA " +
+          camera.m_camera.getName() +
+          " IS DISCONNECTED! ***** TELL MAX! *****"
+        );
+      }
     }
     for (int i = 0; i < m_pnpInfo.length; i++) {
       if (m_pnpInfo[i].result == null) {
@@ -202,11 +217,24 @@ public class PhotonVisionCamera extends SubsystemBase {
       updatePoseFromPNPInfo(m_pnpInfo[i]);
       m_pnpInfo[i].invalidateInfo();
     }
-    if (m_lastEstimatedPose != null) {
-      Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
-        m_lastEstimatedPose.estimatedPose.toPose2d()
-      );
-    }
+  }
+
+  /**
+   * Sets the primary pose strategy for all cameras.<p> <h1> Do not call this unless you know what your doing!</h1>
+   * @param strategy The strategy that will become the primary strategy
+   */
+  public static void setPrimaryStrategy(PoseStrategy strategy) {
+    m_primaryStrategy = strategy;
+    m_poseEstimator.setPrimaryStrategy(strategy);
+  }
+
+  /**
+   * Sets the fallback pose strategy for all cameras.<p> <h1> Do not call this unless you know what your doing!</h1>
+   * @param strategy The strategy that will become the fallback strategy
+   */
+  public static void setFallbackStrategy(PoseStrategy strategy) {
+    m_fallbackStrategy = strategy;
+    m_poseEstimator.setMultiTagFallbackStrategy(strategy);
   }
 
   /**
@@ -266,7 +294,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     double headingTimestampSeconds
   ) {
     // does whatever we need to make the strategy work
-    switch (PRIMARY_STRATEGY) {
+    switch (m_primaryStrategy) {
       case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
         m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
         break;
@@ -277,13 +305,13 @@ public class PhotonVisionCamera extends SubsystemBase {
         m_poseEstimator.setLastPose(m_lastEstimatedPose.estimatedPose);
         break;
     }
-    switch (FALLBACK_STRATEGY) {
+    switch (m_fallbackStrategy) {
       case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
         // if our primary strategy already needs us to update the heading, we dont want to call more hardware.
         // they get upset if you call them enough, and its a waste of time.
         if (
-          PRIMARY_STRATEGY == PoseStrategy.CONSTRAINED_SOLVEPNP ||
-          PRIMARY_STRATEGY == PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
+          m_primaryStrategy == PoseStrategy.CONSTRAINED_SOLVEPNP ||
+          m_primaryStrategy == PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
         ) {
           break;
         }
@@ -351,11 +379,6 @@ public class PhotonVisionCamera extends SubsystemBase {
     double yCoordinateConfidence =
       (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
         ((averageTargetDistance / 2) * yVelocityConf));
-    System.out.println("CURR TIME: " + Utils.getCurrentTimeSeconds());
-    System.out.println(
-      "FRAME TIME: " +
-      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds)
-    );
     Robot.swerve.addVisionMeasurement(
       m_lastEstimatedPose.estimatedPose.toPose2d(),
       Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
@@ -502,7 +525,6 @@ public class PhotonVisionCamera extends SubsystemBase {
       ) {
         bestTarget = targetSeen;
       }
-      // System.out.println(targetSeen.getFiducialId());
     }
     return bestTarget;
   }
@@ -533,7 +555,7 @@ public class PhotonVisionCamera extends SubsystemBase {
    * @return Whether or not the camera is connected.
    */
   public boolean isConnected() {
-    return m_connectionLost; // uses this because it will be checked every loop
+    return m_camera.isConnected();
   }
 
   /**
