@@ -401,7 +401,7 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * Sets the pose staright as you input it, with no flipping to compensate for alliance.
+   * Sets the pose straight as you input it, with no flipping to compensate for alliance.
    * @param poseToSet The pose it will set.
    */
   public void setFieldRelativePose2d(Pose2d poseToSet) {
@@ -409,7 +409,7 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * Sets the translation straight as you input it, with no flipping to compensate for alliance.
    * @param translationToSet The translation it will set.
    */
   public void setFieldRelativeTranslation2d(Translation2d translationToSet) {
@@ -417,7 +417,7 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * Sets the translation staright as you input it, with no flipping to compensate for alliance.
+   * Sets the translation straight as you input it, with no flipping to compensate for alliance.
    * @param translationToSet The translation it will set.
    */
   public void setAllianceRelativeTranslation2d(Translation2d translationToSet) {
