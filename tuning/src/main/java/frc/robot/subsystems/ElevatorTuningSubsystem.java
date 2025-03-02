@@ -93,7 +93,10 @@ public class ElevatorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
+    SmartDashboard.putNumber(
+      "Calculated Distance",
+      getDistance().in(Units.Inches)
+    );
     SmartDashboard.putNumber("Elevator Setpoint", 0);
     SmartDashboard.putData("Save Elevator Config", this);
   }
@@ -126,7 +129,10 @@ public class ElevatorTuningSubsystem implements Sendable {
       SmartDashboard.getNumber("Elevator Setpoint", 0)
     );
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
+    SmartDashboard.putNumber(
+      "Calculated Distance",
+      getDistance().in(Units.Inches)
+    );
 
     if (
       newP != P ||

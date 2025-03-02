@@ -54,21 +54,22 @@ public class LateratorTuningSubsystem implements Sendable {
 
     m_PIDController = m_motor.getClosedLoopController();
 
-    Preferences.initDouble("lateratorP", 0);
-    Preferences.initDouble("lateratorI", 0);
-    Preferences.initDouble("lateratorD", 0);
-    Preferences.initDouble("lateratorFF", 0);
-    Preferences.initDouble("lateratorMaxVel", 0);
-    Preferences.initDouble("lateratorMaxAcc", 0);
+    Preferences.initDouble("lateratorP", P);
+    Preferences.initDouble("lateratorI", I);
+    Preferences.initDouble("lateratorD", D);
+    Preferences.initDouble("lateratorFF", arbFF);
+    Preferences.initDouble("lateratorMaxVel", maxVel);
+    Preferences.initDouble("lateratorMaxAcc", maxAcc);
 
-    P = Preferences.getDouble("lateratorP", 0);
-    I = Preferences.getDouble("lateratorI", 0);
-    D = Preferences.getDouble("lateratorD", 0);
-    arbFF = Preferences.getDouble("lateratorFF", 0);
-    maxVel = Preferences.getDouble("lateratorMaxVel", 0);
-    maxAcc = Preferences.getDouble("lateratorMaxAcc", 0);
+    P = Preferences.getDouble("lateratorP", P);
+    I = Preferences.getDouble("lateratorI", I);
+    D = Preferences.getDouble("lateratorD", D);
+    arbFF = Preferences.getDouble("lateratorFF", arbFF);
+    maxVel = Preferences.getDouble("lateratorMaxVel", maxVel);
+    maxAcc = Preferences.getDouble("lateratorMaxAcc", maxAcc);
 
     displayDashboard();
+    updatePIDs();
   }
 
   public void displayDashboard() {
@@ -110,11 +111,17 @@ public class LateratorTuningSubsystem implements Sendable {
     double newMaxAcc = SmartDashboard.getNumber("Laterator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
-    m_targetRotations = Rotations.of(
-      SmartDashboard.getNumber("Laterator Setpoint", 0)
-    );
+    // m_targetRotations = Rotations.of(
+    //   SmartDashboard.getNumber(
+    //     "Laterator Setpoint",
+    //     m_targetRotations.in(Rotations)
+    //   )
+    // );
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
+    SmartDashboard.putNumber(
+      "Calculated Distance",
+      getDistance().in(Units.Inches)
+    );
 
     if (
       newP != P ||
@@ -152,7 +159,7 @@ public class LateratorTuningSubsystem implements Sendable {
   }
 
   public void setAxisSpeed(double speed) {
-    m_targetRotations = Units.Rotations.of(Double.NaN);
+    // m_targetRotations = Units.Rotations.of(Double.NaN);
     speed *= LATERATOR.AXIS_MAX_SPEED;
     m_motor.set(speed);
   }
@@ -176,13 +183,14 @@ public class LateratorTuningSubsystem implements Sendable {
   public Distance getDistance() {
     return (
       LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
+        -1 * getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
       )
     );
   }
 
-  private void setTargetRotations(Angle targetRotations) {
+  public void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
+    System.out.println("SETTING ROTATIONS");
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
       ControlType.kMAXMotionPositionControl,
@@ -199,6 +207,7 @@ public class LateratorTuningSubsystem implements Sendable {
         .times(LATERATOR.GEAR_RATIO)
         .magnitude()
     );
+    System.out.println("ROTATIONS: " + rotations.in(Rotations));
     setTargetRotations(rotations);
   }
 

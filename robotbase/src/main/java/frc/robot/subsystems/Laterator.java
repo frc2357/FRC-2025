@@ -15,6 +15,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.CAN_ID;
@@ -56,6 +57,14 @@ public class Laterator extends SubsystemBase {
       DIGITAL_INPUT.LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID
     );
     m_debouncer = new Debouncer(Constants.LATERATOR.DEBOUNCE_TIME_SECONDS);
+  }
+
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber(
+      "Laterator Calculated Distance",
+      getDistance().in(Units.Inches)
+    );
   }
 
   public void setSpeed(double percentOutput) {
