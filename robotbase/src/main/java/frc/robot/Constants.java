@@ -400,6 +400,11 @@ public final class Constants {
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
+    // tuned numbers that try to make the pose confidence better. dont touch these.
+    public static final double MAGIC_VEL_CONF_ADDEND = 0.2;
+
+    public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
+
     public static final class FRONT_CAM {
 
       public static final String NAME = "frontCam";
