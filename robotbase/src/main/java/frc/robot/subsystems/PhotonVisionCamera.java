@@ -19,6 +19,7 @@ import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
@@ -177,6 +178,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     Matrix<N3, N3> cameraMatrix,
     Matrix<N8, N1> distCoeefs
   ) {
+    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
     m_camera = new PhotonCamera(cameraName);
     m_robotCameras.add(this);
 
@@ -196,6 +198,10 @@ public class PhotonVisionCamera extends SubsystemBase {
    * <p><h1> For the top of {@link Robot#robotPeriodic() the robot periodic} only.
    */
   public static void updateAllCameras() {
+    boolean updatePose = SmartDashboard.getBoolean(
+      "Toggle Pose Estimation",
+      false
+    );
     for (PhotonVisionCamera camera : m_robotCameras) {
       if (camera.isConnected()) {
         camera.updateResult();
@@ -210,12 +216,14 @@ public class PhotonVisionCamera extends SubsystemBase {
         );
       }
     }
-    for (int i = 0; i < m_pnpInfo.length; i++) {
-      if (m_pnpInfo[i].result == null) {
-        continue;
+    if (updatePose) {
+      for (int i = 0; i < m_pnpInfo.length; i++) {
+        if (m_pnpInfo[i].result == null) {
+          continue;
+        }
+        updatePoseFromPNPInfo(m_pnpInfo[i]);
+        m_pnpInfo[i].invalidateInfo();
       }
-      updatePoseFromPNPInfo(m_pnpInfo[i]);
-      m_pnpInfo[i].invalidateInfo();
     }
   }
 
@@ -367,27 +375,31 @@ public class PhotonVisionCamera extends SubsystemBase {
 
     // the higher the confidence is, the less the estimated measurment is trusted.
     double xVelocityConf =
-      0.2 + Math.abs(Robot.swerve.getXVelocity().in(MetersPerSecond));
+      MAGIC_VEL_CONF_ADDEND +
+      Math.abs(Robot.swerve.getXVelocity().in(MetersPerSecond));
     double yVelocityConf =
-      0.2 + Math.abs(Robot.swerve.getYVelocity().in(MetersPerSecond));
-    // we add 0.2 so that if were sitting still, it doesnt spiral into infinity.
-    // its a partialy magic number, and will need tuning because of that.
+      MAGIC_VEL_CONF_ADDEND +
+      Math.abs(Robot.swerve.getYVelocity().in(MetersPerSecond));
 
-    double xCoordinateConfidence =
-      (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-        ((averageTargetDistance / 2) * xVelocityConf));
-    double yCoordinateConfidence =
-      (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
-        ((averageTargetDistance / 2) * yVelocityConf));
-    // Robot.swerve.addVisionMeasurement(
-    //   m_lastEstimatedPose.estimatedPose.toPose2d(),
-    //   Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
-    //   VecBuilder.fill(
-    //     xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
-    //     yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-    //     Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
-    //   )
-    // );
+    double xCoordinateConfidence = Math.pow(
+      m_lastEstimatedPose.targetsUsed.size() *
+      ((averageTargetDistance / 2) * xVelocityConf),
+      MAGIC_VEL_CONF_EXPONENT
+    );
+    double yCoordinateConfidence = Math.pow(
+      m_lastEstimatedPose.targetsUsed.size() *
+      ((averageTargetDistance / 2) * yVelocityConf),
+      MAGIC_VEL_CONF_EXPONENT
+    );
+    Robot.swerve.addVisionMeasurement(
+      m_lastEstimatedPose.estimatedPose.toPose2d(),
+      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
+      VecBuilder.fill(
+        xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
+        yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
+      )
+    );
   }
 
   /**
