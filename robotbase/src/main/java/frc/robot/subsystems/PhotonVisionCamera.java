@@ -379,15 +379,15 @@ public class PhotonVisionCamera extends SubsystemBase {
     double yCoordinateConfidence =
       (Math.pow(0.8, m_lastEstimatedPose.targetsUsed.size()) *
         ((averageTargetDistance / 2) * yVelocityConf));
-    Robot.swerve.addVisionMeasurement(
-      m_lastEstimatedPose.estimatedPose.toPose2d(),
-      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
-      VecBuilder.fill(
-        xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
-        yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
-      )
-    );
+    // Robot.swerve.addVisionMeasurement(
+    //   m_lastEstimatedPose.estimatedPose.toPose2d(),
+    //   Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
+    //   VecBuilder.fill(
+    //     xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
+    //     yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+    //     Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
+    //   )
+    // );
   }
 
   /**
@@ -691,7 +691,7 @@ public class PhotonVisionCamera extends SubsystemBase {
    * @return The robots estimated pose, if it has any april tag targets. <strong>Returns null if
    *     there are no targets.</strong>
    */
-  public EstimatedRobotPose getLastEstimatedPose() {
+  public static EstimatedRobotPose getLastEstimatedPose() {
     return m_lastEstimatedPose;
   }
 
