@@ -74,8 +74,8 @@ public class DriverControls {
     //   .leftTrigger()
     //   .onTrue(new CoralScore().andThen(humanPrepose.reset()));
 
-    AlgaeChooser algaeChooser = new AlgaeChooser();
-    m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());
+    // AlgaeChooser algaeChooser = new AlgaeChooser();
+    // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());
 
     m_controller.back().onTrue(new FlipPerspective());
   }
