@@ -9,6 +9,7 @@ import frc.robot.commands.algaeRunner.AlgaeRunnerAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.laterator.LateratorAxis;
+import frc.robot.commands.laterator.LateratorZero;
 
 public class CodriverControls {
 
@@ -39,6 +40,7 @@ public class CodriverControls {
       .whileTrue(
         new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
       );
+    m_controller.x().whileTrue(new LateratorZero());
     m_controller
       .povRight()
       .and(m_rightTrigger)

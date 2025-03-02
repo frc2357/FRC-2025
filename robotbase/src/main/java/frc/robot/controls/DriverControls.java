@@ -17,6 +17,7 @@ import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.drive.VelDrive;
 import frc.robot.commands.intake.AlgaeChooser;
+import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.scoring.coral.CoralHumanPrepose;
 import frc.robot.commands.scoring.coral.CoralScore;
 
@@ -67,6 +68,8 @@ public class DriverControls {
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
     m_controller.b().whileTrue(new VelDrive());
+
+    m_leftTrigger.whileTrue(new CoralIntake());
     // Manual Coral Scoring
     // CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
     // m_controller.leftBumper().onTrue(humanPrepose.getSelectCommand());
@@ -74,6 +77,7 @@ public class DriverControls {
     //   .leftTrigger()
     //   .onTrue(new CoralScore().andThen(humanPrepose.reset()));
 
+    m_rightTrigger.whileTrue(new CoralScore());
     // AlgaeChooser algaeChooser = new AlgaeChooser();
     // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());
 

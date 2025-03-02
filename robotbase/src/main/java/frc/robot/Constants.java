@@ -224,18 +224,18 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(1); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
-    public static final double RETURN_SPEED = 0.1;
+    public static final double RETURN_SPEED = -0.1;
   }
 
   public static final class CORAL_RUNNER {
