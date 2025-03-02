@@ -6,6 +6,7 @@ package frc.robot;
 
 import static frc.robot.Constants.PHOTON_VISION.*;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.cscore.OpenCvLoader;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -61,7 +62,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
   private AutoChooserManager m_autoChooserManager;
-  private SignalLoggerManager m_SignalLoggerManager;
   private boolean m_didOpenCVLoad = false;
 
   @SuppressWarnings("unused")
@@ -149,13 +149,11 @@ public class Robot extends TimedRobot {
     // Define network table tools
     m_autoChooserManager = new AutoChooserManager();
     m_sysIdChooser = new SysIdChooser();
-    m_SignalLoggerManager = new SignalLoggerManager();
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
 
     SmartDashboard.putData("Buttonboard", buttonboard);
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
-    SmartDashboard.putData("Signal Logger", m_SignalLoggerManager);
 
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
@@ -164,6 +162,7 @@ public class Robot extends TimedRobot {
     // Logging
     DataLogManager.logNetworkTables(true); // enable/disable automatic NetworksTable Logging
     DataLogManager.start("", "", 1.0); // defaults, flush to flash every 1 seconds
+    SignalLogger.start();
     DriverStation.startDataLog(DataLogManager.getLog());
 
     // Setup logging swerve pose and state for viewing in Advantage Scope

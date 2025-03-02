@@ -179,6 +179,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     Matrix<N8, N1> distCoeefs
   ) {
     SmartDashboard.putBoolean("Toggle Pose Estimation", false);
+    SmartDashboard.putNumberArray("Vision Pose", new double[] { 0, 0, 0 });
     m_camera = new PhotonCamera(cameraName);
     m_robotCameras.add(this);
 
@@ -225,6 +226,14 @@ public class PhotonVisionCamera extends SubsystemBase {
         m_pnpInfo[i].invalidateInfo();
       }
     }
+    SmartDashboard.putNumberArray(
+      "Vision Pose",
+      new double[] {
+        m_lastEstimatedPose.estimatedPose.getX(),
+        m_lastEstimatedPose.estimatedPose.getY(),
+        m_lastEstimatedPose.estimatedPose.getRotation().getAngle(),
+      }
+    );
   }
 
   /**
