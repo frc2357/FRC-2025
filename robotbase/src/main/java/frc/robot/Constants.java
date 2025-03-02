@@ -112,7 +112,7 @@ public final class Constants {
     public static final PIDController X_CONTROLLER = new PIDController(5, 0, 0);
     public static final PIDController Y_CONTROLLER = new PIDController(5, 0, 0);
     public static final PIDController ROTATION_CONTROLLER = new PIDController(
-      1,
+      8,
       0,
       0
     );
@@ -814,7 +814,7 @@ public final class Constants {
    */
   public static class ROBOT_CONFIGURATION {
 
-    public static final double WEIGHT_POUNDS = 105; // TODO: currently estimated. get weight once laterator is on, and then final weight.
+    public static final double WEIGHT_POUNDS = 135.3; // weight with battery and bumpers and all that
 
     public static final Distance FRAME_LENGTH = Units.Inches.of(26);
     public static final Distance FRAME_WIDTH = Units.Inches.of(26);
@@ -871,7 +871,7 @@ public final class Constants {
     public static final double MOMENT_OF_INERTIA_SIMPLIFIED_DISTRIBUTION =
       (1.0 / 12) *
       (WEIGHT_POUNDS / 2.205) */* pounds to kilograms conversion is / 2.205 */
-      (Math.pow(FULL_LENGTH.in(Units.Meters), 2) +
-        Math.pow(FULL_WIDTH.in(Units.Meters), 2));
+      (Math.pow(FRAME_LENGTH.in(Units.Meters), 2) +
+        Math.pow(FRAME_WIDTH.in(Units.Meters), 2));
   }
 }

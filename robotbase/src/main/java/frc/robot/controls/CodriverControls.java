@@ -60,20 +60,19 @@ public class CodriverControls {
       .povRight()
       .and(m_controller.b())
       .whileTrue(new AlgaeKnockerSetSpeed(-0.25));
-
-    m_controller
-      .povLeft()
-      .and(m_leftTrigger)
-      .whileTrue(new AlgaeRunnerAxis(() -> -m_controller.getLeftTriggerAxis()));
-    m_controller
-      .povLeft()
-      .and(m_rightTrigger)
-      .whileTrue(new AlgaeRunnerAxis(() -> m_controller.getRightTriggerAxis()));
-    m_controller
-      .povLeft()
-      .whileTrue(
-        new AlgaePivotAxis(() -> modifyAxis(m_controller.getRightY()))
-      );
+    // m_controller
+    //   .povLeft()
+    //   .and(m_leftTrigger)
+    //   .whileTrue(new AlgaeRunnerAxis(() -> -m_controller.getLeftTriggerAxis()));
+    // m_controller
+    //   .povLeft()
+    //   .and(m_rightTrigger)
+    //   .whileTrue(new AlgaeRunnerAxis(() -> m_controller.getRightTriggerAxis()));
+    // m_controller
+    //   .povLeft()
+    //   .whileTrue(
+    //     new AlgaePivotAxis(() -> modifyAxis(m_controller.getRightY()))
+    //   );
   }
 
   public double deadband(double value, double deadband) {

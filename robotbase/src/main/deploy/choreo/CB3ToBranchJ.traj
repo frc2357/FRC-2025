@@ -16,7 +16,7 @@
  },
  "params":{
   "waypoints":[
-    {"x":{"exp":"CageBlue3.x", "val":7.18387069702149}, "y":{"exp":"CageBlue3.y", "val":5.07560920715332}, "heading":{"exp":"CageBlue3.heading", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"CageBlue3.x", "val":7.18387069702149}, "y":{"exp":"CageBlue3.y", "val":5.07560920715332}, "heading":{"exp":"CageBlue3.heading", "val":0.0}, "intervals":41, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"branchJ.x", "val":4.979290008544922}, "y":{"exp":"branchJ.y", "val":5.193929195404053}, "heading":{"exp":"branchJ.heading", "val":1.039336977502186}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
@@ -24,7 +24,7 @@
     {"from":"first", "to":"last", "data":{"type":"KeepInRectangle", "props":{"x":{"exp":"0 m", "val":0.0}, "y":{"exp":"0 m", "val":0.0}, "w":{"exp":"17.548 m", "val":17.548}, "h":{"exp":"8.052 m", "val":8.052}}}, "enabled":false},
     {"from":"first", "to":"last", "data":{"type":"MaxVelocity", "props":{"max":{"exp":"maxVel", "val":3.5}}}, "enabled":true},
     {"from":"first", "to":"last", "data":{"type":"MaxAcceleration", "props":{"max":{"exp":"maxLinAccel", "val":3.5}}}, "enabled":true},
-    {"from":"first", "to":"last", "data":{"type":"MaxAngularVelocity", "props":{"max":{"exp":"maxAVel", "val":6.0}}}, "enabled":true}],
+    {"from":"first", "to":"last", "data":{"type":"MaxAngularVelocity", "props":{"max":{"exp":"maxAVel", "val":4.01}}}, "enabled":true}],
   "targetDt":{
    "exp":"0.05 s",
    "val":0.05
