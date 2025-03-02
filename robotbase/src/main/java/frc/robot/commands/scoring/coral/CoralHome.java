@@ -9,8 +9,9 @@ public class CoralHome extends ParallelCommandGroup {
 
   public CoralHome() {
     super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.HOME),
-      new LateratorZero()
+      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.HOME).andThen(
+        new LateratorZero()
+      )
       // new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.HOME)
     );
   }
