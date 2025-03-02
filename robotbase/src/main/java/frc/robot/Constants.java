@@ -224,7 +224,7 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(1); // TODO: Tune Setpoint
 
       public static final Distance INTAKE_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
       public static final Distance L1_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
