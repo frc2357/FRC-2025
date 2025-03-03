@@ -5,11 +5,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.LATERATOR;
 import frc.robot.Robot;
 
-public class LateratorZero extends Command {
+public class LateratorZeroStall extends Command {
 
   Timer m_timer;
 
-  public LateratorZero() {
+  public LateratorZeroStall() {
     addRequirements(Robot.laterator);
     m_timer = new Timer();
   }
@@ -24,16 +24,15 @@ public class LateratorZero extends Command {
   public boolean isFinished() {
     return (
       (m_timer.hasElapsed(LATERATOR.STALL_WAIT_TIME) &&
-        Robot.laterator.ReachedStallLimit()) ||
-      Robot.laterator.isAtZero()
+        Robot.laterator.ReachedStallLimit())
     );
   }
 
   @Override
   public void end(boolean interrupted) {
     Robot.laterator.stop();
-    if (!interrupted && Robot.laterator.isAtZero()) {
-      Robot.laterator.setZero();
+    if (!interrupted) {
+      Robot.laterator.setZeroMaxExtension();
     }
     m_timer.stop();
     m_timer.reset();
