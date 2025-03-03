@@ -4,10 +4,9 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
-import frc.robot.commands.algaePivot.AlgaePivotAxis;
-import frc.robot.commands.algaeRunner.AlgaeRunnerAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
+import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorZero;
 
@@ -34,13 +33,14 @@ public class CodriverControls {
     m_controller
       .povUp()
       .whileTrue(new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY())));
+    m_controller.x().whileTrue(new ElevatorZero());
 
     m_controller
       .povRight()
       .whileTrue(
         new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
       );
-    m_controller.x().whileTrue(new LateratorZero());
+    m_controller.b().whileTrue(new LateratorZero());
     m_controller
       .povRight()
       .and(m_rightTrigger)

@@ -17,7 +17,7 @@ public class CoralIntake extends SequentialCommandGroup {
         Robot.coralRunner::isIntakeBeamBroken
       ),
       new ParallelCommandGroup(
-        new CoralHome(),
+        // new CoralHome(),
         new CoralRunnerSetSpeed(
           Constants.CORAL_RUNNER.SLOW_INTAKE_PERCENT
         ).until(Robot.coralRunner::isOuttakeBeamBroken)

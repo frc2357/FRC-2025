@@ -91,7 +91,7 @@ public final class Constants {
   public static final class SWERVE {
 
     public static final AngularVelocity MAX_ANGULAR_VELOCITY =
-      Units.RadiansPerSecond.of(Math.PI * 2);
+      Units.RadiansPerSecond.of((Math.PI * 2) / 3);
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
 
@@ -143,11 +143,11 @@ public final class Constants {
         .apply(MOTOR_CONFIG_LEFT)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
-    public static final double LEFT_MOTOR_P = 0.008;
+    public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
     public static final double LEFT_MOTOR_D = 0;
     public static final double LEFT_MOTOR_VEL_F = 0; // Should always be zero
-    public static final double LEFT_MOTOR_ARB_F = 0.05;
+    public static final double LEFT_MOTOR_ARB_F = 0.5;
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
@@ -176,9 +176,9 @@ public final class Constants {
 
       public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
       public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Inches.of(8.43); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Inches.of(23.189); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Inches.of(50.2); // TODO: Tune Setpoint
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
@@ -226,11 +226,11 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(1); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(3); // TODO: Tune Setpoint
       public static final Distance L1_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Inches.of(-6.4); // TODO: Tune Setpoint
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
