@@ -9,8 +9,8 @@ public class CoralPreposeL4 extends ParallelCommandGroup {
 
   public CoralPreposeL4() {
     super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.L4_PREPOSE),
-      new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L4_PREPOSE)
+      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.L4_PREPOSE)
+      // new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L4_PREPOSE)
     );
   }
 }

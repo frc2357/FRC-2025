@@ -5,11 +5,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Robot;
 import frc.robot.commands.auto.AutoBase;
 import frc.robot.commands.auto.CB3BlueStation2Peice;
-import frc.robot.commands.auto.TuningPathFinal;
-import frc.robot.commands.auto.TuningPathRot;
-import frc.robot.commands.auto.TuningPathX;
 import frc.robot.commands.auto.TuningPathY;
 import java.util.Map;
 
@@ -22,10 +20,8 @@ public class AutoChooserManager {
   private AutoBase[] m_autos = {
     new AutoBase("CubeTestPath"),
     new CB3BlueStation2Peice(),
-    new TuningPathX(),
     new TuningPathY(),
-    new TuningPathRot(),
-    new TuningPathFinal(),
+    new AutoBase("measureCB3"),
   };
 
   private AutoChooser m_autoChooser = new AutoChooser();
@@ -51,11 +47,15 @@ public class AutoChooserManager {
   }
 
   public Command getSelectedCommandScheduler() {
-    return m_autoChooser.selectedCommandScheduler();
+    return m_autoChooser
+      .selectedCommandScheduler()
+      .finallyDo(() -> Robot.swerve.stopMotors());
   }
 
   public Command getSelectedCommand() {
-    return m_autoChooser.selectedCommand();
+    return m_autoChooser
+      .selectedCommand()
+      .finallyDo(() -> Robot.swerve.stopMotors());
   }
 
   public String selectAuto(String autoToSelect) {
