@@ -136,6 +136,10 @@ public class Laterator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
+  public boolean isGoingDown() {
+    return m_targetRotations.lt(getRotations());
+  }
+
   public void setZero() {
     m_encoder.setPosition(0);
   }

@@ -85,7 +85,7 @@ public class Elevator extends SubsystemBase {
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
-  public void setTargetRotations(Angle targetRotations) {
+  private void setTargetRotations(Angle targetRotations) {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
@@ -135,6 +135,10 @@ public class Elevator extends SubsystemBase {
       getRotations(),
       ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
     );
+  }
+
+  public boolean isGoingDown() {
+    return m_targetRotations.lt(getRotations());
   }
 
   public boolean isAtTarget() {
