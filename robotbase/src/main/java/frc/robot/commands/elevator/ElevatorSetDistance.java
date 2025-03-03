@@ -1,7 +1,9 @@
 package frc.robot.commands.elevator;
 
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Robot;
 
 public class ElevatorSetDistance extends Command {
@@ -14,8 +16,17 @@ public class ElevatorSetDistance extends Command {
   }
 
   @Override
-  public void initialize() {
-    Robot.elevator.setTargetDistance(m_distance);
+  public void execute() {
+    if (
+      Robot.swerve
+        .getTranslationalVelocity()
+        .lte(Constants.SWERVE.ROBOT_NO_TIP_SPEED) ||
+      Robot.elevator.isGoingDown()
+    ) {
+      Robot.elevator.setTargetDistance(m_distance);
+    } else {
+      Robot.elevator.setTargetDistance(Robot.elevator.getDistance());
+    }
   }
 
   @Override
