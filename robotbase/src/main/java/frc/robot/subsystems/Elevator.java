@@ -131,6 +131,10 @@ public class Elevator extends SubsystemBase {
     );
   }
 
+  public boolean isGoingDown() {
+    return m_targetRotations.lt(getRotations());
+  }
+
   public boolean isAtTarget() {
     return isAtTargetRotations();
   }
