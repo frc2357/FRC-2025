@@ -251,7 +251,7 @@ public final class Constants {
       public static final Distance L2_PREPOSE = Units.Inches.of(-6.2);
       public static final Distance L3_PREPOSE = Units.Inches.of(-6.2);
       public static final Distance L4_PREPOSE = Units.Inches.of(-6.4);
-      public static final Distance FULL_EXTENSION_SCORE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance FULL_EXTENSION = Units.Inches.of(0); // TODO: Tune Setpoint
     }
 
     public static final double STALL_WAIT_TIME = .1;
