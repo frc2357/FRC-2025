@@ -7,15 +7,15 @@
    "maxAVel":{
     "dimension":"AngVel",
     "var":{
-     "exp":"6 rad / s",
-     "val":6.0
+     "exp":"2 rad / s",
+     "val":2.0
     }
    },
    "maxLinAccel":{
     "dimension":"LinAcc",
     "var":{
-     "exp":"3.5 m / s ^ 2",
-     "val":3.5
+     "exp":"2.5 m / s ^ 2",
+     "val":2.5
     }
    },
    "maxVel":{
@@ -297,8 +297,8 @@
    "val":4.460176874376417
   },
   "gearing":{
-   "exp":"6.75",
-   "val":6.75
+   "exp":"6.746031746031747",
+   "val":6.746031746031747
   },
   "radius":{
    "exp":"1.9 in",
@@ -318,16 +318,16 @@
   },
   "bumper":{
    "front":{
-    "exp":"32.75 / 2 in",
-    "val":0.415925
+    "exp":"32.25 / 2 in",
+    "val":0.409575
    },
    "side":{
-    "exp":"32.75 / 2 in",
-    "val":0.415925
+    "exp":"32.25 / 2 in",
+    "val":0.409575
    },
    "back":{
-    "exp":"32.75 / 2 in",
-    "val":0.415925
+    "exp":"32.25 / 2 in",
+    "val":0.409575
    }
   },
   "differentialTrackWidth":{
