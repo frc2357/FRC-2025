@@ -102,10 +102,9 @@ public class ElevatorTuningSubsystem implements Sendable {
   }
 
   public void updatePIDs() {
-    // Rev recommends not using velocity feed forward for max motion positional control
     m_motorconfig.closedLoop.pidf(P, I, D, 0);
 
-    m_motorconfig.closedLoop.maxMotion
+    m_motorconfig.closedLoop.smartMotion
       .maxAcceleration(maxAcc)
       .maxVelocity(maxVel);
 
@@ -203,7 +202,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl,
+      ControlType.kSmartMotion,
       ClosedLoopSlot.kSlot0,
       arbFF,
       ArbFFUnits.kVoltage
@@ -223,7 +222,7 @@ public class ElevatorTuningSubsystem implements Sendable {
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
-      ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      ELEVATOR.SMART_MOTION_ALLOWED_ERROR_PERCENT
     );
   }
 

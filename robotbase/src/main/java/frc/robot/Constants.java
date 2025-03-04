@@ -153,10 +153,10 @@ public final class Constants {
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
         .outputRange(-1, 1);
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+    public static final double SMART_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+    public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.smartMotion
+        .allowedClosedLoopError(SMART_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(5000)
         .maxVelocity(4600);
 
