@@ -418,7 +418,7 @@ public final class Constants {
         Units.Inches.of(22.243),
         new Rotation3d(
           Units.Degrees.of(0),
-          Units.Degrees.of(10),
+          Units.Degrees.of(-10),
           Units.Degrees.of(0)
         )
       );
@@ -499,7 +499,7 @@ public final class Constants {
         new Rotation3d(
           Units.Degrees.of(-10),
           Units.Degrees.of(0),
-          Units.Degrees.of(90)
+          Units.Degrees.of(-90)
         )
       );
 
@@ -537,9 +537,9 @@ public final class Constants {
         Units.Inches.of(-3.001),
         Units.Inches.of(16.579),
         new Rotation3d(
-          Units.Degrees.of(10),
+          Units.Degrees.of(-10),
           Units.Degrees.of(0),
-          Units.Degrees.of(270)
+          Units.Degrees.of(90)
         )
       );
 

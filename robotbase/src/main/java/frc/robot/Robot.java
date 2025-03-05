@@ -117,13 +117,13 @@ public class Robot extends TimedRobot {
     );
     // leftCam = new PhotonVisionCamera(
     //   LEFT_CAM.NAME,
-    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
+    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
     //   LEFT_CAM.CAMERA_MATRIX,
     //   LEFT_CAM.DIST_COEEFS
     // );
     // rightCam = new PhotonVisionCamera(
     //   RIGHT_CAM.NAME,
-    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
+    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
     //   RIGHT_CAM.CAMERA_MATRIX,
     //   RIGHT_CAM.DIST_COEEFS
     // );
@@ -175,7 +175,6 @@ public class Robot extends TimedRobot {
 
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
-    elevator.setDefaultCommand(new ElevatorHoldPosition());
     new InitRobotCommand().schedule();
 
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
@@ -236,6 +235,7 @@ public class Robot extends TimedRobot {
     m_setCoastOnDisable.cancel();
 
     swerve.configNeutralMode(NeutralModeValue.Brake);
+    new ElevatorHoldPosition().schedule();
   }
 
   /** This function is called periodically during operator control. */
