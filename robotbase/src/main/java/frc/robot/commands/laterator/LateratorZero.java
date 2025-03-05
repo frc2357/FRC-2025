@@ -22,8 +22,9 @@ public class LateratorZero extends Command {
 
   @Override
   public void end(boolean interrupted) {
+    Robot.laterator.stop();
     if (!interrupted) {
-      Robot.laterator.stop();
+      Robot.laterator.setZero();
     }
   }
 }

@@ -16,6 +16,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Preferences;
@@ -35,7 +36,8 @@ public class ElevatorTuningSubsystem implements Sendable {
   private double P = 0.016;
   private double I = 0;
   private double D = 0;
-  private double arbFF = 0.013;
+  private double arbFF = 0.05;
+  private double velFF = 0;
   private double maxVel = 4600; // Desired: 4600, Max: 5600
   private double maxAcc = 5000; // Desired: 18400
 
@@ -66,19 +68,21 @@ public class ElevatorTuningSubsystem implements Sendable {
 
     m_PIDController = m_motorLeft.getClosedLoopController();
 
-    Preferences.initDouble("elevatorP", 0);
-    Preferences.initDouble("elevatorI", 0);
-    Preferences.initDouble("elevatorD", 0);
-    Preferences.initDouble("elevatorFF", 0);
-    Preferences.initDouble("elevatorMaxVel", 0);
-    Preferences.initDouble("elevatorMaxAcc", 0);
+    Preferences.initDouble("elevatorP", P);
+    Preferences.initDouble("elevatorI", I);
+    Preferences.initDouble("elevatorD", D);
+    Preferences.initDouble("elevatorFF", arbFF);
+    Preferences.initDouble("elevatorVelFF", velFF);
+    Preferences.initDouble("elevatorMaxVel", maxVel);
+    Preferences.initDouble("elevatorMaxAcc", maxAcc);
 
-    P = Preferences.getDouble("elevatorP", 0);
-    I = Preferences.getDouble("elevatorI", 0);
-    D = Preferences.getDouble("elevatorD", 0);
-    arbFF = Preferences.getDouble("elevatorFF", 0);
-    maxVel = Preferences.getDouble("elevatorMaxVel", 0);
-    maxAcc = Preferences.getDouble("elevatorMaxAcc", 0);
+    P = Preferences.getDouble("elevatorP", P);
+    I = Preferences.getDouble("elevatorI", I);
+    D = Preferences.getDouble("elevatorD", D);
+    arbFF = Preferences.getDouble("elevatorFF", arbFF);
+    velFF = Preferences.getDouble("elevatorVelFF", velFF);
+    maxVel = Preferences.getDouble("elevatorMaxVel", maxVel);
+    maxAcc = Preferences.getDouble("elevatorMaxAcc", maxAcc);
 
     displayDashboard();
   }
@@ -88,6 +92,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Elevator I", I);
     SmartDashboard.putNumber("Elevator D", D);
     SmartDashboard.putNumber("Elevator arbFF", arbFF);
+    SmartDashboard.putNumber("Elevator velFF", velFF);
     SmartDashboard.putNumber("Elevator MaxVel", maxVel);
     SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -103,11 +108,12 @@ public class ElevatorTuningSubsystem implements Sendable {
 
   public void updatePIDs() {
     // Rev recommends not using velocity feed forward for max motion positional control
-    m_motorconfig.closedLoop.pidf(P, I, D, 0);
+    m_motorconfig.closedLoop.pidf(P, I, D, velFF);
 
-    m_motorconfig.closedLoop.maxMotion
+    m_motorconfig.closedLoop.smartMotion
       .maxAcceleration(maxAcc)
-      .maxVelocity(maxVel);
+      .maxVelocity(maxVel)
+      .allowedClosedLoopError(0.1);
 
     m_motorLeft.configure(
       m_motorconfig,
@@ -121,6 +127,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     double newI = SmartDashboard.getNumber("Elevator I", I);
     double newD = SmartDashboard.getNumber("Elevator D", D);
     double newFF = SmartDashboard.getNumber("Elevator arbFF", arbFF);
+    double newVelFF = SmartDashboard.getNumber("Elevator velFF", velFF);
     double newMaxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -139,6 +146,7 @@ public class ElevatorTuningSubsystem implements Sendable {
       newI != I ||
       newD != D ||
       newFF != arbFF ||
+      newVelFF != velFF ||
       newMaxVel != maxVel ||
       newMaxAcc != maxAcc
     ) {
@@ -146,6 +154,7 @@ public class ElevatorTuningSubsystem implements Sendable {
       I = newI;
       D = newD;
       arbFF = newFF;
+      velFF = newVelFF;
       maxVel = newMaxVel;
       maxAcc = newMaxAcc;
       updatePIDs();
@@ -203,7 +212,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl,
+      ControlType.kSmartMotion,
       ClosedLoopSlot.kSlot0,
       arbFF,
       ArbFFUnits.kVoltage
@@ -239,6 +248,7 @@ public class ElevatorTuningSubsystem implements Sendable {
         Preferences.setDouble("elevatorI", I);
         Preferences.setDouble("elevatorD", D);
         Preferences.setDouble("elevatorFF", arbFF);
+        Preferences.setDouble("elevatorVelFF", velFF);
         Preferences.setDouble("elevatorMaxVel", maxVel);
         Preferences.setDouble("elevatorMaxAcc", maxAcc);
       }

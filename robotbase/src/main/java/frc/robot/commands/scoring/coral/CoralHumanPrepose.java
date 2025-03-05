@@ -1,9 +1,12 @@
 package frc.robot.commands.scoring.coral;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
+import frc.robot.Constants.LATERATOR;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringLevel;
+import frc.robot.subsystems.Laterator;
 import java.util.Map;
 
 public class CoralHumanPrepose {
@@ -42,7 +45,22 @@ public class CoralHumanPrepose {
     return m_levels[m_currentLevel];
   }
 
-  public Command reset() {
-    return new InstantCommand(() -> m_currentLevel = 0);
+  public Distance getLateratorDistance() {
+    switch (m_levels[m_currentLevel]) {
+      case L1:
+        return LATERATOR.SETPOINTS.L1_PREPOSE;
+      case L2:
+        return LATERATOR.SETPOINTS.L2_PREPOSE;
+      case L3:
+        return LATERATOR.SETPOINTS.L3_PREPOSE;
+      case L4:
+        return LATERATOR.SETPOINTS.L4_PREPOSE;
+      default:
+        return LATERATOR.SETPOINTS.HOME;
+    }
+  }
+
+  public void reset() {
+    m_currentLevel = 0;
   }
 }

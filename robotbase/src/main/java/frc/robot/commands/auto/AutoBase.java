@@ -6,6 +6,7 @@ import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.LATERATOR;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
 import frc.robot.commands.scoring.coral.CoralPreposeL4;
@@ -70,7 +71,12 @@ public class AutoBase {
     traj1.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new CoralPreposeL4());
     traj1
       .done()
-      .onTrue(new CoralScore().andThen(new CoralPreposeIntake(), traj2.cmd()));
+      .onTrue(
+        new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
+          new CoralPreposeIntake(),
+          traj2.cmd()
+        )
+      );
   }
 
   /**

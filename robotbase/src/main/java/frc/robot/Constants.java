@@ -91,7 +91,7 @@ public final class Constants {
   public static final class SWERVE {
 
     public static final AngularVelocity MAX_ANGULAR_VELOCITY =
-      Units.RadiansPerSecond.of(Math.PI * 2);
+      Units.RadiansPerSecond.of((Math.PI * 2) / 3);
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
 
@@ -143,21 +143,21 @@ public final class Constants {
         .apply(MOTOR_CONFIG_LEFT)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
-    public static final double LEFT_MOTOR_P = 0.008;
+    public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
     public static final double LEFT_MOTOR_D = 0;
-    public static final double LEFT_MOTOR_VEL_F = 0; // Should always be zero
-    public static final double LEFT_MOTOR_ARB_F = 0.05;
+    public static final double LEFT_MOTOR_VEL_F = 0.0003;
+    public static final double LEFT_MOTOR_ARB_F = 0.15;
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
         .outputRange(-1, 1);
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(5000)
+    public static final double SMART_MOTION_ALLOWED_ERROR_ROTATIONS = 0.2;
+    public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.smartMotion
+        .allowedClosedLoopError(SMART_MOTION_ALLOWED_ERROR_ROTATIONS)
+        .maxAcceleration(10000)
         .maxVelocity(4600);
 
     public static final double GEAR_RATIO = (38.0 / 14.0) * 2.0;
@@ -168,20 +168,24 @@ public final class Constants {
       HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
 
     public static final double AXIS_MAX_SPEED = 0.5;
-    public static final double ZERO_SPEED = -0.05;
+    public static final double ZERO_SPEED = -0.1;
+
+    public static final double ZERO_STALL_AMPS = 35;
+
+    public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(2); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0.2); // TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Inches.of(1); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Inches.of(8.43); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Inches.of(23.189); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Inches.of(50.2); // TODO: Tune Setpoint
     }
 
-    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+    public static final double DEBOUNCE_TIME_SECONDS = 0.3;
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
   }
@@ -226,11 +230,11 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(1); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(2.75); // TODO: Tune Setpoint
+      public static final Distance L1_PREPOSE = Units.Inches.of(-2); // TODO: Tune Setpoint
+      public static final Distance L2_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
+      public static final Distance L3_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
+      public static final Distance L4_PREPOSE = Units.Inches.of(-6.4); // TODO: Tune Setpoint
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
@@ -366,19 +370,19 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.CONSTRAINED_SOLVEPNP;
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
     public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.CONSTRAINED_SOLVEPNP;
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 2.0;
+    public static final double PNP_HEADING_SCALE_FACTOR = 1.0;
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       Optional.of(
-        new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
+        new ConstrainedSolvepnpParams(true, PNP_HEADING_SCALE_FACTOR)
       ); // TODO: tune this throughout normal operation. This is for max to do.
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
@@ -387,8 +391,8 @@ public final class Constants {
     public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
 
     // if were going faster than this, we wont accept any pose est.
-    public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
-      Units.MetersPerSecond.of(3.5);
+    public static final AngularVelocity MAX_ACCEPTABLE_VELOCITY =
+      Units.RadiansPerSecond.of(0.2);
 
     // how close the estimated pose can get to the field border before we invalidate it
     public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.5);

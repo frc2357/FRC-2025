@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -14,17 +16,16 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
 
 public class Elevator extends SubsystemBase {
 
-  private DigitalInput m_hall_effect;
-  private Debouncer m_debouncer;
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
@@ -51,22 +52,17 @@ public class Elevator extends SubsystemBase {
     m_motorLeft.configure(
       Constants.ELEVATOR.MOTOR_CONFIG_LEFT,
       ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      PersistMode.kNoPersistParameters
     );
     m_motorRight.configure(
       Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
       ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      PersistMode.kNoPersistParameters
     );
 
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
-
-    m_hall_effect = new DigitalInput(
-      Constants.DIGITAL_INPUT.ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID
-    );
-    m_debouncer = new Debouncer(Constants.ELEVATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -86,10 +82,29 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setTargetRotations(Angle targetRotations) {
+    var config = ELEVATOR.MOTOR_CONFIG_LEFT;
+    if (getRotations().in(Rotations) > targetRotations.in(Rotations)) {
+      config.closedLoop.smartMotion.maxAcceleration(5000);
+      m_motorLeft.configure(
+        config,
+        ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters
+      );
+    } else if (
+      m_motorLeft.configAccessor.closedLoop.smartMotion.getMaxAcceleration() <
+      6000
+    ) {
+      config.closedLoop.smartMotion.maxAcceleration(10000);
+      m_motorLeft.configure(
+        config,
+        ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters
+      );
+    }
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl,
+      ControlType.kSmartMotion,
       ClosedLoopSlot.kSlot0,
       ELEVATOR.LEFT_MOTOR_ARB_F,
       ArbFFUnits.kVoltage
@@ -133,7 +148,7 @@ public class Elevator extends SubsystemBase {
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
-      ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      ELEVATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
     );
   }
 
@@ -142,7 +157,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_debouncer.calculate(!m_hall_effect.get());
+    return m_motorLeft.getOutputCurrent() > ELEVATOR.ZERO_STALL_AMPS;
   }
 
   public void setZero() {
@@ -151,6 +166,9 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // SmartDashboard.putNumber("Elevator RPM", m_encoder.getVelocity());
+    SmartDashboard.putNumber(
+      "Elevator Calculated Distance",
+      getDistance().in(Units.Inches)
+    );
   }
 }

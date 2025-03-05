@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
+import frc.robot.util.ElasticFieldManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -216,14 +218,12 @@ public class PhotonVisionCamera extends SubsystemBase {
         );
       }
     }
-    if (updatePose) {
-      for (int i = 0; i < m_pnpInfo.length; i++) {
-        if (m_pnpInfo[i].result == null) {
-          continue;
-        }
-        updatePoseFromPNPInfo(m_pnpInfo[i]);
-        m_pnpInfo[i].invalidateInfo();
+    for (int i = 0; i < m_pnpInfo.length; i++) {
+      if (m_pnpInfo[i].result == null) {
+        continue;
       }
+      updatePoseFromPNPInfo(m_pnpInfo[i]);
+      m_pnpInfo[i].invalidateInfo();
     }
   }
 
@@ -304,7 +304,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     // does whatever we need to make the strategy work
     switch (m_primaryStrategy) {
       case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
-        m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
+        // m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
         break;
       case CLOSEST_TO_REFERENCE_POSE:
         m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
@@ -343,6 +343,17 @@ public class PhotonVisionCamera extends SubsystemBase {
       pnpInfo.heading,
       pnpInfo.headingTimestampSeconds
     );
+    if (
+      Math.abs(Robot.swerve.getRotationalVelocity().in(RadiansPerSecond)) >
+      MAX_ACCEPTABLE_VELOCITY.in(RadiansPerSecond)
+    ) {
+      return;
+    }
+
+    m_poseEstimator.addHeadingData(
+      pnpInfo.headingTimestampSeconds,
+      pnpInfo.heading
+    );
     m_lastEstimatedPose = m_poseEstimator
       .update(
         pnpInfo.result,
@@ -362,16 +373,9 @@ public class PhotonVisionCamera extends SubsystemBase {
         .in(Meters);
     }
     averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
-    if (isPoseInField(m_lastEstimatedPose.estimatedPose)) {
-      return;
-    }
-
-    if (
-      Robot.swerve.getTranslationalVelocity().in(MetersPerSecond) >
-      MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
-    ) {
-      return;
-    }
+    // if (!isPoseInField(m_lastEstimatedPose.estimatedPose)) {
+    //   return;
+    // }
 
     // the higher the confidence is, the less the estimated measurment is trusted.
     double xVelocityConf =
@@ -391,14 +395,17 @@ public class PhotonVisionCamera extends SubsystemBase {
       ((averageTargetDistance / 2) * yVelocityConf),
       MAGIC_VEL_CONF_EXPONENT
     );
-    Robot.swerve.addVisionMeasurement(
-      m_lastEstimatedPose.estimatedPose.toPose2d(),
-      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
-      VecBuilder.fill(
-        xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
-        yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
-      )
+    // Robot.swerve.addVisionMeasurement(
+    //   m_lastEstimatedPose.estimatedPose.toPose2d(),
+    //   Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
+    //   VecBuilder.fill(
+    //     xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
+    //     yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+    //     Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
+    //   )
+    // );
+    Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
+      m_lastEstimatedPose.estimatedPose.toPose2d()
     );
   }
 

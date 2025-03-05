@@ -8,9 +8,6 @@ import frc.robot.commands.laterator.LateratorSetDistance;
 public class CoralPreposeL3 extends ParallelCommandGroup {
 
   public CoralPreposeL3() {
-    super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.L3_PREPOSE),
-      new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L3_PREPOSE)
-    );
+    super(new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L3_PREPOSE));
   }
 }

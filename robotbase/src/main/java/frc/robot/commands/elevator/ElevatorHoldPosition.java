@@ -11,7 +11,7 @@ public class ElevatorHoldPosition extends Command {
 
   @Override
   public void initialize() {
-    Robot.elevator.setTargetRotations(Robot.elevator.getRotations());
+    // Robot.elevator.setTargetRotations(Robot.elevator.getRotations());
   }
 
   @Override

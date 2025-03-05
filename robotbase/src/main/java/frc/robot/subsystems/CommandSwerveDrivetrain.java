@@ -147,6 +147,8 @@ public class CommandSwerveDrivetrain
 
   private Twist2d m_fieldVelocity = new Twist2d();
 
+  private double m_lastPigeonYaw;
+
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    * <p>
@@ -464,6 +466,10 @@ public class CommandSwerveDrivetrain
       Math.pow(xVel, 2) + Math.pow(yVel, 2)
     ); // A^2 + B^2 = C^2
     return Units.FeetPerSecond.of(translationalVelocity);
+  }
+
+  public AngularVelocity getRotationalVelocity() {
+    return Units.RadiansPerSecond.of(getState().Speeds.omegaRadiansPerSecond);
   }
 
   public AngularVelocity getAngularVelocity() {

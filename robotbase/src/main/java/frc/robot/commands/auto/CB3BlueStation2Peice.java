@@ -3,6 +3,7 @@ package frc.robot.commands.auto;
 import static frc.robot.Constants.CHOREO.*;
 
 import choreo.auto.AutoTrajectory;
+import frc.robot.Constants.LATERATOR;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
 import frc.robot.commands.scoring.coral.CoralPreposeL4;
@@ -40,13 +41,18 @@ public class CB3BlueStation2Peice extends AutoBase {
     // scoringSegment(BlueSToBranchI, branchIToBlueS);
 
     // as we get close to branch J we prepose to score
-    m_startTraj.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new CoralPreposeL4());
+    // m_startTraj.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new CoralPreposeL4());
     // when at branch J we score, lower the elevator, and move on
     m_startTraj
       .done()
       .onTrue(
-        new CoralScore().andThen(new CoralPreposeIntake(), branchJToBlueS.cmd()) //score coral 1
-      );
+        new AutoCoralPreposeL4()
+          .andThen(
+            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE),
+            new CoralPreposeIntake(),
+            branchJToBlueS.cmd()
+          )
+      ); //score coral 1
 
     // when at the coral station, we intake coral and then go to the next branch
     branchJToBlueS
@@ -54,12 +60,17 @@ public class CB3BlueStation2Peice extends AutoBase {
       .onTrue(new CoralIntake().andThen(BlueSToBranchK.cmd()));
     // as we get close to the branch, we prepose to score
     BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
-      new CoralPreposeL4()
+      new AutoCoralPreposeL4()
     );
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
       .onTrue(
-        new CoralScore().andThen(new CoralPreposeIntake(), branchKToBlueS.cmd()) // score coral 2
+        new AutoCoralPreposeL4()
+          .andThen(
+            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE) // score coral 2
+              .andThen(new CoralPreposeIntake())
+              .andThen(branchKToBlueS.cmd())
+          )
       );
     // // when at the coral station, we intake coral and then go to the next branch
     // branchKToBlueS
