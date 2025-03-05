@@ -9,6 +9,11 @@ import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorZero;
+import frc.robot.commands.scoring.coral.CoralPreposeL1;
+import frc.robot.commands.scoring.coral.CoralPreposeL2;
+import frc.robot.commands.scoring.coral.CoralPreposeL3;
+import frc.robot.commands.scoring.coral.CoralPreposeL4;
+import frc.robot.commands.scoring.coral.CoralScore;
 
 public class CodriverControls {
 
@@ -33,8 +38,27 @@ public class CodriverControls {
     m_controller
       .povUp()
       .whileTrue(new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY())));
-    m_controller.x().whileTrue(new ElevatorZero());
+    m_controller
+      .povLeft()
+      .negate()
+      .and(m_controller.x().whileTrue(new ElevatorZero()));
 
+    m_controller
+      .povLeft()
+      .and(m_controller.a())
+      .whileTrue(new CoralPreposeL1());
+    m_controller
+      .povLeft()
+      .and(m_controller.b())
+      .whileTrue(new CoralPreposeL2());
+    m_controller
+      .povLeft()
+      .and(m_controller.x())
+      .whileTrue(new CoralPreposeL3());
+    m_controller
+      .povLeft()
+      .and(m_controller.y())
+      .whileTrue(new CoralPreposeL4());
     m_controller
       .povRight()
       .whileTrue(

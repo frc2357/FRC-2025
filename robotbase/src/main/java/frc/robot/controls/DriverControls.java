@@ -18,8 +18,10 @@ import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.drive.VelDrive;
 import frc.robot.commands.intake.AlgaeChooser;
 import frc.robot.commands.intake.CoralIntake;
+import frc.robot.commands.intake.CoralIntakeRetract;
 import frc.robot.commands.scoring.coral.CoralHumanPrepose;
 import frc.robot.commands.scoring.coral.CoralScore;
+import org.opencv.ml.Ml;
 
 @SuppressWarnings("unused")
 public class DriverControls {
@@ -46,38 +48,21 @@ public class DriverControls {
   }
 
   public void mapControls() {
-    m_controller.a().whileTrue(new DriveToPoseHandler(RouteAroundReef.Fastest));
-    m_controller
-      .b()
-      .whileTrue(
-        new DriveToCoralStation(StationToGoTo.Fastest, RouteAroundReef.Fastest)
-      );
-
-    m_controller
-      .x()
-      .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetPose(
-            REEF.BRANCH_C.plus(new Transform2d(0, -1, Rotation2d.kZero))
-          )
-        )
-      );
-
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
-    m_controller.b().whileTrue(new VelDrive());
-
-    m_leftTrigger.whileTrue(new CoralIntake());
+    m_leftTrigger.toggleOnTrue(new CoralIntake());
     // Manual Coral Scoring
-    // CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
-    // m_controller.leftBumper().onTrue(humanPrepose.getSelectCommand());
-    // m_controller
-    //   .leftTrigger()
-    //   .onTrue(new CoralScore().andThen(humanPrepose.reset()));
+    CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
+    m_controller.rightBumper().onTrue(humanPrepose.getSelectCommand());
+    m_rightTrigger.onTrue(
+      new CoralScore(() -> humanPrepose.getLateratorDistance()).finallyDo(() ->
+        humanPrepose.reset()
+      )
+    );
 
-    m_rightTrigger.whileTrue(new CoralScore());
+    // m_rightTrigger.whileTrue(new CoralScore());
     // AlgaeChooser algaeChooser = new AlgaeChooser();
     // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());
 

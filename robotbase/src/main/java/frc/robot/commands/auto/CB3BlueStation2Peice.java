@@ -3,6 +3,7 @@ package frc.robot.commands.auto;
 import static frc.robot.Constants.CHOREO.*;
 
 import choreo.auto.AutoTrajectory;
+import frc.robot.Constants.LATERATOR;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
 import frc.robot.commands.scoring.coral.CoralPreposeL4;
@@ -45,7 +46,10 @@ public class CB3BlueStation2Peice extends AutoBase {
     m_startTraj
       .done()
       .onTrue(
-        new CoralScore().andThen(new CoralPreposeIntake(), branchJToBlueS.cmd()) //score coral 1
+        new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
+          new CoralPreposeIntake(),
+          branchJToBlueS.cmd()
+        ) //score coral 1
       );
 
     // when at the coral station, we intake coral and then go to the next branch
@@ -59,7 +63,10 @@ public class CB3BlueStation2Peice extends AutoBase {
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
       .onTrue(
-        new CoralScore().andThen(new CoralPreposeIntake(), branchKToBlueS.cmd()) // score coral 2
+        new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
+          new CoralPreposeIntake(),
+          branchKToBlueS.cmd()
+        ) // score coral 2
       );
     // // when at the coral station, we intake coral and then go to the next branch
     // branchKToBlueS

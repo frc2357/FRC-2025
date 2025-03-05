@@ -1,27 +1,41 @@
 package frc.robot.commands.intake;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
-import frc.robot.commands.scoring.coral.CoralHome;
 
-public class CoralIntake extends SequentialCommandGroup {
+public class CoralIntake extends Command {
 
   public CoralIntake() {
-    super(
-      new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT).until(
-        Robot.coralRunner::isIntakeBeamBroken
-      ),
-      new ParallelCommandGroup(
-        // new CoralHome(),
+    new CoralPreposeIntake()
+      .andThen(
         new CoralRunnerSetSpeed(
-          Constants.CORAL_RUNNER.SLOW_INTAKE_PERCENT
-        ).until(Robot.coralRunner::isOuttakeBeamBroken)
+          Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT
+        ).until(Robot.coralRunner::isIntakeBeamBroken)
       )
-    );
+      .schedule();
+  }
+
+  @Override
+  public void initialize() {
+    new CoralPreposeIntake()
+      .andThen(
+        new CoralRunnerSetSpeed(
+          Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT
+        ).until(Robot.coralRunner::isIntakeBeamBroken)
+      )
+      .schedule();
+  }
+
+  @Override
+  public boolean isFinished() {
+    return Robot.coralRunner.isIntakeBeamBroken();
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    new CoralIntakeRetract().schedule();
   }
 }

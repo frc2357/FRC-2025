@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.auto.AutoBase;
 import frc.robot.commands.auto.CB3BlueStation2Peice;
 import frc.robot.commands.auto.TuningPathFinal;
-import frc.robot.commands.auto.TuningPathRot;
 import frc.robot.commands.auto.TuningPathX;
 import frc.robot.commands.auto.TuningPathY;
 import java.util.Map;
@@ -24,8 +23,8 @@ public class AutoChooserManager {
     new CB3BlueStation2Peice(),
     new TuningPathX(),
     new TuningPathY(),
-    new TuningPathRot(),
     new TuningPathFinal(),
+    new AutoBase("CB3ToBranchI"),
   };
 
   private AutoChooser m_autoChooser = new AutoChooser();

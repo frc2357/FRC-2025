@@ -1,5 +1,6 @@
 package frc.robot.commands.scoring.coral;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -8,11 +9,14 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerStop;
+import frc.robot.commands.laterator.LateratorSetDistance;
+import java.util.function.Supplier;
 
 public class CoralScore extends SequentialCommandGroup {
 
-  public CoralScore() {
+  public CoralScore(Supplier<Distance> lateratorDistance) {
     super(
+      new LateratorSetDistance(lateratorDistance),
       new ParallelDeadlineGroup(
         new SequentialCommandGroup(
           new WaitUntilCommand(Robot.coralRunner::isOuttakeBeamBroken),

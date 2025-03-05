@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -90,7 +92,7 @@ public class Elevator extends SubsystemBase {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl,
+      ControlType.kSmartMotion,
       ClosedLoopSlot.kSlot0,
       ELEVATOR.LEFT_MOTOR_ARB_F,
       ArbFFUnits.kVoltage
@@ -134,7 +136,7 @@ public class Elevator extends SubsystemBase {
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
-      ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      ELEVATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
     );
   }
 
