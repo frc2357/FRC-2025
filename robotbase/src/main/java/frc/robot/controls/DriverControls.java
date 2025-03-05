@@ -53,8 +53,6 @@ public class DriverControls {
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
-    m_controller.x().whileTrue(new ElevatorZero());
-
     m_leftTrigger.toggleOnTrue(new CoralIntake());
     // Manual Coral Scoring
     CoralHumanPrepose humanPrepose = new CoralHumanPrepose();

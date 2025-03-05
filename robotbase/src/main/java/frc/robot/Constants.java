@@ -172,13 +172,13 @@ public final class Constants {
 
     public static final double ZERO_STALL_AMPS = 35;
 
-    public static final Time ZERO_TIME = Units.Seconds.of(5);
+    public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Inches.of(0.5); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(2); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0.2); // TODO: Tune Setpoint
       public static final Distance L1_PREPOSE = Units.Inches.of(1); // TODO: Tune Setpoint
       public static final Distance L2_PREPOSE = Units.Inches.of(8.43); // TODO: Tune Setpoint
       public static final Distance L3_PREPOSE = Units.Inches.of(23.189); // TODO: Tune Setpoint

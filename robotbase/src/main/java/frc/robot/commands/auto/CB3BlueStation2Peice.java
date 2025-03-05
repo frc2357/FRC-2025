@@ -46,25 +46,32 @@ public class CB3BlueStation2Peice extends AutoBase {
     m_startTraj
       .done()
       .onTrue(
-        /*new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
-          new CoralPreposeIntake(),*/
-        branchJToBlueS.cmd()
+        new AutoCoralPreposeL4()
+          .andThen(
+            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE),
+            new CoralPreposeIntake(),
+            branchJToBlueS.cmd()
+          )
       ); //score coral 1
 
     // when at the coral station, we intake coral and then go to the next branch
     branchJToBlueS
       .done()
-      .onTrue(/*new CoralIntake().andThen(*/BlueSToBranchK.cmd());
+      .onTrue(new CoralIntake().andThen(BlueSToBranchK.cmd()));
     // as we get close to the branch, we prepose to score
-    // BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
-    // new CoralPreposeL4()
-    // );
+    BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
+      new AutoCoralPreposeL4()
+    );
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
       .onTrue(
-        /*new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(new CoralPreposeIntake()
-            .andThen(*/branchKToBlueS.cmd()
-      ); // score coral 2
+        new AutoCoralPreposeL4()
+          .andThen(
+            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE) // score coral 2
+              .andThen(new CoralPreposeIntake())
+              .andThen(branchKToBlueS.cmd())
+          )
+      );
     // // when at the coral station, we intake coral and then go to the next branch
     // branchKToBlueS
     //   .done()

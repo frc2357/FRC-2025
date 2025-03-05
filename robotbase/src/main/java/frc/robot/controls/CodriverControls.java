@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
+import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorZero;
@@ -41,7 +42,7 @@ public class CodriverControls {
     m_controller
       .povLeft()
       .negate()
-      .and(m_controller.x().whileTrue(new ElevatorZero()));
+      .and(m_controller.x().whileTrue(new ElevatorHome()));
 
     m_controller
       .povLeft()

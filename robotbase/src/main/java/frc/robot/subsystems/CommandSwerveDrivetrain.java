@@ -147,6 +147,8 @@ public class CommandSwerveDrivetrain
 
   private Twist2d m_fieldVelocity = new Twist2d();
 
+  private double m_lastPigeonYaw;
+
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    * <p>
