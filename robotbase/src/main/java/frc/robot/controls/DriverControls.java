@@ -63,7 +63,6 @@ public class DriverControls {
       )
     );
 
-    // m_rightTrigger.whileTrue(new CoralScore());
     // AlgaeChooser algaeChooser = new AlgaeChooser();
     // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());
 
