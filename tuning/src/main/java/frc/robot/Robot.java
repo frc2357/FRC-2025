@@ -4,17 +4,14 @@
 
 package frc.robot;
 
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.subsystems.AlgaePivotTuningSubsystem;
 import frc.robot.subsystems.ElevatorTuningSubsystem;
 import frc.robot.subsystems.LateratorTuningSubsystem;
 
 public class Robot extends TimedRobot {
 
   ElevatorTuningSubsystem elevator;
-  AlgaePivotTuningSubsystem algae;
   LateratorTuningSubsystem laterator;
 
   XboxController m_controller;
@@ -23,7 +20,6 @@ public class Robot extends TimedRobot {
     m_controller = new XboxController(0);
 
     elevator = new ElevatorTuningSubsystem();
-    // algae = new AlgaePivotTuningSubsystem();
     // laterator = new LateratorTuningSubsystem();
   }
 
@@ -31,7 +27,6 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     elevator.updateDashboard();
     // laterator.updateDashboard();
-    // algae.updateDashboard();
   }
 
   @Override
@@ -41,7 +36,6 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     elevator.teleopPeriodic();
     // laterator.teleopPeriodic();
-    // algae.teleopPeriodic();
   }
 
   @Override
@@ -58,12 +52,10 @@ public class Robot extends TimedRobot {
     if (m_controller.getXButton()) {
       elevator.setZero();
       // laterator.setZero();
-      // algae.setZero();
     }
 
     elevator.setAxisSpeed(-m_controller.getRightY());
     // laterator.setAxisSpeed(-m_controller.getRightY());
-    // algae.setAxisSpeed(-m_controller.getRightY());
     // Call elevator.setAxisSpeed with controller right joystick y axis value
 
   }

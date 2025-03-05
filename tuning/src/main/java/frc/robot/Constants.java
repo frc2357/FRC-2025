@@ -89,37 +89,6 @@ public final class Constants {
       OUTPUT_PULLEY_DIAMETER.times(Math.PI);
   }
 
-  public static final class ALGAE_PIVOT {
-
-    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
-      new SparkMaxConfig()
-        .idleMode(IdleMode.kBrake)
-        .inverted(false)
-        .openLoopRampRate(.25)
-        .smartCurrentLimit(40, 20)
-        .voltageCompensation(12);
-
-    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
-      .apply(MOTOR_CONFIG_RIGHT)
-      .follow(CAN_ID.ALGAE_PIVOT_RIGHT_MOTOR, true);
-
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_RIGHT =
-      MOTOR_CONFIG_RIGHT.closedLoop
-        .outputRange(-1, 1)
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .positionWrappingEnabled(true);
-
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_RIGHT =
-      CLOSED_LOOP_CONFIG_RIGHT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(0)
-        .maxVelocity(0);
-
-    public static final double AXIS_MAX_SPEED = 0.75;
-  }
-
   public static final class CUSTOM_UNITS {
 
     // These units are ONLY for the output shaft on the neo. Any pulley will require
