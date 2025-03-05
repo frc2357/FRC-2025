@@ -70,14 +70,14 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setSpeed(double percentOutput) {
-    // m_motorLeft.set(percentOutput);
-    // m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+    m_motorLeft.set(percentOutput);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void setAxisSpeed(double speed) {
-    // speed *= ELEVATOR.AXIS_MAX_SPEED;
-    // m_motorLeft.set(speed);
-    // m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+    speed *= ELEVATOR.AXIS_MAX_SPEED;
+    m_motorLeft.set(speed);
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
   public void stop() {
@@ -86,24 +86,24 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setTargetRotations(Angle targetRotations) {
-    // m_targetRotations.mut_replace(targetRotations);
-    // m_PIDController.setReference(
-    //   m_targetRotations.in(Units.Rotations),
-    //   ControlType.kMAXMotionPositionControl,
-    //   ClosedLoopSlot.kSlot0,
-    //   ELEVATOR.LEFT_MOTOR_ARB_F,
-    //   ArbFFUnits.kVoltage
-    // );
+    m_targetRotations.mut_replace(targetRotations);
+    m_PIDController.setReference(
+      m_targetRotations.in(Units.Rotations),
+      ControlType.kMAXMotionPositionControl,
+      ClosedLoopSlot.kSlot0,
+      ELEVATOR.LEFT_MOTOR_ARB_F,
+      ArbFFUnits.kVoltage
+    );
   }
 
   public void setTargetDistance(Distance targetDistance) {
-    // Angle rotations = Units.Rotations.of(
-    //   targetDistance
-    //     .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-    //     .times(ELEVATOR.GEAR_RATIO)
-    //     .magnitude()
-    // );
-    // setTargetRotations(rotations);
+    Angle rotations = Units.Rotations.of(
+      targetDistance
+        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
+        .times(ELEVATOR.GEAR_RATIO)
+        .magnitude()
+    );
+    setTargetRotations(rotations);
   }
 
   public AngularVelocity getVelocity() {
