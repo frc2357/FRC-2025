@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.PHOTON_VISION.BACK_CAM;
+import frc.robot.Constants.PHOTON_VISION.FRONT_CAM;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
@@ -90,6 +92,7 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
+    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();

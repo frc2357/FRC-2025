@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
-import frc.robot.util.ElasticFieldManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -180,7 +179,6 @@ public class PhotonVisionCamera extends SubsystemBase {
     Matrix<N3, N3> cameraMatrix,
     Matrix<N8, N1> distCoeefs
   ) {
-    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
     m_camera = new PhotonCamera(cameraName);
     m_robotCameras.add(this);
 
@@ -222,7 +220,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       if (m_pnpInfo[i].result == null) {
         continue;
       }
-      updatePoseFromPNPInfo(m_pnpInfo[i]);
+      updatePoseFromPNPInfo(m_pnpInfo[i], updatePose);
       m_pnpInfo[i].invalidateInfo();
     }
   }
@@ -337,7 +335,10 @@ public class PhotonVisionCamera extends SubsystemBase {
     m_poseEstimator.setRobotToCameraTransform(robotToCamTransform);
   }
 
-  private static void updatePoseFromPNPInfo(TimestampedPNPInfo pnpInfo) {
+  private static void updatePoseFromPNPInfo(
+    TimestampedPNPInfo pnpInfo,
+    boolean updatePose
+  ) {
     preparePoseEstimator(
       pnpInfo.robotToCameraTransform,
       pnpInfo.heading,
@@ -345,7 +346,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     );
     if (
       Math.abs(Robot.swerve.getRotationalVelocity().in(RadiansPerSecond)) >
-      MAX_ACCEPTABLE_VELOCITY.in(RadiansPerSecond)
+      MAX_ACCEPTABLE_ROTATOINAL_VELOCITY.in(RadiansPerSecond)
     ) {
       return;
     }
@@ -395,15 +396,17 @@ public class PhotonVisionCamera extends SubsystemBase {
       ((averageTargetDistance / 2) * yVelocityConf),
       MAGIC_VEL_CONF_EXPONENT
     );
-    // Robot.swerve.addVisionMeasurement(
-    //   m_lastEstimatedPose.estimatedPose.toPose2d(),
-    //   Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
-    //   VecBuilder.fill(
-    //     xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
-    //     yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-    //     Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
-    //   )
-    // );
+    if (updatePose) {
+      Robot.swerve.addVisionMeasurement(
+        m_lastEstimatedPose.estimatedPose.toPose2d(),
+        Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
+        VecBuilder.fill(
+          xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
+          yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+          10000 // Theta conf, should never change the gyro heading
+        )
+      );
+    }
     Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
       m_lastEstimatedPose.estimatedPose.toPose2d()
     );

@@ -156,7 +156,7 @@ public class Elevator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
-  public boolean isAtZero() {
+  public boolean isStalling() {
     return m_motorLeft.getOutputCurrent() > ELEVATOR.ZERO_STALL_AMPS;
   }
 

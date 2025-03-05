@@ -10,11 +10,19 @@ import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerStop;
 import frc.robot.commands.laterator.LateratorSetDistance;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class CoralScore extends SequentialCommandGroup {
 
   public CoralScore(Supplier<Distance> lateratorDistance) {
+    this(lateratorDistance, () -> true);
+  }
+
+  public CoralScore(
+    Supplier<Distance> lateratorDistance,
+    BooleanSupplier zero
+  ) {
     super(
       new LateratorSetDistance(lateratorDistance),
       new ParallelDeadlineGroup(
@@ -25,7 +33,7 @@ public class CoralScore extends SequentialCommandGroup {
         new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT)
       ),
       new CoralRunnerStop(),
-      new CoralHome()
+      new CoralHome(zero)
     );
   }
 }

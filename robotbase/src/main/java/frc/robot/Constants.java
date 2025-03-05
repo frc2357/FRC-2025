@@ -8,10 +8,8 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
@@ -154,6 +152,8 @@ public final class Constants {
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
         .outputRange(-1, 1);
     public static final double SMART_MOTION_ALLOWED_ERROR_ROTATIONS = 0.2;
+
+    @SuppressWarnings("removal")
     public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.smartMotion
         .allowedClosedLoopError(SMART_MOTION_ALLOWED_ERROR_ROTATIONS)
@@ -170,19 +170,19 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final double ZERO_SPEED = -0.1;
 
-    public static final double ZERO_STALL_AMPS = 35;
+    public static final double ZERO_STALL_AMPS = 27; //TODO: tune this ASAP.
 
     public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Inches.of(2); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0.2); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Inches.of(1); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Inches.of(8.43); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Inches.of(23.189); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Inches.of(50.2); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0.5);
+      public static final Distance L1_PREPOSE = Units.Inches.of(1);
+      public static final Distance L2_PREPOSE = Units.Inches.of(7.43);
+      public static final Distance L3_PREPOSE = Units.Inches.of(22.189);
+      public static final Distance L4_PREPOSE = Units.Inches.of(49.2);
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.3;
@@ -230,7 +230,7 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(1); // TODO: Tune Setpoint
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(2.75); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(3); // TODO: Tune Setpoint
       public static final Distance L1_PREPOSE = Units.Inches.of(-2); // TODO: Tune Setpoint
       public static final Distance L2_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
       public static final Distance L3_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
@@ -382,7 +382,7 @@ public final class Constants {
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       Optional.of(
-        new ConstrainedSolvepnpParams(true, PNP_HEADING_SCALE_FACTOR)
+        new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
       ); // TODO: tune this throughout normal operation. This is for max to do.
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
@@ -391,20 +391,20 @@ public final class Constants {
     public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
 
     // if were going faster than this, we wont accept any pose est.
-    public static final AngularVelocity MAX_ACCEPTABLE_VELOCITY =
-      Units.RadiansPerSecond.of(0.2);
+    public static final AngularVelocity MAX_ACCEPTABLE_ROTATOINAL_VELOCITY =
+      Units.RadiansPerSecond.of(0.05);
 
     // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.5);
+    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.1);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
 
-    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.2);
+    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
-    // tuned numbers that try to make the pose confidence better. dont touch these.
+    // tuned numbers for pose confidence. TODO: tune these.
     public static final double MAGIC_VEL_CONF_ADDEND = 0.2;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;

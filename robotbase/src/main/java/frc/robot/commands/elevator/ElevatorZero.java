@@ -27,7 +27,7 @@ public class ElevatorZero extends Command {
   public boolean isFinished() {
     return (
       m_timer.hasElapsed(ELEVATOR.ZERO_TIME.in(Seconds)) &&
-      Robot.elevator.isAtZero()
+      Robot.elevator.isStalling()
     );
   }
 

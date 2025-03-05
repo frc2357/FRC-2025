@@ -5,6 +5,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Robot;
 import frc.robot.commands.auto.AutoBase;
 import frc.robot.commands.auto.CB3BlueStation2Peice;
 import frc.robot.commands.auto.TuningPathFinal;
@@ -50,11 +52,15 @@ public class AutoChooserManager {
   }
 
   public Command getSelectedCommandScheduler() {
-    return m_autoChooser.selectedCommandScheduler();
+    return m_autoChooser
+      .selectedCommandScheduler()
+      .finallyDo(() -> Robot.swerve.stopMotors()); // no touchy.
   }
 
   public Command getSelectedCommand() {
-    return m_autoChooser.selectedCommand();
+    return m_autoChooser
+      .selectedCommand()
+      .finallyDo(() -> Robot.swerve.stopMotors()); // also no touchy.
   }
 
   public String selectAuto(String autoToSelect) {

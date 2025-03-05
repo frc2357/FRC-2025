@@ -3,7 +3,6 @@ package frc.robot.commands.intake;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.Constants;
 import frc.robot.commands.elevator.ElevatorHome;
-import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.laterator.LateratorSetDistance;
 
 public class CoralPreposeIntake extends ParallelCommandGroup {

@@ -7,14 +7,12 @@ import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
-import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorZero;
 import frc.robot.commands.scoring.coral.CoralPreposeL1;
 import frc.robot.commands.scoring.coral.CoralPreposeL2;
 import frc.robot.commands.scoring.coral.CoralPreposeL3;
 import frc.robot.commands.scoring.coral.CoralPreposeL4;
-import frc.robot.commands.scoring.coral.CoralScore;
 
 public class CodriverControls {
 

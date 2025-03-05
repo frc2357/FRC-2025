@@ -48,7 +48,7 @@ public class CB3BlueStation2Peice extends AutoBase {
       .onTrue(
         new AutoCoralPreposeL4()
           .andThen(
-            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE),
+            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false),
             new CoralPreposeIntake(),
             branchJToBlueS.cmd()
           )
@@ -60,14 +60,14 @@ public class CB3BlueStation2Peice extends AutoBase {
       .onTrue(new CoralIntake().andThen(BlueSToBranchK.cmd()));
     // as we get close to the branch, we prepose to score
     BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
-      new AutoCoralPreposeL4()
+      new CoralPreposeL4()
     );
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
       .onTrue(
-        new AutoCoralPreposeL4()
+        new CoralPreposeL4()
           .andThen(
-            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE) // score coral 2
+            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false) // score coral 2
               .andThen(new CoralPreposeIntake())
               .andThen(branchKToBlueS.cmd())
           )

@@ -3,7 +3,6 @@ package frc.robot.commands.intake;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Constants.ALGAE_KNOCKER;
 import frc.robot.Constants.ALGAE_PIVOT;
 import frc.robot.Robot;
 import frc.robot.commands.algaePivot.AlgaePivotSetSpeed;
