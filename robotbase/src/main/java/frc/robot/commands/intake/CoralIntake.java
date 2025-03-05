@@ -8,20 +8,12 @@ import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 
 public class CoralIntake extends Command {
 
-  public CoralIntake() {
-    new CoralPreposeIntake()
-      .andThen(
-        new CoralRunnerSetSpeed(
-          Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT
-        ).until(Robot.coralRunner::isIntakeBeamBroken)
-      )
-      .schedule();
-  }
+  public CoralIntake() {}
 
   @Override
   public void initialize() {
     new CoralPreposeIntake()
-      .andThen(
+      .alongWith(
         new CoralRunnerSetSpeed(
           Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT
         ).until(Robot.coralRunner::isIntakeBeamBroken)

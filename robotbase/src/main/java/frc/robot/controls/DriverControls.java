@@ -16,6 +16,7 @@ import frc.robot.commands.drive.DriveToPoseHandler;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.drive.VelDrive;
+import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.intake.AlgaeChooser;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralIntakeRetract;
@@ -51,6 +52,8 @@ public class DriverControls {
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
+
+    m_controller.x().whileTrue(new ElevatorZero());
 
     m_leftTrigger.toggleOnTrue(new CoralIntake());
     // Manual Coral Scoring

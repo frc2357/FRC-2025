@@ -41,33 +41,30 @@ public class CB3BlueStation2Peice extends AutoBase {
     // scoringSegment(BlueSToBranchI, branchIToBlueS);
 
     // as we get close to branch J we prepose to score
-    m_startTraj.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new CoralPreposeL4());
+    // m_startTraj.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new CoralPreposeL4());
     // when at branch J we score, lower the elevator, and move on
     m_startTraj
       .done()
       .onTrue(
-        new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
-          new CoralPreposeIntake(),
-          branchJToBlueS.cmd()
-        ) //score coral 1
-      );
+        /*new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
+          new CoralPreposeIntake(),*/
+        branchJToBlueS.cmd()
+      ); //score coral 1
 
     // when at the coral station, we intake coral and then go to the next branch
     branchJToBlueS
       .done()
-      .onTrue(new CoralIntake().andThen(BlueSToBranchK.cmd()));
+      .onTrue(/*new CoralIntake().andThen(*/BlueSToBranchK.cmd());
     // as we get close to the branch, we prepose to score
-    BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
-      new CoralPreposeL4()
-    );
+    // BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
+    // new CoralPreposeL4()
+    // );
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
       .onTrue(
-        new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
-          new CoralPreposeIntake(),
-          branchKToBlueS.cmd()
-        ) // score coral 2
-      );
+        /*new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(new CoralPreposeIntake()
+            .andThen(*/branchKToBlueS.cmd()
+      ); // score coral 2
     // // when at the coral station, we intake coral and then go to the next branch
     // branchKToBlueS
     //   .done()

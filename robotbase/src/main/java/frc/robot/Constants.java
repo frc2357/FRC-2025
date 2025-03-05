@@ -168,7 +168,11 @@ public final class Constants {
       HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
 
     public static final double AXIS_MAX_SPEED = 0.5;
-    public static final double ZERO_SPEED = -0.05;
+    public static final double ZERO_SPEED = -0.1;
+
+    public static final double ZERO_STALL_AMPS = 35;
+
+    public static final Time ZERO_TIME = Units.Seconds.of(5);
 
     public static final class SETPOINTS {
 
@@ -181,7 +185,7 @@ public final class Constants {
       public static final Distance L4_PREPOSE = Units.Inches.of(50.2); // TODO: Tune Setpoint
     }
 
-    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+    public static final double DEBOUNCE_TIME_SECONDS = 0.3;
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
   }
