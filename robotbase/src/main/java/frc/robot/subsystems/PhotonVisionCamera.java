@@ -255,20 +255,27 @@ public class PhotonVisionCamera extends SubsystemBase {
       );
       return;
     }
-    List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
+    @SuppressWarnings("removal")
+    PhotonPipelineResult newResult = m_camera.getLatestResult();
+    if (
+      newResult.metadata.captureTimestampMicros !=
+      m_result.metadata.captureTimestampMicros
+    ) {
+      m_result = newResult;
+    }
 
-    if (results.isEmpty()) { // no new results, so we stop here.
-      return;
-    }
-    m_result = results.get(0);
-    for (int i = 1; i < results.size(); i++) {
-      if (
-        results.get(i).metadata.captureTimestampMicros >
-        m_result.metadata.captureTimestampMicros
-      ) { // getting the latest result, by finding the result with the highest capture timestamp.
-        m_result = results.get(i);
-      }
-    }
+    // if (results.isEmpty()) { // no new results, so we stop here.
+    //   return;
+    // }
+    // m_result = results.get(0);
+    // for (int i = 1; i < results.size(); i++) {
+    //   if (
+    //     results.get(i).metadata.captureTimestampMicros >
+    //     m_result.metadata.captureTimestampMicros
+    //   ) { // getting the latest result, by finding the result with the highest capture timestamp.
+    //     m_result = results.get(i);
+    //   }
+    // }
 
     if (m_result == null || !m_result.hasTargets()) {
       return;
@@ -496,6 +503,14 @@ public class PhotonVisionCamera extends SubsystemBase {
         }
       }
     }
+    m_pnpInfo[indexToReplace].replaceInfo(
+        result,
+        heading,
+        headingTimestampSeconds,
+        m_cameraMatrix,
+        m_distCoeefs,
+        m_robotToCameraTranform
+      );
   }
 
   /**
@@ -509,21 +524,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   //   aprilTagInfo.yaw = bestTarget.getYaw();
   //   aprilTagInfo.pitch = bestTarget.getPitch();
   //   aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
-  // }
-
-  /**
-   * The method to cache target data for AprilTags.
-   *
-   * @param targetList The list of targets that it pulls data from to cache.
-   */
-  // private void cacheForAprilTags(List<PhotonTrackedTarget> targetList) {
-  //   for (PhotonTrackedTarget targetSeen : targetList) {
-  //     int id = targetSeen.getFiducialId();
-  //     TargetInfo aprilTagInfo = m_aprilTagInfo[id];
-  //     aprilTagInfo.yaw = targetSeen.getYaw();
-  //     aprilTagInfo.pitch = targetSeen.getPitch();
-  //     aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
-  //   }
   // }
 
   /**
@@ -642,15 +642,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   }
 
   /**
-   * Gets what PhotonVision said the best target was last time it looked.
-   *
-   * @return The fiducial id of the best target
-   */
-  // public int getBestTargetFiducialId() {
-  //   return m_bestTargetFiducialId;
-  // }
-
-  /**
    * @param fiducialId The fiducial ID of the target to get the yaw of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
@@ -663,21 +654,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   // }
 
   /**
-   * @param fiducialIds The list of fiducial IDs to check.
-   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the yaw of the first valid target in the list, <strong>or null if none are valid.
-   */
-  // public Angle getTargetYaw(int[] targetIds, long timeoutMs) {
-  //   for (int id : targetIds) {
-  //     Angle yaw = getTargetYaw(id, timeoutMs);
-  //     if (yaw != null) {
-  //       return yaw;
-  //     }
-  //   }
-  //   return null;
-  // }
-
-  /**
    * @param id The ID of the target to get the pitch of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets pitch, <strong>will be null if the cached data was invalid.
@@ -685,21 +661,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   // public Angle getTargetPitch(int targetId, long timeoutMs) {
   //   if (isValidTarget(targetId, timeoutMs)) {
   //     return Units.Degrees.of(m_aprilTagInfo[targetId].pitch);
-  //   }
-  //   return null;
-  // }
-
-  /**
-   * @param fiducialIds The list of fiducial IDs to check.
-   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the pitch of the first valid id in the list, <strong>or null if none are valid.
-   */
-  // public Angle getTargetPitch(int[] fiducialIds, long timeoutMs) {
-  //   for (int id : fiducialIds) {
-  //     Angle pitch = getTargetPitch(id, timeoutMs);
-  //     if (pitch != null) {
-  //       return pitch;
-  //     }
   //   }
   //   return null;
   // }
