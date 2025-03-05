@@ -59,7 +59,11 @@ public class DriverControls {
       .onTrue(
         new InstantCommand(() ->
           Robot.swerve.resetPose(
-            REEF.BRANCH_C.plus(new Transform2d(0, -1, Rotation2d.kZero))
+            new Pose2d(
+              1.6293373107910156,
+              7.462562561035156,
+              new Rotation2d(2.2004415674621933)
+            )
           )
         )
       );

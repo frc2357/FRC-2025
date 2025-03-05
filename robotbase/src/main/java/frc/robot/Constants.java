@@ -125,8 +125,8 @@ public final class Constants {
       Robot.swerve
     );
 
-    public static final double PREPOSE_SECONDS =
-      ELEVATOR.FULL_EXTENSION_TIME.in(Seconds) + 0.05;
+    public static final double PREPOSE_SECONDS = 0;
+    // ELEVATOR.FULL_EXTENSION_TIME.in(Seconds) + 0.05;
   }
 
   public static final class ELEVATOR {
