@@ -8,10 +8,9 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
@@ -143,22 +142,24 @@ public final class Constants {
         .apply(MOTOR_CONFIG_LEFT)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
-    public static final double LEFT_MOTOR_P = 0.008;
-    public static final double LEFT_MOTOR_I = 0;
-    public static final double LEFT_MOTOR_D = 0;
-    public static final double LEFT_MOTOR_VEL_F = 0; // Should always be zero
-    public static final double LEFT_MOTOR_ARB_F = 0.05;
+    public static final ElevatorFeedforward FEEDFORWARD =
+      new ElevatorFeedforward(
+        0.0, // TODO: tune this
+        0.0, // TODO: tune this
+        0.0, // TODO: tune this
+        0.0 // TODO: tune this
+      );
 
-    public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
-      MOTOR_CONFIG_LEFT.closedLoop
-        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
-        .outputRange(-1, 1);
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(5000)
-        .maxVelocity(4600);
+    public static double MAX_VOLTS = 8;
+
+    public static final ProfiledPIDController PID_CONTROLLER =
+      new ProfiledPIDController(
+        0,
+        0,
+        0,
+        new TrapezoidProfile.Constraints(1, 1)
+      );
+    public static final double ALLOWED_POSITION_ERROR_PERCENT = 0.03;
 
     public static final double GEAR_RATIO = (38.0 / 14.0) * 2.0;
 

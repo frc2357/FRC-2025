@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.AlgaePivotTuningSubsystem;

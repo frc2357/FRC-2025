@@ -14,8 +14,8 @@ public class ElevatorSetDistance extends Command {
   }
 
   @Override
-  public void initialize() {
-    Robot.elevator.setTargetDistance(m_distance);
+  public void execute() {
+    Robot.elevator.reachDistance(m_distance);
   }
 
   @Override

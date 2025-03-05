@@ -1,22 +1,21 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MutAngle;
-import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ELEVATOR;
@@ -27,13 +26,11 @@ public class Elevator extends SubsystemBase {
   private Debouncer m_debouncer;
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
-  private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
 
-  private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
-  private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
-    Double.NaN
-  );
+  private MutDistance m_targetDistance = Units.Meters.mutable(Double.NaN);
+  private MutLinearVelocity m_currentLinearVelocityHolder =
+    Units.MetersPerSecond.mutable(Double.NaN);
   private MutAngle m_currentRotationsHolder = Units.Rotations.mutable(
     Double.NaN
   );
@@ -59,8 +56,6 @@ public class Elevator extends SubsystemBase {
       PersistMode.kPersistParameters
     );
 
-    m_PIDController = m_motorLeft.getClosedLoopController();
-
     m_encoder = m_motorLeft.getEncoder();
 
     m_hall_effect = new DigitalInput(
@@ -71,50 +66,47 @@ public class Elevator extends SubsystemBase {
 
   public void setSpeed(double percentOutput) {
     m_motorLeft.set(percentOutput);
-    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+    m_targetDistance.mut_replace(Double.NaN, Units.Meters);
   }
 
   public void setAxisSpeed(double speed) {
     speed *= ELEVATOR.AXIS_MAX_SPEED;
     m_motorLeft.set(speed);
-    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+    m_targetDistance.mut_replace(Double.NaN, Units.Meters);
   }
 
   public void stop() {
     m_motorLeft.stopMotor();
-    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+    m_targetDistance.mut_replace(Double.NaN, Units.Meters);
   }
 
-  public void setTargetRotations(Angle targetRotations) {
-    m_targetRotations.mut_replace(targetRotations);
-    m_PIDController.setReference(
-      m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl,
-      ClosedLoopSlot.kSlot0,
-      ELEVATOR.LEFT_MOTOR_ARB_F,
-      ArbFFUnits.kVoltage
+  public void reachDistance(Distance targetDistance) {
+    m_targetDistance.mut_replace(targetDistance);
+    double volts = MathUtil.clamp(
+      ELEVATOR.PID_CONTROLLER.calculate(
+        getDistance().in(Units.Meters),
+        m_targetDistance.in(Units.Meters)
+      ) +
+      ELEVATOR.FEEDFORWARD.calculateWithVelocities(
+        getVelocity().in(Units.MetersPerSecond),
+        ELEVATOR.PID_CONTROLLER.getSetpoint().velocity
+      ),
+      -ELEVATOR.MAX_VOLTS,
+      ELEVATOR.MAX_VOLTS
     );
+
+    m_motorLeft.setVoltage(volts);
   }
 
-  public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(ELEVATOR.GEAR_RATIO)
-        .magnitude()
-    );
-    setTargetRotations(rotations);
+  public LinearVelocity getVelocity() {
+    double vel =
+      ((m_encoder.getVelocity() / 60) / ELEVATOR.GEAR_RATIO) *
+      (ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.in(Units.Meters));
+    m_currentLinearVelocityHolder.mut_replace(vel, Units.MetersPerSecond);
+    return m_currentLinearVelocityHolder;
   }
 
-  public AngularVelocity getVelocity() {
-    m_currentAngularVelocityHolder.mut_replace(
-      m_encoder.getVelocity(),
-      Units.RPM
-    );
-    return m_currentAngularVelocityHolder;
-  }
-
-  public Angle getRotations() {
+  private Angle getRotations() {
     m_currentRotationsHolder.mut_replace(
       m_encoder.getPosition(),
       Units.Rotations
@@ -131,9 +123,9 @@ public class Elevator extends SubsystemBase {
   }
 
   private boolean isAtTargetRotations() {
-    return m_targetRotations.isNear(
+    return m_targetDistance.isNear(
       getRotations(),
-      ELEVATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      ELEVATOR.ALLOWED_POSITION_ERROR_PERCENT
     );
   }
 
