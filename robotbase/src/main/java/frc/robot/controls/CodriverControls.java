@@ -4,12 +4,17 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
-import frc.robot.commands.algaePivot.AlgaePivotAxis;
-import frc.robot.commands.algaeRunner.AlgaeRunnerAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
+import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
+import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.laterator.LateratorZero;
+import frc.robot.commands.scoring.coral.CoralHome;
+import frc.robot.commands.scoring.coral.CoralPreposeL1;
+import frc.robot.commands.scoring.coral.CoralPreposeL2;
+import frc.robot.commands.scoring.coral.CoralPreposeL3;
+import frc.robot.commands.scoring.coral.CoralPreposeL4;
 
 public class CodriverControls {
 
@@ -33,14 +38,42 @@ public class CodriverControls {
   public void mapControls() {
     m_controller
       .povUp()
+      .negate()
+      .and(m_controller.povRight().negate())
+      .and(m_controller.x())
+      .onTrue(new CoralHome());
+    m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
+    m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
+    m_controller
+      .povUp()
       .whileTrue(new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY())));
+    m_controller
+      .povLeft()
+      .negate()
+      .and(m_controller.x().whileTrue(new ElevatorHome()));
 
+    m_controller
+      .povLeft()
+      .and(m_controller.a())
+      .whileTrue(new CoralPreposeL1());
+    m_controller
+      .povLeft()
+      .and(m_controller.b())
+      .whileTrue(new CoralPreposeL2());
+    m_controller
+      .povLeft()
+      .and(m_controller.x())
+      .whileTrue(new CoralPreposeL3());
+    m_controller
+      .povLeft()
+      .and(m_controller.y())
+      .whileTrue(new CoralPreposeL4());
     m_controller
       .povRight()
       .whileTrue(
         new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
       );
-    m_controller.x().whileTrue(new LateratorZero());
+    m_controller.b().whileTrue(new LateratorZero());
     m_controller
       .povRight()
       .and(m_rightTrigger)

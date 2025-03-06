@@ -8,10 +8,8 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
@@ -84,21 +82,14 @@ public final class Constants {
     public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 9;
     public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
     public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 7;
-
-    public static final int ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
   }
 
   public static final class SWERVE {
 
     public static final AngularVelocity MAX_ANGULAR_VELOCITY =
-      Units.RadiansPerSecond.of(Math.PI * 2);
+      Units.RadiansPerSecond.of((Math.PI * 2) / 3);
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
-
-    public static final LinearAcceleration MAXIMUM_LINEAR_ACCELERATION =
-      Units.MetersPerSecondPerSecond.of(4.5); // TODO: tune this
-    public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
-      Units.DegreesPerSecondPerSecond.of(120); // TODO: tune this
 
     public static final Time TIME_TO_COAST = Units.Seconds.of(3);
 
@@ -143,21 +134,23 @@ public final class Constants {
         .apply(MOTOR_CONFIG_LEFT)
         .follow(CAN_ID.ELEVATOR_LEFT_MOTOR, true);
 
-    public static final double LEFT_MOTOR_P = 0.008;
+    public static final double LEFT_MOTOR_P = 0;
     public static final double LEFT_MOTOR_I = 0;
     public static final double LEFT_MOTOR_D = 0;
-    public static final double LEFT_MOTOR_VEL_F = 0; // Should always be zero
-    public static final double LEFT_MOTOR_ARB_F = 0.05;
+    public static final double LEFT_MOTOR_VEL_F = 0.0003;
+    public static final double LEFT_MOTOR_ARB_F = 0.15;
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
         .outputRange(-1, 1);
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
-        .maxAcceleration(5000)
+    public static final double SMART_MOTION_ALLOWED_ERROR_ROTATIONS = 0.2;
+
+    @SuppressWarnings("removal")
+    public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.smartMotion
+        .allowedClosedLoopError(SMART_MOTION_ALLOWED_ERROR_ROTATIONS)
+        .maxAcceleration(10000)
         .maxVelocity(4600);
 
     public static final double GEAR_RATIO = (38.0 / 14.0) * 2.0;
@@ -168,20 +161,22 @@ public final class Constants {
       HTD5_PULLEY_PITCH.times(OUTPUT_PULLEY_NUMBER_OF_TEETH);
 
     public static final double AXIS_MAX_SPEED = 0.5;
-    public static final double ZERO_SPEED = -0.05;
+    public static final double ZERO_SPEED = -0.1;
+
+    public static final double ZERO_STALL_AMPS = 27; //TODO: tune this ASAP.
+
+    public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Feet.of(0); // TODO: Tune Setpoint
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0.5);
+      public static final Distance L1_PREPOSE = Units.Inches.of(1);
+      public static final Distance L2_PREPOSE = Units.Inches.of(7.43);
+      public static final Distance L3_PREPOSE = Units.Inches.of(22.189);
+      public static final Distance L4_PREPOSE = Units.Inches.of(49.2);
     }
-
-    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
   }
@@ -224,13 +219,12 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Inches.of(1); // TODO: Tune Setpoint
-
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(1);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(3);
+      public static final Distance L1_PREPOSE = Units.Inches.of(-2);
+      public static final Distance L2_PREPOSE = Units.Inches.of(-6.2);
+      public static final Distance L3_PREPOSE = Units.Inches.of(-6.2);
+      public static final Distance L4_PREPOSE = Units.Inches.of(-6.4);
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
@@ -366,15 +360,15 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.CONSTRAINED_SOLVEPNP;
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
     public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.CONSTRAINED_SOLVEPNP;
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 2.0;
+    public static final double PNP_HEADING_SCALE_FACTOR = 1.0;
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       Optional.of(
@@ -387,20 +381,20 @@ public final class Constants {
     public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
 
     // if were going faster than this, we wont accept any pose est.
-    public static final LinearVelocity MAX_ACCEPTABLE_VELOCITY =
-      Units.MetersPerSecond.of(3.5);
+    public static final AngularVelocity MAX_ACCEPTABLE_ROTATOINAL_VELOCITY =
+      Units.RadiansPerSecond.of(0.05);
 
     // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.5);
+    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.1);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
 
-    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.2);
+    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
-    // tuned numbers that try to make the pose confidence better. dont touch these.
+    // tuned numbers for pose confidence. TODO: tune these.
     public static final double MAGIC_VEL_CONF_ADDEND = 0.2;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
@@ -414,7 +408,7 @@ public final class Constants {
         Units.Inches.of(22.243),
         new Rotation3d(
           Units.Degrees.of(0),
-          Units.Degrees.of(10),
+          Units.Degrees.of(-10),
           Units.Degrees.of(0)
         )
       );
@@ -495,7 +489,7 @@ public final class Constants {
         new Rotation3d(
           Units.Degrees.of(-10),
           Units.Degrees.of(0),
-          Units.Degrees.of(90)
+          Units.Degrees.of(-90)
         )
       );
 
@@ -533,9 +527,9 @@ public final class Constants {
         Units.Inches.of(-3.001),
         Units.Inches.of(16.579),
         new Rotation3d(
-          Units.Degrees.of(10),
+          Units.Degrees.of(-10),
           Units.Degrees.of(0),
-          Units.Degrees.of(270)
+          Units.Degrees.of(90)
         )
       );
 

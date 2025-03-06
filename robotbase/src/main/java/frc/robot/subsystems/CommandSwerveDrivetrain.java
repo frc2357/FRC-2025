@@ -466,6 +466,10 @@ public class CommandSwerveDrivetrain
     return Units.FeetPerSecond.of(translationalVelocity);
   }
 
+  public AngularVelocity getRotationalVelocity() {
+    return Units.RadiansPerSecond.of(getState().Speeds.omegaRadiansPerSecond);
+  }
+
   public AngularVelocity getAngularVelocity() {
     return Units.RadiansPerSecond.of(
       getCurrentChassisSpeeds().omegaRadiansPerSecond

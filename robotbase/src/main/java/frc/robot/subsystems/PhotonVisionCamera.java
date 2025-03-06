@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
@@ -178,7 +179,6 @@ public class PhotonVisionCamera extends SubsystemBase {
     Matrix<N3, N3> cameraMatrix,
     Matrix<N8, N1> distCoeefs
   ) {
-    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
     m_camera = new PhotonCamera(cameraName);
     m_robotCameras.add(this);
 
@@ -216,14 +216,12 @@ public class PhotonVisionCamera extends SubsystemBase {
         );
       }
     }
-    if (updatePose) {
-      for (int i = 0; i < m_pnpInfo.length; i++) {
-        if (m_pnpInfo[i].result == null) {
-          continue;
-        }
-        updatePoseFromPNPInfo(m_pnpInfo[i]);
-        m_pnpInfo[i].invalidateInfo();
+    for (int i = 0; i < m_pnpInfo.length; i++) {
+      if (m_pnpInfo[i].result == null) {
+        continue;
       }
+      updatePoseFromPNPInfo(m_pnpInfo[i], updatePose);
+      m_pnpInfo[i].invalidateInfo();
     }
   }
 
@@ -257,20 +255,27 @@ public class PhotonVisionCamera extends SubsystemBase {
       );
       return;
     }
-    List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
+    @SuppressWarnings("removal")
+    PhotonPipelineResult newResult = m_camera.getLatestResult();
+    if (
+      newResult.metadata.captureTimestampMicros !=
+      m_result.metadata.captureTimestampMicros
+    ) {
+      m_result = newResult;
+    }
 
-    if (results.isEmpty()) { // no new results, so we stop here.
-      return;
-    }
-    m_result = results.get(0);
-    for (int i = 1; i < results.size(); i++) {
-      if (
-        results.get(i).metadata.captureTimestampMicros >
-        m_result.metadata.captureTimestampMicros
-      ) { // getting the latest result, by finding the result with the highest capture timestamp.
-        m_result = results.get(i);
-      }
-    }
+    // if (results.isEmpty()) { // no new results, so we stop here.
+    //   return;
+    // }
+    // m_result = results.get(0);
+    // for (int i = 1; i < results.size(); i++) {
+    //   if (
+    //     results.get(i).metadata.captureTimestampMicros >
+    //     m_result.metadata.captureTimestampMicros
+    //   ) { // getting the latest result, by finding the result with the highest capture timestamp.
+    //     m_result = results.get(i);
+    //   }
+    // }
 
     if (m_result == null || !m_result.hasTargets()) {
       return;
@@ -304,7 +309,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     // does whatever we need to make the strategy work
     switch (m_primaryStrategy) {
       case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
-        m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
+        // m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
         break;
       case CLOSEST_TO_REFERENCE_POSE:
         m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
@@ -337,11 +342,25 @@ public class PhotonVisionCamera extends SubsystemBase {
     m_poseEstimator.setRobotToCameraTransform(robotToCamTransform);
   }
 
-  private static void updatePoseFromPNPInfo(TimestampedPNPInfo pnpInfo) {
+  private static void updatePoseFromPNPInfo(
+    TimestampedPNPInfo pnpInfo,
+    boolean updatePose
+  ) {
     preparePoseEstimator(
       pnpInfo.robotToCameraTransform,
       pnpInfo.heading,
       pnpInfo.headingTimestampSeconds
+    );
+    if (
+      Math.abs(Robot.swerve.getRotationalVelocity().in(RadiansPerSecond)) >
+      MAX_ACCEPTABLE_ROTATOINAL_VELOCITY.in(RadiansPerSecond)
+    ) {
+      return;
+    }
+
+    m_poseEstimator.addHeadingData(
+      pnpInfo.headingTimestampSeconds,
+      pnpInfo.heading
     );
     m_lastEstimatedPose = m_poseEstimator
       .update(
@@ -362,16 +381,9 @@ public class PhotonVisionCamera extends SubsystemBase {
         .in(Meters);
     }
     averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
-    if (isPoseInField(m_lastEstimatedPose.estimatedPose)) {
-      return;
-    }
-
-    if (
-      Robot.swerve.getTranslationalVelocity().in(MetersPerSecond) >
-      MAX_ACCEPTABLE_VELOCITY.in(MetersPerSecond)
-    ) {
-      return;
-    }
+    // if (!isPoseInField(m_lastEstimatedPose.estimatedPose)) {
+    //   return;
+    // }
 
     // the higher the confidence is, the less the estimated measurment is trusted.
     double xVelocityConf =
@@ -391,14 +403,19 @@ public class PhotonVisionCamera extends SubsystemBase {
       ((averageTargetDistance / 2) * yVelocityConf),
       MAGIC_VEL_CONF_EXPONENT
     );
-    Robot.swerve.addVisionMeasurement(
-      m_lastEstimatedPose.estimatedPose.toPose2d(),
-      Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
-      VecBuilder.fill(
-        xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
-        yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-        Double.MAX_VALUE // Theta conf, should usually never change gyro from vision.
-      )
+    if (updatePose) {
+      Robot.swerve.addVisionMeasurement(
+        m_lastEstimatedPose.estimatedPose.toPose2d(),
+        Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
+        VecBuilder.fill(
+          xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
+          yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+          10000 // Theta conf, should never change the gyro heading
+        )
+      );
+    }
+    Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
+      m_lastEstimatedPose.estimatedPose.toPose2d()
     );
   }
 
@@ -486,6 +503,14 @@ public class PhotonVisionCamera extends SubsystemBase {
         }
       }
     }
+    m_pnpInfo[indexToReplace].replaceInfo(
+        result,
+        heading,
+        headingTimestampSeconds,
+        m_cameraMatrix,
+        m_distCoeefs,
+        m_robotToCameraTranform
+      );
   }
 
   /**
@@ -499,21 +524,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   //   aprilTagInfo.yaw = bestTarget.getYaw();
   //   aprilTagInfo.pitch = bestTarget.getPitch();
   //   aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
-  // }
-
-  /**
-   * The method to cache target data for AprilTags.
-   *
-   * @param targetList The list of targets that it pulls data from to cache.
-   */
-  // private void cacheForAprilTags(List<PhotonTrackedTarget> targetList) {
-  //   for (PhotonTrackedTarget targetSeen : targetList) {
-  //     int id = targetSeen.getFiducialId();
-  //     TargetInfo aprilTagInfo = m_aprilTagInfo[id];
-  //     aprilTagInfo.yaw = targetSeen.getYaw();
-  //     aprilTagInfo.pitch = targetSeen.getPitch();
-  //     aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
-  //   }
   // }
 
   /**
@@ -632,15 +642,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   }
 
   /**
-   * Gets what PhotonVision said the best target was last time it looked.
-   *
-   * @return The fiducial id of the best target
-   */
-  // public int getBestTargetFiducialId() {
-  //   return m_bestTargetFiducialId;
-  // }
-
-  /**
    * @param fiducialId The fiducial ID of the target to get the yaw of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
@@ -653,21 +654,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   // }
 
   /**
-   * @param fiducialIds The list of fiducial IDs to check.
-   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the yaw of the first valid target in the list, <strong>or null if none are valid.
-   */
-  // public Angle getTargetYaw(int[] targetIds, long timeoutMs) {
-  //   for (int id : targetIds) {
-  //     Angle yaw = getTargetYaw(id, timeoutMs);
-  //     if (yaw != null) {
-  //       return yaw;
-  //     }
-  //   }
-  //   return null;
-  // }
-
-  /**
    * @param id The ID of the target to get the pitch of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets pitch, <strong>will be null if the cached data was invalid.
@@ -675,21 +661,6 @@ public class PhotonVisionCamera extends SubsystemBase {
   // public Angle getTargetPitch(int targetId, long timeoutMs) {
   //   if (isValidTarget(targetId, timeoutMs)) {
   //     return Units.Degrees.of(m_aprilTagInfo[targetId].pitch);
-  //   }
-  //   return null;
-  // }
-
-  /**
-   * @param fiducialIds The list of fiducial IDs to check.
-   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the pitch of the first valid id in the list, <strong>or null if none are valid.
-   */
-  // public Angle getTargetPitch(int[] fiducialIds, long timeoutMs) {
-  //   for (int id : fiducialIds) {
-  //     Angle pitch = getTargetPitch(id, timeoutMs);
-  //     if (pitch != null) {
-  //       return pitch;
-  //     }
   //   }
   //   return null;
   // }

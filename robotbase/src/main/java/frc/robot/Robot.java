@@ -15,9 +15,12 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.PHOTON_VISION.BACK_CAM;
+import frc.robot.Constants.PHOTON_VISION.FRONT_CAM;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
+import frc.robot.commands.elevator.ElevatorHoldPosition;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
 import frc.robot.controls.Buttonboard;
@@ -89,6 +92,7 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
+    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -111,18 +115,18 @@ public class Robot extends TimedRobot {
       BACK_CAM.CAMERA_MATRIX,
       BACK_CAM.DIST_COEEFS
     );
-    leftCam = new PhotonVisionCamera(
-      LEFT_CAM.NAME,
-      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      LEFT_CAM.CAMERA_MATRIX,
-      LEFT_CAM.DIST_COEEFS
-    );
-    rightCam = new PhotonVisionCamera(
-      RIGHT_CAM.NAME,
-      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      RIGHT_CAM.CAMERA_MATRIX,
-      RIGHT_CAM.DIST_COEEFS
-    );
+    // leftCam = new PhotonVisionCamera(
+    //   LEFT_CAM.NAME,
+    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
+    //   LEFT_CAM.CAMERA_MATRIX,
+    //   LEFT_CAM.DIST_COEEFS
+    // );
+    // rightCam = new PhotonVisionCamera(
+    //   RIGHT_CAM.NAME,
+    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
+    //   RIGHT_CAM.CAMERA_MATRIX,
+    //   RIGHT_CAM.DIST_COEEFS
+    // );
     // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
     if (!m_didOpenCVLoad) {
       PhotonVisionCamera.setPrimaryStrategy(PRIMARY_STRAT_FOR_FAILED_LOAD);
@@ -231,6 +235,7 @@ public class Robot extends TimedRobot {
     m_setCoastOnDisable.cancel();
 
     swerve.configNeutralMode(NeutralModeValue.Brake);
+    new ElevatorHoldPosition().schedule();
   }
 
   /** This function is called periodically during operator control. */
