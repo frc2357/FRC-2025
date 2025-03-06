@@ -8,7 +8,7 @@
 
 #define COLOR_ON 0xFFFFFFFF
 #define COLOR_OFF 0x00000000
- 
+
 #define NUM_BUTTONS 4
 
 #define log_2(x) (log(x) / log(2))
@@ -36,6 +36,7 @@ public:
     LevelSelection(byte leftKeypadI2CAddress, byte rightKeypadI2CAddress);
     void init();
     void update();
+    LevelSelection::Level getSelection();
 
 private:
     void setLedState(int index, bool on);
