@@ -87,7 +87,7 @@ public final class Constants {
   public static final class SWERVE {
 
     public static final AngularVelocity MAX_ANGULAR_VELOCITY =
-      Units.RadiansPerSecond.of((Math.PI * 2) / 3);
+      Units.RadiansPerSecond.of((Math.PI * 2) / 1.5);
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
 
@@ -312,8 +312,7 @@ public final class Constants {
 
     public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
-      .smartCurrentLimit(30)
-      .openLoopRampRate(1)
+      .smartCurrentLimit(60, 60)
       .inverted(false);
     public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
       .apply(MOTOR_CONFIG_ONE)
@@ -323,7 +322,7 @@ public final class Constants {
         .apply(MOTOR_CONFIG_ONE)
         .follow(CAN_ID.CLIMBER_MOTOR_ONE);
 
-    public static final double AXIS_MAX_SPEED = 0.25;
+    public static final double AXIS_MAX_SPEED = 1;
     public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);
   }
 
@@ -368,7 +367,7 @@ public final class Constants {
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 1.0;
+    public static final double PNP_HEADING_SCALE_FACTOR = 0.1;
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       Optional.of(
@@ -377,12 +376,12 @@ public final class Constants {
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
     // yes, these are essentially magic numbers
-    public static final double X_STD_DEV_COEFFIECIENT = 0.4;
-    public static final double Y_STD_DEV_COEFFIECIENT = 0.4;
+    public static final double X_STD_DEV_COEFFIECIENT = 0.65;
+    public static final double Y_STD_DEV_COEFFIECIENT = 0.65;
 
     // if were going faster than this, we wont accept any pose est.
     public static final AngularVelocity MAX_ACCEPTABLE_ROTATOINAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.05);
+      Units.RadiansPerSecond.of(0.1);
 
     // how close the estimated pose can get to the field border before we invalidate it
     public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.1);
@@ -395,7 +394,7 @@ public final class Constants {
     public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
     // tuned numbers for pose confidence. TODO: tune these.
-    public static final double MAGIC_VEL_CONF_ADDEND = 0.2;
+    public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
 

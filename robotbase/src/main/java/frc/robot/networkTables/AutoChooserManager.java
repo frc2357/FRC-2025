@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.commands.auto.AutoBase;
 import frc.robot.commands.auto.CB3BlueStation2Peice;
+import frc.robot.commands.auto.CR3RedStation4Peice;
+import frc.robot.commands.auto.MiddleDitchBranchG;
+import frc.robot.commands.auto.MiddleDitchBranchH;
 import frc.robot.commands.auto.TuningPathFinal;
 import frc.robot.commands.auto.TuningPathX;
 import frc.robot.commands.auto.TuningPathY;
@@ -20,12 +23,10 @@ public class AutoChooserManager {
 
   // The auto routines that will show up on the auto command chooser.
   private AutoBase[] m_autos = {
-    new AutoBase("CubeTestPath"),
     new CB3BlueStation2Peice(),
-    new TuningPathX(),
-    new TuningPathY(),
-    new TuningPathFinal(),
-    new AutoBase("CB3ToBranchI"),
+    new CR3RedStation4Peice(),
+    new MiddleDitchBranchG(),
+    new MiddleDitchBranchH(),
   };
 
   private AutoChooser m_autoChooser = new AutoChooser();

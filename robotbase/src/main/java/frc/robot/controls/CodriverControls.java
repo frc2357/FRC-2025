@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
+import frc.robot.commands.climber.ClimberAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
@@ -93,6 +94,9 @@ public class CodriverControls {
       .povRight()
       .and(m_controller.b())
       .whileTrue(new AlgaeKnockerSetSpeed(-0.25));
+    m_controller
+      .povDown()
+      .whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));
     // m_controller
     //   .povLeft()
     //   .and(m_leftTrigger)
