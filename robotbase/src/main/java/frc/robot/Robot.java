@@ -102,7 +102,7 @@ public class Robot extends TimedRobot {
     // algaeRunner = new AlgaeRunner();
     algaeKnocker = new AlgaeKnocker();
     // algaePivot = new AlgaePivot();
-    // climber = new Climber();
+    climber = new Climber();
     frontCam = new PhotonVisionCamera(
       FRONT_CAM.NAME,
       FRONT_CAM.ROBOT_TO_CAM_TRANSFORM,
@@ -115,18 +115,18 @@ public class Robot extends TimedRobot {
       BACK_CAM.CAMERA_MATRIX,
       BACK_CAM.DIST_COEEFS
     );
-    // leftCam = new PhotonVisionCamera(
-    //   LEFT_CAM.NAME,
-    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
-    //   LEFT_CAM.CAMERA_MATRIX,
-    //   LEFT_CAM.DIST_COEEFS
-    // );
-    // rightCam = new PhotonVisionCamera(
-    //   RIGHT_CAM.NAME,
-    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
-    //   RIGHT_CAM.CAMERA_MATRIX,
-    //   RIGHT_CAM.DIST_COEEFS
-    // );
+    leftCam = new PhotonVisionCamera(
+      LEFT_CAM.NAME,
+      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
+      LEFT_CAM.CAMERA_MATRIX,
+      LEFT_CAM.DIST_COEEFS
+    );
+    rightCam = new PhotonVisionCamera(
+      RIGHT_CAM.NAME,
+      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
+      RIGHT_CAM.CAMERA_MATRIX,
+      RIGHT_CAM.DIST_COEEFS
+    );
     // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
     if (!m_didOpenCVLoad) {
       PhotonVisionCamera.setPrimaryStrategy(PRIMARY_STRAT_FOR_FAILED_LOAD);

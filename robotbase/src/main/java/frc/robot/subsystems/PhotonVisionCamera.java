@@ -255,27 +255,20 @@ public class PhotonVisionCamera extends SubsystemBase {
       );
       return;
     }
-    @SuppressWarnings("removal")
-    PhotonPipelineResult newResult = m_camera.getLatestResult();
-    if (
-      newResult.metadata.captureTimestampMicros !=
-      m_result.metadata.captureTimestampMicros
-    ) {
-      m_result = newResult;
-    }
+    List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
 
-    // if (results.isEmpty()) { // no new results, so we stop here.
-    //   return;
-    // }
-    // m_result = results.get(0);
-    // for (int i = 1; i < results.size(); i++) {
-    //   if (
-    //     results.get(i).metadata.captureTimestampMicros >
-    //     m_result.metadata.captureTimestampMicros
-    //   ) { // getting the latest result, by finding the result with the highest capture timestamp.
-    //     m_result = results.get(i);
-    //   }
-    // }
+    if (results.isEmpty()) { // no new results, so we stop here.
+      return;
+    }
+    m_result = results.get(0);
+    for (int i = 1; i < results.size(); i++) {
+      if (
+        results.get(i).metadata.captureTimestampMicros >
+        m_result.metadata.captureTimestampMicros
+      ) { // getting the latest result, by finding the result with the highest capture timestamp.
+        m_result = results.get(i);
+      }
+    }
 
     if (m_result == null || !m_result.hasTargets()) {
       return;
@@ -357,7 +350,6 @@ public class PhotonVisionCamera extends SubsystemBase {
     ) {
       return;
     }
-
     m_poseEstimator.addHeadingData(
       pnpInfo.headingTimestampSeconds,
       pnpInfo.heading
@@ -503,14 +495,16 @@ public class PhotonVisionCamera extends SubsystemBase {
         }
       }
     }
-    m_pnpInfo[indexToReplace].replaceInfo(
-        result,
-        heading,
-        headingTimestampSeconds,
-        m_cameraMatrix,
-        m_distCoeefs,
-        m_robotToCameraTranform
-      );
+    if (indexToReplace != -1) {
+      m_pnpInfo[indexToReplace].replaceInfo(
+          result,
+          heading,
+          headingTimestampSeconds,
+          m_cameraMatrix,
+          m_distCoeefs,
+          m_robotToCameraTranform
+        );
+    }
   }
 
   /**

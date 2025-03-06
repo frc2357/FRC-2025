@@ -68,11 +68,13 @@ public class DriverControls {
   }
 
   public double getX() {
-    return -modifyAxis(m_controller.getLeftX());
+    double value = -modifyAxis(m_controller.getLeftX());
+    return Math.copySign(Math.pow(value, 2), value);
   }
 
   public double getY() {
-    return -modifyAxis(m_controller.getLeftY());
+    double value = -modifyAxis(m_controller.getLeftY());
+    return Math.copySign(Math.pow(value, 2), value);
   }
 
   public double getRotation() {
