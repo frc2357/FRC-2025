@@ -651,6 +651,7 @@ public final class Constants {
 
     public static final double DRIVE_CONTROLLER_DEADBAND = 0.01;
     public static final double CODRIVE_CONTROLLER_DEADBAND = 0.025;
+    public static final double BUTTONBOARD_CONTROLLER_DEADBAND = 0.05;
 
     public static final double DRIVE_RUMBLE_INTENSITY = .5;
     public static final double CODRIVE_RUMBLE_INTENSITY = .5;

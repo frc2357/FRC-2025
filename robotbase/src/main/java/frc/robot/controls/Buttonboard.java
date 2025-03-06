@@ -9,6 +9,12 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
+import frc.robot.commands.algaePivot.AlgaePivotAxis;
+import frc.robot.commands.algaeRunner.AlgaeRunnerAxis;
+import frc.robot.commands.climber.ClimberAxis;
+import frc.robot.commands.coralRunner.CoralRunnerAxis;
+import frc.robot.commands.elevator.ElevatorAxis;
+import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.controls.controllers.CommandButtonboardController;
 import frc.robot.controls.controllers.CommandButtonboardController.ReefSide;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringDirection;
@@ -16,15 +22,16 @@ import frc.robot.controls.controllers.CommandButtonboardController.ScoringLevel;
 import frc.robot.controls.util.RumbleInterface;
 
 public class Buttonboard implements Sendable, RumbleInterface {
-
   private CommandButtonboardController m_controller;
+  private double m_deadband;
 
   private ReefSide m_selectedReefSide = ReefSide.None;
   private ScoringLevel m_selectedScoringLevel = ScoringLevel.None;
   private ScoringDirection m_selectScoringDirection = ScoringDirection.None;
 
-  public Buttonboard(CommandButtonboardController controller) {
+  public Buttonboard(CommandButtonboardController controller, double deadband) {
     m_controller = controller;
+    m_deadband = deadband;
 
     mapControls();
   }
@@ -63,6 +70,15 @@ public class Buttonboard implements Sendable, RumbleInterface {
     m_controller
       .noDirection()
       .onTrue(new SetScoringDirection(ScoringDirection.None));
+
+    // Axis values are only passed when a mechanism is selected on the buttonboard
+    // TODO: Determine if these need negated or not
+    m_controller.coralIntakeAxis(m_deadband).whileTrue(new CoralRunnerAxis(m_controller::getCoralIntakeAxis));
+    m_controller.algaeIntakeAxis(m_deadband).whileTrue(new AlgaeRunnerAxis(m_controller::getAlgaeIntakeAxis));
+    m_controller.elevatorAxis(m_deadband).whileTrue(new ElevatorAxis(m_controller::getElevatorAxis));
+    m_controller.lateratorAxis(m_deadband).whileTrue(new LateratorAxis(m_controller::getLateratorAxis));
+    m_controller.algaePivotAxis(m_deadband).whileTrue(new AlgaePivotAxis(m_controller::getAlgaePivotAxis));
+    m_controller.climberAxis(m_deadband).whileTrue(new ClimberAxis(m_controller::getClimberAxis));
   }
 
   private class SetReefSide extends InstantCommand {

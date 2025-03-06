@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.PHOTON_VISION.BACK_CAM;
 import frc.robot.Constants.PHOTON_VISION.FRONT_CAM;
+import frc.robot.Constants.CONTROLLER;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
@@ -137,9 +138,8 @@ public class Robot extends TimedRobot {
 
     // Define controls
     buttonboard = new Buttonboard(
-      new CommandButtonboardController(
-        Constants.CONTROLLER.BUTTONBOARD_CONTROLLER_PORT
-      )
+      new CommandButtonboardController(CONTROLLER.BUTTONBOARD_CONTROLLER_PORT),
+      CONTROLLER.BUTTONBOARD_CONTROLLER_DEADBAND
     );
     driverControls = new DriverControls(
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
