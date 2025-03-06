@@ -32,7 +32,6 @@ public class CoralScore extends SequentialCommandGroup {
         ),
         new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT)
       ),
-      new CoralRunnerStop(),
       new CoralHome(zero)
     );
   }

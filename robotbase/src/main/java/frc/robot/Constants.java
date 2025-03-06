@@ -178,8 +178,6 @@ public final class Constants {
       public static final Distance L4_PREPOSE = Units.Inches.of(49.2);
     }
 
-    public static final double DEBOUNCE_TIME_SECONDS = 0.3;
-
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
   }
 
