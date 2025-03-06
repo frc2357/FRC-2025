@@ -11,12 +11,10 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -81,6 +79,7 @@ public class Elevator extends SubsystemBase {
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
+  @SuppressWarnings("removal")
   public void setTargetRotations(Angle targetRotations) {
     var config = ELEVATOR.MOTOR_CONFIG_LEFT;
     if (getRotations().in(Rotations) > targetRotations.in(Rotations)) {

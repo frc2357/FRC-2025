@@ -21,11 +21,9 @@ public class CoralHome extends ParallelCommandGroup {
     super(
       new ConditionalCommand(
         new LateratorHome().alongWith(new ElevatorHome()),
-        new LateratorSetDistance(LATERATOR.SETPOINTS.HOME).alongWith(
-          new ElevatorSetDistance(ELEVATOR.SETPOINTS.HOME).withDeadline(
-            new WaitCommand(1.5)
-          )
-        ),
+        new LateratorSetDistance(LATERATOR.SETPOINTS.HOME)
+          .alongWith(new ElevatorSetDistance(ELEVATOR.SETPOINTS.HOME))
+          .withDeadline(new WaitCommand(1.5)),
         zero
       )
     );

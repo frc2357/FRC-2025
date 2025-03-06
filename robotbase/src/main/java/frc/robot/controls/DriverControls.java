@@ -16,10 +16,13 @@ import frc.robot.commands.drive.DriveToPoseHandler;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.drive.VelDrive;
+import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.intake.AlgaeChooser;
 import frc.robot.commands.intake.CoralIntake;
-import frc.robot.commands.scoring.coral.CoralHumanPrepose;
+import frc.robot.commands.laterator.LateratorHome;
+import frc.robot.commands.scoring.coral.CoralChooser;
+import frc.robot.commands.scoring.coral.CoralHome;
 import frc.robot.commands.scoring.coral.CoralScore;
 import org.opencv.ml.Ml;
 
@@ -49,18 +52,22 @@ public class DriverControls {
 
   public void mapControls() {
     m_controller
+      .povUp()
+      .negate()
+      .and(m_controller.povRight().negate())
+      .and(m_controller.x())
+      .onTrue(new CoralHome());
+    m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
+    m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
+    m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
     m_leftTrigger.toggleOnTrue(new CoralIntake());
     // Manual Coral Scoring
-    CoralHumanPrepose humanPrepose = new CoralHumanPrepose();
-    m_controller.rightBumper().onTrue(humanPrepose.getSelectCommand());
-    m_rightTrigger.onTrue(
-      new CoralScore(() -> humanPrepose.getLateratorDistance()).finallyDo(() ->
-        humanPrepose.reset()
-      )
-    );
+    CoralChooser coralChooser = new CoralChooser();
+    m_controller.rightBumper().onTrue(coralChooser.getLevelCommand());
+    m_rightTrigger.onTrue(coralChooser.getSelectCommand());
 
     // AlgaeChooser algaeChooser = new AlgaeChooser();
     // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());

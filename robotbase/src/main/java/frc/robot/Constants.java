@@ -82,8 +82,6 @@ public final class Constants {
     public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 9;
     public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
     public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 7;
-
-    public static final int ELEVATOR_CENTER_HALL_EFFECT_SENSOR_ID = 0;
   }
 
   public static final class SWERVE {
@@ -92,11 +90,6 @@ public final class Constants {
       Units.RadiansPerSecond.of((Math.PI * 2) / 3);
 
     public static final double STATIC_FEEDFORWARD_METERS_PER_SECOND = 0.093545;
-
-    public static final LinearAcceleration MAXIMUM_LINEAR_ACCELERATION =
-      Units.MetersPerSecondPerSecond.of(4.5); // TODO: tune this
-    public static final AngularAcceleration MAXIMUM_ANGULAR_ACCELERATION =
-      Units.DegreesPerSecondPerSecond.of(120); // TODO: tune this
 
     public static final Time TIME_TO_COAST = Units.Seconds.of(3);
 
@@ -228,13 +221,12 @@ public final class Constants {
 
     public static final class SETPOINTS {
 
-      public static final Distance HOME = Units.Inches.of(1); // TODO: Tune Setpoint
-
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(3); // TODO: Tune Setpoint
-      public static final Distance L1_PREPOSE = Units.Inches.of(-2); // TODO: Tune Setpoint
-      public static final Distance L2_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
-      public static final Distance L3_PREPOSE = Units.Inches.of(-6.2); // TODO: Tune Setpoint
-      public static final Distance L4_PREPOSE = Units.Inches.of(-6.4); // TODO: Tune Setpoint
+      public static final Distance HOME = Units.Inches.of(1);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(3);
+      public static final Distance L1_PREPOSE = Units.Inches.of(-2);
+      public static final Distance L2_PREPOSE = Units.Inches.of(-6.2);
+      public static final Distance L3_PREPOSE = Units.Inches.of(-6.2);
+      public static final Distance L4_PREPOSE = Units.Inches.of(-6.4);
     }
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
