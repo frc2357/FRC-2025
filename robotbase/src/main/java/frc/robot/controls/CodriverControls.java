@@ -8,7 +8,9 @@ import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
+import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.laterator.LateratorZero;
+import frc.robot.commands.scoring.coral.CoralHome;
 import frc.robot.commands.scoring.coral.CoralPreposeL1;
 import frc.robot.commands.scoring.coral.CoralPreposeL2;
 import frc.robot.commands.scoring.coral.CoralPreposeL3;
@@ -34,6 +36,14 @@ public class CodriverControls {
   }
 
   public void mapControls() {
+    m_controller
+      .povUp()
+      .negate()
+      .and(m_controller.povRight().negate())
+      .and(m_controller.x())
+      .onTrue(new CoralHome());
+    m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
+    m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
     m_controller
       .povUp()
       .whileTrue(new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY())));

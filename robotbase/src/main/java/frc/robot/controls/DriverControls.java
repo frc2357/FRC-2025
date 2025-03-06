@@ -52,14 +52,6 @@ public class DriverControls {
 
   public void mapControls() {
     m_controller
-      .povUp()
-      .negate()
-      .and(m_controller.povRight().negate())
-      .and(m_controller.x())
-      .onTrue(new CoralHome());
-    m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
-    m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
-    m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
