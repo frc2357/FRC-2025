@@ -19,7 +19,6 @@ import frc.robot.commands.drive.VelDrive;
 import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.intake.AlgaeChooser;
 import frc.robot.commands.intake.CoralIntake;
-import frc.robot.commands.intake.CoralIntakeRetract;
 import frc.robot.commands.scoring.coral.CoralHumanPrepose;
 import frc.robot.commands.scoring.coral.CoralScore;
 import org.opencv.ml.Ml;
