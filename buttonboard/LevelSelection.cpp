@@ -10,14 +10,18 @@ void LevelSelection::init()
 {
     if (!m_leftKeypad.begin(m_leftKeypadI2CAddress))
     {
-        Serial.println("Failed to establish communication with the left Scoring Level Selection Keypad I2C device");
+        Serial.print("Failed to establish communication with the left Scoring Level Selection Keypad I2C device (0x");
+        Serial.print(m_leftKeypadI2CAddress, 16);
+        Serial.println(")");
         while (true)
             ;
     }
 
     if (!m_rightKeypad.begin(m_rightKeypadI2CAddress))
     {
-        Serial.println("Failed to establish communication with the right Scoring Level Selection Keypad I2C device");
+        Serial.print("Failed to establish communication with the right Scoring Level Selection Keypad I2C device (0x");
+        Serial.print(m_rightKeypadI2CAddress, 16);
+        Serial.println(")");
         while (true)
             ;
     }

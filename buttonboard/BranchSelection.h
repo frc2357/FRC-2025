@@ -26,18 +26,18 @@ public:
     enum Branch
     {
         NONE = -1,
-        A = 4,
-        B = 5,
-        C = 6,
-        D = 7,
-        E = 8,
-        F = 9,
-        G = 10,
-        H = 11,
-        I = 12,
-        J = 13,
-        K = 14,
-        L = 16,
+        A = 13,
+        B = 19,
+        C = 18,
+        D = 12,
+        E = 4,
+        F = 5,
+        G = 6,
+        H = 7,
+        I = 8,
+        J = 9,
+        K = 10,
+        L = 11,
     };
     static int PINS[NUM_BUTTONS];
 

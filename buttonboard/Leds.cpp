@@ -8,7 +8,9 @@ void Leds::init()
 {
     if (!m_mcp.begin_I2C(m_mcpI2CAddress))
     {
-        Serial.println("Failed to establish communication with the Led MCP23017 I2C device");
+        Serial.print("Failed to establish communication with the Led MCP23017 I2C device (0x");
+        Serial.print(m_mcpI2CAddress, 16);
+        Serial.println(")");
         while (1)
             ;
     }

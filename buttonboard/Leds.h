@@ -12,18 +12,18 @@
  * Columns are wired to {fill in the blank}
  * Rows are wired to {fill in the blank}
  */
-#define ROW_ON HIGH
-#define ROW_OFF LOW
-#define COL_ON LOW
-#define COL_OFF HIGH
+#define ROW_ON LOW
+#define ROW_OFF HIGH
+#define COL_ON HIGH
+#define COL_OFF LOW
 
 class Leds
 {
 public:
     // ! It is CRUCIAL that these are in order of LevelSelection::Level starting at L1 and ending at L4
-    int ROW_PINS[NUM_ROWS] = {0, 1, 2, 3};
+    int ROW_PINS[NUM_ROWS] = {11, 10, 9, 8};
     // ! It is CRUCIAL that these are in order of BranchSelection::Branch starting at A and ending at L
-    int COL_PINS[NUM_COLS] = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    int COL_PINS[NUM_COLS] = {7, 6, 15, 14, 13, 12, 0, 1, 2, 3, 4, 5};
 
     Leds::Leds(byte mcpI2CAddress);
 
