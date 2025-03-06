@@ -1,6 +1,7 @@
 #include "PanicControls.h"
 
-PanicControls::PanicControls(byte mcpI2CAddress, byte intPin) : m_mcpI2CAddress(mcpI2CAddress), m_interruptPin(intPin)
+PanicControls::PanicControls(byte mcpI2CAddress, byte intPin)
+    : m_mcpI2CAddress(mcpI2CAddress), m_interruptPin(intPin)
 {
 }
 
@@ -8,7 +9,9 @@ void PanicControls::init()
 {
   if (!m_mcp.begin_I2C(m_mcpI2CAddress))
   {
-    Serial.println("Failed to establish communication with the Panic Controls MCP23017 I2C device");
+    Serial.print("Failed to establish communication with the Panic Controls MCP23017 I2C device (0x");
+    Serial.print(m_mcpI2CAddress, 16);
+    Serial.println(")");
     while (1)
       ;
   }
@@ -95,7 +98,8 @@ void PanicControls::setXboxControlsForMechanism(PanicControls::MechanismControl 
 
 void PanicControls::resetJoysticks()
 {
-  if (m_joysticksReset) return;
+  if (m_joysticksReset)
+    return;
   XInput.setTrigger(XInputControl::TRIGGER_RIGHT, 0);
   XInput.setTrigger(XInputControl::TRIGGER_LEFT, 0);
   XInput.setJoystickY(XInputControl::JOY_RIGHT, 0);
