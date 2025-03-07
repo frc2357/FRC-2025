@@ -95,11 +95,4 @@ public class Telemetry {
       }
     );
   }
-
-  public static void publishPose(String topicName, Pose2d pose) {
-    fieldTypePub.set("Field2d");
-    fieldPub.set(
-      new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
-    );
-  }
 }

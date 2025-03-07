@@ -7,14 +7,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.commands.auto.AutoBase;
-import frc.robot.commands.auto.CB3BlueStation2Peice;
+import frc.robot.commands.auto.CB3BlueStation3Peice;
 import frc.robot.commands.auto.CR3RedStation4Peice;
 import frc.robot.commands.auto.MiddleDitchBranchG;
 import frc.robot.commands.auto.MiddleDitchBranchH;
 import frc.robot.commands.auto.PushTeammate;
-import frc.robot.commands.auto.TuningPathFinal;
-import frc.robot.commands.auto.TuningPathX;
-import frc.robot.commands.auto.TuningPathY;
 import java.util.Map;
 
 public class AutoChooserManager {
@@ -24,7 +21,7 @@ public class AutoChooserManager {
 
   // The auto routines that will show up on the auto command chooser.
   private AutoBase[] m_autos = {
-    new CB3BlueStation2Peice(),
+    new CB3BlueStation3Peice(),
     new CR3RedStation4Peice(),
     new MiddleDitchBranchG(),
     new MiddleDitchBranchH(),

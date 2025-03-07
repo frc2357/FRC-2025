@@ -9,9 +9,9 @@ import frc.robot.commands.intake.CoralPreposeIntake;
 import frc.robot.commands.scoring.coral.CoralPreposeL4;
 import frc.robot.commands.scoring.coral.CoralScore;
 
-public class CB3BlueStation2Peice extends AutoBase {
+public class CB3BlueStation3Peice extends AutoBase {
 
-  public CB3BlueStation2Peice() {
+  public CB3BlueStation3Peice() {
     super("Cage B3 | 2 P | Blue Station", "CB3ToBranchJ");
     // all the commented out code should work the same, but we dont know until we tune the path, so its here for now.
     // makeAutoFromSegments(

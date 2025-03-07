@@ -400,6 +400,22 @@ public class CommandSwerveDrivetrain
       : ChoreoAllianceFlipUtil.flip(curPose);
   }
 
+  public Pose2d flipYAxis(Pose2d poseToFlip) {
+    return new Pose2d(
+      poseToFlip.getX(),
+      ChoreoAllianceFlipUtil.flipY(poseToFlip.getY()),
+      poseToFlip.getRotation()
+    );
+  }
+
+  public Pose2d flipXAxis(Pose2d poseToFlip) {
+    return new Pose2d(
+      ChoreoAllianceFlipUtil.flipX(poseToFlip.getX()),
+      poseToFlip.getY(),
+      poseToFlip.getRotation()
+    );
+  }
+
   /**
    * Sets the pose straight as you input it, with no flipping to compensate for alliance.
    * @param poseToSet The pose it will set.

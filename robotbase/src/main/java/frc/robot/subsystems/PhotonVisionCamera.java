@@ -1,10 +1,6 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.Utils;
@@ -12,12 +8,19 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.networktables.BooleanEntry;
+import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -25,15 +28,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
-import frc.robot.util.Telemetry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Vector;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.targeting.*;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** Controls the photon vision camera options. */
 public class PhotonVisionCamera extends SubsystemBase {
@@ -49,6 +53,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     public Optional<Matrix<N3, N3>> camMatrix = null;
     public Optional<Matrix<N8, N1>> distCoeefs = null;
     public Transform3d robotToCameraTransform = null;
+    public PhotonVisionCamera camera = null;
 
     public TimestampedPNPInfo() {
       result = null;
@@ -57,6 +62,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       camMatrix = null;
       distCoeefs = null;
       robotToCameraTransform = null;
+      camera = null;
     }
 
     public void replaceInfo(
@@ -65,7 +71,8 @@ public class PhotonVisionCamera extends SubsystemBase {
       double headingTimestamp,
       Optional<Matrix<N3, N3>> camMatrix,
       Optional<Matrix<N8, N1>> distCoeefs,
-      Transform3d robotToCamTransform
+      Transform3d robotToCamTransform,
+      PhotonVisionCamera camera
     ) {
       this.result = result;
       this.heading = heading;
@@ -73,6 +80,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       this.camMatrix = camMatrix;
       this.distCoeefs = distCoeefs;
       this.robotToCameraTransform = robotToCamTransform;
+      this.camera = camera;
     }
 
     public void invalidateInfo() {
@@ -82,6 +90,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       camMatrix = null;
       distCoeefs = null;
       robotToCameraTransform = null;
+      camera = null;
     }
 
     public static TimestampedPNPInfo[] makePNPInfoList() {
@@ -160,6 +169,10 @@ public class PhotonVisionCamera extends SubsystemBase {
   /** Whether or not we have connection with the camera still */
   protected boolean m_connectionLost;
 
+  protected NetworkTable m_table;
+  protected DoubleArrayPublisher m_fieldPub;
+  protected StringPublisher m_fieldTypePub;
+
   /**
    * The fiducial ID of the best target we have.
    *
@@ -188,6 +201,11 @@ public class PhotonVisionCamera extends SubsystemBase {
     // for (int i = 0; i < m_aprilTagInfo.length; i++) {
     //   m_aprilTagInfo[i] = new TargetInfo();
     // }
+
+    m_table = NetworkTableInstance.getDefault()
+      .getTable("VisionPose-" + cameraName);
+    m_fieldPub = m_table.getDoubleArrayTopic("pose").publish();
+    m_fieldTypePub = m_table.getStringTopic(".type").publish();
 
     m_robotToCameraTranform = cameraTransform;
     m_cameraMatrix = Optional.of(cameraMatrix);
@@ -404,12 +422,16 @@ public class PhotonVisionCamera extends SubsystemBase {
         )
       );
     }
-    // Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
-    //   m_lastEstimatedPose.estimatedPose.toPose2d()
-    // );
-    Telemetry.publishPose(
-      "ShooterField",
-      m_lastEstimatedPose.estimatedPose.toPose2d()
+    publishPose(m_lastEstimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
+  }
+
+  public static void publishPose(Pose2d pose, PhotonVisionCamera camera) {
+    if (pose == null) {
+      return;
+    }
+    camera.m_fieldTypePub.set("Field2d");
+    camera.m_fieldPub.accept(
+      new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
     );
   }
 
@@ -425,11 +447,13 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (!result.hasTargets()) {
       return;
     }
-    double frameTimeSeconds = result.getTimestampSeconds();
-    double currTimeSeconds = RobotController.getMeasureFPGATime().in(Seconds);
+    double frameTimeSeconds = Utils.fpgaToCurrentTime(
+      result.getTimestampSeconds()
+    );
+    double currTimeSeconds = Utils.getCurrentTimeSeconds();
     SmartDashboard.putNumber(
       "Time Sync To Pheonix Diff Seconds",
-      currTimeSeconds - Utils.getCurrentTimeSeconds()
+      frameTimeSeconds - currTimeSeconds
     );
     // if result is older than allowed, do not store it
     if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
@@ -448,7 +472,8 @@ public class PhotonVisionCamera extends SubsystemBase {
             headingTimestampSeconds,
             m_cameraMatrix,
             m_distCoeefs,
-            m_robotToCameraTranform
+            m_robotToCameraTranform,
+            this
           );
         break;
       }
@@ -508,7 +533,8 @@ public class PhotonVisionCamera extends SubsystemBase {
           headingTimestampSeconds,
           m_cameraMatrix,
           m_distCoeefs,
-          m_robotToCameraTranform
+          m_robotToCameraTranform,
+          this
         );
     }
   }
@@ -558,18 +584,12 @@ public class PhotonVisionCamera extends SubsystemBase {
    */
   public static boolean isPoseInField(Pose3d pose) {
     return (
-      m_lastEstimatedPose.estimatedPose.getX() <
-        FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-        FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getX() >
-      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getY() <
-      FIELD_CONSTANTS.FIELD_WIDTH.in(Meters) - FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getY() >
-      FIELD_CONSTANTS.FIELD_WIDTH.in(Meters) + FIELD_BORDER_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() < -Z_MARGIN.in(Meters) ||
-      m_lastEstimatedPose.estimatedPose.getZ() > Z_MARGIN.in(Meters)
+      pose.getX() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getX() >
+      FIELD_CONSTANTS.FIELD_LENGTH.plus(FIELD_BORDER_MARGIN).in(Meters) ||
+      pose.getY() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getY() >
+      FIELD_CONSTANTS.FIELD_LENGTH.plus(FIELD_BORDER_MARGIN).in(Meters)
     );
   }
 
@@ -671,52 +691,10 @@ public class PhotonVisionCamera extends SubsystemBase {
    * <p>Should only be used if the camera does not see more than 1 april tag, if it does, use
    * getPNPResult instead, as it is more accurate.
    *
-   * @return The robots estimated pose, if it has any april tag targets. <strong>Returns null if
-   *     there are no targets.</strong>
+   * @return The robots estimated pose, if it has any april tag targets. <strong>Can be null at various points.</strong>
    */
   public static EstimatedRobotPose getLastEstimatedPose() {
     return m_lastEstimatedPose;
-  }
-
-  /**
-   * Gets the information of the multiple tag pose estimate if it exists. Be real careful with how you use this.
-   *
-   * <p>If the camera does not see more than 1 april tag, <strong> this will return null. </strong>
-   *
-   * @return The PNPResult for you to get information from.
-   */
-  public MultiTargetPNPResult getMultiTargetPNPResult() {
-    Optional<MultiTargetPNPResult> PNPEstimate = m_result.getMultiTagResult();
-    return PNPEstimate.isPresent() ? PNPEstimate.get() : null;
-  }
-
-  /**
-   * @param result The MultiTargetPNPResult to take the pose from.
-   * @return The Pose3d constructed from the PNPResult. RETURNS NULL IF POSE IS NOT ACCEPTABLE
-   */
-  public Pose3d pose3dFromPNPResult(MultiTargetPNPResult result) {
-    Transform3d resultTransform = result.estimatedPose.best;
-    double resultReprojectionError = result.estimatedPose.bestReprojErr;
-    double resultAmbiguity = result.estimatedPose.ambiguity;
-
-    if (resultAmbiguity > MAX_AMBIGUITY_TOLERANCE) {
-      return null;
-    }
-    if (resultReprojectionError > MAX_REPROJECTION_ERROR_PIXELS) {
-      return null;
-    }
-    return new Pose3d(
-      resultTransform.getTranslation(),
-      resultTransform.getRotation()
-    );
-  }
-
-  /**
-   * @param result The MultiTargetPNPResult to take the pose from.
-   * @return The Pose2d constructed from the PNPResult.
-   */
-  public Pose2d pose2dFromPNPResult(MultiTargetPNPResult result) {
-    return pose3dFromPNPResult(result).toPose2d();
   }
 
   /**

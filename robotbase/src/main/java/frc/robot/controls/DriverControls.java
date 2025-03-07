@@ -13,6 +13,8 @@ import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.algaeRunner.AlgaeRunnerSetSpeed;
+import frc.robot.commands.descoring.RemoveAlgaeHigh;
+import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler;
@@ -59,27 +61,14 @@ public class DriverControls {
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
-    m_leftTrigger.toggleOnTrue(new CoralIntake());
     // Manual Coral Scoring
     CoralChooser coralChooser = new CoralChooser();
     m_controller.rightBumper().onTrue(coralChooser.getElevatorPreposeCommand());
     m_leftTrigger.onTrue(new CoralHome());
     m_rightTrigger.toggleOnTrue(coralChooser.getScoreCommand());
     m_controller.leftBumper().onTrue(coralChooser.selectL4());
-    m_controller
-      .a()
-      .whileTrue(
-        new ElevatorSetDistance(ELEVATOR.SETPOINTS.LOW_ALGAE).alongWith(
-          new AlgaeKnockerSetSpeed(0.5)
-        )
-      );
-    m_controller
-      .b()
-      .whileTrue(
-        new ElevatorSetDistance(ELEVATOR.SETPOINTS.HIGH_ALGAE).alongWith(
-          new AlgaeKnockerSetSpeed(0.5)
-        )
-      );
+    m_controller.a().whileTrue(new RemoveAlgaeLow());
+    m_controller.b().whileTrue(new RemoveAlgaeHigh());
 
     // AlgaeChooser algaeChooser = new AlgaeChooser();
     // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());

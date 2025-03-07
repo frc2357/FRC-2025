@@ -128,6 +128,14 @@ public final class Constants {
       Robot.swerve
     );
 
+    public static final AutoFactory Y_FLIPPED_FACTORY = new AutoFactory(
+      () -> Robot.swerve.flipYAxis(Robot.swerve.getFieldRelativePose2d()),
+      (Pose2d pose) -> Robot.swerve.resetPose(Robot.swerve.flipYAxis(pose)),
+      Robot.swerve::followChoreoPath,
+      true,
+      Robot.swerve
+    );
+
     public static final double PREPOSE_SECONDS =
       ELEVATOR.FULL_EXTENSION_TIME.in(Seconds) + 0.05;
   }
@@ -183,7 +191,7 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(2);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.75);
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
       public static final Distance L2_PREPOSE = Units.Inches.of(9.43);
       public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
@@ -612,8 +620,9 @@ public final class Constants {
 
     public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.35);
 
-    public static final Rotation2d ROTATE_AROUND_REEF_ROTATIONS =
-      new Rotation2d(Units.Rotations.of(0.05));
+    public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
+      Units.Rotations.of(0.05)
+    );
 
     public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
       .1,

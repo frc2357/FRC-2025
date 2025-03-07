@@ -10,8 +10,8 @@ import frc.robot.util.Utility;
 public class DriveToCoralStation extends DriveToPoseHandler {
 
   public enum StationToGoTo {
-    Upper,
-    Lower,
+    BlueSide,
+    RedSide,
     Fastest,
   }
 
@@ -43,9 +43,9 @@ public class DriveToCoralStation extends DriveToPoseHandler {
 
   private Pose2d getDesiredTarget(Pose2d currPose) {
     switch (m_desiredStation) {
-      case Lower:
+      case RedSide:
         return LOWER_STATION_DESIRED_SLOT;
-      case Upper:
+      case BlueSide:
         return UPPER_STATION_DESIRED_SLOT;
       case Fastest:
       default:

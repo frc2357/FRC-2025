@@ -154,8 +154,6 @@ public class Robot extends TimedRobot {
     m_autoChooserManager = new AutoChooserManager();
     m_sysIdChooser = new SysIdChooser();
     m_SignalLoggerManager = new SignalLoggerManager();
-    elasticFieldManager = new ElasticFieldManager();
-    elasticFieldManager.setupSwerveField();
 
     SmartDashboard.putData("Buttonboard", buttonboard);
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
@@ -163,7 +161,6 @@ public class Robot extends TimedRobot {
 
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
-    elasticFieldManager.setupShooterField();
 
     // Logging
     DataLogManager.logNetworkTables(true); // enable/disable automatic NetworksTable Logging
@@ -192,10 +189,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     PhotonVisionCamera.updateAllCameras();
-    // elasticFieldManager.swerveFieldRep.setRobotPose(
-    //   swerve.getFieldRelativePose2d()
-    // );
-    Telemetry.publishPose("SwerveField", swerve.getFieldRelativePose2d());
+    elasticFieldManager.swerveFieldRep.setRobotPose(
+      swerve.getFieldRelativePose2d()
+    );
     CommandScheduler.getInstance().run();
   }
 

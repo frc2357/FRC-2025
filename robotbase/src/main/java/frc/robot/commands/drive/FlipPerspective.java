@@ -12,15 +12,9 @@ public class FlipPerspective extends Command {
 
   @Override
   public void initialize() {
-    double currentDegrees = Robot.swerve
-      .getOperatorForwardDirection()
-      .getDegrees();
-
-    if (currentDegrees == 0) {
-      Robot.swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI));
-    } else {
-      Robot.swerve.setOperatorPerspectiveForward(new Rotation2d(0));
-    }
+    Robot.swerve.setOperatorPerspectiveForward(
+      Robot.swerve.getOperatorForwardDirection().unaryMinus()
+    );
   }
 
   @Override

@@ -1,16 +1,17 @@
 package frc.robot.commands.scoring.coral;
 
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants.CORAL_RUNNER;
 import frc.robot.Constants.LATERATOR;
 import frc.robot.Robot;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringLevel;
 import java.util.Map;
-import javax.sound.midi.Sequencer;
 
 public class CoralChooser {
 
@@ -64,6 +65,15 @@ public class CoralChooser {
     }
   }
 
+  public Dimensionless getRunnerSpeed() {
+    switch (m_levels[m_currentLevel]) {
+      case L1, L2:
+        return CORAL_RUNNER.SCORING_PERCENT.minus(Units.Percent.of(0.2));
+      default:
+        return CORAL_RUNNER.SCORING_PERCENT;
+    }
+  }
+
   public void resetLevel() {
     m_currentLevel = 0;
   }
@@ -79,9 +89,11 @@ public class CoralChooser {
     Map.ofEntries(
       Map.entry(
         true,
-        new CoralScore(() -> getLateratorDistance()).finallyDo(() ->
-          resetLevel()
-        )
+        new CoralScore(
+          () -> getLateratorDistance(),
+          () -> true,
+          () -> getRunnerSpeed()
+        ).finallyDo(() -> resetLevel())
       ),
       Map.entry(false, new CoralIntake())
     ),

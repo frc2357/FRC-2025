@@ -168,7 +168,7 @@ public class DriveToPoseHandler extends Command {
         .getTranslation()
         .rotateAround(
           REEF.CENTER.getTranslation(),
-          ROTATE_AROUND_REEF_ROTATIONS
+          ROTATE_AROUND_REEF_ROTATION
         ),
       currPose.getRotation()
     );
@@ -177,7 +177,7 @@ public class DriveToPoseHandler extends Command {
         .getTranslation()
         .rotateAround(
           REEF.CENTER.getTranslation(),
-          ROTATE_AROUND_REEF_ROTATIONS.unaryMinus()
+          ROTATE_AROUND_REEF_ROTATION.unaryMinus()
         ),
       currPose.getRotation()
     );

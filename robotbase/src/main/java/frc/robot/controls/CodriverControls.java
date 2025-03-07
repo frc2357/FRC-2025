@@ -3,6 +3,7 @@ package frc.robot.controls;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.LATERATOR;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.climber.ClimberAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
@@ -10,7 +11,7 @@ import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorHome;
-import frc.robot.commands.laterator.LateratorZero;
+import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.scoring.coral.CoralHome;
 import frc.robot.commands.scoring.coral.CoralPreposeL1;
 import frc.robot.commands.scoring.coral.CoralPreposeL2;
@@ -104,6 +105,7 @@ public class CodriverControls {
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
     onlyDown.whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));
+    onlyDown.onTrue(new LateratorSetDistance(LATERATOR.SETPOINTS.L4_PREPOSE));
   }
 
   public double deadband(double value, double deadband) {
