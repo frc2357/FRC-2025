@@ -28,15 +28,15 @@ public class Climber extends SubsystemBase {
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-    m_motorThree = new SparkMax(
-      CAN_ID.CLIMBER_MOTOR_THREE,
-      MotorType.kBrushless
-    );
-    m_motorThree.configure(
-      CLIMBER.MOTOR_CONFIG_THREE,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
-    );
+    // m_motorThree = new SparkMax(
+    //   CAN_ID.CLIMBER_MOTOR_THREE,
+    //   MotorType.kBrushless
+    // );
+    // m_motorThree.configure(
+    //   CLIMBER.MOTOR_CONFIG_THREE,
+    //   ResetMode.kResetSafeParameters,
+    //   PersistMode.kPersistParameters
+    // );
   }
 
   public void setSpeed(double percentOutput) {

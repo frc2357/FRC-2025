@@ -13,7 +13,7 @@ public class VelDrive extends Command {
 
   @Override
   public void initialize() {
-    Robot.swerve.driveFieldRelative(2, 0, 0);
+    Robot.swerve.driveFieldRelative(-2, 0, 0);
   }
 
   @Override

@@ -334,10 +334,10 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
       .apply(MOTOR_CONFIG_ONE)
       .follow(CAN_ID.CLIMBER_MOTOR_ONE);
-    public static final SparkBaseConfig MOTOR_CONFIG_THREE =
-      new SparkMaxConfig()
-        .apply(MOTOR_CONFIG_ONE)
-        .follow(CAN_ID.CLIMBER_MOTOR_ONE);
+    // public static final SparkBaseConfig MOTOR_CONFIG_THREE =
+    //   new SparkMaxConfig()
+    //     .apply(MOTOR_CONFIG_ONE)
+    //     .follow(CAN_ID.CLIMBER_MOTOR_ONE);
 
     public static final double AXIS_MAX_SPEED = 1;
     public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);

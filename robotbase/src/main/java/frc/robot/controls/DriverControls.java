@@ -63,7 +63,7 @@ public class DriverControls {
     // Manual Coral Scoring
     CoralChooser coralChooser = new CoralChooser();
     m_controller.rightBumper().onTrue(coralChooser.getElevatorPreposeCommand());
-    m_leftTrigger.onTrue(new ElevatorHome());
+    m_leftTrigger.onTrue(new CoralHome());
     m_rightTrigger.toggleOnTrue(coralChooser.getScoreCommand());
     m_controller.leftBumper().onTrue(coralChooser.selectL4());
     m_controller
@@ -74,7 +74,7 @@ public class DriverControls {
         )
       );
     m_controller
-      .y()
+      .b()
       .whileTrue(
         new ElevatorSetDistance(ELEVATOR.SETPOINTS.HIGH_ALGAE).alongWith(
           new AlgaeKnockerSetSpeed(0.5)

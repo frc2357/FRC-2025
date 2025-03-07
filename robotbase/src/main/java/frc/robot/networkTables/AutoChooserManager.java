@@ -11,6 +11,7 @@ import frc.robot.commands.auto.CB3BlueStation2Peice;
 import frc.robot.commands.auto.CR3RedStation4Peice;
 import frc.robot.commands.auto.MiddleDitchBranchG;
 import frc.robot.commands.auto.MiddleDitchBranchH;
+import frc.robot.commands.auto.PushTeammate;
 import frc.robot.commands.auto.TuningPathFinal;
 import frc.robot.commands.auto.TuningPathX;
 import frc.robot.commands.auto.TuningPathY;
@@ -27,6 +28,7 @@ public class AutoChooserManager {
     new CR3RedStation4Peice(),
     new MiddleDitchBranchG(),
     new MiddleDitchBranchH(),
+    new PushTeammate(),
   };
 
   private AutoChooser m_autoChooser = new AutoChooser();
