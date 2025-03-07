@@ -16,7 +16,7 @@ public class ClimberAxis extends Command {
   @Override
   public void execute() {
     double axisValue = m_axis.getValue();
-    Robot.climber.setAxisSpeed(axisValue);
+    Robot.climber.setAxisSpeed(Math.pow(axisValue, 3));
   }
 
   @Override

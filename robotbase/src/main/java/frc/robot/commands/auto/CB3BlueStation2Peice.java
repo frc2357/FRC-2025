@@ -26,8 +26,8 @@ public class CB3BlueStation2Peice extends AutoBase {
     AutoTrajectory branchJToBlueS = m_routine.trajectory("branchJToBlueS");
     AutoTrajectory BlueSToBranchK = m_routine.trajectory("BlueSToBranchK");
     AutoTrajectory branchKToBlueS = m_routine.trajectory("branchKToBlueS");
-    // AutoTrajectory BlueSToBranchL = m_routine.trajectory("BlueSToBranchL");
-    // AutoTrajectory branchLToBlueS = m_routine.trajectory("branchLToBlueS");
+    AutoTrajectory BlueSToBranchL = m_routine.trajectory("BlueSToBranchL");
+    AutoTrajectory branchLToBlueS = m_routine.trajectory("branchLToBlueS");
     // AutoTrajectory BlueSToBranchI = m_routine.trajectory("BlueSToBranchI");
     // AutoTrajectory branchIToBlueS = m_routine.trajectory("branchIToBlueS");
     // This is with everything manually put into segments
@@ -46,7 +46,7 @@ public class CB3BlueStation2Peice extends AutoBase {
     m_startTraj
       .done()
       .onTrue(
-        new AutoCoralPreposeL4()
+        new CoralPreposeL4()
           .andThen(
             new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false),
             new CoralPreposeIntake(),
@@ -73,17 +73,19 @@ public class CB3BlueStation2Peice extends AutoBase {
           )
       );
     // // when at the coral station, we intake coral and then go to the next branch
-    // branchKToBlueS
-    //   .done()
-    //   .onTrue(new CoralIntake().andThen(BlueSToBranchL.cmd()));
-    // BlueSToBranchL
-    //   .atTimeBeforeEnd(PREPOSE_SECONDS)
-    //   .onTrue(new CoralPreposeL4());
-    // BlueSToBranchL
-    //   .done()
-    //   .onTrue(
-    //     new CoralScore().andThen(new CoralPreposeIntake(), branchLToBlueS.cmd()) // score coral 3
-    //   );
+    branchKToBlueS
+      .done()
+      .onTrue(new CoralIntake().andThen(BlueSToBranchL.cmd()));
+    BlueSToBranchL.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
+      new CoralPreposeL4()
+    );
+    BlueSToBranchL.done()
+      .onTrue(
+        new CoralScore(
+          () -> LATERATOR.SETPOINTS.L4_PREPOSE,
+          () -> false
+        ).andThen(new CoralPreposeIntake(), branchLToBlueS.cmd()) // score coral 3
+      );
     // // when at the coral station, we intake coral and then go to the next branch
     // branchLToBlueS
     //   .done()

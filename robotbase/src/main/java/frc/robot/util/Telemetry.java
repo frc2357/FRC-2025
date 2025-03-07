@@ -14,14 +14,14 @@ import edu.wpi.first.networktables.StringPublisher;
 public class Telemetry {
 
   /* What to publish over networktables for telemetry */
-  NetworkTableInstance inst = NetworkTableInstance.getDefault();
+  static NetworkTableInstance inst = NetworkTableInstance.getDefault();
 
   /* Robot pose for field positioning */
-  NetworkTable table = inst.getTable("Pose");
-  DoubleArrayPublisher fieldPub = table
+  static NetworkTable table = inst.getTable("Pose");
+  static DoubleArrayPublisher fieldPub = table
     .getDoubleArrayTopic("robotPose")
     .publish();
-  StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
+  static StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
   /* Robot speeds for general checking */
   NetworkTable driveStats = inst.getTable("Drive");
@@ -93,6 +93,13 @@ public class Telemetry {
         state.ModuleTargets[3].angle.getDegrees(),
         state.ModuleTargets[3].speedMetersPerSecond,
       }
+    );
+  }
+
+  public static void publishPose(String topicName, Pose2d pose) {
+    fieldTypePub.set("Field2d");
+    fieldPub.set(
+      new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
     );
   }
 }

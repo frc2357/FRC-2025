@@ -8,9 +8,9 @@ public class CR3RedStation4Peice extends AutoBase {
     makeAutoFromSegments(
       "branchFToRedS",
       "RedSToBranchE",
-      "branchEToRedS"/*
-       "RedSToBranchD",
-       "branchDToRedS",
+      "branchEToRedS",
+      "RedSToBranchD",
+      "branchDToRedS"/*,
        "RedSToBranchC",
        "branchCToRedS"*/
     );

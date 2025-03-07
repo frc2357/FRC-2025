@@ -37,79 +37,73 @@ public class CodriverControls {
   }
 
   public void mapControls() {
-    m_controller
+    Trigger noDpad = m_controller
       .povUp()
       .negate()
       .and(m_controller.povRight().negate())
-      .and(m_controller.x())
-      .onTrue(new CoralHome());
+      .and(m_controller.povLeft().negate())
+      .and(m_controller.povDown().negate());
+
+    Trigger onlyLeft = m_controller
+      .povUp()
+      .negate()
+      .and(m_controller.povRight().negate())
+      .and(m_controller.povLeft())
+      .and(m_controller.povDown().negate());
+
+    Trigger onlyRight = m_controller
+      .povUp()
+      .negate()
+      .and(m_controller.povRight())
+      .and(m_controller.povLeft().negate())
+      .and(m_controller.povDown().negate());
+
+    Trigger onlyUp = m_controller
+      .povUp()
+      .and(m_controller.povRight().negate())
+      .and(m_controller.povLeft().negate())
+      .and(m_controller.povDown().negate());
+
+    Trigger onlyDown = m_controller
+      .povUp()
+      .negate()
+      .and(m_controller.povRight().negate())
+      .and(m_controller.povLeft().negate())
+      .and(m_controller.povDown());
+
+    noDpad.and(m_controller.x()).onTrue(new CoralHome());
     m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
     m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
-    m_controller
-      .povUp()
-      .whileTrue(new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY())));
-    m_controller
-      .povLeft()
-      .negate()
-      .and(m_controller.x().whileTrue(new ElevatorHome()));
 
-    m_controller
-      .povLeft()
-      .and(m_controller.a())
-      .whileTrue(new CoralPreposeL1());
-    m_controller
-      .povLeft()
-      .and(m_controller.b())
-      .whileTrue(new CoralPreposeL2());
-    m_controller
-      .povLeft()
-      .and(m_controller.x())
-      .whileTrue(new CoralPreposeL3());
-    m_controller
-      .povLeft()
-      .and(m_controller.y())
-      .whileTrue(new CoralPreposeL4());
-    m_controller
-      .povRight()
-      .whileTrue(
-        new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
-      );
-    m_controller.b().whileTrue(new LateratorZero());
-    m_controller
-      .povRight()
+    onlyUp.whileTrue(
+      new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY()))
+    );
+
+    onlyUp.and(m_controller.x().whileTrue(new ElevatorHome()));
+
+    onlyLeft.and(m_controller.a()).whileTrue(new CoralPreposeL1());
+    onlyLeft.and(m_controller.b()).whileTrue(new CoralPreposeL2());
+    onlyLeft.and(m_controller.x()).whileTrue(new CoralPreposeL3());
+    onlyLeft.and(m_controller.y()).whileTrue(new CoralPreposeL4());
+
+    onlyRight.whileTrue(
+      new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
+    );
+
+    // onlyRight.onTrue(new LateratorZero());
+
+    onlyRight
       .and(m_rightTrigger)
       .whileTrue(
         new CoralRunnerAxis(() -> -m_controller.getRightTriggerAxis())
       );
-    m_controller
-      .povRight()
+    onlyRight
       .and(m_leftTrigger)
       .whileTrue(new CoralRunnerAxis(() -> m_controller.getLeftTriggerAxis()));
 
-    m_controller
-      .povRight()
-      .and(m_controller.a())
-      .whileTrue(new AlgaeKnockerSetSpeed(0.25));
-    m_controller
-      .povRight()
-      .and(m_controller.b())
-      .whileTrue(new AlgaeKnockerSetSpeed(-0.25));
-    m_controller
-      .povDown()
-      .whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));
-    // m_controller
-    //   .povLeft()
-    //   .and(m_leftTrigger)
-    //   .whileTrue(new AlgaeRunnerAxis(() -> -m_controller.getLeftTriggerAxis()));
-    // m_controller
-    //   .povLeft()
-    //   .and(m_rightTrigger)
-    //   .whileTrue(new AlgaeRunnerAxis(() -> m_controller.getRightTriggerAxis()));
-    // m_controller
-    //   .povLeft()
-    //   .whileTrue(
-    //     new AlgaePivotAxis(() -> modifyAxis(m_controller.getRightY()))
-    //   );
+    onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
+    onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
+    onlyDown.whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));
   }
 
   public double deadband(double value, double deadband) {

@@ -8,8 +8,11 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ELEVATOR;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
+import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
+import frc.robot.commands.algaeRunner.AlgaeRunnerSetSpeed;
 import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler;
@@ -17,6 +20,7 @@ import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.drive.VelDrive;
 import frc.robot.commands.elevator.ElevatorHome;
+import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.intake.AlgaeChooser;
 import frc.robot.commands.intake.CoralIntake;
@@ -58,8 +62,24 @@ public class DriverControls {
     m_leftTrigger.toggleOnTrue(new CoralIntake());
     // Manual Coral Scoring
     CoralChooser coralChooser = new CoralChooser();
-    m_controller.rightBumper().onTrue(coralChooser.getLevelCommand());
-    m_rightTrigger.onTrue(coralChooser.getSelectCommand());
+    m_controller.rightBumper().onTrue(coralChooser.getElevatorPreposeCommand());
+    m_leftTrigger.onTrue(new ElevatorHome());
+    m_rightTrigger.toggleOnTrue(coralChooser.getScoreCommand());
+    m_controller.leftBumper().onTrue(coralChooser.selectL4());
+    m_controller
+      .a()
+      .whileTrue(
+        new ElevatorSetDistance(ELEVATOR.SETPOINTS.LOW_ALGAE).alongWith(
+          new AlgaeKnockerSetSpeed(0.5)
+        )
+      );
+    m_controller
+      .y()
+      .whileTrue(
+        new ElevatorSetDistance(ELEVATOR.SETPOINTS.HIGH_ALGAE).alongWith(
+          new AlgaeKnockerSetSpeed(0.5)
+        )
+      );
 
     // AlgaeChooser algaeChooser = new AlgaeChooser();
     // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());

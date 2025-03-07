@@ -7,19 +7,31 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
-import com.revrobotics.spark.config.*;
+import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.MAXMotionConfig;
+import com.revrobotics.spark.config.SmartMotionConfig;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Dimensionless;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import java.util.Optional;
@@ -144,7 +156,7 @@ public final class Constants {
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
         .outputRange(-1, 1);
-    public static final double SMART_MOTION_ALLOWED_ERROR_ROTATIONS = 0.2;
+    public static final double SMART_MOTION_ALLOWED_ERROR_ROTATIONS = 0.1;
 
     @SuppressWarnings("removal")
     public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
@@ -171,11 +183,13 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(0.5);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(2);
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
-      public static final Distance L2_PREPOSE = Units.Inches.of(7.43);
-      public static final Distance L3_PREPOSE = Units.Inches.of(22.189);
-      public static final Distance L4_PREPOSE = Units.Inches.of(49.2);
+      public static final Distance L2_PREPOSE = Units.Inches.of(9.43);
+      public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
+      public static final Distance L4_PREPOSE = Units.Inches.of(50.2);
+      public static final Distance LOW_ALGAE = Units.Inches.of(0.07);
+      public static final Distance HIGH_ALGAE = Units.Inches.of(15);
     }
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
@@ -241,6 +255,8 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
+    public static final double STALL_AMPS = 40;
+
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
     public static final double AXIS_MAX_SPEED = 0.5;
@@ -250,6 +266,7 @@ public final class Constants {
     public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(
       0.2
     );
+    public static final Dimensionless BACK_OUT_PERCENT = Units.Percent.of(-0.1);
     public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0.5);
     public static final double SCORING_WAIT_TIME = 0.5;
   }
@@ -387,7 +404,7 @@ public final class Constants {
     public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.1);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
-    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
+    public static final Distance Z_MARGIN = Units.Feet.of(0.1);
 
     public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 

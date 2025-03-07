@@ -1,12 +1,16 @@
 package frc.robot.commands.scoring.coral;
 
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.LATERATOR;
 import frc.robot.Robot;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringLevel;
 import java.util.Map;
+import javax.sound.midi.Sequencer;
 
 public class CoralChooser {
 
@@ -22,19 +26,20 @@ public class CoralChooser {
 
   private int m_currentLevel = 0;
 
-  private SelectCommand<ScoringLevel> m_levelComand = new SelectCommand<>(
-    Map.ofEntries(
-      Map.entry(ScoringLevel.L1, new CoralPreposeL1()),
-      Map.entry(ScoringLevel.L2, new CoralPreposeL2()),
-      Map.entry(ScoringLevel.L3, new CoralPreposeL3()),
-      Map.entry(ScoringLevel.L4, new CoralPreposeL4()),
-      Map.entry(ScoringLevel.None, new CoralHome())
-    ),
-    this::levelSupplier
-  );
+  private SelectCommand<ScoringLevel> m_elevatorPreposeCommand =
+    new SelectCommand<>(
+      Map.ofEntries(
+        Map.entry(ScoringLevel.L1, new CoralPreposeL1()),
+        Map.entry(ScoringLevel.L2, new CoralPreposeL2()),
+        Map.entry(ScoringLevel.L3, new CoralPreposeL3()),
+        Map.entry(ScoringLevel.L4, new CoralPreposeL4()),
+        Map.entry(ScoringLevel.None, new CoralHome())
+      ),
+      this::levelSupplier
+    );
 
-  public SelectCommand<ScoringLevel> getLevelCommand() {
-    return m_levelComand;
+  public SelectCommand<ScoringLevel> getElevatorPreposeCommand() {
+    return m_elevatorPreposeCommand;
   }
 
   private ScoringLevel levelSupplier() {
@@ -63,7 +68,14 @@ public class CoralChooser {
     m_currentLevel = 0;
   }
 
-  private SelectCommand<Boolean> m_command = new SelectCommand<Boolean>(
+  public SequentialCommandGroup selectL4() {
+    // Set the current level to L3, then when the prepose command runs, it will go to L4 and set current level to L4
+    return new InstantCommand(() -> m_currentLevel = 3).andThen(
+      new CoralPreposeL4()
+    );
+  }
+
+  private SelectCommand<Boolean> m_scoreCommand = new SelectCommand<Boolean>(
     Map.ofEntries(
       Map.entry(
         true,
@@ -76,8 +88,8 @@ public class CoralChooser {
     this::supplier
   );
 
-  public SelectCommand<Boolean> getSelectCommand() {
-    return m_command;
+  public SelectCommand<Boolean> getScoreCommand() {
+    return m_scoreCommand;
   }
 
   private boolean supplier() {

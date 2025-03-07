@@ -9,7 +9,7 @@ public class ElevatorHome extends SequentialCommandGroup {
   public ElevatorHome() {
     super(
       new ElevatorSetDistance(ELEVATOR.SETPOINTS.HOME).withDeadline(
-        new WaitCommand(1.4)
+        new WaitCommand(1)
       ),
       new ElevatorZero()
     );

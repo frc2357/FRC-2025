@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
+import frc.robot.util.Telemetry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -367,15 +368,12 @@ public class PhotonVisionCamera extends SubsystemBase {
     }
     double averageTargetDistance = 0;
     for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
-      averageTargetDistance += target
-        .getBestCameraToTarget()
-        .getMeasureX()
-        .in(Meters);
+      averageTargetDistance += target.getBestCameraToTarget().getX();
     }
     averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
-    // if (!isPoseInField(m_lastEstimatedPose.estimatedPose)) {
-    //   return;
-    // }
+    if (!isPoseInField(m_lastEstimatedPose.estimatedPose)) {
+      return;
+    }
 
     // the higher the confidence is, the less the estimated measurment is trusted.
     double xVelocityConf =
@@ -398,15 +396,19 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (updatePose) {
       Robot.swerve.addVisionMeasurement(
         m_lastEstimatedPose.estimatedPose.toPose2d(),
-        Utils.fpgaToCurrentTime(m_lastEstimatedPose.timestampSeconds),
+        m_lastEstimatedPose.timestampSeconds,
         VecBuilder.fill(
           xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
           yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-          10000 // Theta conf, should never change the gyro heading
+          Double.MAX_VALUE // Theta conf, should never change the gyro heading
         )
       );
     }
-    Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
+    // Robot.elasticFieldManager.shooterFieldRep.setRobotPose(
+    //   m_lastEstimatedPose.estimatedPose.toPose2d()
+    // );
+    Telemetry.publishPose(
+      "ShooterField",
       m_lastEstimatedPose.estimatedPose.toPose2d()
     );
   }
@@ -424,7 +426,11 @@ public class PhotonVisionCamera extends SubsystemBase {
       return;
     }
     double frameTimeSeconds = result.getTimestampSeconds();
-    double currTimeSeconds = RobotController.getFPGATime() * 1e-6;
+    double currTimeSeconds = RobotController.getMeasureFPGATime().in(Seconds);
+    SmartDashboard.putNumber(
+      "Time Sync To Pheonix Diff Seconds",
+      currTimeSeconds - Utils.getCurrentTimeSeconds()
+    );
     // if result is older than allowed, do not store it
     if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
       return;
@@ -551,17 +557,17 @@ public class PhotonVisionCamera extends SubsystemBase {
    * @return Whether or not the provided pose is in the field
    */
   public static boolean isPoseInField(Pose3d pose) {
-    return !(
+    return (
       m_lastEstimatedPose.estimatedPose.getX() <
-        -FIELD_BORDER_MARGIN.in(Meters) ||
+        FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
+        FIELD_BORDER_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getX() >
       FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
       FIELD_BORDER_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getY() <
-      -FIELD_BORDER_MARGIN.in(Meters) ||
+      FIELD_CONSTANTS.FIELD_WIDTH.in(Meters) - FIELD_BORDER_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getY() >
-      FIELD_CONSTANTS.FIELD_LENGTH.in(Meters) +
-      FIELD_BORDER_MARGIN.in(Meters) ||
+      FIELD_CONSTANTS.FIELD_WIDTH.in(Meters) + FIELD_BORDER_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getZ() < -Z_MARGIN.in(Meters) ||
       m_lastEstimatedPose.estimatedPose.getZ() > Z_MARGIN.in(Meters)
     );

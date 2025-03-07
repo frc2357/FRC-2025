@@ -24,7 +24,9 @@ public class CoralScore extends SequentialCommandGroup {
     BooleanSupplier zero
   ) {
     super(
-      new LateratorSetDistance(lateratorDistance),
+      new LateratorSetDistance(lateratorDistance).withDeadline(
+        new WaitCommand(.7)
+      ),
       new ParallelDeadlineGroup(
         new SequentialCommandGroup(
           new WaitUntilCommand(Robot.coralRunner::isOuttakeBeamBroken),

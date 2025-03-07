@@ -38,6 +38,7 @@ public class Elevator extends SubsystemBase {
   );
 
   public Elevator() {
+    SmartDashboard.putNumber("Elevator Setpoint Modifier", 0);
     m_motorLeft = new SparkMax(
       Constants.CAN_ID.ELEVATOR_LEFT_MOTOR,
       MotorType.kBrushless
@@ -81,25 +82,6 @@ public class Elevator extends SubsystemBase {
 
   @SuppressWarnings("removal")
   public void setTargetRotations(Angle targetRotations) {
-    var config = ELEVATOR.MOTOR_CONFIG_LEFT;
-    if (getRotations().in(Rotations) > targetRotations.in(Rotations)) {
-      config.closedLoop.smartMotion.maxAcceleration(5000);
-      m_motorLeft.configure(
-        config,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kNoPersistParameters
-      );
-    } else if (
-      m_motorLeft.configAccessor.closedLoop.smartMotion.getMaxAcceleration() <
-      6000
-    ) {
-      config.closedLoop.smartMotion.maxAcceleration(10000);
-      m_motorLeft.configure(
-        config,
-        ResetMode.kNoResetSafeParameters,
-        PersistMode.kNoPersistParameters
-      );
-    }
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),

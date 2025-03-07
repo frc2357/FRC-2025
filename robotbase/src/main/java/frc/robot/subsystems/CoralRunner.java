@@ -88,4 +88,8 @@ public class CoralRunner extends SubsystemBase {
   public boolean isOuttakeBeamBroken() {
     return m_debouncerIntake.calculate(!m_beamBreakOuttake.get());
   }
+
+  public boolean isStalling() {
+    return m_motor.getOutputCurrent() > CORAL_RUNNER.STALL_AMPS;
+  }
 }
