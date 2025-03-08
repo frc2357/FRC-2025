@@ -82,6 +82,7 @@ public class DriverControls {
       .toggleOnTrue(
         new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
       );
+    m_controller.x().onTrue(coralChooser.selectL3());
     m_controller.y().whileTrue(new DriveRobotRelative());
 
     m_controller.back().onTrue(new FlipPerspective());

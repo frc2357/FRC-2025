@@ -17,7 +17,6 @@ public class CoralChooser {
 
   private ScoringLevel[] m_levels = new ScoringLevel[] {
     ScoringLevel.None,
-    ScoringLevel.L1,
     ScoringLevel.L2,
     ScoringLevel.L3,
     ScoringLevel.L4,
@@ -30,7 +29,6 @@ public class CoralChooser {
   private SelectCommand<ScoringLevel> m_elevatorPreposeCommand =
     new SelectCommand<>(
       Map.ofEntries(
-        Map.entry(ScoringLevel.L1, new CoralPreposeL1()),
         Map.entry(ScoringLevel.L2, new CoralPreposeL2()),
         Map.entry(ScoringLevel.L3, new CoralPreposeL3()),
         Map.entry(ScoringLevel.L4, new CoralPreposeL4()),
@@ -52,8 +50,6 @@ public class CoralChooser {
 
   public Distance getLateratorDistance() {
     switch (m_levels[m_currentLevel]) {
-      case L1:
-        return LATERATOR.SETPOINTS.L1_PREPOSE;
       case L2:
         return LATERATOR.SETPOINTS.L2_PREPOSE;
       case L3:
@@ -67,7 +63,7 @@ public class CoralChooser {
 
   public Dimensionless getRunnerSpeed() {
     switch (m_levels[m_currentLevel]) {
-      case L1, L2:
+      case L2:
         return CORAL_RUNNER.SCORING_PERCENT.minus(Units.Percent.of(0.2));
       default:
         return CORAL_RUNNER.SCORING_PERCENT;
@@ -82,6 +78,13 @@ public class CoralChooser {
     // Set the current level to L3, then when the prepose command runs, it will go to L4 and set current level to L4
     return new InstantCommand(() -> m_currentLevel = 3).andThen(
       new CoralPreposeL4()
+    );
+  }
+
+  public SequentialCommandGroup selectL3() {
+    // Set the current level to L3, then when the prepose command runs, it will go to L4 and set current level to L4
+    return new InstantCommand(() -> m_currentLevel = 2).andThen(
+      new CoralPreposeL3()
     );
   }
 
