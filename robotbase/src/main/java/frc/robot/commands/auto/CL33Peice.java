@@ -9,10 +9,10 @@ import frc.robot.commands.intake.CoralPreposeIntake;
 import frc.robot.commands.scoring.coral.CoralPreposeL4;
 import frc.robot.commands.scoring.coral.CoralScore;
 
-public class CB3BlueStation3Peice extends AutoBase {
+public class CL33Peice extends AutoBase {
 
-  public CB3BlueStation3Peice() {
-    super("Cage B3 | 2 P | Blue Station", "CB3ToBranchJ");
+  public CL33Peice() {
+    super("Cage Left 3 | 2 P", "CB3ToBranchJ");
     // all the commented out code should work the same, but we dont know until we tune the path, so its here for now.
     // makeAutoFromSegments(
     //   "branchJToBlueS",
@@ -26,8 +26,8 @@ public class CB3BlueStation3Peice extends AutoBase {
     AutoTrajectory branchJToBlueS = m_routine.trajectory("branchJToBlueS");
     AutoTrajectory BlueSToBranchK = m_routine.trajectory("BlueSToBranchK");
     AutoTrajectory branchKToBlueS = m_routine.trajectory("branchKToBlueS");
-    AutoTrajectory BlueSToBranchL = m_routine.trajectory("BlueSToBranchL");
-    AutoTrajectory branchLToBlueS = m_routine.trajectory("branchLToBlueS");
+    // AutoTrajectory BlueSToBranchL = m_routine.trajectory("BlueSToBranchL");
+    // AutoTrajectory branchLToBlueS = m_routine.trajectory("branchLToBlueS");
     // AutoTrajectory BlueSToBranchI = m_routine.trajectory("BlueSToBranchI");
     // AutoTrajectory branchIToBlueS = m_routine.trajectory("branchIToBlueS");
     // This is with everything manually put into segments
@@ -75,17 +75,17 @@ public class CB3BlueStation3Peice extends AutoBase {
     // // when at the coral station, we intake coral and then go to the next branch
     branchKToBlueS
       .done()
-      .onTrue(new CoralIntake().andThen(BlueSToBranchL.cmd()));
-    BlueSToBranchL.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
-      new CoralPreposeL4()
-    );
-    BlueSToBranchL.done()
-      .onTrue(
-        new CoralScore(
-          () -> LATERATOR.SETPOINTS.L4_PREPOSE,
-          () -> false
-        ).andThen(new CoralPreposeIntake(), branchLToBlueS.cmd()) // score coral 3
-      );
+      .onTrue(new CoralIntake()/*.andThen(BlueSToBranchL.cmd()) */);
+    // BlueSToBranchL.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
+    //   new CoralPreposeL4()
+    // );
+    // BlueSToBranchL.done()
+    //   .onTrue(
+    //     new CoralScore(
+    //       () -> LATERATOR.SETPOINTS.L4_PREPOSE,
+    //       () -> false
+    //     ).andThen(new CoralPreposeIntake(), branchLToBlueS.cmd()) // score coral 3
+    //   );
     // // when at the coral station, we intake coral and then go to the next branch
     // branchLToBlueS
     //   .done()

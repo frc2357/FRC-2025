@@ -13,8 +13,10 @@ import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.algaeRunner.AlgaeRunnerSetSpeed;
+import frc.robot.commands.descoring.AlgaeRemoverChooser;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
+import frc.robot.commands.drive.DriveRobotRelative;
 import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler;
@@ -67,11 +69,20 @@ public class DriverControls {
     m_leftTrigger.onTrue(new CoralHome());
     m_rightTrigger.toggleOnTrue(coralChooser.getScoreCommand());
     m_controller.leftBumper().onTrue(coralChooser.selectL4());
-    m_controller.a().whileTrue(new RemoveAlgaeLow());
-    m_controller.b().whileTrue(new RemoveAlgaeHigh());
 
-    // AlgaeChooser algaeChooser = new AlgaeChooser();
-    // m_controller.rightTrigger().onTrue(algaeChooser.getSelectCommand());
+    AlgaeRemoverChooser algaeRemoverChooser = new AlgaeRemoverChooser();
+    //m_controller.a().onTrue(algaeRemoverChooser.getSelectCommand());
+    m_controller
+      .a()
+      .toggleOnTrue(
+        new RemoveAlgaeLow().finallyDo(() -> new CoralHome().schedule())
+      );
+    m_controller
+      .b()
+      .toggleOnTrue(
+        new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
+      );
+    m_controller.y().whileTrue(new DriveRobotRelative());
 
     m_controller.back().onTrue(new FlipPerspective());
   }

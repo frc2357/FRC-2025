@@ -31,6 +31,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
@@ -191,13 +192,13 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.75);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.3);
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
       public static final Distance L2_PREPOSE = Units.Inches.of(9.43);
       public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
       public static final Distance L4_PREPOSE = Units.Inches.of(50.2);
-      public static final Distance LOW_ALGAE = Units.Inches.of(0.07);
-      public static final Distance HIGH_ALGAE = Units.Inches.of(15);
+      public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
+      public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
@@ -384,7 +385,7 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+      PoseStrategy.CONSTRAINED_SOLVEPNP;
     public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
@@ -392,7 +393,7 @@ public final class Constants {
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 0.1;
+    public static final double PNP_HEADING_SCALE_FACTOR = 1;
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       Optional.of(
@@ -405,8 +406,11 @@ public final class Constants {
     public static final double Y_STD_DEV_COEFFIECIENT = 0.65;
 
     // if were going faster than this, we wont accept any pose est.
-    public static final AngularVelocity MAX_ACCEPTABLE_ROTATOINAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.1);
+    public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
+      Units.RadiansPerSecond.of(0.15);
+
+    public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
+      Units.MetersPerSecond.of(1);
 
     // how close the estimated pose can get to the field border before we invalidate it
     public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.1);
@@ -430,9 +434,14 @@ public final class Constants {
         Units.Inches.of(7.951),
         Units.Inches.of(.624),
         Units.Inches.of(22.243),
+        // new Rotation3d(
+        //   Units.Degrees.of(0),
+        //   Units.Degrees.of(-10),
+        //   Units.Degrees.of(0)
+        // )
         new Rotation3d(
           Units.Degrees.of(0),
-          Units.Degrees.of(-10),
+          Units.Degrees.of(10),
           Units.Degrees.of(0)
         )
       );

@@ -20,7 +20,6 @@ import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,11 +30,11 @@ import frc.robot.Robot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Vector;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -161,7 +160,15 @@ public class PhotonVisionCamera extends SubsystemBase {
 
   protected final Optional<Matrix<N8, N1>> m_distCoeefs;
 
+  /**
+   * The latest pose estimation from all cameras
+   */
   protected static EstimatedRobotPose m_lastEstimatedPose;
+
+  /**
+   * The latest pose estimation from this camera
+   */
+  private EstimatedRobotPose m_lastCameraEstimation;
 
   private static PoseStrategy m_primaryStrategy = PRIMARY_STRATEGY;
   private static PoseStrategy m_fallbackStrategy = FALLBACK_STRATEGY;
@@ -321,7 +328,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     // does whatever we need to make the strategy work
     switch (m_primaryStrategy) {
       case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
-        // m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
+        m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
         break;
       case CLOSEST_TO_REFERENCE_POSE:
         m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
@@ -363,16 +370,6 @@ public class PhotonVisionCamera extends SubsystemBase {
       pnpInfo.heading,
       pnpInfo.headingTimestampSeconds
     );
-    if (
-      Math.abs(Robot.swerve.getRotationalVelocity().in(RadiansPerSecond)) >
-      MAX_ACCEPTABLE_ROTATOINAL_VELOCITY.in(RadiansPerSecond)
-    ) {
-      return;
-    }
-    m_poseEstimator.addHeadingData(
-      pnpInfo.headingTimestampSeconds,
-      pnpInfo.heading
-    );
     m_lastEstimatedPose = m_poseEstimator
       .update(
         pnpInfo.result,
@@ -384,6 +381,7 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (m_lastEstimatedPose == null) {
       return;
     }
+    publishPose(m_lastEstimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
     double averageTargetDistance = 0;
     for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
       averageTargetDistance += target.getBestCameraToTarget().getX();
@@ -422,11 +420,10 @@ public class PhotonVisionCamera extends SubsystemBase {
         )
       );
     }
-    publishPose(m_lastEstimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
   }
 
   public static void publishPose(Pose2d pose, PhotonVisionCamera camera) {
-    if (pose == null) {
+    if (pose == null || camera == null) {
       return;
     }
     camera.m_fieldTypePub.set("Field2d");
@@ -444,7 +441,7 @@ public class PhotonVisionCamera extends SubsystemBase {
    */
   private void updatePNPInfo(PhotonPipelineResult result) {
     // if the provided result has no targets, it has no value, so we do not want to store it
-    if (!result.hasTargets()) {
+    if (result == null || !result.hasTargets()) {
       return;
     }
     double frameTimeSeconds = Utils.fpgaToCurrentTime(
@@ -459,8 +456,22 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
       return;
     }
-    Rotation3d heading = Robot.swerve.getRotation3d();
-    double headingTimestampSeconds = Robot.swerve.getState().Timestamp;
+    if (
+      Math.abs(Robot.swerve.getRotationalVelocity().in(RadiansPerSecond)) >
+      MAX_ACCEPTABLE_ROTATIONAL_VELOCITY.in(RadiansPerSecond)
+    ) {
+      return;
+    }
+    if (
+      Math.abs(Robot.swerve.getTranslationalVelocity().in(MetersPerSecond)) >
+      MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY.in(MetersPerSecond)
+    ) {
+      return;
+    }
+    Rotation3d heading = new Rotation3d(
+      Robot.swerve.getFieldRelativePose2d().getRotation()
+    );
+    double headingTimestampSeconds = result.getTimestampSeconds();
     int tarCount = result.targets.size();
     int indexToReplace = -1;
     for (int i = 0; i < m_pnpInfo.length; i++) {
@@ -589,7 +600,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       FIELD_CONSTANTS.FIELD_LENGTH.plus(FIELD_BORDER_MARGIN).in(Meters) ||
       pose.getY() < -FIELD_BORDER_MARGIN.in(Meters) ||
       pose.getY() >
-      FIELD_CONSTANTS.FIELD_LENGTH.plus(FIELD_BORDER_MARGIN).in(Meters)
+      FIELD_CONSTANTS.FIELD_WIDTH.plus(FIELD_BORDER_MARGIN).in(Meters)
     );
   }
 

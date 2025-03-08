@@ -26,14 +26,13 @@ public class AutoBase {
    */
   public AutoBase(String name) {
     this(name, name);
-  }
-
-  /**
+  }/**
    * This will initialize an auto routine
    * Will create the first trajectory, and set the routine to wait, reset odometry, and run the first trajectory
    * @param name Name of the auto routine
    * @param startTraj Trajectory to start with
    */
+
   public AutoBase(String name, String startTraj) {
     m_name = name;
     // This is how you make an auto routine. The name should be essentially the same as the name of the function it is in.
