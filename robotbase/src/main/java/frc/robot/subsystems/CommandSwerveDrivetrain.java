@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -472,7 +473,7 @@ public class CommandSwerveDrivetrain
     );
   }
 
-  public LinearVelocity getTranslationalVelocity() {
+  public LinearVelocity getAbsoluteTranslationalVelocity() {
     var speeds = getCurrentChassisSpeeds();
     var xVel = Math.abs(speeds.vxMetersPerSecond);
     var yVel = Math.abs(speeds.vyMetersPerSecond);
@@ -482,14 +483,8 @@ public class CommandSwerveDrivetrain
     return Units.FeetPerSecond.of(translationalVelocity);
   }
 
-  public AngularVelocity getRotationalVelocity() {
-    return Units.RadiansPerSecond.of(getState().Speeds.omegaRadiansPerSecond);
-  }
-
   public AngularVelocity getAngularVelocity() {
-    return Units.RadiansPerSecond.of(
-      getCurrentChassisSpeeds().omegaRadiansPerSecond
-    );
+    return Units.RadiansPerSecond.of(getState().Speeds.omegaRadiansPerSecond);
   }
 
   public void stopMotors() {
@@ -500,8 +495,8 @@ public class CommandSwerveDrivetrain
     }
   }
 
-  public double getYaw() {
-    return getPigeon2().getYaw().getValueAsDouble();
+  public Angle getYaw() {
+    return getPigeon2().getYaw().getValue();
   }
 
   // Pigeon is rotated 90 degrees so pitch and roll are flipped
@@ -512,6 +507,17 @@ public class CommandSwerveDrivetrain
   // Pigeon is rotated 90 degrees so pitch and roll are flipped
   public double getPitch() {
     return getPigeon2().getRoll().getValueAsDouble();
+  }
+
+  public Twist2d getRobotVelocity() {
+    return new Twist2d(
+      getXVelocity().in(Units.MetersPerSecond),
+      getYVelocity().in(Units.MetersPerSecond),
+      getPigeon2()
+        .getAngularVelocityZWorld()
+        .getValue()
+        .in(Units.RadiansPerSecond)
+    );
   }
 
   public Twist2d getFieldVelocity() {
