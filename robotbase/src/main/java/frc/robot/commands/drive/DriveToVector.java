@@ -118,7 +118,7 @@ public class DriveToVector extends Command {
         .getTranslation();
     }
 
-    Robot.swerve.driveFieldRelative(
+    Robot.swerve.driveRobotRelative(
       driveVelocity.getX(),
       driveVelocity.getY(),
       thetaVelocity
