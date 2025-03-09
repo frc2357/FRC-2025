@@ -603,9 +603,9 @@ public final class Constants {
     );
   }
 
-  public static class DRIVE_TO_POSE {
+  public static class DRIVE_TO_VECTOR {
 
-    public static final ProfiledPIDController AUTO_ALIGN_DRIVE_CONTROLLER =
+    public static final ProfiledPIDController DRIVE_CONTROLLER =
       new ProfiledPIDController(
         8,
         0.0,
@@ -613,7 +613,26 @@ public final class Constants {
         new TrapezoidProfile.Constraints(1.5, 1)
       );
 
-    public static final ProfiledPIDController AUTO_ALIGN_THETA_CONTROLLER =
+    public static final ProfiledPIDController THETA_CONTROLLER =
+      new ProfiledPIDController(
+        6,
+        0.0,
+        0.0,
+        new TrapezoidProfile.Constraints(2, 1)
+      );
+  }
+
+  public static class DRIVE_TO_POSE {
+
+    public static final ProfiledPIDController DRIVE_CONTROLLER =
+      new ProfiledPIDController(
+        8,
+        0.0,
+        0.0,
+        new TrapezoidProfile.Constraints(1.5, 1)
+      );
+
+    public static final ProfiledPIDController THETA_CONTROLLER =
       new ProfiledPIDController(
         6,
         0.0,
