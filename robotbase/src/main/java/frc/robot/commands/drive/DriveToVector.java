@@ -1,8 +1,8 @@
 package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,7 +25,6 @@ public class DriveToVector extends Command {
   private ProfiledPIDController m_driveController;
   private ProfiledPIDController m_thetaController;
 
-  
   private Supplier<Translation2d> m_translationSupplier;
   private Supplier<Pose2d> m_targetSupplier;
   private Angle m_initialAngle;
@@ -62,11 +61,7 @@ public class DriveToVector extends Command {
           Robot.swerve.getRobotVelocity().dy
         )
           .rotateBy(
-            target
-              .getTranslation()
-              .minus(current)
-              .getAngle()
-              .unaryMinus()
+            target.getTranslation().minus(current).getAngle().unaryMinus()
           )
           .getX()
       )
@@ -91,8 +86,7 @@ public class DriveToVector extends Command {
 
     if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
       // Calculate drive speed
-      double currentDistance = current
-        .getDistance(target.getTranslation());
+      double currentDistance = current.getDistance(target.getTranslation());
       double driveErrorAbs = currentDistance;
       double driveVelocityScalar = m_driveController.calculate(
         driveErrorAbs,
@@ -110,9 +104,7 @@ public class DriveToVector extends Command {
       // Command speeds
       driveVelocity = new Pose2d(
         Translation2d.kZero,
-        current
-          .minus(target.getTranslation())
-          .getAngle()
+        current.minus(target.getTranslation()).getAngle()
       )
         .transformBy(Utility.translationToTransform(driveVelocityScalar, 0.0))
         .getTranslation();
