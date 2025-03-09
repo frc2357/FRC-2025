@@ -11,6 +11,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.*;
 import com.ctre.phoenix6.swerve.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -315,17 +316,40 @@ public class CommandSwerveDrivetrain
    * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
    * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in meters per second.
    * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
+   * @param perspective The perspective to use for field relative driving.
    */
   public void driveFieldRelative(
     double velocityXMetersPerSecond,
     double velocityYMetersPerSecond,
-    double rotationRateRadiansPerSecond
+    double rotationRateRadiansPerSecond,
+    ForwardPerspectiveValue perspective
   ) {
     setControl(
       m_fieldRelative
         .withVelocityX(velocityXMetersPerSecond)
         .withVelocityY(velocityYMetersPerSecond)
         .withRotationalRate(rotationRateRadiansPerSecond)
+        .withForwardPerspective(perspective)
+    );
+  }
+
+  /**
+   * The method to use for field relative driving.
+   *
+   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
+   */
+  public void driveFieldRelative(
+    double velocityXMetersPerSecond,
+    double velocityYMetersPerSecond,
+    double rotationRateRadiansPerSecond
+  ) {
+    driveFieldRelative(
+      velocityXMetersPerSecond,
+      velocityYMetersPerSecond,
+      rotationRateRadiansPerSecond,
+      ForwardPerspectiveValue.OperatorPerspective
     );
   }
 
