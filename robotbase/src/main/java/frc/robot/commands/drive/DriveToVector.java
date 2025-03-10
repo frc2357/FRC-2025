@@ -27,7 +27,6 @@ public class DriveToVector extends Command {
 
   private Supplier<Translation2d> m_translationSupplier;
   private Supplier<Pose2d> m_targetSupplier;
-  private Angle m_initialAngle;
 
   /**
    *
@@ -67,8 +66,7 @@ public class DriveToVector extends Command {
       )
     );
 
-    m_initialAngle = Robot.swerve.getYaw();
-    m_thetaController.reset(Robot.swerve.getYaw().in(Radians));
+    m_thetaController.reset(Robot.swerve.getFieldRelativePose2d().getRotation().getRadians());
   }
 
   @Override
@@ -96,8 +94,8 @@ public class DriveToVector extends Command {
 
       // Calculate theta speed
       thetaVelocity = m_thetaController.calculate(
-        Robot.swerve.getYaw().in(Radians),
-        target.getRotation().getMeasure().plus(m_initialAngle).in(Radians)
+        Robot.swerve.getFieldRelativePose2d().getRotation().getRadians(),
+        target.getRotation().getMeasure().in(Radians)
       );
       if (m_thetaController.atGoal()) thetaVelocity = 0.0;
 
