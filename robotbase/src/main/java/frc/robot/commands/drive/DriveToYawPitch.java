@@ -17,7 +17,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.util.Utility;
 import java.util.function.Supplier;
 
-public class DriveToVector extends Command {
+public class DriveToYawPitch extends Command {
 
   private static final double m_speedAt12VoltsMPS =
     TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -25,21 +25,21 @@ public class DriveToVector extends Command {
   private ProfiledPIDController m_driveController;
   private ProfiledPIDController m_thetaController;
 
-  private Supplier<Translation2d> m_translationSupplier;
+  private Supplier<Translation2d> m_yawPitchSupplier;
   private Supplier<Pose2d> m_targetSupplier;
 
   /**
    *
-   * @param translationSupplier Returns the vector of an april tag target
-   * @param targetSupplier Returns the target vector and angle
+   * @param yawPitchSupplier Returns a translation of an april tag target where the x is the yaw, and pitch is the y
+   * @param targetSupplier Returns the target yaw, pitch, and field-relative robot rotational position
    */
-  public DriveToVector(
-    Supplier<Translation2d> translationSupplier,
+  public DriveToYawPitch(
+    Supplier<Translation2d> yawPitchSupplier,
     Supplier<Pose2d> targetSupplier
   ) {
     addRequirements(Robot.swerve);
 
-    m_translationSupplier = translationSupplier;
+    m_yawPitchSupplier = yawPitchSupplier;
     m_driveController = DRIVE_TO_VECTOR.DRIVE_CONTROLLER;
     m_thetaController = DRIVE_TO_VECTOR.THETA_CONTROLLER;
   }
@@ -48,7 +48,7 @@ public class DriveToVector extends Command {
   public void initialize() {
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    Translation2d current = m_translationSupplier.get();
+    Translation2d current = m_yawPitchSupplier.get();
     Pose2d target = m_targetSupplier.get();
 
     // Not sure if initial velocity still needs rotated by error or not.
@@ -65,13 +65,13 @@ public class DriveToVector extends Command {
           .getX()
       )
     );
-
+    
     m_thetaController.reset(Robot.swerve.getFieldRelativePose2d().getRotation().getRadians());
   }
 
   @Override
   public void execute() {
-    Translation2d current = m_translationSupplier.get();
+    Translation2d current = m_yawPitchSupplier.get();
     Pose2d target = m_targetSupplier.get();
 
     Translation2d driveVelocity = new Translation2d(
