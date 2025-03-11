@@ -105,7 +105,9 @@ public class CodriverControls {
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
     onlyDown.whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));
-    onlyDown.onTrue(new LateratorSetDistance(LATERATOR.SETPOINTS.L4_PREPOSE));
+    onlyDown.onTrue(
+      new LateratorSetDistance(() -> LATERATOR.SETPOINTS.L4_PREPOSE)
+    );
   }
 
   public double deadband(double value, double deadband) {

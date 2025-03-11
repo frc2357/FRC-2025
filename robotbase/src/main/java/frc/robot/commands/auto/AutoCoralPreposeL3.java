@@ -9,7 +9,7 @@ public class AutoCoralPreposeL3 extends ParallelCommandGroup {
 
   public AutoCoralPreposeL3() {
     super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.L3_PREPOSE),
+      new LateratorSetDistance(() -> Constants.LATERATOR.SETPOINTS.L3_PREPOSE),
       new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L3_PREPOSE)
     );
   }

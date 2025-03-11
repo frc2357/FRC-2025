@@ -10,7 +10,9 @@ public class CoralPreposeIntake extends ParallelCommandGroup {
 
   public CoralPreposeIntake() {
     super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.INTAKE_PREPOSE),
+      new LateratorSetDistance(() ->
+        Constants.LATERATOR.SETPOINTS.INTAKE_PREPOSE
+      ),
       new ElevatorSetDistance(ELEVATOR.SETPOINTS.INTAKE_PREPOSE)
     );
   }

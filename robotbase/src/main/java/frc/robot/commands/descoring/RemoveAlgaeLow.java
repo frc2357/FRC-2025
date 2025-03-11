@@ -12,7 +12,7 @@ public class RemoveAlgaeLow extends ParallelCommandGroup {
   public RemoveAlgaeLow() {
     super(
       new ElevatorSetDistance(ELEVATOR.SETPOINTS.LOW_ALGAE),
-      new LateratorSetDistance(LATERATOR.SETPOINTS.L3_PREPOSE),
+      new LateratorSetDistance(() -> LATERATOR.SETPOINTS.L3_PREPOSE),
       new AlgaeKnockerSetSpeed(-0.5)
     );
   }

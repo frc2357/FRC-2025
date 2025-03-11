@@ -7,7 +7,7 @@ public class LateratorHome extends SequentialCommandGroup {
 
   public LateratorHome() {
     super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.HOME),
+      new LateratorSetDistance(() -> Constants.LATERATOR.SETPOINTS.HOME),
       new LateratorZero()
     );
   }
