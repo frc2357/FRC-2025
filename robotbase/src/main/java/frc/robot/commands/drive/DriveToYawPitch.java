@@ -1,88 +1,90 @@
 package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.Constants.DRIVE_TO_POSE;
+import frc.robot.Constants.DRIVE_TO_VECTOR;
 import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.Utility;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-public class DriveToPose extends Command {
-
-  private Function<Pose2d, Pose2d> m_targetPoseFunction;
-
-  private ProfiledPIDController m_driveController;
-  private ProfiledPIDController m_thetaController;
+public class DriveToYawPitch extends Command {
 
   private static final double m_speedAt12VoltsMPS =
     TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
 
-  public DriveToPose(Function<Pose2d, Pose2d> targetPoseFunction) {
+  private ProfiledPIDController m_driveController;
+  private ProfiledPIDController m_thetaController;
+
+  private Supplier<Translation2d> m_yawPitchSupplier;
+  private Supplier<Pose2d> m_targetSupplier;
+
+  /**
+   *
+   * @param yawPitchSupplier Returns a translation of an april tag target where the x is the yaw, and pitch is the y
+   * @param targetSupplier Returns the target yaw, pitch, and field-relative robot rotational position
+   */
+  public DriveToYawPitch(
+    Supplier<Translation2d> yawPitchSupplier,
+    Supplier<Pose2d> targetSupplier
+  ) {
     addRequirements(Robot.swerve);
 
-    m_targetPoseFunction = targetPoseFunction;
-    m_driveController = DRIVE_TO_POSE.DRIVE_CONTROLLER;
-    m_thetaController = DRIVE_TO_POSE.THETA_CONTROLLER;
+    m_yawPitchSupplier = yawPitchSupplier;
+    m_driveController = DRIVE_TO_VECTOR.DRIVE_CONTROLLER;
+    m_thetaController = DRIVE_TO_VECTOR.THETA_CONTROLLER;
   }
 
   @Override
   public void initialize() {
-    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
-    Pose2d targetPose = m_targetPoseFunction.apply(currentPose);
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
+    Translation2d current = m_yawPitchSupplier.get();
+    Pose2d target = m_targetSupplier.get();
+
+    // Not sure if initial velocity still needs rotated by error or not.
     m_driveController.reset(
       new TrapezoidProfile.State(
-        currentPose.getTranslation().getDistance(targetPose.getTranslation()),
+        current.getDistance(target.getTranslation()),
         -new Translation2d(
-          Robot.swerve.getFieldVelocity().dx,
-          Robot.swerve.getFieldVelocity().dy
+          Robot.swerve.getRobotVelocity().dx,
+          Robot.swerve.getRobotVelocity().dy
         )
           .rotateBy(
-            targetPose
-              .getTranslation()
-              .minus(currentPose.getTranslation())
-              .getAngle()
-              .unaryMinus()
+            target.getTranslation().minus(current).getAngle().unaryMinus()
           )
           .getX()
       )
     );
-
-    m_thetaController.reset(currentPose.getRotation().getRadians());
+    
+    m_thetaController.reset(Robot.swerve.getFieldRelativePose2d().getRotation().getRadians());
   }
 
   @Override
   public void execute() {
-    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
-    Pose2d targetPose = m_targetPoseFunction.apply(currentPose);
+    Translation2d current = m_yawPitchSupplier.get();
+    Pose2d target = m_targetSupplier.get();
 
     Translation2d driveVelocity = new Translation2d(
       Robot.driverControls.getY() * m_speedAt12VoltsMPS,
       Robot.driverControls.getX() * m_speedAt12VoltsMPS
     );
-    ForwardPerspectiveValue perspective =
-      ForwardPerspectiveValue.OperatorPerspective;
-
     double thetaVelocity =
       Robot.driverControls.getRotation() *
       Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
 
     if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
-      perspective = ForwardPerspectiveValue.BlueAlliance;
       // Calculate drive speed
-      double currentDistance = currentPose
-        .getTranslation()
-        .getDistance(targetPose.getTranslation());
+      double currentDistance = current.getDistance(target.getTranslation());
       double driveErrorAbs = currentDistance;
       double driveVelocityScalar = m_driveController.calculate(
         driveErrorAbs,
@@ -92,29 +94,24 @@ public class DriveToPose extends Command {
 
       // Calculate theta speed
       thetaVelocity = m_thetaController.calculate(
-        currentPose.getRotation().getRadians(),
-        targetPose.getRotation().getRadians()
+        Robot.swerve.getFieldRelativePose2d().getRotation().getRadians(),
+        target.getRotation().getMeasure().in(Radians)
       );
       if (m_thetaController.atGoal()) thetaVelocity = 0.0;
 
       // Command speeds
       driveVelocity = new Pose2d(
         Translation2d.kZero,
-        currentPose
-          .getTranslation()
-          .minus(targetPose.getTranslation())
-          .getAngle()
+        current.minus(target.getTranslation()).getAngle()
       )
         .transformBy(Utility.translationToTransform(driveVelocityScalar, 0.0))
         .getTranslation();
     }
 
-    // System.out.println("ROTO = " + m_rotoOutput);
-    Robot.swerve.driveFieldRelative(
+    Robot.swerve.driveRobotRelative(
       driveVelocity.getX(),
       driveVelocity.getY(),
-      thetaVelocity,
-      perspective
+      thetaVelocity
     );
   }
 

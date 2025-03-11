@@ -457,13 +457,15 @@ public class PhotonVisionCamera extends SubsystemBase {
       return;
     }
     if (
-      Math.abs(Robot.swerve.getRotationalVelocity().in(RadiansPerSecond)) >
+      Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
       MAX_ACCEPTABLE_ROTATIONAL_VELOCITY.in(RadiansPerSecond)
     ) {
       return;
     }
     if (
-      Math.abs(Robot.swerve.getTranslationalVelocity().in(MetersPerSecond)) >
+      Math.abs(
+        Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond)
+      ) >
       MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY.in(MetersPerSecond)
     ) {
       return;
