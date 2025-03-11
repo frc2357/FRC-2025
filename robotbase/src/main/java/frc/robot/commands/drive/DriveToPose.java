@@ -3,6 +3,7 @@ package frc.robot.commands.drive;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -69,11 +70,15 @@ public class DriveToPose extends Command {
       Robot.driverControls.getY() * m_speedAt12VoltsMPS,
       Robot.driverControls.getX() * m_speedAt12VoltsMPS
     );
+    ForwardPerspectiveValue perspective =
+      ForwardPerspectiveValue.OperatorPerspective;
+
     double thetaVelocity =
       Robot.driverControls.getRotation() *
       Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
 
     if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
+      perspective = ForwardPerspectiveValue.BlueAlliance;
       // Calculate drive speed
       double currentDistance = currentPose
         .getTranslation()
@@ -108,7 +113,8 @@ public class DriveToPose extends Command {
     Robot.swerve.driveFieldRelative(
       driveVelocity.getX(),
       driveVelocity.getY(),
-      thetaVelocity
+      thetaVelocity,
+      perspective
     );
   }
 
