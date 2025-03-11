@@ -21,27 +21,13 @@ public class LateratorSetDistance extends Command {
     this(() -> distance);
   }
 
-  public void execute() {
-    if (
-      Robot.swerve
-        .getAbsoluteTranslationalVelocity()
-        .lte(Constants.SWERVE.ROBOT_NO_TIP_SPEED) ||
-      Robot.elevator.isGoingDown()
-    ) {
-      Robot.laterator.setTargetDistance(m_distance.get());
-    } else {
-      Robot.laterator.setTargetDistance(Robot.laterator.getDistance());
-    }
+  public void initialize() {
+    Robot.laterator.setTargetDistance(m_distance.get());
   }
 
   @Override
   public boolean isFinished() {
-    return m_distance
-      .get()
-      .isNear(
-        Robot.laterator.getDistance(),
-        LATERATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
-      );
+    return Robot.laterator.isAtTarget();
   }
 
   @Override
