@@ -1,9 +1,9 @@
 package frc.robot.commands.elevator;
 
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Constants.ELEVATOR;
 import frc.robot.Robot;
 
 public class ElevatorSetDistance extends Command {
@@ -31,7 +31,10 @@ public class ElevatorSetDistance extends Command {
 
   @Override
   public boolean isFinished() {
-    return Robot.elevator.isAtTarget();
+    return m_distance.isNear(
+      Robot.elevator.getDistance(),
+      ELEVATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
+    );
   }
 
   @Override
