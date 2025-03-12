@@ -11,12 +11,15 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.networktables.BooleanEntry;
+import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
@@ -34,7 +37,6 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -164,11 +166,6 @@ public class PhotonVisionCamera extends SubsystemBase {
    * The latest pose estimation from all cameras
    */
   protected static EstimatedRobotPose m_lastEstimatedPose;
-
-  /**
-   * The latest pose estimation from this camera
-   */
-  private EstimatedRobotPose m_lastCameraEstimation;
 
   private static PoseStrategy m_primaryStrategy = PRIMARY_STRATEGY;
   private static PoseStrategy m_fallbackStrategy = FALLBACK_STRATEGY;
@@ -370,7 +367,7 @@ public class PhotonVisionCamera extends SubsystemBase {
       pnpInfo.heading,
       pnpInfo.headingTimestampSeconds
     );
-    m_lastEstimatedPose = m_poseEstimator
+    EstimatedRobotPose estimatedPose = m_poseEstimator
       .update(
         pnpInfo.result,
         pnpInfo.camMatrix,
@@ -378,48 +375,55 @@ public class PhotonVisionCamera extends SubsystemBase {
         POSE_EST_PARAMS
       )
       .orElse(null);
-    if (m_lastEstimatedPose == null) {
+    if (estimatedPose == null) {
       return;
     }
-    publishPose(m_lastEstimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
+    publishPose(estimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
     double averageTargetDistance = 0;
-    for (PhotonTrackedTarget target : m_lastEstimatedPose.targetsUsed) {
+    for (PhotonTrackedTarget target : estimatedPose.targetsUsed) {
       averageTargetDistance += target.getBestCameraToTarget().getX();
     }
-    averageTargetDistance /= m_lastEstimatedPose.targetsUsed.size();
-    if (!isPoseInField(m_lastEstimatedPose.estimatedPose)) {
-      return;
-    }
+    averageTargetDistance /= estimatedPose.targetsUsed.size();
+    if (!isPoseInField(estimatedPose.estimatedPose)) return;
+    if (estimatedPose.targetsUsed.size() < 2) return;
 
     // the higher the confidence is, the less the estimated measurment is trusted.
-    double xVelocityConf =
+    double velocityConf =
       MAGIC_VEL_CONF_ADDEND +
-      Math.abs(Robot.swerve.getXVelocity().in(MetersPerSecond));
-    double yVelocityConf =
-      MAGIC_VEL_CONF_ADDEND +
-      Math.abs(Robot.swerve.getYVelocity().in(MetersPerSecond));
+      Math.abs(
+        Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond)
+      );
 
-    double xCoordinateConfidence = Math.pow(
-      m_lastEstimatedPose.targetsUsed.size() *
-      ((averageTargetDistance / 2) * xVelocityConf),
+    double coordinateConfidence = Math.pow(
+      estimatedPose.targetsUsed.size() *
+      ((averageTargetDistance / 2) * velocityConf),
       MAGIC_VEL_CONF_EXPONENT
     );
-    double yCoordinateConfidence = Math.pow(
-      m_lastEstimatedPose.targetsUsed.size() *
-      ((averageTargetDistance / 2) * yVelocityConf),
-      MAGIC_VEL_CONF_EXPONENT
-    );
+    Pose2d estimatedPose2d = estimatedPose.estimatedPose.toPose2d();
+    // if estimated pose is too far from current pose
+    if (
+      new Transform2d(Robot.swerve.getFieldRelativePose2d(), estimatedPose2d)
+        .getTranslation()
+        .getNorm() >
+      MAX_DISTANCE_FROM_CURR_POSE_METERS
+    ) {
+      // and were not disabled, throw it out
+      if (!RobotModeTriggers.disabled().getAsBoolean()) {
+        return;
+      }
+    }
     if (updatePose) {
       Robot.swerve.addVisionMeasurement(
-        m_lastEstimatedPose.estimatedPose.toPose2d(),
-        m_lastEstimatedPose.timestampSeconds,
+        estimatedPose.estimatedPose.toPose2d(),
+        Utils.fpgaToCurrentTime(estimatedPose.timestampSeconds),
         VecBuilder.fill(
-          xCoordinateConfidence * X_STD_DEV_COEFFIECIENT,
-          yCoordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+          coordinateConfidence * X_STD_DEV_COEFFIECIENT,
+          coordinateConfidence * Y_STD_DEV_COEFFIECIENT,
           Double.MAX_VALUE // Theta conf, should never change the gyro heading
         )
       );
     }
+    m_lastEstimatedPose = estimatedPose;
   }
 
   public static void publishPose(Pose2d pose, PhotonVisionCamera camera) {
@@ -448,10 +452,6 @@ public class PhotonVisionCamera extends SubsystemBase {
       result.getTimestampSeconds()
     );
     double currTimeSeconds = Utils.getCurrentTimeSeconds();
-    SmartDashboard.putNumber(
-      "Time Sync To Pheonix Diff Seconds",
-      frameTimeSeconds - currTimeSeconds
-    );
     // if result is older than allowed, do not store it
     if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
       return;
@@ -459,21 +459,19 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (
       Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
       MAX_ACCEPTABLE_ROTATIONAL_VELOCITY.in(RadiansPerSecond)
-    ) {
-      return;
-    }
+    ) return;
     if (
       Math.abs(
         Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond)
       ) >
       MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY.in(MetersPerSecond)
-    ) {
-      return;
-    }
+    ) return;
     Rotation3d heading = new Rotation3d(
       Robot.swerve.getFieldRelativePose2d().getRotation()
     );
-    double headingTimestampSeconds = result.getTimestampSeconds();
+    double headingTimestampSeconds = Utils.fpgaToCurrentTime(
+      result.getTimestampSeconds()
+    );
     int tarCount = result.targets.size();
     int indexToReplace = -1;
     for (int i = 0; i < m_pnpInfo.length; i++) {
@@ -596,7 +594,7 @@ public class PhotonVisionCamera extends SubsystemBase {
    * @return Whether or not the provided pose is in the field
    */
   public static boolean isPoseInField(Pose3d pose) {
-    return (
+    return !(
       pose.getX() < -FIELD_BORDER_MARGIN.in(Meters) ||
       pose.getX() >
       FIELD_CONSTANTS.FIELD_LENGTH.plus(FIELD_BORDER_MARGIN).in(Meters) ||
@@ -605,6 +603,18 @@ public class PhotonVisionCamera extends SubsystemBase {
       FIELD_CONSTANTS.FIELD_WIDTH.plus(FIELD_BORDER_MARGIN).in(Meters)
     );
   }
+
+  // public static Matrix<N8, N1> getDistCoeefsFromNT(String cameraName) {
+  //   NetworkTable table = NetworkTableInstance.getDefault()
+  //     .getTable("photonvision");
+  //   DoubleArrayTopic topic = table.getDoubleArrayTopic(
+  //     cameraName + "/cameraDistortion"
+  //   );
+  //   double[] distortionFromNT = topic
+  //     .genericSubscribe()
+  //     .getDoubleArray(new double[] {Double.NaN});
+  //   if(Double.isNaN(distortionFromNT[0]));
+  // }
 
   /**
    * @return Whether or not the camera is connected.

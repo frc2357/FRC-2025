@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;

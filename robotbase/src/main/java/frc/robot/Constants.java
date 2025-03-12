@@ -389,25 +389,27 @@ public final class Constants {
     public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 1;
+    public static final double PNP_HEADING_SCALE_FACTOR = 20;
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
+      // heading free essentailly determines whether or not the calculations are done in 2D or 3D space.
+      // if its false, its done in 2D and heading scale is essentially forced to 0. (i think (documentation is lacking))
       Optional.of(
-        new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
+        new ConstrainedSolvepnpParams(true, PNP_HEADING_SCALE_FACTOR)
       ); // TODO: tune this throughout normal operation. This is for max to do.
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
     // yes, these are essentially magic numbers
-    public static final double X_STD_DEV_COEFFIECIENT = 0.65;
-    public static final double Y_STD_DEV_COEFFIECIENT = 0.65;
+    public static final double X_STD_DEV_COEFFIECIENT = 0.8;
+    public static final double Y_STD_DEV_COEFFIECIENT = 0.8;
 
     // if were going faster than this, we wont accept any pose est.
     public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.15);
+      Units.RadiansPerSecond.of(0.3);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
       Units.MetersPerSecond.of(1);
@@ -422,10 +424,11 @@ public final class Constants {
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
-    // tuned numbers for pose confidence. TODO: tune these.
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
+
+    public static final double MAX_DISTANCE_FROM_CURR_POSE_METERS = 1.5;
 
     public static final class FRONT_CAM {
 
@@ -520,9 +523,9 @@ public final class Constants {
         Units.Inches.of(-3.001),
         Units.Inches.of(16.578),
         new Rotation3d(
-          Units.Degrees.of(-10),
+          Units.Degrees.of(10),
           Units.Degrees.of(0),
-          Units.Degrees.of(-90)
+          Units.Degrees.of(270)
         )
       );
 
@@ -871,7 +874,7 @@ public final class Constants {
     public static final Distance FRAME_LENGTH = Units.Inches.of(26);
     public static final Distance FRAME_WIDTH = Units.Inches.of(26);
 
-    public static final Distance BUMPER_THICKNESS = Units.Inches.of(3);
+    public static final Distance BUMPER_THICKNESS = Units.Inches.of(3.125);
 
     public static final Distance FULL_LENGTH = FRAME_LENGTH.plus(
       BUMPER_THICKNESS.times(2)

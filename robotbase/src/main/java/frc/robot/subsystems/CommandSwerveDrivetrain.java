@@ -497,6 +497,10 @@ public class CommandSwerveDrivetrain
     );
   }
 
+  public boolean isRobotOffGround() {
+    return getPigeon2().getAccumGyroZ().getValueAsDouble() > 0.5;
+  }
+
   public LinearVelocity getAbsoluteTranslationalVelocity() {
     var speeds = getCurrentChassisSpeeds();
     var xVel = Math.abs(speeds.vxMetersPerSecond);

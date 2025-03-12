@@ -35,9 +35,9 @@ public class RobotConfigurationTests {
     );
     System.out.println(
       "Full Dimensions: " +
-      FULL_LENGTH.in(Inches) +
+      FULL_LENGTH.in(Meters) +
       "\" long " +
-      FULL_WIDTH.in(Inches) +
+      FULL_WIDTH.in(Meters) +
       "\" wide"
     );
     assertEquals(30, FULL_LENGTH.in(Inches), 2);
