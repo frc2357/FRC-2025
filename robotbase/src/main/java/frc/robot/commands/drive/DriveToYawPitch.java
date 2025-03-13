@@ -8,13 +8,13 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.Constants.DRIVE_TO_VECTOR;
+import frc.robot.Constants.DRIVE_TO_YAW_PITCH;
 import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.Utility;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DriveToYawPitch extends Command {
@@ -25,7 +25,7 @@ public class DriveToYawPitch extends Command {
   private ProfiledPIDController m_driveController;
   private ProfiledPIDController m_thetaController;
 
-  private Supplier<Translation2d> m_yawPitchSupplier;
+  private Supplier<Optional<Translation2d>> m_yawPitchSupplier;
   private Supplier<Pose2d> m_targetSupplier;
 
   /**
@@ -34,33 +34,38 @@ public class DriveToYawPitch extends Command {
    * @param targetSupplier Returns the target yaw, pitch, and field-relative robot rotational position
    */
   public DriveToYawPitch(
-    Supplier<Translation2d> yawPitchSupplier,
+    Supplier<Optional<Translation2d>> yawPitchSupplier,
     Supplier<Pose2d> targetSupplier
   ) {
     addRequirements(Robot.swerve);
 
     m_yawPitchSupplier = yawPitchSupplier;
-    m_driveController = DRIVE_TO_VECTOR.DRIVE_CONTROLLER;
-    m_thetaController = DRIVE_TO_VECTOR.THETA_CONTROLLER;
+    m_driveController = DRIVE_TO_YAW_PITCH.DRIVE_CONTROLLER;
+    m_thetaController = DRIVE_TO_YAW_PITCH.THETA_CONTROLLER;
   }
 
   @Override
   public void initialize() {
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    Translation2d current = m_yawPitchSupplier.get();
+    Optional<Translation2d> current = m_yawPitchSupplier.get();
+    if (current.isEmpty()) {
+      cancel();
+      return;
+    }
+
     Pose2d target = m_targetSupplier.get();
 
     // Not sure if initial velocity still needs rotated by error or not.
     m_driveController.reset(
       new TrapezoidProfile.State(
-        current.getDistance(target.getTranslation()),
+        current.get().getDistance(target.getTranslation()),
         -new Translation2d(
           Robot.swerve.getRobotVelocity().dx,
           Robot.swerve.getRobotVelocity().dy
         )
           .rotateBy(
-            target.getTranslation().minus(current).getAngle().unaryMinus()
+            target.getTranslation().minus(current.get()).getAngle().unaryMinus()
           )
           .getX()
       )
@@ -73,7 +78,7 @@ public class DriveToYawPitch extends Command {
 
   @Override
   public void execute() {
-    Translation2d current = m_yawPitchSupplier.get();
+    Optional<Translation2d> current = m_yawPitchSupplier.get();
     Pose2d target = m_targetSupplier.get();
 
     Translation2d driveVelocity = new Translation2d(
@@ -84,9 +89,15 @@ public class DriveToYawPitch extends Command {
       Robot.driverControls.getRotation() *
       Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
 
-    if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
+    if (
+      driveVelocity.equals(Translation2d.kZero) &&
+      thetaVelocity == 0 &&
+      current.isPresent()
+    ) {
       // Calculate drive speed
-      double currentDistance = current.getDistance(target.getTranslation());
+      double currentDistance = current
+        .get()
+        .getDistance(target.getTranslation());
       double driveErrorAbs = currentDistance;
       double driveVelocityScalar = m_driveController.calculate(
         driveErrorAbs,
@@ -104,7 +115,7 @@ public class DriveToYawPitch extends Command {
       // Command speeds
       driveVelocity = new Pose2d(
         Translation2d.kZero,
-        current.minus(target.getTranslation()).getAngle()
+        current.get().minus(target.getTranslation()).getAngle()
       )
         .transformBy(Utility.translationToTransform(driveVelocityScalar, 0.0))
         .getTranslation();

@@ -2,6 +2,9 @@ package frc.robot.controls;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -14,6 +17,7 @@ import frc.robot.commands.drive.DriveRobotRelative;
 import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
+import frc.robot.commands.drive.DriveToYawPitch;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralRetract;
@@ -21,6 +25,12 @@ import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL4;
+import frc.robot.commands.laterator.LateratorHome;
+import frc.robot.commands.scoring.coral.CoralChooser;
+import frc.robot.commands.scoring.coral.CoralHome;
+import frc.robot.commands.scoring.coral.CoralScore;
+import java.util.Optional;
+import org.opencv.ml.Ml;
 
 public class DriverControls {
 
@@ -98,6 +108,28 @@ public class DriverControls {
       .y()
       .whileTrue(
         new DriveToCoralStation(StationToGoTo.LeftSide, RouteAroundReef.Fastest)
+    m_controller.back().onTrue(new FlipPerspective());
+
+    m_controller
+      .povUp()
+      .whileTrue(
+        new DriveToYawPitch(
+          () -> {
+            Optional<Angle> yaw = Robot.backCam.getTargetYaw(18, 60);
+            Optional<Angle> pitch = Robot.backCam.getTargetPitch(18, 60);
+            if (yaw.isPresent() && pitch.isPresent()) {
+              return Optional.of(
+                new Translation2d(
+                  yaw.get().in(Units.Degrees),
+                  pitch.get().in(Units.Degrees)
+                )
+              );
+            } else {
+              return Optional.empty();
+            }
+          },
+          () -> new Pose2d(-11, -2.3, new Rotation2d(0))
+        )
       );
   }
 

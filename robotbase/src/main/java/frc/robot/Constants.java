@@ -520,11 +520,11 @@ public final class Constants {
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
   }
 
-  public static class DRIVE_TO_VECTOR {
+  public static class DRIVE_TO_YAW_PITCH {
 
     public static final ProfiledPIDController DRIVE_CONTROLLER =
       new ProfiledPIDController(
-        8,
+        0.1, //8
         0.0,
         0.0,
         new TrapezoidProfile.Constraints(1.5, 1)
@@ -532,7 +532,7 @@ public final class Constants {
 
     public static final ProfiledPIDController THETA_CONTROLLER =
       new ProfiledPIDController(
-        6,
+        0.1, //6
         0.0,
         0.0,
         new TrapezoidProfile.Constraints(2, 1)
