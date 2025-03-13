@@ -10,6 +10,7 @@ import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
+import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.scoring.coral.CoralHome;
@@ -71,8 +72,15 @@ public class CodriverControls {
       .and(m_controller.povRight().negate())
       .and(m_controller.povLeft().negate())
       .and(m_controller.povDown());
+    Trigger noLetterButtons = m_controller
+      .a()
+      .negate()
+      .and(m_controller.b().negate())
+      .and(m_controller.x().negate())
+      .and(m_controller.y().negate());
 
     noDpad.and(m_controller.x()).onTrue(new CoralHome());
+
     m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
     m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
 
@@ -87,9 +95,11 @@ public class CodriverControls {
     onlyLeft.and(m_controller.x()).whileTrue(new CoralPreposeL3());
     onlyLeft.and(m_controller.y()).whileTrue(new CoralPreposeL4());
 
-    onlyRight.whileTrue(
-      new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
-    );
+    onlyRight
+      .and(noLetterButtons)
+      .whileTrue(
+        new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
+      );
 
     // onlyRight.onTrue(new LateratorZero());
 
@@ -102,6 +112,7 @@ public class CodriverControls {
       .and(m_leftTrigger)
       .whileTrue(new CoralRunnerAxis(() -> m_controller.getLeftTriggerAxis()));
 
+    onlyRight.and(m_controller.y()).whileTrue(new LateratorFullZero());
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
     onlyDown.whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));

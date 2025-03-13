@@ -92,13 +92,18 @@ public class Laterator extends SubsystemBase {
   }
 
   public void setTargetDistance(Distance targetDistance) {
+    Angle rotations = distanceToRotations(targetDistance);
+    setTargetRotations(rotations);
+  }
+
+  private Angle distanceToRotations(Distance targetDistance) {
     Angle rotations = Units.Rotations.of(
       targetDistance
         .div(LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
         .times(LATERATOR.GEAR_RATIO)
         .magnitude()
     );
-    setTargetRotations(rotations);
+    return (rotations);
   }
 
   public AngularVelocity getVelocity() {
@@ -136,8 +141,20 @@ public class Laterator extends SubsystemBase {
     return isAtTargetRotations();
   }
 
+  public boolean ReachedStallLimit() {
+    return m_motor.getOutputCurrent() > LATERATOR.NOMINAL_AMP_LIMIT;
+  }
+
   public void setZero() {
     m_encoder.setPosition(0);
+  }
+
+  public void setZeroMaxExtension() {
+    m_encoder.setPosition(
+      distanceToRotations(Constants.LATERATOR.SETPOINTS.FULL_EXTENSION).in(
+        Units.Rotations
+      )
+    );
   }
 
   public boolean isAtZero() {
