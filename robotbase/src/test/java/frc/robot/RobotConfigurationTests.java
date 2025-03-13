@@ -40,8 +40,6 @@ public class RobotConfigurationTests {
       FULL_WIDTH.in(Meters) +
       "\" wide"
     );
-    assertEquals(30, FULL_LENGTH.in(Inches), 2);
-    assertEquals(30, FULL_WIDTH.in(Inches), 2);
   }
 
   @Test

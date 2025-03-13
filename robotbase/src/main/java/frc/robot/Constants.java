@@ -433,6 +433,8 @@ public final class Constants {
 
     public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
 
+    public static final Time UPDATE_POSE_INTERVALS = Seconds.of(3);
+
     public static final class FRONT_CAM {
 
       public static final String NAME = "frontCam";
@@ -733,7 +735,7 @@ public final class Constants {
           Rotation2d.kZero
         );
 
-      public static final Pose2d UPPER_STATION_DESIRED_SLOT =
+      public static final Pose2d LEFT_STATION_DESIRED_SLOT =
         UPPER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
           UPPER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
             DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER
@@ -753,7 +755,7 @@ public final class Constants {
           Rotation2d.kZero
         );
 
-      public static final Pose2d LOWER_STATION_DESIRED_SLOT =
+      public static final Pose2d RIGHT_STATION_DESIRED_SLOT =
         LOWER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
           LOWER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
             DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER

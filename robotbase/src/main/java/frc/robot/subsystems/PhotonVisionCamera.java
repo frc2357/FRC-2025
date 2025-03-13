@@ -12,13 +12,12 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.networktables.BooleanEntry;
-import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
-import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.units.measure.MutTime;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
@@ -40,64 +39,25 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 /** Controls the photon vision camera options. */
 public class PhotonVisionCamera {
 
-  /**
-   * The class for storing results with all data needed to perform the constrained PNP operation
-   */
-  private static class TimestampedPNPInfo {
-
-    public PhotonPipelineResult result = null;
-    public Rotation3d heading = null;
-    public double headingTimestampSeconds = Double.NaN;
-    public Optional<Matrix<N3, N3>> camMatrix = null;
-    public Optional<Matrix<N8, N1>> distCoeefs = null;
-    public Transform3d robotToCameraTransform = null;
-    public PhotonVisionCamera camera = null;
-
-    public TimestampedPNPInfo() {
-      result = null;
-      heading = null;
-      headingTimestampSeconds = Double.NaN;
-      camMatrix = null;
-      distCoeefs = null;
-      robotToCameraTransform = null;
-      camera = null;
-    }
-
-    public void replaceInfo(
-      PhotonPipelineResult result,
-      Rotation3d heading,
-      double headingTimestamp,
-      Optional<Matrix<N3, N3>> camMatrix,
-      Optional<Matrix<N8, N1>> distCoeefs,
-      Transform3d robotToCamTransform,
-      PhotonVisionCamera camera
-    ) {
-      this.result = result;
-      this.heading = heading;
-      this.headingTimestampSeconds = headingTimestamp;
-      this.camMatrix = camMatrix;
-      this.distCoeefs = distCoeefs;
-      this.robotToCameraTransform = robotToCamTransform;
-      this.camera = camera;
-    }
-
-    public void invalidateInfo() {
-      result = null;
-      heading = null;
-      headingTimestampSeconds = Double.NaN;
-      camMatrix = null;
-      distCoeefs = null;
-      robotToCameraTransform = null;
-      camera = null;
-    }
-
-    public static TimestampedPNPInfo[] makePNPInfoList() {
-      TimestampedPNPInfo[] list =
-        new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
-      for (int i = 0; i < list.length; i++) {
-        list[i] = new TimestampedPNPInfo();
-      }
-      return list;
+  private final record TimestampedPNPInfo(
+    PhotonPipelineResult result,
+    Rotation3d heading,
+    double headingTimestampSeconds,
+    Optional<Matrix<N3, N3>> camMatrix,
+    Optional<Matrix<N8, N1>> distCoeefs,
+    Transform3d robotToCameraTransform,
+    PhotonVisionCamera camera
+  ) {
+    public boolean exists() {
+      return (
+        result != null &&
+        heading != null &&
+        !Double.isNaN(headingTimestampSeconds) &&
+        (camMatrix != null && camMatrix.isPresent()) &&
+        (distCoeefs != null && distCoeefs.isPresent()) &&
+        robotToCameraTransform != null &&
+        camera != null
+      );
     }
   }
 
@@ -202,12 +162,7 @@ public class PhotonVisionCamera {
   /*
    * The class for the object we use to cache our target data
    */
-  // private static class TargetInfo {
-
-  //   public double yaw = Double.NaN;
-  //   public double pitch = Double.NaN;
-  //   public long timestamp = 0;
-  // }
+  // private static record TargetInfo(double yaw, double pitch, long timestamp) {}
 
   // all of these are protected so we can use them in extended classes
   // which are only extended so we can control which pipelines we are using.
@@ -224,7 +179,7 @@ public class PhotonVisionCamera {
    * <p> this data is used to figure out which results are the most worthwhile to use for pose est
    */
   private static final TimestampedPNPInfo[] m_pnpInfo =
-    TimestampedPNPInfo.makePNPInfoList();
+    new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
 
   /**
    * A list of all instances of this class, in order of instantiation
@@ -255,6 +210,8 @@ public class PhotonVisionCamera {
 
   private static PoseStrategy m_primaryStrategy = PRIMARY_STRATEGY;
   private static PoseStrategy m_fallbackStrategy = FALLBACK_STRATEGY;
+
+  private static MutTime m_lastPoseUpdateTime;
 
   protected final NetworkTable m_poseOutputTable;
   protected final DoubleArrayPublisher m_poseFieldPub;
@@ -341,6 +298,7 @@ public class PhotonVisionCamera {
     m_robotToCameraTranform = robotToCameraTransform;
     m_cameraMatrix = cameraMatrix;
     m_distCoeefs = distCoeefs;
+    m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
   }
 
   public boolean getDistCoeefs() {
@@ -396,7 +354,7 @@ public class PhotonVisionCamera {
       if (m_pnpInfo[i].result == null) continue;
 
       estimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
-      m_pnpInfo[i].invalidateInfo();
+      m_pnpInfo[i] = null;
     }
     updatePoseFromPoseEstimates(updatePose, estimates);
   }
@@ -501,6 +459,7 @@ public class PhotonVisionCamera {
   private static poseEstimate estimatePoseWithPNPInfo(
     TimestampedPNPInfo pnpInfo
   ) {
+    if (pnpInfo == null || !pnpInfo.exists()) return null;
     preparePoseEstimator(
       pnpInfo.robotToCameraTransform,
       pnpInfo.heading,
@@ -520,13 +479,13 @@ public class PhotonVisionCamera {
     publishPose(estimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
     double averageTargetDistance = 0;
     for (PhotonTrackedTarget target : estimatedPose.targetsUsed) {
-      averageTargetDistance += target.getBestCameraToTarget().getX();
+      averageTargetDistance += Math.abs(
+        target.getBestCameraToTarget().getTranslation().getNorm()
+      );
     }
     averageTargetDistance /= estimatedPose.targetsUsed.size();
 
     if (!isPoseInField(estimatedPose.estimatedPose)) return null;
-
-    // if (estimatedPose.targetsUsed.size() < 2) return null;
 
     // the higher the confidence is, the less the estimated measurment is trusted.
     double velocityConf =
@@ -540,7 +499,6 @@ public class PhotonVisionCamera {
       ((averageTargetDistance / 2) * velocityConf),
       MAGIC_VEL_CONF_EXPONENT
     );
-    Pose2d estimatedPose2d = estimatedPose.estimatedPose.toPose2d();
     // if estimated pose is too far from current pose
     m_lastEstimatedPose = estimatedPose;
     return new poseEstimate(
@@ -571,6 +529,9 @@ public class PhotonVisionCamera {
     if (!updatePose) return;
 
     if (!averageEstimate.isInField()) return;
+    double measuredTime = Utils.fpgaToCurrentTime(
+      averageEstimate.timestampSeconds
+    );
     if (
       new Transform2d(
         Robot.swerve.getFieldRelativePose2d(),
@@ -580,14 +541,20 @@ public class PhotonVisionCamera {
         .getNorm() >
       MAX_DIST_FROM_CURR_POSE.in(Meters)
     ) {
-      // and were not disabled, throw it out
-      if (!RobotModeTriggers.disabled().getAsBoolean()) return;
+      // and we have updated the pose recently, and were not disabled, throw it out
+      if (
+        measuredTime <
+          m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds) &&
+        !RobotModeTriggers.disabled().getAsBoolean()
+      ) return;
     }
+
     Robot.swerve.addVisionMeasurement(
       averageEstimate.estimPose.toPose2d(),
-      Utils.fpgaToCurrentTime(averageEstimate.timestampSeconds),
+      measuredTime,
       averageEstimate.stdDevs
     );
+    m_lastPoseUpdateTime.mut_replace(measuredTime, Seconds);
   }
 
   public static void publishPose(Pose2d pose, PhotonVisionCamera camera) {
@@ -641,15 +608,15 @@ public class PhotonVisionCamera {
     for (int i = 0; i < m_pnpInfo.length; i++) {
       // if selected info does not exist, replace it and stop the loop
       if (m_pnpInfo[i].result == null) {
-        m_pnpInfo[i].replaceInfo(
-            result,
-            heading,
-            headingTimestampSeconds,
-            m_cameraMatrix,
-            m_distCoeefs,
-            m_robotToCameraTranform,
-            this
-          );
+        m_pnpInfo[i] = new TimestampedPNPInfo(
+          result,
+          heading,
+          headingTimestampSeconds,
+          m_cameraMatrix,
+          m_distCoeefs,
+          m_robotToCameraTranform,
+          this
+        );
         break;
       }
       double storedInfoFrameSeconds = m_pnpInfo[i].result.getTimestampSeconds();
@@ -658,7 +625,7 @@ public class PhotonVisionCamera {
         storedInfoFrameSeconds <=
         currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)
       ) {
-        m_pnpInfo[i].invalidateInfo();
+        m_pnpInfo[i] = null;
         indexToReplace = i;
         continue;
       }
@@ -702,15 +669,15 @@ public class PhotonVisionCamera {
       }
     }
     if (indexToReplace != -1) {
-      m_pnpInfo[indexToReplace].replaceInfo(
-          result,
-          heading,
-          headingTimestampSeconds,
-          m_cameraMatrix,
-          m_distCoeefs,
-          m_robotToCameraTranform,
-          this
-        );
+      m_pnpInfo[indexToReplace] = new TimestampedPNPInfo(
+        result,
+        heading,
+        headingTimestampSeconds,
+        m_cameraMatrix,
+        m_distCoeefs,
+        m_robotToCameraTranform,
+        this
+      );
     }
   }
 
