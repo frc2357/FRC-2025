@@ -79,7 +79,7 @@ public class Elevator extends SubsystemBase {
   }
 
   @SuppressWarnings("removal")
-  public void setTargetRotations(Angle targetRotations) {
+  private void setTargetRotations(Angle targetRotations) {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
@@ -108,7 +108,7 @@ public class Elevator extends SubsystemBase {
     return m_currentAngularVelocityHolder;
   }
 
-  public Angle getRotations() {
+  private Angle getRotations() {
     m_currentRotationsHolder.mut_replace(
       m_encoder.getPosition(),
       Units.Rotations
@@ -133,6 +133,10 @@ public class Elevator extends SubsystemBase {
 
   public boolean isAtTarget() {
     return isAtTargetRotations();
+  }
+
+  public boolean isGoingDown() {
+    return m_targetRotations.lt(getRotations());
   }
 
   public boolean isStalling() {

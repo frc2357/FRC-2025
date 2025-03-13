@@ -110,6 +110,9 @@ public final class Constants {
     public static final double FACING_ANGLE_P = 0;
     public static final double FACING_ANGLE_I = 0;
     public static final double FACING_ANGLE_D = 0;
+
+    public static final LinearVelocity ROBOT_NO_TIP_SPEED =
+      Units.MetersPerSecond.of(.5);
   }
 
   public static final class CHOREO {
