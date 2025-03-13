@@ -13,7 +13,6 @@ import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,9 +20,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
@@ -35,9 +31,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
-import java.util.Map;
 import java.util.Optional;
-import org.ejml.simple.SimpleMatrix;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -393,7 +387,7 @@ public final class Constants {
     public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
+      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
@@ -401,10 +395,11 @@ public final class Constants {
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       // heading free essentailly determines whether or not the calculations are done in 2D or 3D space.
-      // if its false, its done in 2D and heading scale is essentially forced to 0. (i think (documentation is lacking))
+      // if its false, its done in 2D and heading sclae matters.
+      // if its true, calcs are done in 3D, and heading scale is essentially 0.
       Optional.of(
-        new ConstrainedSolvepnpParams(true, PNP_HEADING_SCALE_FACTOR)
-      ); // TODO: tune this throughout normal operation. This is for max to do.
+        new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
+      );
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
     // yes, these are essentially magic numbers
@@ -433,6 +428,8 @@ public final class Constants {
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
 
     public static final double MAX_DISTANCE_FROM_CURR_POSE_METERS = 1.5;
+
+    public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
 
     public static final class FRONT_CAM {
 

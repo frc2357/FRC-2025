@@ -19,11 +19,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
@@ -102,6 +99,110 @@ public class PhotonVisionCamera {
     }
   }
 
+  protected final record poseEstimate(
+    Pose3d estimPose,
+    double timestampSeconds,
+    int targetsUsedNum,
+    Matrix<N3, N1> stdDevs
+  ) {
+    public poseEstimate() {
+      this(null, -1, -1, null);
+    }
+
+    public poseEstimate(EstimatedRobotPose estim, Matrix<N3, N1> stdDevs) {
+      this(
+        estim.estimatedPose,
+        estim.timestampSeconds,
+        estim.targetsUsed.size(),
+        stdDevs
+      );
+    }
+
+    public boolean isInField() {
+      return (
+        !(this.estimPose == null) &&
+        PhotonVisionCamera.isPoseInField(this.estimPose)
+      );
+    }
+
+    public boolean exists() {
+      return (
+        this.estimPose != null &&
+        this.stdDevs != null &&
+        this.timestampSeconds > 0 &&
+        this.targetsUsedNum > 0
+      );
+    }
+
+    public static poseEstimate averageOutValidEstimates(
+      poseEstimate... estimates
+    ) {
+      if (estimates.length == 1) return estimates[0];
+      Pose3d averagedPose = Pose3d.kZero;
+      double averagedTimestamp = 0;
+      int averageTargets = 0;
+      int invalidEstimates = 0;
+      Matrix<N3, N1> averageStdDevs = VecBuilder.fill(0, 0, 0);
+      double averageCoordDev = 0;
+      for (poseEstimate estimate : estimates) {
+        if (estimate == null || !estimate.exists() || !estimate.isInField()) {
+          invalidEstimates++;
+          if (invalidEstimates >= estimates.length) return new poseEstimate();
+          continue;
+        }
+        averagedPose.plus(new Transform3d(Pose3d.kZero, estimate.estimPose));
+        averagedTimestamp += estimate.timestampSeconds;
+        averageTargets += estimate.targetsUsedNum;
+        averageCoordDev += estimate.stdDevs.get(0, 0);
+      }
+      averagedPose.div(estimates.length - invalidEstimates);
+      averagedTimestamp /= estimates.length - invalidEstimates;
+      averageTargets = Math.floorDiv(
+        averageTargets,
+        estimates.length - invalidEstimates
+      );
+      averageStdDevs.div(estimates.length - invalidEstimates);
+      return new poseEstimate(
+        averagedPose,
+        averagedTimestamp,
+        averageTargets,
+        VecBuilder.fill(averageCoordDev, averageCoordDev, Double.MAX_VALUE)
+      );
+    }
+
+    public static poseEstimate findConcensus(poseEstimate... estimates) {
+      if (estimates.length == 1) {
+        return estimates[0];
+      }
+      poseEstimate averageEstimate = averageOutValidEstimates(estimates);
+      if (
+        averageEstimate == null || !averageEstimate.exists()
+      ) return new poseEstimate();
+      Pose2d averagedPose = averageEstimate.estimPose.toPose2d();
+      int invalidEstimates = 0;
+      double averageDistBetweenEstimates = 0;
+      for (poseEstimate estimate : estimates) {
+        if (estimate == null || !estimate.exists() || !estimate.isInField()) {
+          invalidEstimates++;
+          continue;
+        }
+        if (invalidEstimates >= estimates.length) return new poseEstimate();
+        Transform2d transform = new Transform2d(
+          estimate.estimPose.toPose2d(),
+          averagedPose
+        );
+        averageDistBetweenEstimates += Math.abs(
+          transform.getTranslation().getNorm()
+        );
+      }
+      averageDistBetweenEstimates /= estimates.length - invalidEstimates;
+      if (averageDistBetweenEstimates > MAX_DIST_BETWEEN_ESTIMATES) {
+        return new poseEstimate();
+      }
+      return averageEstimate;
+    }
+  }
+
   /*
    * The class for the object we use to cache our target data
    */
@@ -149,7 +250,7 @@ public class PhotonVisionCamera {
    */
   private static final PhotonPoseEstimator m_poseEstimator =
     new PhotonPoseEstimator(
-      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField),
+      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
       PRIMARY_STRATEGY,
       new Transform3d()
     );
@@ -168,16 +269,23 @@ public class PhotonVisionCamera {
   private static PoseStrategy m_primaryStrategy = PRIMARY_STRATEGY;
   private static PoseStrategy m_fallbackStrategy = FALLBACK_STRATEGY;
 
-  /** Whether or not we have connection with the camera still */
-  protected boolean m_connectionLost;
+  protected final NetworkTable m_poseOutputTable;
+  protected final DoubleArrayPublisher m_poseFieldPub;
+  protected final StringPublisher m_poseFieldTypePub;
 
-  protected NetworkTable m_poseOutputTable;
-  protected DoubleArrayPublisher m_poseFieldPub;
-  protected StringPublisher m_poseFieldTypePub;
+  protected static final NetworkTable m_poseConcensusTable =
+    NetworkTableInstance.getDefault().getTable("VisionPose-Combined");
+  protected static final DoubleArrayPublisher m_poseConcensusFieldPub =
+    m_poseConcensusTable.getDoubleArrayTopic("pose").publish();
+  protected static final StringPublisher m_poseConcensusFieldTypePub =
+    m_poseConcensusTable.getStringTopic(".type").publish();
 
-  protected NetworkTable m_photonTable;
-  protected DoubleArrayTopic m_intrinsicsTopic;
-  protected DoubleArrayTopic m_distortionTopic;
+  // m_poseFieldPub = m_poseOutputTable.getDoubleArrayTopic("pose").publish();
+  //   m_poseFieldTypePub = m_poseOutputTable.getStringTopic(".type").publish();
+
+  protected final NetworkTable m_photonTable;
+  protected final DoubleArrayTopic m_intrinsicsTopic;
+  protected final DoubleArrayTopic m_distortionTopic;
 
   /**
    * The fiducial ID of the best target we have.
@@ -205,6 +313,7 @@ public class PhotonVisionCamera {
     );
     new InitCamera(this)
       .finallyDo(() -> {
+        @SuppressWarnings("resource")
         Alert alert = new Alert(
           "CameraAlerts/" + m_camera.getName(),
           "Camera fully initialized",
@@ -271,7 +380,6 @@ public class PhotonVisionCamera {
       Nat.N3(),
       intrinsicsArray
     );
-
     m_cameraMatrix = Optional.of(cameraMatrix);
     return true;
   }
@@ -281,6 +389,7 @@ public class PhotonVisionCamera {
    * <p><h1> For the top of {@link Robot#robotPeriodic() the robot periodic} only.
    */
   public static void updateAllCameras() {
+    poseEstimate[] estimates = new poseEstimate[PNP_INFO_STORAGE_AMOUNT];
     boolean updatePose = SmartDashboard.getBoolean(
       "Toggle Pose Estimation",
       false
@@ -303,9 +412,10 @@ public class PhotonVisionCamera {
       if (m_pnpInfo[i].result == null) {
         continue;
       }
-      updatePoseFromPNPInfo(m_pnpInfo[i], updatePose);
+      estimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
       m_pnpInfo[i].invalidateInfo();
     }
+    updatePoseFromPoseEstimates(updatePose, estimates);
   }
 
   /**
@@ -330,12 +440,7 @@ public class PhotonVisionCamera {
    * Fetches the latest pipeline result for this instance
    */
   private void updateResult() {
-    if (!m_camera.isConnected() && !m_connectionLost) {
-      m_connectionLost = true;
-      DriverStation.reportError(
-        "[" + m_camera.getName() + "]\n" + LOST_CONNECTION_ERROR_MESSAGE,
-        false
-      );
+    if (!m_camera.isConnected()) {
       return;
     }
     List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
@@ -363,13 +468,6 @@ public class PhotonVisionCamera {
     //   cacheForAprilTags(m_result.targets);
     // }
 
-    if (m_connectionLost) {
-      m_connectionLost = false;
-      DriverStation.reportWarning(
-        "[" + m_camera.getName() + "]\n" + CONNECTION_REGAINED_MESSAGE,
-        false
-      );
-    }
     updatePNPInfo(m_result); // update pnpInfo with the new result
   }
 
@@ -418,9 +516,8 @@ public class PhotonVisionCamera {
     m_poseEstimator.setRobotToCameraTransform(robotToCamTransform);
   }
 
-  private static void updatePoseFromPNPInfo(
-    TimestampedPNPInfo pnpInfo,
-    boolean updatePose
+  private static poseEstimate estimatePoseWithPNPInfo(
+    TimestampedPNPInfo pnpInfo
   ) {
     preparePoseEstimator(
       pnpInfo.robotToCameraTransform,
@@ -436,7 +533,7 @@ public class PhotonVisionCamera {
       )
       .orElse(null);
     if (estimatedPose == null) {
-      return;
+      return new poseEstimate();
     }
     publishPose(estimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
     double averageTargetDistance = 0;
@@ -444,8 +541,8 @@ public class PhotonVisionCamera {
       averageTargetDistance += target.getBestCameraToTarget().getX();
     }
     averageTargetDistance /= estimatedPose.targetsUsed.size();
-    if (!isPoseInField(estimatedPose.estimatedPose)) return;
-    if (estimatedPose.targetsUsed.size() < 2) return;
+    if (!isPoseInField(estimatedPose.estimatedPose)) return new poseEstimate();
+    // if (estimatedPose.targetsUsed.size() < 2) return new poseEstimate();
 
     // the higher the confidence is, the less the estimated measurment is trusted.
     double velocityConf =
@@ -469,21 +566,41 @@ public class PhotonVisionCamera {
     ) {
       // and were not disabled, throw it out
       if (!RobotModeTriggers.disabled().getAsBoolean()) {
-        return;
+        return new poseEstimate();
       }
     }
-    if (updatePose) {
-      Robot.swerve.addVisionMeasurement(
-        estimatedPose.estimatedPose.toPose2d(),
-        Utils.fpgaToCurrentTime(estimatedPose.timestampSeconds),
-        VecBuilder.fill(
-          coordinateConfidence * X_STD_DEV_COEFFIECIENT,
-          coordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-          Double.MAX_VALUE // Theta conf, should never change the gyro heading
-        )
-      );
-    }
     m_lastEstimatedPose = estimatedPose;
+    return new poseEstimate(
+      estimatedPose,
+      VecBuilder.fill(
+        coordinateConfidence * X_STD_DEV_COEFFIECIENT,
+        coordinateConfidence * Y_STD_DEV_COEFFIECIENT,
+        Double.MAX_VALUE // Theta conf, should never change the gyro heading
+      )
+    );
+  }
+
+  private static void updatePoseFromPoseEstimates(
+    boolean updatePose,
+    poseEstimate... estimates
+  ) {
+    poseEstimate averageEstimate = estimates.length > 1
+      ? poseEstimate.findConcensus(estimates)
+      : estimates[0];
+    if (averageEstimate == null || !averageEstimate.exists()) return;
+    m_poseConcensusFieldTypePub.set("Field2d");
+    Pose2d pose = averageEstimate.estimPose.toPose2d();
+    m_poseConcensusFieldPub.accept(
+      new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
+    );
+    if (!updatePose) return;
+
+    if (!averageEstimate.isInField()) return;
+    Robot.swerve.addVisionMeasurement(
+      averageEstimate.estimPose.toPose2d(),
+      averageEstimate.timestampSeconds,
+      averageEstimate.stdDevs
+    );
   }
 
   public static void publishPose(Pose2d pose, PhotonVisionCamera camera) {

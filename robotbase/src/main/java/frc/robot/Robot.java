@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.PHOTON_VISION.BACK_CAM;
-import frc.robot.Constants.PHOTON_VISION.FRONT_CAM;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
@@ -35,7 +33,6 @@ import frc.robot.networkTables.*;
 import frc.robot.subsystems.*;
 import frc.robot.util.ElasticFieldManager;
 import frc.robot.util.Telemetry;
-import org.photonvision.proto.Photon;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -64,8 +61,6 @@ public class Robot extends TimedRobot {
 
   public static Alliance alliance = null;
 
-  public static Alert robotErrors;
-
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
   private AutoChooserManager m_autoChooserManager;
@@ -80,8 +75,6 @@ public class Robot extends TimedRobot {
    * and should be used for any initialization code.
    */
   public Robot() {
-    robotErrors = new Alert("Robot", "All clear", AlertType.kError);
-    robotErrors.set(false);
     // forces OpenCV to load. Dont remove this.
     for (int i = 0; i < 3; i++) {
       try {
@@ -90,8 +83,9 @@ public class Robot extends TimedRobot {
         break;
       } catch (Exception e) {
         if (i > 2) {
-          robotErrors.setText("OpenCV Load FAILED! Pose est will be ");
-          robotErrors.set(true);
+          System.err.println(
+            "OpenCV Load FAILED! Pose est will be much worse!"
+          );
         }
       }
     }
@@ -167,7 +161,6 @@ public class Robot extends TimedRobot {
 
     // Setup logging swerve pose and state for viewing in Advantage Scope
     Robot.swerve.registerTelemetry(new Telemetry()::telemeterize);
-
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();
