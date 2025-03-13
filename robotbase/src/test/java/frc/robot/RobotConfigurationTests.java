@@ -36,9 +36,9 @@ public class RobotConfigurationTests {
     System.out.println(
       "Full Dimensions: " +
       FULL_LENGTH.in(Meters) +
-      "\" long " +
+      " meters long " +
       FULL_WIDTH.in(Meters) +
-      "\" wide"
+      " meters wide"
     );
   }
 

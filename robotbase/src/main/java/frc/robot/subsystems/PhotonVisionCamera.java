@@ -61,7 +61,7 @@ public class PhotonVisionCamera {
     }
   }
 
-  protected final record poseEstimate(
+  private final record poseEstimate(
     Pose3d estimPose,
     double timestampSeconds,
     int targetsUsedNum,
@@ -78,7 +78,7 @@ public class PhotonVisionCamera {
 
     public boolean isInField() {
       return (
-        !(this.estimPose == null) &&
+        this.estimPose != null &&
         PhotonVisionCamera.isPoseInField(this.estimPose)
       );
     }
@@ -92,6 +92,11 @@ public class PhotonVisionCamera {
       );
     }
 
+    /**
+     * Takes an arbitrary number of {@link poseEstimate} objects and finds the average between all characteristics of the estimates.
+     * @param estimates The estimates to average out.
+     * @return The averaged out estimate
+     */
     public static poseEstimate averageOutValidEstimates(
       poseEstimate... estimates
     ) {
@@ -130,10 +135,12 @@ public class PhotonVisionCamera {
       );
     }
 
+    /** Takes an arbitrary number of {@link poseEstimate poseEstimates} and finds the most commonly agreed upon pose.
+     * @param estimates The estimates to draw from
+     * @return A pose estimate of the average estimate, as long as all the estimates are close enough together
+     */
     public static poseEstimate findConcensus(poseEstimate... estimates) {
-      if (estimates.length == 1) {
-        return estimates[0];
-      }
+      if (estimates.length < 2) return estimates[0];
       poseEstimate averageEstimate = averageOutValidEstimates(estimates);
       if (averageEstimate == null || !averageEstimate.exists()) return null;
       Pose2d averagedPose = averageEstimate.estimPose.toPose2d();
@@ -159,25 +166,12 @@ public class PhotonVisionCamera {
     }
   }
 
-  /*
-   * The class for the object we use to cache our target data
-   */
   // private static record TargetInfo(double yaw, double pitch, long timestamp) {}
 
-  // all of these are protected so we can use them in extended classes
-  // which are only extended so we can control which pipelines we are using.
-
-  /** The actual camera object that we get everything from. */
   protected final PhotonCamera m_camera;
 
-  /** The result we fecth from PhotonLib each loop. */
   protected PhotonPipelineResult m_result;
 
-  /**
-   * The list of {@link TimestampedPNPInfo} objects that we use to store data for the constrainedPNP calculation.
-   *
-   * <p> this data is used to figure out which results are the most worthwhile to use for pose est
-   */
   private static final TimestampedPNPInfo[] m_pnpInfo =
     new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
 
@@ -187,12 +181,9 @@ public class PhotonVisionCamera {
   private static final ArrayList<PhotonVisionCamera> m_robotCameras =
     new ArrayList<PhotonVisionCamera>();
 
-  /**
-   * The pose estimator for all photon cameras.
-   */
   private static final PhotonPoseEstimator m_poseEstimator =
     new PhotonPoseEstimator(
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
+      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark), //TODO: make sure this is correct for the current field. (this is a note for later)
       PRIMARY_STRATEGY,
       new Transform3d()
     );
@@ -203,10 +194,7 @@ public class PhotonVisionCamera {
 
   protected Optional<Matrix<N8, N1>> m_distCoeefs;
 
-  /**
-   * The latest pose estimation from all cameras
-   */
-  protected static EstimatedRobotPose m_lastEstimatedPose;
+  protected static EstimatedRobotPose m_latestEstimatedPose;
 
   private static PoseStrategy m_primaryStrategy = PRIMARY_STRATEGY;
   private static PoseStrategy m_fallbackStrategy = FALLBACK_STRATEGY;
@@ -429,7 +417,7 @@ public class PhotonVisionCamera {
         m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
         break;
       case CLOSEST_TO_LAST_POSE:
-        m_poseEstimator.setLastPose(m_lastEstimatedPose.estimatedPose);
+        m_poseEstimator.setLastPose(m_latestEstimatedPose.estimatedPose);
         break;
     }
     switch (m_fallbackStrategy) {
@@ -448,7 +436,7 @@ public class PhotonVisionCamera {
         m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
         break;
       case CLOSEST_TO_LAST_POSE:
-        m_poseEstimator.setLastPose(m_lastEstimatedPose.estimatedPose);
+        m_poseEstimator.setLastPose(m_latestEstimatedPose.estimatedPose);
         break;
     }
 
@@ -500,7 +488,7 @@ public class PhotonVisionCamera {
       MAGIC_VEL_CONF_EXPONENT
     );
     // if estimated pose is too far from current pose
-    m_lastEstimatedPose = estimatedPose;
+    m_latestEstimatedPose = estimatedPose;
     return new poseEstimate(
       estimatedPose,
       VecBuilder.fill(
@@ -569,8 +557,6 @@ public class PhotonVisionCamera {
 
   /**
    * Updates the {@link #m_pnpInfo} list with a result, and replaces the worst result, if the provided result is better.
-   *
-   * <p> only works for april tag only cameras.
    *
    * @param result The provided {@link PhotonPipelineResult result} to use for updating the pnpInfo list
    */
@@ -681,11 +667,6 @@ public class PhotonVisionCamera {
     }
   }
 
-  /**
-   * The method to cache target data for gamepeices.
-   *
-   * @param targetList The list of targets that it pulls data from to cache.
-   */
   // private void cacheForGamepeices(List<PhotonTrackedTarget> targetList) {
   //   PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
   //   TargetInfo aprilTagInfo = m_aprilTagInfo[0];
@@ -694,14 +675,6 @@ public class PhotonVisionCamera {
   //   aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
   // }
 
-  /**
-   * Calculates the best gamepeice in a list of PhotonTrackedTargets.
-   *
-   * <p>This is made to sort through gamepeices if they are next to eachother.
-   *
-   * @param targetList List of the targets to sort through.
-   * @return The target that is in a acceptable pitch range, and is the most centered.
-   */
   public PhotonTrackedTarget calculateBestGamepeiceTarget(
     List<PhotonTrackedTarget> targetList
   ) {
@@ -719,11 +692,6 @@ public class PhotonVisionCamera {
     return bestTarget;
   }
 
-  /**
-   * Returns whether or not the provided pose is within the field margin constants.
-   * @param pose The pose that will be checked
-   * @return Whether or not the provided pose is in the field
-   */
   public static boolean isPoseInField(Pose3d pose) {
     return !(
       pose.getX() < -FIELD_BORDER_MARGIN.in(Meters) ||
@@ -747,25 +715,14 @@ public class PhotonVisionCamera {
   //   if(Double.isNaN(distortionFromNT[0]));
   // }
 
-  /**
-   * @return Whether or not the camera is connected.
-   */
   public boolean isConnected() {
     return m_camera.isConnected();
   }
 
-  /**
-   * @return The current pipelines latency in milliseconds. Returns NaN if the camera is not
-   *     connected.
-   */
   public double getLatencyMillis() {
     return isConnected() ? m_result.metadata.getLatencyMillis() : Double.NaN;
   }
 
-  /**
-   * @return The timestamp of the latest pipeline result in seconds. Returns Double.NaN if the
-   *     camera is not connected.
-   */
   public double getTimestampSeconds() {
     return isConnected() ? m_result.getTimestampSeconds() : Double.NaN;
   }
@@ -795,22 +752,12 @@ public class PhotonVisionCamera {
   //   );
   // }
 
-  /**
-   * Sets the pipeline index to make the camera go to.
-   *
-   * @param index The index to make it be set to.
-   */
   public void setPipeline(int index) {
     if (m_camera.getPipelineIndex() != index) {
       m_camera.setPipelineIndex(index);
     }
   }
 
-  /**
-   * Gets the pipeline index that an NT subscriber returns.
-   *
-   * @return The returned pipeline index number.
-   */
   public int getPipeline() {
     return m_camera.getPipelineIndex();
   }
@@ -839,28 +786,14 @@ public class PhotonVisionCamera {
   //   return null;
   // }
 
-  /**
-   * Gets the last estimated pose from PV's pose estimator.
-   *
-   * <p>Should only be used if the camera does not see more than 1 april tag, if it does, use
-   * getPNPResult instead, as it is more accurate.
-   *
-   * @return The robots estimated pose, if it has any april tag targets. <strong>Can be null at various points.</strong>
-   */
   public static EstimatedRobotPose getLastEstimatedPose() {
-    return m_lastEstimatedPose;
+    return m_latestEstimatedPose;
   }
 
-  /**
-   * @return The number of targets seen.
-   */
   public int numberOfTargetsSeen() {
     return m_result.targets.size();
   }
 
-  /**
-   * @return Whether or not the camera has a target.
-   */
   public boolean hasTarget() {
     return m_result.hasTargets();
   }

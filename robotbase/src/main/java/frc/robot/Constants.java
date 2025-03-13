@@ -199,7 +199,7 @@ public final class Constants {
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
 
-    public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
+    public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
   }
 
   public static final class LATERATOR {
@@ -346,13 +346,8 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
       .apply(MOTOR_CONFIG_ONE)
       .follow(CAN_ID.CLIMBER_MOTOR_ONE);
-    // public static final SparkBaseConfig MOTOR_CONFIG_THREE =
-    //   new SparkMaxConfig()
-    //     .apply(MOTOR_CONFIG_ONE)
-    //     .follow(CAN_ID.CLIMBER_MOTOR_ONE);
 
     public static final double AXIS_MAX_SPEED = 1;
-    public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);
   }
 
   public static final class CUSTOM_UNITS {
@@ -382,9 +377,6 @@ public final class Constants {
 
     public static final Angle MAX_ANGLE = Units.Degrees.of(35);
 
-    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable degree.
-    public static final double MAX_AMBIGUITY_TOLERANCE = 4; // TODO: tune this until its reasonable.
-
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
@@ -396,7 +388,7 @@ public final class Constants {
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 20;
+    public static final double PNP_HEADING_SCALE_FACTOR = 20; // no touchy.
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       // heading free essentailly determines whether or not the calculations are done in 2D or 3D space.
@@ -426,7 +418,7 @@ public final class Constants {
 
     public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 
-    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
+    public static final int PNP_INFO_STORAGE_AMOUNT = 3;
 
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
@@ -728,11 +720,7 @@ public final class Constants {
     public static class CORAL_STATION {
 
       public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
-        new Pose2d(
-          0.5548880100250244,
-          6.694406032562256,
-          new Rotation2d(2.206778871255995)
-        );
+        new Pose2d(0.55488, 6.69440, new Rotation2d(2.20677));
       public static final Transform2d UPPER_STATION_SLOT_TO_SLOT_TRANSFORM =
         new Transform2d(
           Units.Inches.of(5.65685),
