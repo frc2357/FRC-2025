@@ -9,6 +9,8 @@ import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.cscore.OpenCvLoader;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -62,6 +64,8 @@ public class Robot extends TimedRobot {
 
   public static Alliance alliance = null;
 
+  public static Alert robotErrors;
+
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
   private AutoChooserManager m_autoChooserManager;
@@ -76,6 +80,8 @@ public class Robot extends TimedRobot {
    * and should be used for any initialization code.
    */
   public Robot() {
+    robotErrors = new Alert("Robot", "All clear", AlertType.kError);
+    robotErrors.set(false);
     // forces OpenCV to load. Dont remove this.
     for (int i = 0; i < 3; i++) {
       try {
@@ -84,9 +90,8 @@ public class Robot extends TimedRobot {
         break;
       } catch (Exception e) {
         if (i > 2) {
-          System.err.println(
-            "\n\nOpenCV Load FAILED! ******* TELL MAX ASAP! *******"
-          );
+          robotErrors.setText("OpenCV Load FAILED! Pose est will be ");
+          robotErrors.set(true);
         }
       }
     }
@@ -106,27 +111,19 @@ public class Robot extends TimedRobot {
     climber = new Climber();
     frontCam = new PhotonVisionCamera(
       FRONT_CAM.NAME,
-      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      FRONT_CAM.CAMERA_MATRIX,
-      FRONT_CAM.DIST_COEFFS
+      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     backCam = new PhotonVisionCamera(
       BACK_CAM.NAME,
-      BACK_CAM.ROBOT_TO_CAM_TRANSFORM,
-      BACK_CAM.CAMERA_MATRIX,
-      BACK_CAM.DIST_COEEFS
+      BACK_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     leftCam = new PhotonVisionCamera(
       LEFT_CAM.NAME,
-      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      LEFT_CAM.CAMERA_MATRIX,
-      LEFT_CAM.DIST_COEEFS
+      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     rightCam = new PhotonVisionCamera(
       RIGHT_CAM.NAME,
-      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      RIGHT_CAM.CAMERA_MATRIX,
-      RIGHT_CAM.DIST_COEEFS
+      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
     if (!m_didOpenCVLoad) {

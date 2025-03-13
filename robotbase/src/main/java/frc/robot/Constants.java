@@ -35,6 +35,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
+import java.util.Map;
 import java.util.Optional;
 import org.ejml.simple.SimpleMatrix;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
@@ -437,40 +438,10 @@ public final class Constants {
         Units.Inches.of(7.951),
         Units.Inches.of(.624),
         Units.Inches.of(22.243),
-        // new Rotation3d(
-        //   Units.Degrees.of(0),
-        //   Units.Degrees.of(-10),
-        //   Units.Degrees.of(0)
-        // )
         new Rotation3d(
           Units.Degrees.of(0),
           Units.Degrees.of(10),
           Units.Degrees.of(0)
-        )
-      );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 734.557836120221, 0.0, 634.8211156347711 },
-            { 0.0, 734.4550563158114, 504.1277599678814 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEFFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.03900951112544531,
-            -0.06701313537480716,
-            -3.107885230659201E-4,
-            -1.1708847785696965E-4,
-            0.03884449647452857,
-            -0.009013057952936134,
-            0.012070659734909549,
-            0.017173063089175628,
-          }
         )
       );
     }
@@ -488,31 +459,6 @@ public final class Constants {
           Units.Degrees.of(180)
         )
       );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 731.8691015421067, 0.0, 647.4317928911091 },
-            { 0.0, 732.0244798620424, 507.99253293961715 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.038342519503234494,
-            -0.0671687056289058,
-            6.87360479856246E-5,
-            4.596192020596837E-6,
-            0.041912648539022886,
-            -0.010420972593061864,
-            0.014191022936485371,
-            0.019150102220730315,
-          }
-        )
-      );
     }
 
     public static final class RIGHT_CAM {
@@ -528,31 +474,6 @@ public final class Constants {
           Units.Degrees.of(270)
         )
       );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 729.6608690553459, 0.0, 649.1575608574531 },
-            { 0.0, 729.8029659622256, 529.4303396485709 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.04116716900792142,
-            -0.0683155445538715,
-            -7.724921691039068E-5,
-            -8.847337357162373E-5,
-            0.03570970592766647,
-            -0.007563612386900275,
-            0.012708454838216305,
-            0.01479948909867507,
-          }
-        )
-      );
     }
 
     public static final class LEFT_CAM {
@@ -566,31 +487,6 @@ public final class Constants {
           Units.Degrees.of(-10),
           Units.Degrees.of(0),
           Units.Degrees.of(90)
-        )
-      );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 733.181868108721, 0.0, 652.9883355143077 },
-            { 0.0, 732.9765658876138, 499.036857675139 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.03808488979739667,
-            -0.06777007253553732,
-            -2.660953485058089E-4,
-            2.389317050257177E-4,
-            0.03942586698262671,
-            -0.00896070145798233,
-            0.011891179064366236,
-            0.017476606427208132,
-          }
         )
       );
     }

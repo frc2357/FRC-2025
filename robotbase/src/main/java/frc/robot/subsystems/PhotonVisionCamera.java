@@ -7,29 +7,27 @@ import com.ctre.phoenix6.Utils;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.numbers.N8;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.networktables.BooleanEntry;
-import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
+import frc.robot.commands.util.InitCamera;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +39,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** Controls the photon vision camera options. */
-public class PhotonVisionCamera extends SubsystemBase {
+public class PhotonVisionCamera {
 
   /**
    * The class for storing results with all data needed to perform the constrained PNP operation
@@ -158,9 +156,9 @@ public class PhotonVisionCamera extends SubsystemBase {
 
   protected final Transform3d m_robotToCameraTranform;
 
-  protected final Optional<Matrix<N3, N3>> m_cameraMatrix;
+  protected Optional<Matrix<N3, N3>> m_cameraMatrix;
 
-  protected final Optional<Matrix<N8, N1>> m_distCoeefs;
+  protected Optional<Matrix<N8, N1>> m_distCoeefs;
 
   /**
    * The latest pose estimation from all cameras
@@ -173,9 +171,13 @@ public class PhotonVisionCamera extends SubsystemBase {
   /** Whether or not we have connection with the camera still */
   protected boolean m_connectionLost;
 
-  protected NetworkTable m_table;
-  protected DoubleArrayPublisher m_fieldPub;
-  protected StringPublisher m_fieldTypePub;
+  protected NetworkTable m_poseOutputTable;
+  protected DoubleArrayPublisher m_poseFieldPub;
+  protected StringPublisher m_poseFieldTypePub;
+
+  protected NetworkTable m_photonTable;
+  protected DoubleArrayTopic m_intrinsicsTopic;
+  protected DoubleArrayTopic m_distortionTopic;
 
   /**
    * The fiducial ID of the best target we have.
@@ -193,9 +195,31 @@ public class PhotonVisionCamera extends SubsystemBase {
 
   public PhotonVisionCamera(
     String cameraName,
-    Transform3d cameraTransform,
-    Matrix<N3, N3> cameraMatrix,
-    Matrix<N8, N1> distCoeefs
+    Transform3d robotToCameraTransform
+  ) {
+    this(
+      cameraName,
+      robotToCameraTransform,
+      Optional.ofNullable(null),
+      Optional.ofNullable(null)
+    );
+    new InitCamera(this)
+      .finallyDo(() -> {
+        Alert alert = new Alert(
+          "CameraAlerts/" + m_camera.getName(),
+          "Camera fully initialized",
+          AlertType.kInfo
+        );
+        alert.set(true);
+      })
+      .schedule();
+  }
+
+  public PhotonVisionCamera(
+    String cameraName,
+    Transform3d robotToCameraTransform,
+    Optional<Matrix<N3, N3>> cameraMatrix,
+    Optional<Matrix<N8, N1>> distCoeefs
   ) {
     m_camera = new PhotonCamera(cameraName);
     m_robotCameras.add(this);
@@ -206,14 +230,50 @@ public class PhotonVisionCamera extends SubsystemBase {
     //   m_aprilTagInfo[i] = new TargetInfo();
     // }
 
-    m_table = NetworkTableInstance.getDefault()
+    m_poseOutputTable = NetworkTableInstance.getDefault()
       .getTable("VisionPose-" + cameraName);
-    m_fieldPub = m_table.getDoubleArrayTopic("pose").publish();
-    m_fieldTypePub = m_table.getStringTopic(".type").publish();
+    m_poseFieldPub = m_poseOutputTable.getDoubleArrayTopic("pose").publish();
+    m_poseFieldTypePub = m_poseOutputTable.getStringTopic(".type").publish();
 
-    m_robotToCameraTranform = cameraTransform;
-    m_cameraMatrix = Optional.of(cameraMatrix);
+    m_photonTable = NetworkTableInstance.getDefault()
+      .getTable("photonvision")
+      .getSubTable(cameraName);
+    m_distortionTopic = m_photonTable.getDoubleArrayTopic("cameraDistortion");
+    m_intrinsicsTopic = m_photonTable.getDoubleArrayTopic("cameraIntrinsics");
+
+    m_robotToCameraTranform = robotToCameraTransform;
+    m_cameraMatrix = cameraMatrix;
+    m_distCoeefs = distCoeefs;
+  }
+
+  public boolean getDistCoeefs() {
+    double[] distArray = m_distortionTopic.getEntry(null).get();
+    if (distArray == null) {
+      return false;
+    }
+    Matrix<N8, N1> distCoeefs = new Matrix<N8, N1>(
+      Nat.N8(),
+      Nat.N1(),
+      distArray
+    );
+
     m_distCoeefs = Optional.of(distCoeefs);
+    return true;
+  }
+
+  public boolean getCameraMatrix() {
+    double[] intrinsicsArray = m_intrinsicsTopic.getEntry(null).get();
+    if (intrinsicsArray == null) {
+      return false;
+    }
+    Matrix<N3, N3> cameraMatrix = new Matrix<N3, N3>(
+      Nat.N3(),
+      Nat.N3(),
+      intrinsicsArray
+    );
+
+    m_cameraMatrix = Optional.of(cameraMatrix);
+    return true;
   }
 
   /**
@@ -430,8 +490,8 @@ public class PhotonVisionCamera extends SubsystemBase {
     if (pose == null || camera == null) {
       return;
     }
-    camera.m_fieldTypePub.set("Field2d");
-    camera.m_fieldPub.accept(
+    camera.m_poseFieldTypePub.set("Field2d");
+    camera.m_poseFieldPub.accept(
       new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
     );
   }
