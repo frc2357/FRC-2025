@@ -414,10 +414,10 @@ public final class Constants {
       Units.MetersPerSecond.of(1);
 
     // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.1);
+    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.1);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
-    public static final Distance Z_MARGIN = Units.Feet.of(0.1);
+    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
 
     public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 
@@ -427,7 +427,9 @@ public final class Constants {
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
 
-    public static final double MAX_DISTANCE_FROM_CURR_POSE_METERS = 1.5;
+    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(
+      0.75
+    );
 
     public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
 
