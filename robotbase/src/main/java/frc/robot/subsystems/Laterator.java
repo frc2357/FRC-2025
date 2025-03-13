@@ -151,9 +151,9 @@ public class Laterator extends SubsystemBase {
 
   public void setZeroMaxExtension() {
     m_encoder.setPosition(
-      distanceToRotations(
-        Constants.LATERATOR.SETPOINTS.FULL_EXTENSION_SCORE
-      ).in(Units.Rotations)
+      distanceToRotations(Constants.LATERATOR.SETPOINTS.FULL_EXTENSION).in(
+        Units.Rotations
+      )
     );
   }
 

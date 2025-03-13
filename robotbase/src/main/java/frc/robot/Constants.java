@@ -260,7 +260,7 @@ public final class Constants {
 
     public static final double NOMINAL_AMP_LIMIT = 5; // TODO: tune this
 
-    public static final double ZERO_SPEED = 0.1;
+    public static final double ZERO_SPEED = -0.1;
   }
 
   public static final class CORAL_RUNNER {
