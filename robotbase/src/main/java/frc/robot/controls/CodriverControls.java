@@ -73,9 +73,8 @@ public class CodriverControls {
       .and(m_controller.povLeft().negate())
       .and(m_controller.povDown());
     Trigger noLetterButtons = m_controller
-      .povUp()
+      .a()
       .negate()
-      .and(m_controller.a().negate())
       .and(m_controller.b().negate())
       .and(m_controller.x().negate())
       .and(m_controller.y().negate());
