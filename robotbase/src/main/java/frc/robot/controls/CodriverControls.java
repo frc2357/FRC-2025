@@ -11,7 +11,6 @@ import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
-import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.scoring.coral.CoralHome;
@@ -75,6 +74,8 @@ public class CodriverControls {
       .and(m_controller.povDown());
 
     noDpad.and(m_controller.x()).onTrue(new CoralHome());
+    noDpad.and(m_controller.b().whileTrue(new LateratorFullZero()));
+
     m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
     m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
 

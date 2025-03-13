@@ -251,14 +251,14 @@ public final class Constants {
       public static final Distance L2_PREPOSE = Units.Inches.of(-6.2);
       public static final Distance L3_PREPOSE = Units.Inches.of(-6.2);
       public static final Distance L4_PREPOSE = Units.Inches.of(-6.4);
-      public static final Distance FULL_EXTENSION = Units.Inches.of(0); // TODO: Tune Setpoint
+      public static final Distance FULL_EXTENSION = Units.Inches.of(-6.6);
     }
 
     public static final double STALL_WAIT_TIME = .1;
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
-    public static final double NOMINAL_AMP_LIMIT = 5; // TODO: tune this
+    public static final double NOMINAL_AMP_LIMIT = 20;
 
     public static final double ZERO_SPEED = -0.1;
   }
