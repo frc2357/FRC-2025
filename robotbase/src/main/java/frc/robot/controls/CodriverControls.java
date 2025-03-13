@@ -8,8 +8,8 @@ import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
+import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
-import frc.robot.commands.laterator.LateratorZero;
 import frc.robot.commands.scoring.coral.CoralHome;
 import frc.robot.commands.scoring.coral.CoralPreposeL1;
 import frc.robot.commands.scoring.coral.CoralPreposeL2;
@@ -73,7 +73,7 @@ public class CodriverControls {
       .whileTrue(
         new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
       );
-    m_controller.b().whileTrue(new LateratorZero());
+    m_controller.b().whileTrue(new LateratorFullZero());
     m_controller
       .povRight()
       .and(m_rightTrigger)
