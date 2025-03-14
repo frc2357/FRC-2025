@@ -48,7 +48,7 @@ public class CL33Peice extends AutoBase {
       .onTrue(
         new CoralPreposeL4()
           .andThen(
-            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false),
+            //new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false),
             new CoralPreposeIntake(),
             branchJToBlueS.cmd()
           )
@@ -67,9 +67,9 @@ public class CL33Peice extends AutoBase {
       .onTrue(
         new CoralPreposeL4()
           .andThen(
-            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false) // score coral 2
-              .andThen(new CoralPreposeIntake())
-              .andThen(branchKToBlueS.cmd())
+            //new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false) // score coral 2
+            //.andThen(new CoralPreposeIntake())
+            //.andThen(branchKToBlueS.cmd())
           )
       );
     // // when at the coral station, we intake coral and then go to the next branch
