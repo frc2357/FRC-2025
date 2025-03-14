@@ -423,8 +423,9 @@ public final class Constants {
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
-
-    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(1);
+    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(
+      0.75
+    );
 
     public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
 
