@@ -19,8 +19,7 @@ public class CoralPreposeL1 extends SequentialCommandGroup {
             SmartDashboard.getNumber("Elevator Setpoint Modifier", 0)
           )
         )
-      ),
-      new LateratorSetDistance(LATERATOR.SETPOINTS.L1_PREPOSE)
+      )
     );
   }
 }

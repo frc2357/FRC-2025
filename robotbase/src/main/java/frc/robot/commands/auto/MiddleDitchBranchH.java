@@ -14,7 +14,7 @@ public class MiddleDitchBranchH extends AutoBase {
       .onTrue(
         new CoralPreposeL4()
           .andThen(
-            new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE),
+            //new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE),
             new CoralHome()
           )
       );
