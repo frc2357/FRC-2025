@@ -6,11 +6,11 @@ import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants.LATERATOR;
+import frc.robot.Constants;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
-import frc.robot.commands.scoring.coral.CoralPreposeL4;
-import frc.robot.commands.scoring.coral.CoralScore;
+import frc.robot.commands.scoring.auto.AutoCoralConfirmScore;
+import frc.robot.commands.scoring.auto.AutoCoralPreposeL4;
 import frc.robot.commands.util.VariableWaitCommand;
 
 public class AutoBase {
@@ -67,7 +67,14 @@ public class AutoBase {
    * @param traj2 The AutoTrajectory that takes the robot from the reef to the coral station
    */
   protected void scoringSegment(AutoTrajectory traj1, AutoTrajectory traj2) {
-    traj1.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new CoralPreposeL4());
+    traj1.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new AutoCoralPreposeL4());
+    traj1
+      .done()
+      .onTrue(
+        new AutoCoralConfirmScore(
+          Constants.CORAL_RUNNER.SCORING_PERCENT_L4
+        ).andThen(new CoralPreposeIntake(), traj2.cmd())
+      );
   }
 
   /**

@@ -1,9 +1,9 @@
 package frc.robot.commands.auto;
 
-import frc.robot.Constants.LATERATOR;
-import frc.robot.commands.scoring.coral.CoralHome;
-import frc.robot.commands.scoring.coral.CoralPreposeL4;
-import frc.robot.commands.scoring.coral.CoralScore;
+import frc.robot.Constants;
+import frc.robot.commands.scoring.CoralHome;
+import frc.robot.commands.scoring.auto.AutoCoralConfirmScore;
+import frc.robot.commands.scoring.auto.AutoCoralPreposeL4;
 
 public class MiddleDitchBranchH extends AutoBase {
 
@@ -12,9 +12,11 @@ public class MiddleDitchBranchH extends AutoBase {
     m_startTraj
       .done()
       .onTrue(
-        new CoralPreposeL4()
+        new AutoCoralPreposeL4()
           .andThen(
-            //new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE),
+            new AutoCoralConfirmScore(
+              Constants.CORAL_RUNNER.SCORING_PERCENT_L4
+            ),
             new CoralHome()
           )
       );

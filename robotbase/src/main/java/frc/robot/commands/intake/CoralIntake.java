@@ -6,7 +6,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.CORAL_RUNNER;
 import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
-import frc.robot.commands.scoring.coral.CoralHome;
+import frc.robot.commands.scoring.CoralHome;
 
 public class CoralIntake extends Command {
 

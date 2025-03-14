@@ -13,11 +13,7 @@ import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
-import frc.robot.commands.scoring.coral.CoralHome;
-import frc.robot.commands.scoring.coral.CoralPreposeL1;
-import frc.robot.commands.scoring.coral.CoralPreposeL2;
-import frc.robot.commands.scoring.coral.CoralPreposeL3;
-import frc.robot.commands.scoring.coral.CoralPreposeL4;
+import frc.robot.commands.scoring.CoralHome;
 
 public class CodriverControls {
 
@@ -90,18 +86,11 @@ public class CodriverControls {
 
     onlyUp.and(m_controller.x().whileTrue(new ElevatorHome()));
 
-    onlyLeft.and(m_controller.a()).whileTrue(new CoralPreposeL1());
-    onlyLeft.and(m_controller.b()).whileTrue(new CoralPreposeL2());
-    onlyLeft.and(m_controller.x()).whileTrue(new CoralPreposeL3());
-    onlyLeft.and(m_controller.y()).whileTrue(new CoralPreposeL4());
-
     onlyRight
       .and(noLetterButtons)
       .whileTrue(
         new LateratorAxis(() -> modifyAxis(-m_controller.getRightX()))
       );
-
-    // onlyRight.onTrue(new LateratorZero());
 
     onlyRight
       .and(m_rightTrigger)

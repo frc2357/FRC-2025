@@ -3,11 +3,11 @@ package frc.robot.commands.auto;
 import static frc.robot.Constants.CHOREO.*;
 
 import choreo.auto.AutoTrajectory;
-import frc.robot.Constants.LATERATOR;
+import frc.robot.Constants;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
-import frc.robot.commands.scoring.coral.CoralPreposeL4;
-import frc.robot.commands.scoring.coral.CoralScore;
+import frc.robot.commands.scoring.auto.AutoCoralConfirmScore;
+import frc.robot.commands.scoring.auto.AutoCoralPreposeL4;
 
 public class CL33Peice extends AutoBase {
 
@@ -46,9 +46,11 @@ public class CL33Peice extends AutoBase {
     m_startTraj
       .done()
       .onTrue(
-        new CoralPreposeL4()
+        new AutoCoralPreposeL4()
           .andThen(
-            //new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false),
+            new AutoCoralConfirmScore(
+              Constants.CORAL_RUNNER.SCORING_PERCENT_L4
+            ),
             new CoralPreposeIntake(),
             branchJToBlueS.cmd()
           )
@@ -60,43 +62,43 @@ public class CL33Peice extends AutoBase {
       .onTrue(new CoralIntake().andThen(BlueSToBranchK.cmd()));
     // as we get close to the branch, we prepose to score
     BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
-      new CoralPreposeL4()
+      new AutoCoralPreposeL4()
     );
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
       .onTrue(
-        new CoralPreposeL4()
+        new AutoCoralPreposeL4()
           .andThen(
-            //new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE, () -> false) // score coral 2
-            //.andThen(new CoralPreposeIntake())
-            //.andThen(branchKToBlueS.cmd())
+            new AutoCoralConfirmScore(Constants.CORAL_RUNNER.SCORING_PERCENT_L4) // score coral 2
+              .andThen(new CoralPreposeIntake())
+              .andThen(branchKToBlueS.cmd())
           )
       );
-    // // when at the coral station, we intake coral and then go to the next branch
+    // when at the coral station, we intake coral and then go to the next branch
     branchKToBlueS
       .done()
       .onTrue(new CoralIntake()/*.andThen(BlueSToBranchL.cmd()) */);
     // BlueSToBranchL.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
-    //   new CoralPreposeL4()
+    //   new AutoCoralPreposeL4()
     // );
     // BlueSToBranchL.done()
     //   .onTrue(
-    //     new CoralScore(
-    //       () -> LATERATOR.SETPOINTS.L4_PREPOSE,
-    //       () -> false
+    //     new AutoCoralConfirmScore(
+    //       Constants.CORAL_RUNNER.SCORING_PERCENT_L4
     //     ).andThen(new CoralPreposeIntake(), branchLToBlueS.cmd()) // score coral 3
     //   );
     // // when at the coral station, we intake coral and then go to the next branch
     // branchLToBlueS
     //   .done()
     //   .onTrue(new CoralIntake().andThen(BlueSToBranchI.cmd()));
-    // BlueSToBranchI
-    //   .atTimeBeforeEnd(PREPOSE_SECONDS)
-    //   .onTrue(new CoralPreposeL4());
-    // BlueSToBranchI
-    //   .done()
+    // BlueSToBranchI.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
+    //   new AutoCoralPreposeL4()
+    // );
+    // BlueSToBranchI.done()
     //   .onTrue(
-    //     new CoralScore().andThen(new CoralPreposeIntake(), branchIToBlueS.cmd()) // score coral 4
+    //     new AutoCoralConfirmScore(
+    //       Constants.CORAL_RUNNER.SCORING_PERCENT_L4 // score coral 4
+    //     ).andThen(new CoralPreposeIntake(), branchIToBlueS.cmd()) // score coral 4
     //   );
     // // when at the coral station, we intake coral, and wait for auto to end (if it hasnt already)
     // branchIToBlueS.done().onTrue(new CoralIntake());

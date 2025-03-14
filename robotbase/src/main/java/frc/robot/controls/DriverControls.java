@@ -10,18 +10,16 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
-import frc.robot.commands.descoring.AlgaeRemoverChooser;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveRobotRelative;
 import frc.robot.commands.drive.FlipPerspective;
-import frc.robot.commands.scoring.coral.CoralHome;
-import frc.robot.commands.scoring.coral.CoralIntakeScoreConditional;
-import frc.robot.commands.scoring.coral.CoralPreposeL2;
-import frc.robot.commands.scoring.coral.CoralPreposeL3;
-import frc.robot.commands.scoring.coral.CoralPreposeL4;
+import frc.robot.commands.intake.CoralIntake;
+import frc.robot.commands.scoring.CoralHome;
+import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
+import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
+import frc.robot.commands.scoring.teleop.TeleopCoralScoreL4;
 
-@SuppressWarnings("unused")
 public class DriverControls {
 
   private CommandXboxController m_controller;
@@ -56,14 +54,21 @@ public class DriverControls {
         )
       );
 
-    // Manual Coral Scoring
-    m_controller.rightBumper().onTrue(new CoralPreposeL3());
-    m_leftTrigger.onTrue(new CoralHome());
-    m_rightTrigger.onTrue(new CoralIntakeScoreConditional());
-    m_controller.leftBumper().onTrue(new CoralPreposeL4());
+    // Scoring
+    m_controller.leftBumper().onTrue(new TeleopCoralScoreL4(m_rightTrigger));
+    m_controller.rightBumper().onTrue(new TeleopCoralScoreL3(m_rightTrigger));
+    m_controller.x().onTrue(new TeleopCoralScoreL2(m_rightTrigger));
 
-    AlgaeRemoverChooser algaeRemoverChooser = new AlgaeRemoverChooser();
-    //m_controller.a().onTrue(algaeRemoverChooser.getSelectCommand());
+    // Intaking
+    m_rightTrigger
+      .and(
+        () ->
+          Robot.coralRunner.isOuttakeBeamBroken() &&
+          Robot.coralRunner.isIntakeBeamBroken()
+      )
+      .onTrue(new CoralIntake());
+
+    // Remove algae
     m_controller
       .a()
       .toggleOnTrue(
@@ -74,10 +79,14 @@ public class DriverControls {
       .toggleOnTrue(
         new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
       );
-    m_controller.x().onTrue(new CoralPreposeL2());
-    m_controller.y().whileTrue(new DriveRobotRelative());
 
+    // Other
+    m_leftTrigger.onTrue(new CoralHome());
     m_controller.back().onTrue(new FlipPerspective());
+    m_controller
+      .start()
+      .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
+    m_controller.y().whileTrue(new DriveRobotRelative());
 
     m_controller
       .y()
