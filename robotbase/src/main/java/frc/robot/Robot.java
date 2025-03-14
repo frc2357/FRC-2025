@@ -92,7 +92,7 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
-    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
+    SmartDashboard.putBoolean("Toggle Pose Estimation", true);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
