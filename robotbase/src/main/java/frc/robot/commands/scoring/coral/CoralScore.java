@@ -10,12 +10,24 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
+import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.util.Utility;
 
 public class CoralScore extends SequentialCommandGroup {
 
   public CoralScore() {
     super(
+      new LateratorSetDistance(() -> {
+        if (
+          Utility.isWithinTolerance(
+            Robot.elevator.getDistance().in(Units.Inches),
+            Constants.ELEVATOR.SETPOINTS.L4_PREPOSE.in(Units.Inches),
+            Constants.ELEVATOR.L4_DETECTION_TOLERANCE.in(Units.Inches)
+          )
+        ) {
+          return Constants.LATERATOR.SETPOINTS.L4_PREPOSE;
+        }
+      }),
       new ParallelDeadlineGroup(
         new SequentialCommandGroup(
           new WaitUntilCommand(
