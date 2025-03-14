@@ -4,10 +4,13 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.cscore.OpenCvLoader;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -15,8 +18,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.PHOTON_VISION.BACK_CAM;
-import frc.robot.Constants.PHOTON_VISION.FRONT_CAM;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
@@ -32,7 +33,6 @@ import frc.robot.networkTables.*;
 import frc.robot.subsystems.*;
 import frc.robot.util.ElasticFieldManager;
 import frc.robot.util.Telemetry;
-import org.photonvision.proto.Photon;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
       } catch (Exception e) {
         if (i > 2) {
           System.err.println(
-            "\n\nOpenCV Load FAILED! ******* TELL MAX ASAP! *******"
+            "OpenCV Load FAILED! Pose est will be much worse!"
           );
         }
       }
@@ -92,7 +92,7 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
-    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
+    SmartDashboard.putBoolean("Toggle Pose Estimation", true);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -105,27 +105,19 @@ public class Robot extends TimedRobot {
     climber = new Climber();
     frontCam = new PhotonVisionCamera(
       FRONT_CAM.NAME,
-      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      FRONT_CAM.CAMERA_MATRIX,
-      FRONT_CAM.DIST_COEFFS
+      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     backCam = new PhotonVisionCamera(
       BACK_CAM.NAME,
-      BACK_CAM.ROBOT_TO_CAM_TRANSFORM,
-      BACK_CAM.CAMERA_MATRIX,
-      BACK_CAM.DIST_COEEFS
+      BACK_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     leftCam = new PhotonVisionCamera(
       LEFT_CAM.NAME,
-      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      LEFT_CAM.CAMERA_MATRIX,
-      LEFT_CAM.DIST_COEEFS
+      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     rightCam = new PhotonVisionCamera(
       RIGHT_CAM.NAME,
-      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM,
-      RIGHT_CAM.CAMERA_MATRIX,
-      RIGHT_CAM.DIST_COEEFS
+      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
     if (!m_didOpenCVLoad) {
@@ -169,7 +161,6 @@ public class Robot extends TimedRobot {
 
     // Setup logging swerve pose and state for viewing in Advantage Scope
     Robot.swerve.registerTelemetry(new Telemetry()::telemeterize);
-
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
     new InitRobotCommand().schedule();

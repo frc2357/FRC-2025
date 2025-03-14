@@ -13,7 +13,6 @@ import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,9 +20,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
@@ -36,7 +32,6 @@ import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import java.util.Optional;
-import org.ejml.simple.SimpleMatrix;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -204,7 +199,7 @@ public final class Constants {
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
 
-    public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5); // TODO: MAKE SURE THIS IS RIGHT! Its used for autos. Goal is 0.5 seconds.
+    public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
   }
 
   public static final class LATERATOR {
@@ -351,13 +346,8 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
       .apply(MOTOR_CONFIG_ONE)
       .follow(CAN_ID.CLIMBER_MOTOR_ONE);
-    // public static final SparkBaseConfig MOTOR_CONFIG_THREE =
-    //   new SparkMaxConfig()
-    //     .apply(MOTOR_CONFIG_ONE)
-    //     .follow(CAN_ID.CLIMBER_MOTOR_ONE);
 
     public static final double AXIS_MAX_SPEED = 1;
-    public static final Time RUN_DOWN_TIME = Units.Seconds.of(2);
   }
 
   public static final class CUSTOM_UNITS {
@@ -387,9 +377,6 @@ public final class Constants {
 
     public static final Angle MAX_ANGLE = Units.Degrees.of(35);
 
-    public static final double MAX_REPROJECTION_ERROR_PIXELS = 50; // TODO: tune this to a reasonable degree.
-    public static final double MAX_AMBIGUITY_TOLERANCE = 4; // TODO: tune this until its reasonable.
-
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
@@ -401,39 +388,49 @@ public final class Constants {
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 1;
+    public static final double PNP_HEADING_SCALE_FACTOR = 20; // no touchy.
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
+      // heading free essentailly determines whether or not the calculations are done in 2D or 3D space.
+      // if its false, its done in 2D and heading sclae matters.
+      // if its true, calcs are done in 3D, and heading scale is essentially 0.
       Optional.of(
         new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
-      ); // TODO: tune this throughout normal operation. This is for max to do.
+      );
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
     // yes, these are essentially magic numbers
-    public static final double X_STD_DEV_COEFFIECIENT = 0.65;
-    public static final double Y_STD_DEV_COEFFIECIENT = 0.65;
+    public static final double X_STD_DEV_COEFFIECIENT = 0.8;
+    public static final double Y_STD_DEV_COEFFIECIENT = 0.8;
 
     // if were going faster than this, we wont accept any pose est.
     public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.15);
+      Units.RadiansPerSecond.of(0.3);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
       Units.MetersPerSecond.of(1);
 
     // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Meters.of(0.1);
+    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.1);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
-    public static final Distance Z_MARGIN = Units.Feet.of(0.1);
+    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
 
     public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 
-    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
+    public static final int PNP_INFO_STORAGE_AMOUNT = 3;
 
-    // tuned numbers for pose confidence. TODO: tune these.
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
+
+    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(
+      0.75
+    );
+
+    public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
+
+    public static final Time UPDATE_POSE_INTERVALS = Seconds.of(3);
 
     public static final class FRONT_CAM {
 
@@ -442,40 +439,10 @@ public final class Constants {
         Units.Inches.of(7.951),
         Units.Inches.of(.624),
         Units.Inches.of(22.243),
-        // new Rotation3d(
-        //   Units.Degrees.of(0),
-        //   Units.Degrees.of(-10),
-        //   Units.Degrees.of(0)
-        // )
         new Rotation3d(
           Units.Degrees.of(0),
           Units.Degrees.of(10),
           Units.Degrees.of(0)
-        )
-      );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 734.557836120221, 0.0, 634.8211156347711 },
-            { 0.0, 734.4550563158114, 504.1277599678814 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEFFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.03900951112544531,
-            -0.06701313537480716,
-            -3.107885230659201E-4,
-            -1.1708847785696965E-4,
-            0.03884449647452857,
-            -0.009013057952936134,
-            0.012070659734909549,
-            0.017173063089175628,
-          }
         )
       );
     }
@@ -493,31 +460,6 @@ public final class Constants {
           Units.Degrees.of(180)
         )
       );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 731.8691015421067, 0.0, 647.4317928911091 },
-            { 0.0, 732.0244798620424, 507.99253293961715 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.038342519503234494,
-            -0.0671687056289058,
-            6.87360479856246E-5,
-            4.596192020596837E-6,
-            0.041912648539022886,
-            -0.010420972593061864,
-            0.014191022936485371,
-            0.019150102220730315,
-          }
-        )
-      );
     }
 
     public static final class RIGHT_CAM {
@@ -528,34 +470,9 @@ public final class Constants {
         Units.Inches.of(-3.001),
         Units.Inches.of(16.578),
         new Rotation3d(
-          Units.Degrees.of(-10),
+          Units.Degrees.of(10),
           Units.Degrees.of(0),
-          Units.Degrees.of(-90)
-        )
-      );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 729.6608690553459, 0.0, 649.1575608574531 },
-            { 0.0, 729.8029659622256, 529.4303396485709 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.04116716900792142,
-            -0.0683155445538715,
-            -7.724921691039068E-5,
-            -8.847337357162373E-5,
-            0.03570970592766647,
-            -0.007563612386900275,
-            0.012708454838216305,
-            0.01479948909867507,
-          }
+          Units.Degrees.of(270)
         )
       );
     }
@@ -571,31 +488,6 @@ public final class Constants {
           Units.Degrees.of(-10),
           Units.Degrees.of(0),
           Units.Degrees.of(90)
-        )
-      );
-
-      public static final Matrix<N3, N3> CAMERA_MATRIX = new Matrix<N3, N3>(
-        new SimpleMatrix(
-          new double[][] {
-            { 733.181868108721, 0.0, 652.9883355143077 },
-            { 0.0, 732.9765658876138, 499.036857675139 },
-            { 0.0, 0.0, 1.0 },
-          }
-        )
-      );
-
-      public static final Matrix<N8, N1> DIST_COEEFS = new Matrix<N8, N1>(
-        new SimpleMatrix(
-          new double[] {
-            0.03808488979739667,
-            -0.06777007253553732,
-            -2.660953485058089E-4,
-            2.389317050257177E-4,
-            0.03942586698262671,
-            -0.00896070145798233,
-            0.011891179064366236,
-            0.017476606427208132,
-          }
         )
       );
     }
@@ -828,11 +720,7 @@ public final class Constants {
     public static class CORAL_STATION {
 
       public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
-        new Pose2d(
-          0.5548880100250244,
-          6.694406032562256,
-          new Rotation2d(2.206778871255995)
-        );
+        new Pose2d(0.55488, 6.69440, new Rotation2d(2.20677));
       public static final Transform2d UPPER_STATION_SLOT_TO_SLOT_TRANSFORM =
         new Transform2d(
           Units.Inches.of(5.65685),
@@ -840,7 +728,7 @@ public final class Constants {
           Rotation2d.kZero
         );
 
-      public static final Pose2d UPPER_STATION_DESIRED_SLOT =
+      public static final Pose2d LEFT_STATION_DESIRED_SLOT =
         UPPER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
           UPPER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
             DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER
@@ -860,7 +748,7 @@ public final class Constants {
           Rotation2d.kZero
         );
 
-      public static final Pose2d LOWER_STATION_DESIRED_SLOT =
+      public static final Pose2d RIGHT_STATION_DESIRED_SLOT =
         LOWER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
           LOWER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
             DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER
@@ -879,7 +767,7 @@ public final class Constants {
     public static final Distance FRAME_LENGTH = Units.Inches.of(26);
     public static final Distance FRAME_WIDTH = Units.Inches.of(26);
 
-    public static final Distance BUMPER_THICKNESS = Units.Inches.of(3);
+    public static final Distance BUMPER_THICKNESS = Units.Inches.of(3.125);
 
     public static final Distance FULL_LENGTH = FRAME_LENGTH.plus(
       BUMPER_THICKNESS.times(2)

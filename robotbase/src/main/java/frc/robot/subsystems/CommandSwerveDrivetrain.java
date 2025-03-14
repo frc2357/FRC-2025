@@ -422,7 +422,11 @@ public class CommandSwerveDrivetrain
     var curPose = getFieldRelativePose2d();
     return Robot.alliance == Alliance.Blue
       ? curPose
-      : ChoreoAllianceFlipUtil.flip(curPose);
+      : new Pose2d(
+        ChoreoAllianceFlipUtil.flipX(curPose.getX()),
+        ChoreoAllianceFlipUtil.flipY(curPose.getY()),
+        ChoreoAllianceFlipUtil.flip(curPose.getRotation())
+      );
   }
 
   public Pose2d flipYAxis(Pose2d poseToFlip) {

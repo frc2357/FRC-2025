@@ -1,7 +1,7 @@
 package frc.robot.commands.drive;
 
-import static frc.robot.Constants.FIELD.CORAL_STATION.LOWER_STATION_DESIRED_SLOT;
-import static frc.robot.Constants.FIELD.CORAL_STATION.UPPER_STATION_DESIRED_SLOT;
+import static frc.robot.Constants.FIELD.CORAL_STATION.LEFT_STATION_DESIRED_SLOT;
+import static frc.robot.Constants.FIELD.CORAL_STATION.RIGHT_STATION_DESIRED_SLOT;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,8 +10,8 @@ import frc.robot.util.Utility;
 public class DriveToCoralStation extends DriveToPoseHandler {
 
   public enum StationToGoTo {
-    BlueSide,
-    RedSide,
+    LeftSide,
+    RightSide,
     Fastest,
   }
 
@@ -43,23 +43,23 @@ public class DriveToCoralStation extends DriveToPoseHandler {
 
   private Pose2d getDesiredTarget(Pose2d currPose) {
     switch (m_desiredStation) {
-      case RedSide:
-        return LOWER_STATION_DESIRED_SLOT;
-      case BlueSide:
-        return UPPER_STATION_DESIRED_SLOT;
+      case RightSide:
+        return RIGHT_STATION_DESIRED_SLOT;
+      case LeftSide:
+        return LEFT_STATION_DESIRED_SLOT;
       case Fastest:
       default:
-        double upperStationDist = Utility.findDistanceBetweenPoses(
+        double leftStationDist = Utility.findDistanceBetweenPoses(
           currPose,
-          UPPER_STATION_DESIRED_SLOT
+          LEFT_STATION_DESIRED_SLOT
         );
-        double lowerStationDist = Utility.findDistanceBetweenPoses(
+        double rightStationDist = Utility.findDistanceBetweenPoses(
           currPose,
-          LOWER_STATION_DESIRED_SLOT
+          RIGHT_STATION_DESIRED_SLOT
         );
-        return upperStationDist <= lowerStationDist
-          ? UPPER_STATION_DESIRED_SLOT
-          : LOWER_STATION_DESIRED_SLOT;
+        return leftStationDist <= rightStationDist
+          ? LEFT_STATION_DESIRED_SLOT
+          : RIGHT_STATION_DESIRED_SLOT;
     }
   }
 }

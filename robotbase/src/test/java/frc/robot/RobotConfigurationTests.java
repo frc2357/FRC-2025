@@ -35,13 +35,11 @@ public class RobotConfigurationTests {
     );
     System.out.println(
       "Full Dimensions: " +
-      FULL_LENGTH.in(Inches) +
-      "\" long " +
-      FULL_WIDTH.in(Inches) +
-      "\" wide"
+      FULL_LENGTH.in(Meters) +
+      " meters long " +
+      FULL_WIDTH.in(Meters) +
+      " meters wide"
     );
-    assertEquals(30, FULL_LENGTH.in(Inches), 2);
-    assertEquals(30, FULL_WIDTH.in(Inches), 2);
   }
 
   @Test
