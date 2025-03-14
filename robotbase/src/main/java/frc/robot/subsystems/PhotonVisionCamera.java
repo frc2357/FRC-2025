@@ -192,7 +192,7 @@ public class PhotonVisionCamera {
 
   protected Optional<Matrix<N3, N3>> m_cameraMatrix;
 
-  protected Optional<Matrix<N8, N1>> m_distCoeefs;
+  protected Optional<Matrix<N8, N1>> m_distCoefs;
 
   protected static EstimatedRobotPose m_latestEstimatedPose;
 
@@ -285,21 +285,21 @@ public class PhotonVisionCamera {
 
     m_robotToCameraTranform = robotToCameraTransform;
     m_cameraMatrix = cameraMatrix;
-    m_distCoeefs = distCoeefs;
+    m_distCoefs = distCoeefs;
     m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
   }
 
-  public boolean getDistCoeefs() {
+  public boolean getDistCoefs() {
     double[] distArray = m_distortSub.get();
     if (distArray == null) {
       return false;
     }
-    Matrix<N8, N1> distCoeefs = new Matrix<N8, N1>(
+    Matrix<N8, N1> distCoefs = new Matrix<N8, N1>(
       Nat.N8(),
       Nat.N1(),
       distArray
     );
-    m_distCoeefs = Optional.of(distCoeefs);
+    m_distCoefs = Optional.of(distCoefs);
     return true;
   }
 
@@ -330,13 +330,11 @@ public class PhotonVisionCamera {
       else if (
         RobotModeTriggers.disabled().getAsBoolean() &&
         RobotController.getMeasureTime().in(Seconds) % 5 <= 0.1
-      ) {
-        System.err.println(
-          "CAMERA " +
-          camera.m_camera.getName() +
-          " IS DISCONNECTED! ***** TELL MAX! *****"
-        );
-      }
+      ) System.err.println(
+        "CAMERA " +
+        camera.m_camera.getName() +
+        " IS DISCONNECTED! ***** TELL MAX! *****"
+      );
     }
     for (int i = 0; i < m_pnpInfo.length; i++) {
       if (m_pnpInfo[i].result == null) continue;
@@ -465,6 +463,10 @@ public class PhotonVisionCamera {
     if (estimatedPose == null) return null;
 
     publishPose(estimatedPose.estimatedPose.toPose2d(), pnpInfo.camera);
+
+    // if estimate is out of the field, throw it away
+    if (!isPoseInField(estimatedPose.estimatedPose)) return null;
+
     double averageTargetDistance = 0;
     for (PhotonTrackedTarget target : estimatedPose.targetsUsed) {
       averageTargetDistance += Math.abs(
@@ -472,8 +474,6 @@ public class PhotonVisionCamera {
       );
     }
     averageTargetDistance /= estimatedPose.targetsUsed.size();
-
-    if (!isPoseInField(estimatedPose.estimatedPose)) return null;
 
     // the higher the confidence is, the less the estimated measurment is trusted.
     double velocityConf =
@@ -487,6 +487,7 @@ public class PhotonVisionCamera {
       ((averageTargetDistance / 2) * velocityConf),
       MAGIC_VEL_CONF_EXPONENT
     );
+
     // if estimated pose is too far from current pose
     m_latestEstimatedPose = estimatedPose;
     return new poseEstimate(
@@ -503,6 +504,7 @@ public class PhotonVisionCamera {
     boolean updatePose,
     poseEstimate... estimates
   ) {
+    // get the most common estimate
     poseEstimate averageEstimate = estimates.length > 1
       ? poseEstimate.findConcensus(estimates)
       : estimates[0];
@@ -514,12 +516,14 @@ public class PhotonVisionCamera {
     m_poseConcensusFieldPub.accept(
       new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
     );
+    // if we dont want to update the pose, throw it away
     if (!updatePose) return;
-
+    // if estimate isnt in the field, throw it away
     if (!averageEstimate.isInField()) return;
     double measuredTime = Utils.fpgaToCurrentTime(
       averageEstimate.timestampSeconds
     );
+    // if estimated pose it too far from swerve pose
     if (
       new Transform2d(
         Robot.swerve.getFieldRelativePose2d(),
@@ -573,16 +577,19 @@ public class PhotonVisionCamera {
     if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
       return;
     }
+    // if rotating too fast, dont store info
     if (
       Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
       MAX_ACCEPTABLE_ROTATIONAL_VELOCITY.in(RadiansPerSecond)
     ) return;
+    // if translating too fast, dont store info
     if (
       Math.abs(
         Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond)
       ) >
       MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY.in(MetersPerSecond)
     ) return;
+
     Rotation3d heading = new Rotation3d(
       Robot.swerve.getFieldRelativePose2d().getRotation()
     );
@@ -599,7 +606,7 @@ public class PhotonVisionCamera {
           heading,
           headingTimestampSeconds,
           m_cameraMatrix,
-          m_distCoeefs,
+          m_distCoefs,
           m_robotToCameraTranform,
           this
         );
@@ -654,13 +661,14 @@ public class PhotonVisionCamera {
         }
       }
     }
+    // if an index has been selected to replace, replace it
     if (indexToReplace != -1) {
       m_pnpInfo[indexToReplace] = new TimestampedPNPInfo(
         result,
         heading,
         headingTimestampSeconds,
         m_cameraMatrix,
-        m_distCoeefs,
+        m_distCoefs,
         m_robotToCameraTranform,
         this
       );
@@ -702,18 +710,6 @@ public class PhotonVisionCamera {
       FIELD_CONSTANTS.FIELD_WIDTH.plus(FIELD_BORDER_MARGIN).in(Meters)
     );
   }
-
-  // public static Matrix<N8, N1> getDistCoeefsFromNT(String cameraName) {
-  //   NetworkTable table = NetworkTableInstance.getDefault()
-  //     .getTable("photonvision");
-  //   DoubleArrayTopic topic = table.getDoubleArrayTopic(
-  //     cameraName + "/cameraDistortion"
-  //   );
-  //   double[] distortionFromNT = topic
-  //     .genericSubscribe()
-  //     .getDoubleArray(new double[] {Double.NaN});
-  //   if(Double.isNaN(distortionFromNT[0]));
-  // }
 
   public boolean isConnected() {
     return m_camera.isConnected();

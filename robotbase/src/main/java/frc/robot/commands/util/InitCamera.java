@@ -13,7 +13,7 @@ public class InitCamera extends Command {
 
   @Override
   public boolean isFinished() {
-    return m_cameraToInit.getCameraMatrix() && m_cameraToInit.getDistCoeefs();
+    return m_cameraToInit.getCameraMatrix() && m_cameraToInit.getDistCoefs();
   }
 
   @Override
