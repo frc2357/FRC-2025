@@ -12,9 +12,11 @@ import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.util.Utility;
+import frc.robot.util.Utility;
 
 public class CoralScore extends SequentialCommandGroup {
 
+  public CoralScore() {
   public CoralScore() {
     super(
       new LateratorSetDistance(() -> {
@@ -37,6 +39,18 @@ public class CoralScore extends SequentialCommandGroup {
           ),
           new WaitCommand(Constants.CORAL_RUNNER.SCORING_WAIT_TIME)
         ),
+        new ConditionalCommand(
+          new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_L4),
+          new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_OTHER),
+          () ->
+            Utility.isWithinTolerance(
+              Robot.elevator.getDistance().in(Units.Inches),
+              Constants.ELEVATOR.SETPOINTS.L4_PREPOSE.in(Units.Inches),
+              Constants.ELEVATOR.L4_DETECTION_TOLERANCE.in(Units.Inches)
+            )
+        )
+      ),
+      new CoralHome()
         new ConditionalCommand(
           new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_L4),
           new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_OTHER),
