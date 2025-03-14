@@ -1,38 +1,20 @@
 package frc.robot.controls;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
-import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.ELEVATOR;
-import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
-import frc.robot.commands.algaeRunner.AlgaeRunnerSetSpeed;
 import frc.robot.commands.descoring.AlgaeRemoverChooser;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveRobotRelative;
-import frc.robot.commands.drive.DriveToCoralStation;
-import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
-import frc.robot.commands.drive.DriveToPoseHandler;
-import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.FlipPerspective;
-import frc.robot.commands.drive.VelDrive;
-import frc.robot.commands.elevator.ElevatorHome;
-import frc.robot.commands.elevator.ElevatorSetDistance;
-import frc.robot.commands.elevator.ElevatorZero;
-import frc.robot.commands.intake.AlgaeChooser;
-import frc.robot.commands.intake.CoralIntake;
-import frc.robot.commands.laterator.LateratorHome;
-import frc.robot.commands.scoring.coral.CoralChooser;
 import frc.robot.commands.scoring.coral.CoralHome;
-import frc.robot.commands.scoring.coral.CoralScore;
-import org.opencv.ml.Ml;
+import frc.robot.commands.scoring.coral.CoralIntakeScoreConditional;
+import frc.robot.commands.scoring.coral.CoralPreposeL2;
+import frc.robot.commands.scoring.coral.CoralPreposeL3;
+import frc.robot.commands.scoring.coral.CoralPreposeL4;
 
 @SuppressWarnings("unused")
 public class DriverControls {
@@ -64,11 +46,10 @@ public class DriverControls {
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
     // Manual Coral Scoring
-    CoralChooser coralChooser = new CoralChooser();
-    m_controller.rightBumper().onTrue(coralChooser.getElevatorPreposeCommand());
+    m_controller.rightBumper().onTrue(new CoralPreposeL3());
     m_leftTrigger.onTrue(new CoralHome());
-    m_rightTrigger.toggleOnTrue(coralChooser.getScoreCommand());
-    m_controller.leftBumper().onTrue(coralChooser.selectL4());
+    m_rightTrigger.onTrue(new CoralIntakeScoreConditional());
+    m_controller.leftBumper().onTrue(new CoralPreposeL4());
 
     AlgaeRemoverChooser algaeRemoverChooser = new AlgaeRemoverChooser();
     //m_controller.a().onTrue(algaeRemoverChooser.getSelectCommand());
@@ -82,7 +63,7 @@ public class DriverControls {
       .toggleOnTrue(
         new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
       );
-    m_controller.x().onTrue(coralChooser.selectL3());
+    m_controller.x().onTrue(new CoralPreposeL2());
     m_controller.y().whileTrue(new DriveRobotRelative());
 
     m_controller.back().onTrue(new FlipPerspective());
