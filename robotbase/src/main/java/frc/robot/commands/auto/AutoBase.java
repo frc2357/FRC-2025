@@ -68,14 +68,6 @@ public class AutoBase {
    */
   protected void scoringSegment(AutoTrajectory traj1, AutoTrajectory traj2) {
     traj1.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(new CoralPreposeL4());
-    traj1
-      .done()
-      .onTrue(
-        new CoralScore(() -> LATERATOR.SETPOINTS.L4_PREPOSE).andThen(
-          new CoralPreposeIntake(),
-          traj2.cmd()
-        )
-      );
   }
 
   /**

@@ -202,6 +202,10 @@ public final class Constants {
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
 
+    public static final Distance L4_DETECTION_TOLERANCE = Units.Inches.of(12);
+    public static final Distance L3_DETECTION_TOLERANCE = Units.Inches.of(6);
+    public static final Distance L2_DETECTION_TOLERANCE = Units.Inches.of(3);
+
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
   }
 
@@ -282,7 +286,13 @@ public final class Constants {
       0.2
     );
     public static final Dimensionless BACK_OUT_PERCENT = Units.Percent.of(-0.1);
-    public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0.5);
+    public static final Dimensionless SCORING_PERCENT_L4 = Units.Percent.of(
+      0.5
+    );
+    public static final Dimensionless SCORING_PERCENT_OTHER = Units.Percent.of(
+      0.3
+    );
+
     public static final double SCORING_WAIT_TIME = 0.5;
   }
 
