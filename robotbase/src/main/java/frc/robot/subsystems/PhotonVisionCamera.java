@@ -337,7 +337,7 @@ public class PhotonVisionCamera {
       );
     }
     for (int i = 0; i < m_pnpInfo.length; i++) {
-      if (m_pnpInfo[i].result == null) continue;
+      if (m_pnpInfo[i] == null) continue;
 
       estimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
       m_pnpInfo[i] = null;
@@ -600,7 +600,7 @@ public class PhotonVisionCamera {
     int indexToReplace = -1;
     for (int i = 0; i < m_pnpInfo.length; i++) {
       // if selected info does not exist, replace it and stop the loop
-      if (m_pnpInfo[i].result == null) {
+      if (m_pnpInfo[i] == null) {
         m_pnpInfo[i] = new TimestampedPNPInfo(
           result,
           heading,

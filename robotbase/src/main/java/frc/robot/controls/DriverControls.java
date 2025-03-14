@@ -83,7 +83,11 @@ public class DriverControls {
         new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
       );
     m_controller.x().onTrue(coralChooser.selectL3());
-    m_controller.y().whileTrue(new DriveRobotRelative());
+    m_controller
+      .y()
+      .whileTrue(
+        new DriveToCoralStation(StationToGoTo.LeftSide, RouteAroundReef.Fastest)
+      );
 
     m_controller.back().onTrue(new FlipPerspective());
   }
