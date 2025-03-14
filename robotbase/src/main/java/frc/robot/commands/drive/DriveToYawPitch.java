@@ -65,8 +65,10 @@ public class DriveToYawPitch extends Command {
           .getX()
       )
     );
-    
-    m_thetaController.reset(Robot.swerve.getFieldRelativePose2d().getRotation().getRadians());
+
+    m_thetaController.reset(
+      Robot.swerve.getFieldRelativePose2d().getRotation().getRadians()
+    );
   }
 
   @Override
