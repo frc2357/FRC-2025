@@ -336,6 +336,7 @@ public class CameraManager {
   private void storePNPInfo(TimestampedPNPInfo pnpInfo) {
     if (pnpInfo == null || !pnpInfo.exists()) return;
     int indexToReplace = -1;
+    if (pnpInfo.result().targets.size() < MIN_ALLOWED_TARGETS) return;
     for (int i = 0; i < m_pnpInfo.length; i++) {
       // if selected info does not exist, replace it and stop the loop
       if (m_pnpInfo[i] == null) {
