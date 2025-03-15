@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.util.PressToContinue;
@@ -25,6 +26,14 @@ public class TeleopCoralScoreL2 {
   public Command getCommand() {
     return new ParallelCommandGroup(
       new SequentialCommandGroup(
+        new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.HOME).onlyIf(
+          () ->
+            Robot.laterator
+              .getDistance()
+              .lt(
+                Constants.LATERATOR.SETPOINTS.HOME.minus(Units.Inches.of(0.5))
+              )
+        ),
         new ElevatorSetDistance(
           Constants.ELEVATOR.SETPOINTS.L2_PREPOSE.plus(
             Units.Inches.of(
