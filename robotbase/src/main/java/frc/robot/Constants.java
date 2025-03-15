@@ -282,8 +282,15 @@ public final class Constants {
       0.2
     );
     public static final Dimensionless BACK_OUT_PERCENT = Units.Percent.of(-0.1);
-    public static final Dimensionless SCORING_PERCENT = Units.Percent.of(0.5);
-    public static final double SCORING_WAIT_TIME = 0.5;
+    public static final Dimensionless SCORING_PERCENT_L4 = Units.Percent.of(
+      0.5
+    );
+    public static final Dimensionless SCORING_PERCENT_OTHER = Units.Percent.of(
+      0.3
+    );
+
+    public static final double TELEOP_SCORING_WAIT_TIME = 0.5; // Hopefully this goes away
+    public static final double AUTO_SCORING_WAIT_TIME = 0.5;
   }
 
   public static final class ALGAE_RUNNER {
