@@ -4,22 +4,16 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.Utils;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
-import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.units.measure.MutTime;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -30,9 +24,7 @@ import frc.robot.util.CollisionDetection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.*;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -199,10 +191,6 @@ public class PhotonVisionCamera {
   private static final StringPublisher m_poseConcensusFieldTypePub =
     m_poseConcensusTable.getStringTopic(".type").publish();
 
-  private final NetworkTable m_photonTable;
-  private final DoubleArraySubscriber m_intrinSub;
-  private final DoubleArraySubscriber m_distortSub;
-
   protected PhotonPipelineResult m_result;
 
   protected Optional<Matrix<N3, N3>> m_cameraMatrix;
@@ -238,24 +226,13 @@ public class PhotonVisionCamera {
       Optional.ofNullable(null),
       Optional.ofNullable(null)
     );
-    new InitCamera(this)
-      .finallyDo(() -> {
-        @SuppressWarnings("resource")
-        Alert alert = new Alert(
-          "CameraAlerts/" + m_camera.getName(),
-          "Camera fully initialized",
-          AlertType.kInfo
-        );
-        alert.set(true);
-      })
-      .schedule();
   }
 
   public PhotonVisionCamera(
     String cameraName,
     Transform3d robotToCameraTransform,
-    Optional<Matrix<N3, N3>> cameraMatrix,
-    Optional<Matrix<N8, N1>> distCoeefs
+    Optional<Matrix<N3, N3>> camMatrix,
+    Optional<Matrix<N8, N1>> distCoefs
   ) {
     m_camera = new PhotonCamera(cameraName);
     m_robotCameras.add(this);
@@ -271,46 +248,23 @@ public class PhotonVisionCamera {
     m_poseFieldPub = m_poseOutputTable.getDoubleArrayTopic("pose").publish();
     m_poseFieldTypePub = m_poseOutputTable.getStringTopic(".type").publish();
 
-    m_photonTable = NetworkTableInstance.getDefault()
-      .getTable("photonvision")
-      .getSubTable(cameraName);
-    m_distortSub = m_photonTable
-      .getDoubleArrayTopic("cameraDistortion")
-      .getEntry(null);
-    m_intrinSub = m_photonTable
-      .getDoubleArrayTopic("cameraIntrinsics")
-      .getEntry(null);
-
     m_robotToCameraTranform = robotToCameraTransform;
-    m_cameraMatrix = cameraMatrix;
-    m_distCoefs = distCoeefs;
+    m_cameraMatrix = camMatrix;
+    m_distCoefs = distCoefs;
     m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
+    if (camMatrix.isEmpty() || distCoefs.isEmpty()) new InitCamera(
+      this
+    ).schedule();
   }
 
   public boolean getDistCoefs() {
-    double[] distArray = m_distortSub.get();
-    if (distArray == null) {
-      return false;
-    }
-    Matrix<N8, N1> distCoefs = new Matrix<N8, N1>(
-      Nat.N8(),
-      Nat.N1(),
-      distArray
-    );
-    m_distCoefs = Optional.of(distCoefs);
-    return true;
+    m_distCoefs = m_camera.getDistCoeffs();
+    return m_distCoefs.isPresent();
   }
 
   public boolean getCameraMatrix() {
-    double[] intrinsicsArray = m_intrinSub.get();
-    if (intrinsicsArray == null) return false;
-    Matrix<N3, N3> cameraMatrix = new Matrix<N3, N3>(
-      Nat.N3(),
-      Nat.N3(),
-      intrinsicsArray
-    );
-    m_cameraMatrix = Optional.of(cameraMatrix);
-    return true;
+    m_cameraMatrix = m_camera.getCameraMatrix();
+    return m_cameraMatrix.isPresent();
   }
 
   /**
@@ -777,5 +731,9 @@ public class PhotonVisionCamera {
 
   public boolean hasTarget() {
     return m_result.hasTargets();
+  }
+
+  public String getName() {
+    return m_camera.getName();
   }
 }
