@@ -28,12 +28,8 @@ public class CollisionDetectionTests {
 
   @Test
   void willHitReefBoundaryTest() {
-    var currPose = new Pose2d(
-      3.1950957775115967,
-      3.126810312271118,
-      Rotation2d.kZero
-    );
-    var currTar = currPose.plus(new Transform2d(0, 4, Rotation2d.kZero));
+    var currPose = new Pose2d(3.3, 6, Rotation2d.kZero);
+    var currTar = currPose.plus(new Transform2d(1, 2, Rotation2d.kZero));
     boolean result = CollisionDetection.willHitReef(
       currPose,
       currTar,
@@ -51,7 +47,7 @@ public class CollisionDetectionTests {
       middlePose.getY() - 1,
       Rotation2d.kZero
     );
-    Pose2d currTar = middlePose.plus(new Transform2d(1, 1, Rotation2d.kZero));
+    Pose2d currTar = middlePose.plus(new Transform2d(0, 1, Rotation2d.kZero));
     boolean result = CollisionDetection.willHitReef(
       currPose,
       currTar,

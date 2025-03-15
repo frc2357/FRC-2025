@@ -418,7 +418,7 @@ public final class Constants {
       Units.RadiansPerSecond.of(0.3);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(0.5);
+      Units.MetersPerSecond.of(1.5);
 
     public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 
@@ -427,13 +427,11 @@ public final class Constants {
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
-    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(
-      0.75
-    );
+    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.3);
 
     public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
 
-    public static final Time UPDATE_POSE_INTERVALS = Seconds.of(3);
+    public static final Time UPDATE_POSE_INTERVALS = Seconds.of(2);
 
     public static final class FRONT_CAM {
 
@@ -555,16 +553,16 @@ public final class Constants {
         new TrapezoidProfile.Constraints(2, 1)
       );
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(3);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(3);
+    public static final Distance X_TOLERANCE = Units.Inches.of(1);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(1);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(6);
 
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(1.5);
 
-    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.35);
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.45);
 
     public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
-      Units.Rotations.of(0.05)
+      Units.Rotations.of(0.08)
     );
 
     public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
@@ -583,7 +581,7 @@ public final class Constants {
      * REEF_BOUNDARY + X distance away from the center of the reef
      */
     public static final Distance IDEAL_DISTANCE_FROM_REEF =
-      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(1.5));
+      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(3));
 
     /**
      * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
@@ -596,7 +594,7 @@ public final class Constants {
     /**
      * How far away we want to be from things that we could hit.
      */
-    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(4);
+    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(7);
 
     /**
      * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
@@ -735,15 +733,15 @@ public final class Constants {
     public static class CORAL_STATION {
 
       public static final Pose2d LEFT_STATION_DESIRED_SLOT = new Pose2d(
-        1.4982421636581424,
-        7.253018569946288,
-        new Rotation2d(2.219466687081632)
+        1.48,
+        7.28,
+        new Rotation2d(2.21946)
       );
 
       public static final Pose2d RIGHT_STATION_DESIRED_SLOT = new Pose2d(
-        1.098242163658142,
-        0.9429221749305725,
-        new Rotation2d(-2.219466687081632)
+        1.09824,
+        0.94292,
+        new Rotation2d(-2.21946)
       );
     }
   }

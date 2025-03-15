@@ -5,11 +5,13 @@ import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
@@ -191,6 +193,10 @@ public class PhotonVisionCamera {
   private static final StringPublisher m_poseConcensusFieldTypePub =
     m_poseConcensusTable.getStringTopic(".type").publish();
 
+  protected final NetworkTable m_photonTable;
+  protected final DoubleArraySubscriber m_intrinSub;
+  protected final DoubleArraySubscriber m_distortSub;
+
   protected PhotonPipelineResult m_result;
 
   protected Optional<Matrix<N3, N3>> m_cameraMatrix;
@@ -223,8 +229,8 @@ public class PhotonVisionCamera {
     this(
       cameraName,
       robotToCameraTransform,
-      Optional.ofNullable(null),
-      Optional.ofNullable(null)
+      Optional.empty(),
+      Optional.empty()
     );
   }
 
@@ -248,23 +254,53 @@ public class PhotonVisionCamera {
     m_poseFieldPub = m_poseOutputTable.getDoubleArrayTopic("pose").publish();
     m_poseFieldTypePub = m_poseOutputTable.getStringTopic(".type").publish();
 
+    m_photonTable = NetworkTableInstance.getDefault()
+      .getTable("photonvision")
+      .getSubTable(cameraName);
+    m_distortSub = m_photonTable
+      .getDoubleArrayTopic("cameraDistortion")
+      .getEntry(null);
+    m_intrinSub = m_photonTable
+      .getDoubleArrayTopic("cameraIntrinsics")
+      .getEntry(null);
+
     m_robotToCameraTranform = robotToCameraTransform;
     m_cameraMatrix = camMatrix;
     m_distCoefs = distCoefs;
     m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
-    if (camMatrix.isEmpty() || distCoefs.isEmpty()) new InitCamera(
-      this
-    ).schedule();
+    if (camMatrix.isEmpty() || distCoefs.isEmpty()) {
+      m_cameraMatrix = m_camera.getCameraMatrix();
+      m_distCoefs = m_camera.getDistCoeffs();
+      if (camMatrix.isEmpty() || distCoefs.isEmpty()) new InitCamera(
+        this
+      ).schedule();
+    }
   }
 
   public boolean getDistCoefs() {
-    m_distCoefs = m_camera.getDistCoeffs();
-    return m_distCoefs.isPresent();
+    double[] distArray = m_distortSub.get();
+    if (distArray == null) {
+      return false;
+    }
+    Matrix<N8, N1> distCoefs = new Matrix<N8, N1>(
+      Nat.N8(),
+      Nat.N1(),
+      distArray
+    );
+    m_distCoefs = Optional.of(distCoefs);
+    return true;
   }
 
   public boolean getCameraMatrix() {
-    m_cameraMatrix = m_camera.getCameraMatrix();
-    return m_cameraMatrix.isPresent();
+    double[] intrinsicsArray = m_intrinSub.get();
+    if (intrinsicsArray == null) return false;
+    Matrix<N3, N3> cameraMatrix = new Matrix<N3, N3>(
+      Nat.N3(),
+      Nat.N3(),
+      intrinsicsArray
+    );
+    m_cameraMatrix = Optional.of(cameraMatrix);
+    return true;
   }
 
   /**
@@ -483,11 +519,13 @@ public class PhotonVisionCamera {
         .getNorm() >
       MAX_DIST_FROM_CURR_POSE.in(Meters)
     ) {
+      if (RobotModeTriggers.disabled().getAsBoolean()) {
+        Robot.swerve.resetPose(pose);
+      }
       // and we have updated the pose recently, and were not disabled, throw it out
       if (
         measuredTime <
-          m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds) &&
-        !RobotModeTriggers.disabled().getAsBoolean()
+        m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds)
       ) return;
     }
 
