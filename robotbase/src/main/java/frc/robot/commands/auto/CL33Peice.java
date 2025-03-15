@@ -6,6 +6,7 @@ import choreo.auto.AutoTrajectory;
 import frc.robot.Constants;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
+import frc.robot.commands.intake.CoralRetract;
 import frc.robot.commands.scoring.auto.AutoCoralConfirmScore;
 import frc.robot.commands.scoring.auto.AutoCoralPreposeL4;
 
@@ -59,7 +60,11 @@ public class CL33Peice extends AutoBase {
     // when at the coral station, we intake coral and then go to the next branch
     branchJToBlueS
       .done()
-      .onTrue(new CoralIntake().andThen(BlueSToBranchK.cmd()));
+      .onTrue(
+        new CoralIntake()
+          .andThen(new CoralRetract())
+          .andThen(BlueSToBranchK.cmd())
+      );
     // as we get close to the branch, we prepose to score
     BlueSToBranchK.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
       new AutoCoralPreposeL4()
@@ -77,7 +82,10 @@ public class CL33Peice extends AutoBase {
     // when at the coral station, we intake coral and then go to the next branch
     branchKToBlueS
       .done()
-      .onTrue(new CoralIntake()/*.andThen(BlueSToBranchL.cmd()) */);
+      .onTrue(
+        new CoralIntake().andThen(new CoralRetract())
+        /*.andThen(BlueSToBranchL.cmd()) */
+      );
     // BlueSToBranchL.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
     //   new AutoCoralPreposeL4()
     // );
@@ -90,7 +98,7 @@ public class CL33Peice extends AutoBase {
     // // when at the coral station, we intake coral and then go to the next branch
     // branchLToBlueS
     //   .done()
-    //   .onTrue(new CoralIntake().andThen(BlueSToBranchI.cmd()));
+    //   .onTrue(new CoralIntake().andThen(new CoralRetract()).andThen(BlueSToBranchI.cmd()));
     // BlueSToBranchI.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
     //   new AutoCoralPreposeL4()
     // );
@@ -101,6 +109,6 @@ public class CL33Peice extends AutoBase {
     //     ).andThen(new CoralPreposeIntake(), branchIToBlueS.cmd()) // score coral 4
     //   );
     // // when at the coral station, we intake coral, and wait for auto to end (if it hasnt already)
-    // branchIToBlueS.done().onTrue(new CoralIntake());
+    // branchIToBlueS.done().onTrue(new CoralIntake().andThen(new CoralRetract()));
   }
 }

@@ -15,6 +15,7 @@ import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveRobotRelative;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.intake.CoralIntake;
+import frc.robot.commands.intake.CoralRetract;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
@@ -63,10 +64,12 @@ public class DriverControls {
     m_rightTrigger
       .and(
         () ->
-          Robot.coralRunner.isOuttakeBeamBroken() &&
-          Robot.coralRunner.isIntakeBeamBroken()
+          !Robot.coralRunner.isOuttakeBeamBroken() &&
+          !Robot.coralRunner.isIntakeBeamBroken()
       )
-      .onTrue(new CoralIntake());
+      .toggleOnTrue(
+        new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
+      );
 
     // Remove algae
     m_controller
