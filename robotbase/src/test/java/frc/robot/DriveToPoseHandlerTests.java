@@ -47,12 +47,16 @@ class DriveToPoseHandlerTests extends DriveToPoseHandler {
   @Test
   void findNewTargetFinalApproachTest() {
     Pose2d finalGoal = REEF.BRANCH_A;
-    Pose2d currPose = finalGoal.plus(new Transform2d(-.5, 0, Rotation2d.kZero));
+    Pose2d currPose = finalGoal.plus(
+      new Transform2d(-.05, 0, Rotation2d.kZero)
+    );
     Pose2d currTar = REEF.BRANCH_A.plus(
-      new Transform2d(-0.05, 0, Rotation2d.kZero)
+      new Transform2d(0, 0, Rotation2d.kZero)
     );
     m_finalGoal = finalGoal;
     Pose2d result = super.getNewTarget(currTar, currPose);
+    System.out.println(finalGoal);
+    System.out.println(result);
     assertEquals(finalGoal, result);
   }
 
