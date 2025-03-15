@@ -7,7 +7,6 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
-import com.google.errorprone.annotations.CompileTimeConstant;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SmartMotionConfig;
@@ -51,6 +50,15 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+  /*TODO: priorities for sunday. (below)
+  throughout day make sure pose est works
+  1. tune auto until we have a 3 peice
+  2. make sure alliance relative pose works correctly 
+  3. make sure drive to reef works without collision avoidance
+  5. make sure drive to reef works with collision avoidance
+  6. drive practice to make sure everything meshes and works well
+  7. make a 4 peice auto, or 3 peice on the other side of the reef*/
 
   public static final class CAN_ID {
 
@@ -138,8 +146,7 @@ public final class Constants {
       Robot.swerve
     );
 
-    public static final double PREPOSE_SECONDS =
-      ELEVATOR.FULL_EXTENSION_TIME.in(Seconds) + 0.05;
+    public static final double PREPOSE_SECONDS = 0.05;
   }
 
   public static final class ELEVATOR {
@@ -290,7 +297,7 @@ public final class Constants {
     );
 
     public static final double TELEOP_SCORING_WAIT_TIME = 0;
-    public static final double AUTO_SCORING_WAIT_TIME = 0.5;
+    public static final double AUTO_SCORING_WAIT_TIME = 0.2;
 
     public static final double BACKOUT_TIME_SECONDS = 0.5;
   }
@@ -392,7 +399,7 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.CONSTRAINED_SOLVEPNP;
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
@@ -400,7 +407,7 @@ public final class Constants {
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 20; // no touchy.
+    public static final double PNP_HEADING_SCALE_FACTOR = 2; // no touchy.
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
       // heading free essentailly determines whether or not the calculations are done in 2D or 3D space.
@@ -422,34 +429,44 @@ public final class Constants {
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
       Units.MetersPerSecond.of(1.5);
 
-    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
+    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.6);
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 3;
 
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
-    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.3);
+    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.5);
 
     public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
 
-    public static final Time UPDATE_POSE_INTERVALS = Seconds.of(2);
+    public static final Time UPDATE_POSE_INTERVALS = Seconds.of(4);
 
-    public static final int MIN_ALLOWED_TARGETS = 2;
+    public static final int MIN_ALLOWED_TARGETS = 1;
 
     public static final class FRONT_CAM {
 
       public static final String NAME = "frontCam";
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(7.951),
-        Units.Inches.of(.624),
-        Units.Inches.of(22.243),
-        new Rotation3d(
-          Units.Degrees.of(0),
-          Units.Degrees.of(10),
-          Units.Degrees.of(0)
-        )
-      );
+      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = // new Transform3d(
+        //   Units.Inches.of(7.951),
+        //   Units.Inches.of(4.624),
+        //   Units.Inches.of(22.243),
+        //   new Rotation3d(
+        //     Units.Degrees.of(0),
+        //     Units.Degrees.of(10),
+        //     Units.Degrees.of(0)
+        //   )
+        // );
+        new Transform3d(
+          Units.Inches.of(4.624),
+          Units.Inches.of(7.799),
+          Units.Inches.of(22.055),
+          new Rotation3d(
+            Units.Degrees.of(0),
+            Units.Degrees.of(-10),
+            Units.Degrees.of(180)
+          )
+        );
     }
 
     public static final class BACK_CAM {
