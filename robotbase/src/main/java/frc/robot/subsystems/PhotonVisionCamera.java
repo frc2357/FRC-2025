@@ -14,6 +14,8 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.Robot;
 import frc.robot.commands.util.InitCamera;
 import java.util.List;
@@ -371,12 +373,19 @@ public class PhotonVisionCamera {
 
   public PhotonVisionCamera(
     String cameraName,
-    Transform3d cameraTransform,
-    Matrix<N3, N3> cameraMatrix,
-    Matrix<N8, N1> distCoeefs,
+    Transform3d robotToCameraTransform,
+    Optional<Matrix<N3, N3>> camMatrix,
+    Optional<Matrix<N8, N1>> distCoefs,
+    Consumer<TimestampedPNPInfo> infoConsumer,
     boolean caching
   ) {
-    this(cameraName, cameraTransform, cameraMatrix, distCoeefs);
+    this(
+      cameraName,
+      robotToCameraTransform,
+      camMatrix,
+      distCoefs,
+      infoConsumer
+    );
     m_aprilTagInfo = new TargetInfo[22];
     for (int i = 0; i < m_aprilTagInfo.length; i++) {
       m_aprilTagInfo[i] = new TargetInfo();

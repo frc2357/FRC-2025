@@ -21,14 +21,11 @@ import frc.robot.commands.drive.DriveToYawPitch;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralRetract;
+import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL4;
-import frc.robot.commands.laterator.LateratorHome;
-import frc.robot.commands.scoring.coral.CoralChooser;
-import frc.robot.commands.scoring.coral.CoralHome;
-import frc.robot.commands.scoring.coral.CoralScore;
 import java.util.Optional;
 import org.opencv.ml.Ml;
 
@@ -108,6 +105,7 @@ public class DriverControls {
       .y()
       .whileTrue(
         new DriveToCoralStation(StationToGoTo.LeftSide, RouteAroundReef.Fastest)
+      );
     m_controller.back().onTrue(new FlipPerspective());
 
     m_controller
