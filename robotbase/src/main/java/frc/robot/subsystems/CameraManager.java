@@ -4,13 +4,10 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.Utils;
-import com.google.errorprone.annotations.DoNotCall;
-import com.google.errorprone.annotations.DoNotMock;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
@@ -320,7 +317,7 @@ public class CameraManager {
       }
       // and we have updated the pose recently, and were not disabled, throw it out
       if (
-        measuredTime <
+        measuredTime >
         m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds)
       ) return;
     }

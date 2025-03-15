@@ -5,7 +5,6 @@ import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.networktables.BooleanEntry;
@@ -15,7 +14,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import frc.robot.Robot;
-import frc.robot.commands.util.InitCamera;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -130,40 +128,7 @@ public class PhotonVisionCamera {
     m_robotToCameraTranform = robotToCameraTransform;
     m_cameraMatrix = camMatrix;
     m_distCoefs = distCoefs;
-    if (camMatrix.isEmpty() || distCoefs.isEmpty()) {
-      m_cameraMatrix = m_camera.getCameraMatrix();
-      m_distCoefs = m_camera.getDistCoeffs();
-      if (camMatrix.isEmpty() || distCoefs.isEmpty()) new InitCamera(
-        this
-      ).schedule();
-    }
     m_pnpInfoStorer = infoConsumer;
-  }
-
-  public boolean getDistCoefs() {
-    double[] distArray = m_distortSub.get();
-    if (distArray == null) {
-      return false;
-    }
-    Matrix<N8, N1> distCoefs = new Matrix<N8, N1>(
-      Nat.N8(),
-      Nat.N1(),
-      distArray
-    );
-    m_distCoefs = Optional.of(distCoefs);
-    return true;
-  }
-
-  public boolean getCameraMatrix() {
-    double[] intrinsicsArray = m_intrinSub.get();
-    if (intrinsicsArray == null) return false;
-    Matrix<N3, N3> cameraMatrix = new Matrix<N3, N3>(
-      Nat.N3(),
-      Nat.N3(),
-      intrinsicsArray
-    );
-    m_cameraMatrix = Optional.of(cameraMatrix);
-    return true;
   }
 
   /**
