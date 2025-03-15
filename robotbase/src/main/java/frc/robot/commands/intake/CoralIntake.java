@@ -12,14 +12,9 @@ public class CoralIntake extends ParallelCommandGroup {
   public CoralIntake() {
     super(
       new CoralPreposeIntake(),
-      new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT)
-        .until(Robot.coralRunner::isIntakeBeamBroken)
-        .until(() -> Robot.coralRunner.isStalling())
-        .andThen(
-          new CoralRunnerSetSpeed(CORAL_RUNNER.BACK_OUT_PERCENT).withDeadline(
-            new WaitCommand(0.4)
-          )
-        )
+      new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT).until(
+        Robot.coralRunner::isIntakeBeamBroken
+      )
     );
   }
 }

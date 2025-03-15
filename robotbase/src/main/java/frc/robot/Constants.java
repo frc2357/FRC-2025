@@ -289,8 +289,10 @@ public final class Constants {
       0.3
     );
 
-    public static final double TELEOP_SCORING_WAIT_TIME = 0.5; // Hopefully this goes away
+    public static final double TELEOP_SCORING_WAIT_TIME = 0;
     public static final double AUTO_SCORING_WAIT_TIME = 0.5;
+
+    public static final double BACKOUT_TIME_SECONDS = 0.5;
   }
 
   public static final class ALGAE_RUNNER {
