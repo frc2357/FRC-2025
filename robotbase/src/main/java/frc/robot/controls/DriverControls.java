@@ -57,17 +57,19 @@ public class DriverControls {
       );
 
     // Scoring
-    m_controller.leftBumper().onTrue(new TeleopCoralScoreL4(m_rightTrigger));
-    m_controller.rightBumper().onTrue(new TeleopCoralScoreL3(m_rightTrigger));
-    m_controller.x().onTrue(new TeleopCoralScoreL2(m_rightTrigger));
+    m_controller
+      .leftBumper()
+      .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
+    m_controller
+      .rightBumper()
+      .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
+    m_controller
+      .x()
+      .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
 
     // Intaking
     m_rightTrigger
-      .and(
-        () ->
-          !Robot.coralRunner.isOuttakeBeamBroken() &&
-          !Robot.coralRunner.isIntakeBeamBroken()
-      )
+      .and(() -> Robot.coralRunner.hasNoCoral())
       .toggleOnTrue(
         new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
       );

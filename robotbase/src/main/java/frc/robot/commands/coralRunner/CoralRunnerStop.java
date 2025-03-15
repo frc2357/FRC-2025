@@ -9,11 +9,18 @@ public class CoralRunnerStop extends Command {
     addRequirements(Robot.coralRunner);
   }
 
+  @Override
   public boolean isFinished() {
     return true;
   }
 
+  @Override
   public void end(boolean wasInterupted) {
     Robot.coralRunner.stop();
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
   }
 }

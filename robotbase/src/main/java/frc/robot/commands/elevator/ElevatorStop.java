@@ -18,4 +18,9 @@ public class ElevatorStop extends Command {
   public void end(boolean wasInterupted) {
     Robot.elevator.stop();
   }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
+  }
 }

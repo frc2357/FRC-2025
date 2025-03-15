@@ -9,11 +9,18 @@ public class LateratorStop extends Command {
     addRequirements(Robot.laterator);
   }
 
+  @Override
   public boolean isFinished() {
     return true;
   }
 
+  @Override
   public void end(boolean wasInterupted) {
     Robot.laterator.stop();
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
   }
 }

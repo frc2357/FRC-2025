@@ -16,11 +16,7 @@ public class TeleopCoralConfirmScore extends SequentialCommandGroup {
     super(
       new ParallelDeadlineGroup(
         new SequentialCommandGroup(
-          new WaitUntilCommand(
-            () ->
-              !Robot.coralRunner.isOuttakeBeamBroken() &&
-              !Robot.coralRunner.isIntakeBeamBroken()
-          ),
+          new WaitUntilCommand(() -> Robot.coralRunner.hasNoCoral()),
           new WaitCommand(Constants.CORAL_RUNNER.TELEOP_SCORING_WAIT_TIME)
         ),
         new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_L4)
