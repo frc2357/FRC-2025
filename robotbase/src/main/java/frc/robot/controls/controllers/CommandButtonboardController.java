@@ -25,10 +25,10 @@ public class CommandButtonboardController extends CommandGenericHID {
 
   public enum ScoringLevel {
     None(-1),
-    L4(0),
-    L3(90),
-    L2(180),
-    L1(270);
+    L1(0),
+    L2(90),
+    L3(180),
+    L4(270);
 
     public final int povValue;
 

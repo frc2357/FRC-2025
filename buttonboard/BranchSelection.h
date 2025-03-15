@@ -26,33 +26,20 @@ public:
     enum Branch
     {
         NONE = -1,
-        A = 4,
-        B = 5,
-        C = 6,
-        D = 7,
-        E = 8,
-        F = 9,
-        G = 10,
-        H = 11,
-        I = 12,
-        J = 13,
-        K = 14,
-        L = 16,
+        A = 19,
+        B = 13,
+        C = 12,
+        D = 18,
+        E = 5,
+        F = 4,
+        G = 6,
+        H = 7,
+        I = 11,
+        J = 9,
+        K = 10,
+        L = 8,
     };
-    int PINS[NUM_BUTTONS] = {
-        Branch::A,
-        Branch::B,
-        Branch::C,
-        Branch::D,
-        Branch::E,
-        Branch::F,
-        Branch::G,
-        Branch::H,
-        Branch::I,
-        Branch::J,
-        Branch::K,
-        Branch::L,
-    };
+    static int PINS[NUM_BUTTONS];
 
     BranchSelection();
 
@@ -68,7 +55,7 @@ private:
     void setXboxButtonsForBranch(BranchSelection::Branch selection, bool selected);
 
     FTDebouncer m_debouncer;
-    BranchSelection::Branch m_selection;
+    BranchSelection::Branch m_selection = BranchSelection::Branch::NONE;
 };
 
 #endif // BRANCH_SELECTION_H
