@@ -3,10 +3,13 @@ package frc.robot.util;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.COLLISION_DETECTION.*;
 import static frc.robot.Constants.FIELD.REEF.*;
+import static frc.robot.Constants.FIELD_CONSTANTS.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.units.Units;
+import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.util.SATCollisionDetector.SATVector;
 
 public class CollisionDetection {
@@ -105,5 +108,16 @@ public class CollisionDetection {
       }
     }
     return false;
+  }
+
+  public static boolean isPoseInField(Pose3d pose) {
+    return !(
+      pose.getX() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getX() >
+      FIELD_CONSTANTS.FIELD_LENGTH.plus(FIELD_BORDER_MARGIN).in(Meters) ||
+      pose.getY() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getY() >
+      FIELD_CONSTANTS.FIELD_WIDTH.plus(FIELD_BORDER_MARGIN).in(Meters)
+    );
   }
 }

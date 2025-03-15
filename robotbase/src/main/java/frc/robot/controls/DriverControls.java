@@ -1,5 +1,7 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -61,7 +63,13 @@ public class DriverControls {
   public void mapControls() {
     m_controller
       .start()
-      .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
+      .onTrue(
+        new InstantCommand(() ->
+          Robot.swerve.resetPose(
+            REEF.BRANCH_A.plus(new Transform2d(-0.2, 0, Rotation2d.kZero))
+          )
+        )
+      );
 
     // Manual Coral Scoring
     CoralChooser coralChooser = new CoralChooser();

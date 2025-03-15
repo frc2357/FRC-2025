@@ -7,12 +7,15 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
+import com.google.errorprone.annotations.CompileTimeConstant;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -410,12 +413,6 @@ public final class Constants {
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
       Units.MetersPerSecond.of(0.5);
 
-    // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.1);
-
-    // how far off on the z axis the estimated pose can be before we invalidate it
-    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
-
     public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.3);
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 3;
@@ -494,12 +491,24 @@ public final class Constants {
 
   public static final class FIELD_CONSTANTS {
 
-    public static final Distance FIELD_LENGTH = Units.Feet.of(54).plus(
-      Units.Inches.of(3)
+    public static final AprilTagFields APRIL_TAG_FIELD =
+      AprilTagFields.k2025ReefscapeAndyMark;
+
+    public static final AprilTagFieldLayout APRIL_TAG_LAYOUT =
+      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+
+    public static final Distance FIELD_LENGTH = Units.Meters.of(
+      APRIL_TAG_LAYOUT.getFieldLength()
     );
-    public static final Distance FIELD_WIDTH = Units.Feet.of(26).plus(
-      Units.Inches.of(3)
+    public static final Distance FIELD_WIDTH = Units.Meters.of(
+      APRIL_TAG_LAYOUT.getFieldWidth()
     );
+
+    // how close the estimated pose can get to the field border before we invalidate it
+    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.1);
+
+    // how far off on the z axis the estimated pose can be before we invalidate it
+    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
   }
 
   public static class DRIVE_TO_VECTOR {
@@ -572,7 +581,7 @@ public final class Constants {
     /**
      * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
      */
-    public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 2;
+    public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 3;
   }
 
   public static final class COLLISION_DETECTION {
@@ -718,41 +727,17 @@ public final class Constants {
 
     public static class CORAL_STATION {
 
-      public static final Pose2d UPPER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
-        new Pose2d(0.55488, 6.69440, new Rotation2d(2.20677));
-      public static final Transform2d UPPER_STATION_SLOT_TO_SLOT_TRANSFORM =
-        new Transform2d(
-          Units.Inches.of(5.65685),
-          Units.Inches.of(5.65685),
-          Rotation2d.kZero
-        );
+      public static final Pose2d LEFT_STATION_DESIRED_SLOT = new Pose2d(
+        1.4982421636581424,
+        7.253018569946288,
+        new Rotation2d(2.219466687081632)
+      );
 
-      public static final Pose2d LEFT_STATION_DESIRED_SLOT =
-        UPPER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
-          UPPER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
-            DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER
-          )
-        );
-
-      public static final Pose2d LOWER_STATION_LEFTMOST_USABLE_SLOT = // TODO: tune this to field
-        new Pose2d(
-          0.5548880100250244,
-          1.3386709690093994,
-          new Rotation2d(-2.206778871255995)
-        );
-      public static final Transform2d LOWER_STATION_SLOT_TO_SLOT_TRANSFORM =
-        new Transform2d(
-          Units.Inches.of(5.65685),
-          Units.Inches.of(-5.65685),
-          Rotation2d.kZero
-        );
-
-      public static final Pose2d RIGHT_STATION_DESIRED_SLOT =
-        LOWER_STATION_LEFTMOST_USABLE_SLOT.transformBy(
-          LOWER_STATION_SLOT_TO_SLOT_TRANSFORM.times(
-            DRIVE_TO_POSE.DESIRED_CORAL_STATION_SLOT_NUMBER
-          )
-        );
+      public static final Pose2d RIGHT_STATION_DESIRED_SLOT = new Pose2d(
+        1.098242163658142,
+        0.9429221749305725,
+        new Rotation2d(-2.219466687081632)
+      );
     }
   }
 
