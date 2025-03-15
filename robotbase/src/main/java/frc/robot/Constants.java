@@ -433,6 +433,8 @@ public final class Constants {
 
     public static final Time UPDATE_POSE_INTERVALS = Seconds.of(2);
 
+    public static final int MIN_ALLOWED_TARGETS = 2;
+
     public static final class FRONT_CAM {
 
       public static final String NAME = "frontCam";
