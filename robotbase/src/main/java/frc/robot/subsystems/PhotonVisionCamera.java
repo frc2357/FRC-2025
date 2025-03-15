@@ -6,7 +6,6 @@ import static frc.robot.Constants.PHOTON_VISION.*;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.networktables.BooleanEntry;
@@ -15,26 +14,19 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.units.measure.MutTime;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Robot;
 import frc.robot.commands.util.InitCamera;
-import frc.robot.util.CollisionDetection;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.photonvision.*;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** Controls the photon vision camera options. */
 public class PhotonVisionCamera {
 
-  private final record TimestampedPNPInfo(
+  public final record TimestampedPNPInfo(
     PhotonPipelineResult result,
     Rotation3d heading,
     double headingTimestampSeconds,
@@ -56,129 +48,9 @@ public class PhotonVisionCamera {
     }
   }
 
-  private final record poseEstimate(
-    Pose3d estimPose,
-    double timestampSeconds,
-    int targetsUsedNum,
-    Matrix<N3, N1> stdDevs
-  ) {
-    public poseEstimate(EstimatedRobotPose estim, Matrix<N3, N1> stdDevs) {
-      this(
-        estim.estimatedPose,
-        estim.timestampSeconds,
-        estim.targetsUsed.size(),
-        stdDevs
-      );
-    }
-
-    public boolean isInField() {
-      return (
-        this.estimPose != null &&
-        CollisionDetection.isPoseInField(this.estimPose)
-      );
-    }
-
-    public boolean exists() {
-      return (
-        this.estimPose != null &&
-        this.stdDevs != null &&
-        this.timestampSeconds > 0 &&
-        this.targetsUsedNum > 0
-      );
-    }
-
-    /**
-     * Takes an arbitrary number of {@link poseEstimate} objects and finds the average between all characteristics of the estimates.
-     * @param estimates The estimates to average out. Must contain valid estimates only, and not be null.
-     * @return The averaged out estimate
-     */
-    public static poseEstimate averageOutEstimates(poseEstimate... estimates) {
-      if (estimates.length == 1) return estimates[0];
-      Pose3d averagedPose = Pose3d.kZero;
-      double averagedTimestamp = 0;
-      int averageTargets = 0;
-      Matrix<N3, N1> averageStdDevs = VecBuilder.fill(0, 0, 0);
-      double averageCoordDev = 0;
-      for (poseEstimate estimate : estimates) {
-        averagedPose = averagedPose.plus(
-          new Transform3d(Pose3d.kZero, estimate.estimPose)
-        );
-        averagedTimestamp += estimate.timestampSeconds;
-        averageTargets += estimate.targetsUsedNum;
-        averageCoordDev += estimate.stdDevs.get(0, 0);
-      }
-      averagedPose.div(estimates.length);
-      averagedTimestamp /= estimates.length;
-      averageTargets = Math.floorDiv(averageTargets, estimates.length);
-      averageStdDevs.div(estimates.length);
-      return new poseEstimate(
-        averagedPose,
-        averagedTimestamp,
-        averageTargets,
-        VecBuilder.fill(averageCoordDev, averageCoordDev, Double.MAX_VALUE)
-      );
-    }
-
-    /** Takes an arbitrary number of {@link poseEstimate poseEstimates} and finds the most commonly agreed upon pose.
-     * @param estimates The estimates to draw from, can contain invalid estimates.
-     * @return A pose estimate of the average estimate, as long as all the estimates are close enough together
-     */
-    public static poseEstimate findConcensus(poseEstimate... estimates) {
-      estimates = findValidEstimates(estimates);
-      if (estimates == null) return null;
-      if (estimates.length == 1) return estimates[0];
-      poseEstimate averageEstimate = averageOutEstimates(estimates);
-      if (averageEstimate == null || !averageEstimate.exists()) return null;
-      Pose2d averagedPose = averageEstimate.estimPose.toPose2d();
-      double averageDistBetweenEstimates = 0;
-      for (poseEstimate estimate : estimates) {
-        Transform2d transform = new Transform2d(
-          estimate.estimPose.toPose2d(),
-          averagedPose
-        );
-        averageDistBetweenEstimates += Math.abs(
-          transform.getTranslation().getNorm()
-        );
-      }
-      averageDistBetweenEstimates /= estimates.length;
-      if (averageDistBetweenEstimates > MAX_DIST_BETWEEN_ESTIMATES) return null;
-      return averageEstimate;
-    }
-
-    public static poseEstimate[] findValidEstimates(poseEstimate... estimates) {
-      ArrayList<poseEstimate> validEstimates = new ArrayList<poseEstimate>();
-      for (poseEstimate estimate : estimates) {
-        if (estimate != null && estimate.isValid()) {
-          validEstimates.add(estimate);
-        }
-      }
-      if (validEstimates.size() == 0) {
-        return null;
-      }
-      return validEstimates.toArray(new poseEstimate[validEstimates.size()]);
-    }
-
-    public boolean isValid() {
-      return this.exists() && this.isInField();
-    }
-  }
-
-  private static final ArrayList<PhotonVisionCamera> m_robotCameras =
-    new ArrayList<PhotonVisionCamera>();
-
-  private static final PhotonPoseEstimator m_poseEstimator =
-    new PhotonPoseEstimator(
-      FIELD_CONSTANTS.APRIL_TAG_LAYOUT,
-      PRIMARY_STRATEGY,
-      new Transform3d()
-    );
-
   // private static record TargetInfo(double yaw, double pitch, long timestamp) {}
 
   protected final PhotonCamera m_camera;
-
-  private static final TimestampedPNPInfo[] m_pnpInfo =
-    new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
 
   protected final Transform3d m_robotToCameraTranform;
 
@@ -186,27 +58,16 @@ public class PhotonVisionCamera {
   protected final DoubleArrayPublisher m_poseFieldPub;
   protected final StringPublisher m_poseFieldTypePub;
 
-  private static final NetworkTable m_poseConcensusTable =
-    NetworkTableInstance.getDefault().getTable("VisionPose-Combined");
-  private static final DoubleArrayPublisher m_poseConcensusFieldPub =
-    m_poseConcensusTable.getDoubleArrayTopic("pose").publish();
-  private static final StringPublisher m_poseConcensusFieldTypePub =
-    m_poseConcensusTable.getStringTopic(".type").publish();
-
   protected final NetworkTable m_photonTable;
   protected final DoubleArraySubscriber m_intrinSub;
   protected final DoubleArraySubscriber m_distortSub;
 
   protected PhotonPipelineResult m_result;
 
-  protected Optional<Matrix<N3, N3>> m_cameraMatrix;
-  protected Optional<Matrix<N8, N1>> m_distCoefs;
+  private Optional<Matrix<N3, N3>> m_cameraMatrix;
+  private Optional<Matrix<N8, N1>> m_distCoefs;
 
-  private static MutTime m_lastPoseUpdateTime;
-  protected static EstimatedRobotPose m_latestEstimatedPose;
-
-  private static PoseStrategy m_primaryStrategy = PRIMARY_STRATEGY;
-  private static PoseStrategy m_fallbackStrategy = FALLBACK_STRATEGY;
+  private final Consumer<TimestampedPNPInfo> m_pnpInfoStorer;
 
   /**
    * The fiducial ID of the best target we have.
@@ -224,13 +85,15 @@ public class PhotonVisionCamera {
 
   public PhotonVisionCamera(
     String cameraName,
-    Transform3d robotToCameraTransform
+    Transform3d robotToCameraTransform,
+    Consumer<TimestampedPNPInfo> infoConsumer
   ) {
     this(
       cameraName,
       robotToCameraTransform,
       Optional.empty(),
-      Optional.empty()
+      Optional.empty(),
+      infoConsumer
     );
   }
 
@@ -238,10 +101,10 @@ public class PhotonVisionCamera {
     String cameraName,
     Transform3d robotToCameraTransform,
     Optional<Matrix<N3, N3>> camMatrix,
-    Optional<Matrix<N8, N1>> distCoefs
+    Optional<Matrix<N8, N1>> distCoefs,
+    Consumer<TimestampedPNPInfo> infoConsumer
   ) {
     m_camera = new PhotonCamera(cameraName);
-    m_robotCameras.add(this);
 
     // 1-22 correspond to apriltag fiducial IDs, 0 is for gamepeices.
     // m_aprilTagInfo = new TargetInfo[23];
@@ -267,7 +130,6 @@ public class PhotonVisionCamera {
     m_robotToCameraTranform = robotToCameraTransform;
     m_cameraMatrix = camMatrix;
     m_distCoefs = distCoefs;
-    m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
     if (camMatrix.isEmpty() || distCoefs.isEmpty()) {
       m_cameraMatrix = m_camera.getCameraMatrix();
       m_distCoefs = m_camera.getDistCoeffs();
@@ -275,6 +137,7 @@ public class PhotonVisionCamera {
         this
       ).schedule();
     }
+    m_pnpInfoStorer = infoConsumer;
   }
 
   public boolean getDistCoefs() {
@@ -304,57 +167,9 @@ public class PhotonVisionCamera {
   }
 
   /**
-   * Updates all instances of {@link PhotonVisionCamera} with the latest result, and updates the pose with the updated pnpInfo.
-   * <p><h1> For the top of {@link Robot#robotPeriodic() the robot periodic} only.
-   */
-  public static void updateAllCameras() {
-    poseEstimate[] estimates = new poseEstimate[PNP_INFO_STORAGE_AMOUNT];
-    boolean updatePose = SmartDashboard.getBoolean(
-      "Toggle Pose Estimation",
-      false
-    );
-    for (PhotonVisionCamera camera : m_robotCameras) {
-      if (camera.isConnected()) camera.updateResult();
-      else if (
-        RobotModeTriggers.disabled().getAsBoolean() &&
-        RobotController.getMeasureTime().in(Seconds) % 5 <= 0.1
-      ) System.err.println(
-        "CAMERA " +
-        camera.m_camera.getName() +
-        " IS DISCONNECTED! ***** TELL MAX! *****"
-      );
-    }
-    for (int i = 0; i < m_pnpInfo.length; i++) {
-      if (m_pnpInfo[i] == null) continue;
-
-      estimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
-      m_pnpInfo[i] = null;
-    }
-    updatePoseFromPoseEstimates(updatePose, estimates);
-  }
-
-  /**
-   * Sets the primary pose strategy for all cameras.<p> <h1> Do not call this unless you know what your doing!</h1>
-   * @param strategy The strategy that will become the primary strategy
-   */
-  public static void setPrimaryStrategy(PoseStrategy strategy) {
-    m_primaryStrategy = strategy;
-    m_poseEstimator.setPrimaryStrategy(strategy);
-  }
-
-  /**
-   * Sets the fallback pose strategy for all cameras.<p> <h1> Do not call this unless you know what your doing!</h1>
-   * @param strategy The strategy that will become the fallback strategy
-   */
-  public static void setFallbackStrategy(PoseStrategy strategy) {
-    m_fallbackStrategy = strategy;
-    m_poseEstimator.setMultiTagFallbackStrategy(strategy);
-  }
-
-  /**
    * Fetches the latest pipeline result for this instance
    */
-  private void updateResult() {
+  protected void updateResult() {
     if (!m_camera.isConnected()) return;
 
     List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
@@ -382,159 +197,7 @@ public class PhotonVisionCamera {
     //   cacheForAprilTags(m_result.targets);
     // }
 
-    updatePNPInfo(m_result); // update pnpInfo with the new result
-  }
-
-  /**
-   * Gets the {@link #m_poseEstimator pose estimator} ready to estimate with the provided and/or relevant information
-   */
-  @SuppressWarnings("incomplete-switch")
-  private static void preparePoseEstimator(
-    Transform3d robotToCamTransform,
-    Rotation3d heading,
-    double headingTimestampSeconds
-  ) {
-    // does whatever we need to make the strategy work
-    switch (m_primaryStrategy) {
-      case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
-        m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
-        break;
-      case CLOSEST_TO_REFERENCE_POSE:
-        m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
-        break;
-      case CLOSEST_TO_LAST_POSE:
-        m_poseEstimator.setLastPose(m_latestEstimatedPose.estimatedPose);
-        break;
-    }
-    switch (m_fallbackStrategy) {
-      case CONSTRAINED_SOLVEPNP, PNP_DISTANCE_TRIG_SOLVE:
-        // if our primary strategy already needs us to update the heading, we dont want to call more hardware.
-        // they get upset if you call them enough, and its a waste of time.
-        if (
-          m_primaryStrategy == PoseStrategy.CONSTRAINED_SOLVEPNP ||
-          m_primaryStrategy == PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
-        ) break;
-        m_poseEstimator.addHeadingData(headingTimestampSeconds, heading);
-        break;
-      case CLOSEST_TO_REFERENCE_POSE:
-        m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
-        break;
-      case CLOSEST_TO_LAST_POSE:
-        m_poseEstimator.setLastPose(m_latestEstimatedPose.estimatedPose);
-        break;
-    }
-
-    // change pose estimator settings to be correct for the current camera
-    m_poseEstimator.setRobotToCameraTransform(robotToCamTransform);
-  }
-
-  private static poseEstimate estimatePoseWithPNPInfo(
-    TimestampedPNPInfo pnpInfo
-  ) {
-    if (pnpInfo == null || !pnpInfo.exists()) return null;
-    preparePoseEstimator(
-      pnpInfo.robotToCameraTransform,
-      pnpInfo.heading,
-      pnpInfo.headingTimestampSeconds
-    );
-    EstimatedRobotPose estimate = m_poseEstimator
-      .update(
-        pnpInfo.result,
-        pnpInfo.camMatrix,
-        pnpInfo.distCoeefs,
-        POSE_EST_PARAMS
-      )
-      .orElse(null);
-
-    if (estimate == null) return null;
-
-    pnpInfo.camera.publishPose(estimate.estimatedPose.toPose2d());
-
-    // if estimate is out of the field, throw it away
-    if (!CollisionDetection.isPoseInField(estimate.estimatedPose)) return null;
-
-    double averageTargetDistance = 0;
-    for (PhotonTrackedTarget target : estimate.targetsUsed) {
-      averageTargetDistance += Math.abs(
-        target.getBestCameraToTarget().getTranslation().getNorm()
-      );
-    }
-    averageTargetDistance /= estimate.targetsUsed.size();
-
-    // the higher the confidence is, the less the estimated measurment is trusted.
-    double velocityConf =
-      MAGIC_VEL_CONF_ADDEND +
-      Math.abs(
-        Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond)
-      );
-
-    double coordinateConfidence = Math.pow(
-      estimate.targetsUsed.size() *
-      ((averageTargetDistance / 2) * velocityConf),
-      MAGIC_VEL_CONF_EXPONENT
-    );
-
-    // if estimated pose is too far from current pose
-    m_latestEstimatedPose = estimate;
-    return new poseEstimate(
-      estimate,
-      VecBuilder.fill(
-        coordinateConfidence * X_STD_DEV_COEFFIECIENT,
-        coordinateConfidence * Y_STD_DEV_COEFFIECIENT,
-        Double.MAX_VALUE // Theta conf, should never change the gyro heading
-      )
-    );
-  }
-
-  private static void updatePoseFromPoseEstimates(
-    boolean updatePose,
-    poseEstimate... estimates
-  ) {
-    // get the most common estimate
-    poseEstimate averageEstimate = estimates.length > 1
-      ? poseEstimate.findConcensus(estimates)
-      : estimates[0];
-
-    if (averageEstimate == null || !averageEstimate.exists()) return;
-
-    m_poseConcensusFieldTypePub.set("Field2d");
-    Pose2d pose = averageEstimate.estimPose.toPose2d();
-    m_poseConcensusFieldPub.accept(
-      new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
-    );
-    // if we dont want to update the pose, throw it away
-    if (!updatePose) return;
-    // if estimate isnt in the field, throw it away
-    if (!averageEstimate.isInField()) return;
-    double measuredTime = Utils.fpgaToCurrentTime(
-      averageEstimate.timestampSeconds
-    );
-    // if estimated pose it too far from swerve pose
-    if (
-      new Transform2d(
-        Robot.swerve.getFieldRelativePose2d(),
-        averageEstimate.estimPose.toPose2d()
-      )
-        .getTranslation()
-        .getNorm() >
-      MAX_DIST_FROM_CURR_POSE.in(Meters)
-    ) {
-      if (RobotModeTriggers.disabled().getAsBoolean()) {
-        Robot.swerve.resetPose(pose);
-      }
-      // and we have updated the pose recently, and were not disabled, throw it out
-      if (
-        measuredTime <
-        m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds)
-      ) return;
-    }
-
-    Robot.swerve.addVisionMeasurement(
-      averageEstimate.estimPose.toPose2d(),
-      measuredTime,
-      averageEstimate.stdDevs
-    );
-    m_lastPoseUpdateTime.mut_replace(measuredTime, Seconds);
+    m_pnpInfoStorer.accept(createPNPInfo(m_result)); // update pnpInfo with the new result
   }
 
   public void publishPose(Pose2d pose) {
@@ -552,10 +215,10 @@ public class PhotonVisionCamera {
    *
    * @param result The provided {@link PhotonPipelineResult result} to use for updating the pnpInfo list
    */
-  private void updatePNPInfo(PhotonPipelineResult result) {
+  private TimestampedPNPInfo createPNPInfo(PhotonPipelineResult result) {
     // if the provided result has no targets, it has no value, so we do not want to store it
     if (result == null || !result.hasTargets()) {
-      return;
+      return null;
     }
     double frameTimeSeconds = Utils.fpgaToCurrentTime(
       result.getTimestampSeconds()
@@ -563,20 +226,20 @@ public class PhotonVisionCamera {
     double currTimeSeconds = Utils.getCurrentTimeSeconds();
     // if result is older than allowed, do not store it
     if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
-      return;
+      return null;
     }
-    // if rotating too fast, dont store info
+    // if rotating too fast, dont create info
     if (
       Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
       MAX_ACCEPTABLE_ROTATIONAL_VELOCITY.in(RadiansPerSecond)
-    ) return;
-    // if translating too fast, dont store info
+    ) return null;
+    // if translating too fast, dont create info
     if (
       Math.abs(
         Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond)
       ) >
       MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY.in(MetersPerSecond)
-    ) return;
+    ) return null;
 
     Rotation3d heading = new Rotation3d(
       Robot.swerve.getFieldRelativePose2d().getRotation()
@@ -584,83 +247,15 @@ public class PhotonVisionCamera {
     double headingTimestampSeconds = Utils.fpgaToCurrentTime(
       result.getTimestampSeconds()
     );
-    int tarCount = result.targets.size();
-    int indexToReplace = -1;
-    for (int i = 0; i < m_pnpInfo.length; i++) {
-      // if selected info does not exist, replace it and stop the loop
-      if (m_pnpInfo[i] == null) {
-        m_pnpInfo[i] = new TimestampedPNPInfo(
-          result,
-          heading,
-          headingTimestampSeconds,
-          m_cameraMatrix,
-          m_distCoefs,
-          m_robotToCameraTranform,
-          this
-        );
-        break;
-      }
-      double storedInfoFrameSeconds = m_pnpInfo[i].result.getTimestampSeconds();
-      // if stored data is older than allowed, invalidate it, and set it to be replaced.
-      if (
-        storedInfoFrameSeconds <=
-        currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)
-      ) {
-        m_pnpInfo[i] = null;
-        indexToReplace = i;
-        continue;
-      }
-      // if selected info has less targets than the provided result
-      else if (m_pnpInfo[i].result.targets.size() <= tarCount) {
-        // if we have already selected info to replace
-        if (indexToReplace > -1) {
-          // if we found a worse result
-          if (
-            m_pnpInfo[indexToReplace].result.targets.size() >
-            m_pnpInfo[i].result.targets.size()
-          ) {
-            // replace that one instead
-            indexToReplace = i;
-          }
-          // if both results have the same number of targets
-          else if (
-            m_pnpInfo[indexToReplace].result.targets.size() ==
-            m_pnpInfo[i].result.targets.size()
-          ) {
-            // if (i) was taken later than (indexToReplace), replace (i) instead
-            if (
-              m_pnpInfo[indexToReplace].result.metadata.captureTimestampMicros >
-              m_pnpInfo[i].result.metadata.captureTimestampMicros
-            ) {
-              indexToReplace = i;
-            }
-            // if (i) has worse ambiguity than (indexToReplace), replace (i) instead
-            else if (
-              m_pnpInfo[indexToReplace].result.targets.get(0).poseAmbiguity <
-              m_pnpInfo[i].result.targets.get(0).poseAmbiguity
-            ) {
-              indexToReplace = i;
-            }
-          }
-        }
-        // if we have not already selected something to replace
-        else {
-          indexToReplace = i;
-        }
-      }
-    }
-    // if an index has been selected to replace, replace it
-    if (indexToReplace != -1) {
-      m_pnpInfo[indexToReplace] = new TimestampedPNPInfo(
-        result,
-        heading,
-        headingTimestampSeconds,
-        m_cameraMatrix,
-        m_distCoefs,
-        m_robotToCameraTranform,
-        this
-      );
-    }
+    return new TimestampedPNPInfo(
+      result,
+      heading,
+      headingTimestampSeconds,
+      m_cameraMatrix,
+      m_distCoefs,
+      m_robotToCameraTranform,
+      this
+    );
   }
 
   // private void cacheForGamepeices(List<PhotonTrackedTarget> targetList) {
@@ -758,10 +353,6 @@ public class PhotonVisionCamera {
   //   }
   //   return null;
   // }
-
-  public static EstimatedRobotPose getLastEstimatedPose() {
-    return m_latestEstimatedPose;
-  }
 
   public int numberOfTargetsSeen() {
     return m_result.targets.size();

@@ -24,10 +24,7 @@ public class TuningPathX extends AutoBase {
       .onTrue(
         new InstantCommand(() ->
           System.out.println(
-            "POSE - CHOREO: " +
-            Robot.swerve.getFieldRelativePose2d() +
-            "\nPOSE - PHOTON: " +
-            PhotonVisionCamera.getLastEstimatedPose().estimatedPose.toPose2d()
+            "POSE - CHOREO: " + Robot.swerve.getFieldRelativePose2d()
           )
         )
       );
@@ -36,10 +33,7 @@ public class TuningPathX extends AutoBase {
       .onTrue(
         new InstantCommand(() ->
           System.out.println(
-            "POSE - CHOREO: " +
-            Robot.swerve.getFieldRelativePose2d() +
-            "\nPOSE - PHOTON: " +
-            PhotonVisionCamera.getLastEstimatedPose().estimatedPose.toPose2d()
+            "POSE - CHOREO: " + Robot.swerve.getFieldRelativePose2d()
           )
         )
       );
@@ -50,8 +44,6 @@ public class TuningPathX extends AutoBase {
           System.out.println(
             "FINAL POSE - CHOREO: " +
             Robot.swerve.getFieldRelativePose2d() +
-            "\nFINAL POSE - PHOTON: " +
-            PhotonVisionCamera.getLastEstimatedPose().estimatedPose.toPose2d() +
             "\nDIFF BETWEEN DESIRED AND ACTUAL: " +
             new Transform2d(finalPose, Robot.swerve.getFieldRelativePose2d())
           )

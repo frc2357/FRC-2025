@@ -50,6 +50,7 @@ public class Robot extends TimedRobot {
   public static AlgaeKnocker algaeKnocker;
   public static AlgaePivot algaePivot;
   public static Climber climber;
+  public static CameraManager camManager;
   public static PhotonVisionCamera frontCam;
   public static PhotonVisionCamera backCam;
   public static PhotonVisionCamera leftCam;
@@ -103,27 +104,25 @@ public class Robot extends TimedRobot {
     algaeKnocker = new AlgaeKnocker();
     // algaePivot = new AlgaePivot();
     climber = new Climber();
-    frontCam = new PhotonVisionCamera(
+    camManager = new CameraManager();
+    frontCam = camManager.createCamera(
       FRONT_CAM.NAME,
       FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
-    backCam = new PhotonVisionCamera(
+    backCam = camManager.createCamera(
       BACK_CAM.NAME,
       BACK_CAM.ROBOT_TO_CAM_TRANSFORM
     );
-    leftCam = new PhotonVisionCamera(
+    leftCam = camManager.createCamera(
       LEFT_CAM.NAME,
       LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
-    rightCam = new PhotonVisionCamera(
+    rightCam = camManager.createCamera(
       RIGHT_CAM.NAME,
       RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
     // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
-    if (!m_didOpenCVLoad) {
-      PhotonVisionCamera.setPrimaryStrategy(PRIMARY_STRAT_FOR_FAILED_LOAD);
-      PhotonVisionCamera.setFallbackStrategy(FALLBACK_STRAT_FOR_FAILED_LOAD);
-    }
+    if (!m_didOpenCVLoad) {}
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
 
@@ -179,7 +178,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    PhotonVisionCamera.updateAllCameras();
+    camManager.updateAllCameras();
     elasticFieldManager.swerveFieldRep.setRobotPose(
       swerve.getFieldRelativePose2d()
     );
