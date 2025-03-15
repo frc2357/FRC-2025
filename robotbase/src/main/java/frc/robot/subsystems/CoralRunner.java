@@ -25,6 +25,8 @@ public class CoralRunner extends SubsystemBase {
   private DigitalInput m_beamBreakOuttake;
   private Debouncer m_debouncerOuttake;
   private Debouncer m_debouncerIntake;
+  private boolean m_isIntakeBeamBroken;
+  private boolean m_isOutakeBeamBroken;
   private RelativeEncoder m_encoder;
 
   private MutAngularVelocity m_currentVelocityHolder = Units.RPM.mutable(
@@ -59,10 +61,6 @@ public class CoralRunner extends SubsystemBase {
     );
   }
 
-  public void setSpeed(double percentOutput) {
-    m_motor.set(percentOutput);
-  }
-
   public void setSpeed(Dimensionless percent) {
     m_motor.set(percent.in(Units.Percent));
   }
@@ -82,14 +80,32 @@ public class CoralRunner extends SubsystemBase {
   }
 
   public boolean isIntakeBeamBroken() {
-    return m_debouncerOuttake.calculate(!m_beamBreakIntake.get());
+    return m_isIntakeBeamBroken;
   }
 
   public boolean isOuttakeBeamBroken() {
-    return m_debouncerIntake.calculate(!m_beamBreakOuttake.get());
+    return m_isOutakeBeamBroken;
   }
 
   public boolean isStalling() {
     return m_motor.getOutputCurrent() > CORAL_RUNNER.STALL_AMPS;
+  }
+
+  public boolean containsCoral() {
+    return m_isIntakeBeamBroken || m_isOutakeBeamBroken;
+  }
+
+  public boolean hasNoCoral() {
+    return !m_isIntakeBeamBroken && !m_isOutakeBeamBroken;
+  }
+
+  @Override
+  public void periodic() {
+    m_isIntakeBeamBroken = m_debouncerOuttake.calculate(
+      !m_beamBreakIntake.get()
+    );
+    m_isOutakeBeamBroken = m_debouncerIntake.calculate(
+      !m_beamBreakOuttake.get()
+    );
   }
 }

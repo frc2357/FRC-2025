@@ -21,7 +21,6 @@ public class CoralSettle extends Command {
 
   @Override
   public void initialize() {
-    System.out.println("Settle Init");
     m_timer.start();
   }
 
@@ -46,7 +45,10 @@ public class CoralSettle extends Command {
 
   @Override
   public boolean isFinished() {
-    return Robot.coralRunner.isOuttakeBeamBroken();
+    return (
+      Robot.coralRunner.isOuttakeBeamBroken() ||
+      (Robot.coralRunner.hasNoCoral())
+    );
   }
 
   @Override

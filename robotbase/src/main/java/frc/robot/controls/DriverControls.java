@@ -69,11 +69,7 @@ public class DriverControls {
 
     // Intaking
     m_rightTrigger
-      .and(
-        () ->
-          !Robot.coralRunner.isOuttakeBeamBroken() &&
-          !Robot.coralRunner.isIntakeBeamBroken()
-      )
+      .and(() -> Robot.coralRunner.hasNoCoral())
       .toggleOnTrue(
         new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
       );

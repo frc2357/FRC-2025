@@ -15,7 +15,6 @@ public class CoralRunnerSetSpeed extends Command {
 
   @Override
   public void initialize() {
-    System.out.println("Set Speed INIT");
     Robot.coralRunner.setSpeed(m_percent);
   }
 
