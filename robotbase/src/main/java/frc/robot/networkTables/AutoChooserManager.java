@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.commands.auto.AutoBase;
-import frc.robot.commands.auto.CL33Peice;
-import frc.robot.commands.auto.CR34Peice;
+import frc.robot.commands.auto.C3L3Peice;
+import frc.robot.commands.auto.C3R3Peice;
 import frc.robot.commands.auto.MiddleDitchBranchG;
 import frc.robot.commands.auto.MiddleDitchBranchH;
 import frc.robot.commands.auto.PushTeammate;
@@ -21,8 +21,8 @@ public class AutoChooserManager {
 
   // The auto routines that will show up on the auto command chooser.
   private AutoBase[] m_autos = {
-    new CL33Peice(),
-    new CR34Peice(),
+    new C3L3Peice(),
+    new C3R3Peice(),
     new MiddleDitchBranchG(),
     new MiddleDitchBranchH(),
     new PushTeammate(),

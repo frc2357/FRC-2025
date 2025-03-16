@@ -9,8 +9,8 @@ public class AutoCoralPreposeL2 extends SequentialCommandGroup {
 
   public AutoCoralPreposeL2() {
     super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.L2_PREPOSE),
-      new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L2_PREPOSE)
+      new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L2_PREPOSE),
+      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.L2_PREPOSE)
     );
   }
 }

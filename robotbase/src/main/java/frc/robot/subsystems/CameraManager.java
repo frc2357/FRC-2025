@@ -231,12 +231,7 @@ public class CameraManager {
     if (pnpInfo == null || !pnpInfo.exists()) return null;
     preparePoseEstimator(pnpInfo);
     EstimatedRobotPose estimate = m_poseEstimator
-      .update(
-        pnpInfo.result(),
-        pnpInfo.camMatrix(),
-        pnpInfo.distCoeefs(),
-        POSE_EST_PARAMS
-      )
+      .update(pnpInfo.result())
       .orElse(null);
 
     if (estimate == null) return null;

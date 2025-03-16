@@ -11,7 +11,7 @@ import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import java.util.function.BooleanSupplier;
 
-public class CoralHome extends ParallelCommandGroup {
+public class CoralHome extends ConditionalCommand {
 
   public CoralHome() {
     this(() -> true);
@@ -19,13 +19,16 @@ public class CoralHome extends ParallelCommandGroup {
 
   public CoralHome(BooleanSupplier zero) {
     super(
-      new ConditionalCommand(
-        new LateratorHome().alongWith(new ElevatorHome()),
-        new LateratorSetDistance(LATERATOR.SETPOINTS.HOME)
-          .alongWith(new ElevatorSetDistance(ELEVATOR.SETPOINTS.HOME))
-          .withDeadline(new WaitCommand(1.5)),
-        zero
-      )
+      new LateratorHome()
+        .alongWith(new WaitCommand(0.2).andThen(new ElevatorHome())),
+      new LateratorSetDistance(LATERATOR.SETPOINTS.HOME)
+        .alongWith(
+          new WaitCommand(0.2).andThen(
+            new ElevatorSetDistance(ELEVATOR.SETPOINTS.HOME)
+          )
+        )
+        .withDeadline(new WaitCommand(1.5)),
+      zero
     );
   }
 }

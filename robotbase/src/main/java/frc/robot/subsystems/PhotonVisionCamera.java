@@ -13,6 +13,9 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Robot;
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +31,6 @@ public class PhotonVisionCamera {
     PhotonPipelineResult result,
     Rotation3d heading,
     double headingTimestampSeconds,
-    Optional<Matrix<N3, N3>> camMatrix,
-    Optional<Matrix<N8, N1>> distCoeefs,
     Transform3d robotToCameraTransform,
     PhotonVisionCamera camera
   ) {
@@ -38,15 +39,17 @@ public class PhotonVisionCamera {
         result != null &&
         heading != null &&
         !Double.isNaN(headingTimestampSeconds) &&
-        (camMatrix != null && camMatrix.isPresent()) &&
-        (distCoeefs != null && distCoeefs.isPresent()) &&
         robotToCameraTransform != null &&
         camera != null
       );
     }
   }
 
-  // private static record TargetInfo(double yaw, double pitch, long timestamp) {}
+  private static record TargetInfo(double yaw, double pitch, long timestamp) {
+    public TargetInfo(PhotonTrackedTarget target) {
+      this(target.yaw, target.pitch, RobotController.getFPGATime());
+    }
+  }
 
   protected final PhotonCamera m_camera;
 
@@ -62,17 +65,11 @@ public class PhotonVisionCamera {
 
   protected PhotonPipelineResult m_result;
 
-  private Optional<Matrix<N3, N3>> m_cameraMatrix;
-  private Optional<Matrix<N8, N1>> m_distCoefs;
-
   private final Consumer<TimestampedPNPInfo> m_pnpInfoStorer;
 
-  /**
-   * The fiducial ID of the best target we have.
-   *
-   * <p>Used for methods that dont take in a fid ID but do some april tag stuff.
-   */
-  // protected int m_bestTargetFiducialId;
+  protected int m_bestTargetFiducialId;
+
+  private final TargetInfo[] m_aprilTagInfo = new TargetInfo[23];
 
   // experimental "turbo switch" that has the ability to increase FPS. Do not fiddle with it.
   @SuppressWarnings("unused")
@@ -104,12 +101,6 @@ public class PhotonVisionCamera {
   ) {
     m_camera = new PhotonCamera(cameraName);
 
-    // 1-22 correspond to apriltag fiducial IDs, 0 is for gamepeices.
-    // m_aprilTagInfo = new TargetInfo[23];
-    // for (int i = 0; i < m_aprilTagInfo.length; i++) {
-    //   m_aprilTagInfo[i] = new TargetInfo();
-    // }
-
     m_poseOutputTable = NetworkTableInstance.getDefault()
       .getTable("VisionPose-" + cameraName);
     m_poseFieldPub = m_poseOutputTable.getDoubleArrayTopic("pose").publish();
@@ -126,8 +117,6 @@ public class PhotonVisionCamera {
       .getEntry(null);
 
     m_robotToCameraTranform = robotToCameraTransform;
-    m_cameraMatrix = camMatrix;
-    m_distCoefs = distCoefs;
     m_pnpInfoStorer = infoConsumer;
   }
 
@@ -156,12 +145,11 @@ public class PhotonVisionCamera {
       return;
     }
     // m_bestTargetFiducialId = m_result.getBestTarget().getFiducialId();
-    // if (m_bestTargetFiducialId == -1) { // -1 means the ID is not set, so its a gamepeice.
-    //   cacheForGamepeices(m_result.targets);
-    // } else {
-    //   cacheForAprilTags(m_result.targets);
-    // }
-
+    if (m_bestTargetFiducialId == -1) { // -1 means the ID is not set, so its a gamepeice.
+      cacheForGamepeices(m_result.targets);
+    } else {
+      cacheForAprilTags(m_result.targets);
+    }
     m_pnpInfoStorer.accept(createPNPInfo(m_result)); // update pnpInfo with the new result
   }
 
@@ -185,14 +173,14 @@ public class PhotonVisionCamera {
     if (result == null || !result.hasTargets()) {
       return null;
     }
-    double frameTimeSeconds = Utils.fpgaToCurrentTime(
-      result.getTimestampSeconds()
-    );
-    double currTimeSeconds = Utils.getCurrentTimeSeconds();
+    // double frameTimeSeconds = Utils.fpgaToCurrentTime(
+    //   result.getTimestampSeconds()
+    // );
+    // double currTimeSeconds = Utils.getCurrentTimeSeconds();
     // if result is older than allowed, do not store it
-    if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
-      return null;
-    }
+    // if (frameTimeSeconds <= currTimeSeconds - PNP_INFO_VALID_TIME.in(Seconds)) {
+    //   return null;
+    // }
     // if rotating too fast, dont create info
     if (
       Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
@@ -216,20 +204,21 @@ public class PhotonVisionCamera {
       result,
       heading,
       headingTimestampSeconds,
-      m_cameraMatrix,
-      m_distCoefs,
       m_robotToCameraTranform,
       this
     );
   }
 
-  // private void cacheForGamepeices(List<PhotonTrackedTarget> targetList) {
-  //   PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
-  //   TargetInfo aprilTagInfo = m_aprilTagInfo[0];
-  //   aprilTagInfo.yaw = bestTarget.getYaw();
-  //   aprilTagInfo.pitch = bestTarget.getPitch();
-  //   aprilTagInfo.timestamp = m_result.metadata.captureTimestampMicros;
-  // }
+  private void cacheForGamepeices(List<PhotonTrackedTarget> targetList) {
+    PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
+    m_aprilTagInfo[0] = new TargetInfo(bestTarget);
+  }
+
+  private void cacheForAprilTags(List<PhotonTrackedTarget> targets) {
+    for (PhotonTrackedTarget target : targets) {
+      m_aprilTagInfo[target.fiducialId] = new TargetInfo(target);
+    }
+  }
 
   public PhotonTrackedTarget calculateBestGamepeiceTarget(
     List<PhotonTrackedTarget> targetList
@@ -269,21 +258,21 @@ public class PhotonVisionCamera {
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return If the camera has seen the target within the timeout given
    */
-  // public boolean isValidTarget(int targetId, long timeoutMs) {
-  //   long now = System.currentTimeMillis();
-  //   long then = now - timeoutMs;
+  public boolean isValidTarget(int targetId, long timeoutMs) {
+    long now = System.currentTimeMillis();
+    long then = now - timeoutMs;
 
-  //   if (targetId >= m_aprilTagInfo.length) {
-  //     return false;
-  //   }
-  //   TargetInfo target = m_aprilTagInfo[targetId];
+    if (targetId >= m_aprilTagInfo.length) {
+      return false;
+    }
+    TargetInfo target = m_aprilTagInfo[targetId];
 
-  //   return (
-  //     target.timestamp > then ||
-  //     Math.abs(target.yaw) > MAX_ANGLE.in(Degrees) ||
-  //     Math.abs(target.pitch) > MAX_ANGLE.in(Degrees)
-  //   );
-  // }
+    return (
+      target.timestamp > then ||
+      Math.abs(target.yaw) > MAX_ANGLE.in(Degrees) ||
+      Math.abs(target.pitch) > MAX_ANGLE.in(Degrees)
+    );
+  }
 
   public void setPipeline(int index) {
     if (m_camera.getPipelineIndex() != index) {
@@ -300,24 +289,24 @@ public class PhotonVisionCamera {
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
    */
-  // public Angle getTargetYaw(int targetId, long timeoutMs) {
-  //   if (isValidTarget(targetId, timeoutMs)) {
-  //     return Units.Degrees.of(m_aprilTagInfo[targetId].yaw);
-  //   }
-  //   return null;
-  // }
+  public Angle getTargetYaw(int targetId, long timeoutMs) {
+    if (isValidTarget(targetId, timeoutMs)) {
+      return Units.Degrees.of(m_aprilTagInfo[targetId].yaw);
+    }
+    return null;
+  }
 
   /**
    * @param id The ID of the target to get the pitch of.
    * @param timeoutMs The amount of milliseconds past which target info is deemed expired
    * @return Returns the desired targets pitch, <strong>will be null if the cached data was invalid.
    */
-  // public Angle getTargetPitch(int targetId, long timeoutMs) {
-  //   if (isValidTarget(targetId, timeoutMs)) {
-  //     return Units.Degrees.of(m_aprilTagInfo[targetId].pitch);
-  //   }
-  //   return null;
-  // }
+  public Angle getTargetPitch(int targetId, long timeoutMs) {
+    if (isValidTarget(targetId, timeoutMs)) {
+      return Units.Degrees.of(m_aprilTagInfo[targetId].pitch);
+    }
+    return null;
+  }
 
   public int numberOfTargetsSeen() {
     return m_result.targets.size();

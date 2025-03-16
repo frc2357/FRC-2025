@@ -1,5 +1,6 @@
 package frc.robot.controls;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -13,7 +14,9 @@ import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveRobotRelative;
 import frc.robot.commands.drive.DriveToCoralStation;
 import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
+import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
+import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralRetract;
@@ -94,11 +97,7 @@ public class DriverControls {
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
     m_controller.y().whileTrue(new DriveRobotRelative());
 
-    m_controller
-      .y()
-      .whileTrue(
-        new DriveToCoralStation(StationToGoTo.LeftSide, RouteAroundReef.Fastest)
-      );
+    m_controller.y().whileTrue(new DriveToReef(RouteAroundReef.None));
   }
 
   public double getX() {
