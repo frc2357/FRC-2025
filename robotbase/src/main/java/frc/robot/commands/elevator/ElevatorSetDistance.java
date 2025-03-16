@@ -8,11 +8,16 @@ import frc.robot.Robot;
 
 public class ElevatorSetDistance extends Command {
 
+  public static int running = 0;
   private Distance m_distance;
 
   public ElevatorSetDistance(Distance distance) {
     m_distance = distance;
     addRequirements(Robot.elevator);
+  }
+
+  public void initialize() {
+    running++;
   }
 
   public void execute() {
@@ -37,5 +42,7 @@ public class ElevatorSetDistance extends Command {
   }
 
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    running--;
+  }
 }
