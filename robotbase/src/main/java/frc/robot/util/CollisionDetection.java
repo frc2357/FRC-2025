@@ -111,6 +111,10 @@ public class CollisionDetection {
   }
 
   public static boolean isPoseInField(Pose3d pose) {
+    return isPoseInField(pose.toPose2d());
+  }
+
+  public static boolean isPoseInField(Pose2d pose) {
     return !(
       pose.getX() < -FIELD_BORDER_MARGIN.in(Meters) ||
       pose.getX() >

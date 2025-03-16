@@ -10,10 +10,10 @@ import frc.robot.commands.intake.CoralRetract;
 import frc.robot.commands.scoring.auto.AutoCoralConfirmScore;
 import frc.robot.commands.scoring.auto.AutoCoralPreposeL4;
 
-public class CL33Peice extends AutoBase {
+public class C3L3Peice extends AutoBase {
 
-  public CL33Peice() {
-    super("Cage Left 3 | 2 P", "CB3ToBranchJ");
+  public C3L3Peice() {
+    super("Cage Left 3 | 3 P", "CB3ToBranchJ");
     // all the commented out code should work the same, but we dont know until we tune the path, so its here for now.
     // makeAutoFromSegments(
     //   "branchJToBlueS",
@@ -27,8 +27,8 @@ public class CL33Peice extends AutoBase {
     AutoTrajectory branchJToBlueS = m_routine.trajectory("branchJToBlueS");
     AutoTrajectory BlueSToBranchK = m_routine.trajectory("BlueSToBranchK");
     AutoTrajectory branchKToBlueS = m_routine.trajectory("branchKToBlueS");
-    // AutoTrajectory BlueSToBranchL = m_routine.trajectory("BlueSToBranchL");
-    // AutoTrajectory branchLToBlueS = m_routine.trajectory("branchLToBlueS");
+    AutoTrajectory BlueSToBranchL = m_routine.trajectory("BlueSToBranchL");
+    AutoTrajectory branchLToBlueS = m_routine.trajectory("branchLToBlueS");
     // AutoTrajectory BlueSToBranchI = m_routine.trajectory("BlueSToBranchI");
     // AutoTrajectory branchIToBlueS = m_routine.trajectory("branchIToBlueS");
     // This is with everything manually put into segments
@@ -52,7 +52,7 @@ public class CL33Peice extends AutoBase {
             new AutoCoralConfirmScore(
               Constants.CORAL_RUNNER.SCORING_PERCENT_L4
             ),
-            new CoralPreposeIntake().alongWith(branchJToBlueS.cmd())
+            new CoralPreposeIntake().andThen(branchJToBlueS.cmd())
           )
       ); //score coral 1
 
@@ -61,7 +61,7 @@ public class CL33Peice extends AutoBase {
       .done()
       .onTrue(
         new CoralIntake()
-          .andThen(new CoralRetract().alongWith(BlueSToBranchK.cmd()))
+          .andThen(new CoralRetract().andThen(BlueSToBranchK.cmd()))
       );
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
@@ -70,29 +70,31 @@ public class CL33Peice extends AutoBase {
           .andThen(
             new AutoCoralConfirmScore(
               Constants.CORAL_RUNNER.SCORING_PERCENT_L4
-            ).andThen(new CoralPreposeIntake().alongWith(branchKToBlueS.cmd())) // score coral 2
-          )
+            ).andThen(new CoralPreposeIntake(), branchKToBlueS.cmd())
+          ) // score coral 2
       );
     // when at the coral station, we intake coral and then go to the next branch
     branchKToBlueS
       .done()
       .onTrue(
-        new CoralIntake()
+        new CoralIntake().andThen(new CoralRetract(), BlueSToBranchL.cmd())
+      );
+    BlueSToBranchL.done()
+      .onTrue(
+        new AutoCoralPreposeL4()
           .andThen(
-            new CoralRetract()
-            /*.alongWith(BlueSToBranchL.cmd()) */
+            new AutoCoralConfirmScore(
+              Constants.CORAL_RUNNER.SCORING_PERCENT_L4
+            ).andThen(new CoralPreposeIntake(), branchLToBlueS.cmd()) // score coral 3
           )
       );
-    // BlueSToBranchL.done()
-    //   .onTrue(
-    //     new AutoCoralConfirmScore(
-    //       Constants.CORAL_RUNNER.SCORING_PERCENT_L4
-    //     ).andThen(new CoralPreposeIntake(), branchLToBlueS.cmd()) // score coral 3
-    //   );
-    // // when at the coral station, we intake coral and then go to the next branch
-    // branchLToBlueS
-    //   .done()
-    //   .onTrue(new CoralIntake().andThen(new CoralRetract()).andThen(BlueSToBranchI.cmd()));
+    // when at the coral station, we intake coral and then go to the next branch
+    branchLToBlueS
+      .done()
+      .onTrue(
+        new CoralIntake()
+          .andThen(new CoralRetract())/* .andThen(BlueSToBranchI.cmd())*/
+      );
     // BlueSToBranchI.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
     //   new AutoCoralPreposeL4()
     // );

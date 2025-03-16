@@ -13,6 +13,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.DRIVE_TO_POSE;
 import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
+import frc.robot.util.CollisionDetection;
 import frc.robot.util.Utility;
 import java.util.function.Function;
 
@@ -36,8 +37,16 @@ public class DriveToPose extends Command {
 
   @Override
   public void initialize() {
-    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
-    Pose2d targetPose = m_targetPoseFunction.apply(currentPose);
+    Pose2d currentPose = Robot.swerve.getFieldRelativePose2d();
+    System.out.println("CURR POSE - " + currentPose);
+    System.out.println(
+      "CURR POSE FLIPPED - " +
+      Robot.swerve.makePoseAllianceRelative(currentPose)
+    );
+    Pose2d targetPose = Robot.swerve.makePoseAllianceRelative(
+      m_targetPoseFunction.apply(currentPose)
+    );
+    System.out.println("TAR POSE - " + targetPose);
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     m_driveController.reset(
@@ -63,8 +72,13 @@ public class DriveToPose extends Command {
 
   @Override
   public void execute() {
-    Pose2d currentPose = Robot.swerve.getAllianceRelativePose2d();
-    Pose2d targetPose = m_targetPoseFunction.apply(currentPose);
+    Pose2d currentPose = Robot.swerve.getFieldRelativePose2d();
+    Pose2d targetPose = Robot.swerve.makePoseAllianceRelative(
+      m_targetPoseFunction.apply(currentPose)
+    );
+    if (!CollisionDetection.isPoseInField(targetPose)) {
+      targetPose = currentPose;
+    }
 
     Translation2d driveVelocity = new Translation2d(
       Robot.driverControls.getY() * m_speedAt12VoltsMPS,

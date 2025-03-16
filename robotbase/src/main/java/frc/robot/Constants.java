@@ -204,7 +204,7 @@ public final class Constants {
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
       public static final Distance L2_PREPOSE = Units.Inches.of(9.43);
       public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
-      public static final Distance L4_PREPOSE = Units.Inches.of(50.2);
+      public static final Distance L4_PREPOSE = Units.Inches.of(51.2);
       public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
@@ -297,7 +297,7 @@ public final class Constants {
     );
 
     public static final double TELEOP_SCORING_WAIT_TIME = 0;
-    public static final double AUTO_SCORING_WAIT_TIME = 0.2;
+    public static final double AUTO_SCORING_WAIT_TIME = 0.4;
 
     public static final double BACKOUT_TIME_SECONDS = 0.5;
   }
@@ -424,10 +424,10 @@ public final class Constants {
 
     // if were going faster than this, we wont accept any pose est.
     public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.3);
+      Units.RadiansPerSecond.of(0.01);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(1.5);
+      Units.MetersPerSecond.of(0.001);
 
     public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.6);
 
@@ -563,7 +563,7 @@ public final class Constants {
         8,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(1.5, 1)
+        new TrapezoidProfile.Constraints(2, 1.5)
       );
 
     public static final ProfiledPIDController THETA_CONTROLLER =
@@ -571,16 +571,16 @@ public final class Constants {
         6,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1)
+        new TrapezoidProfile.Constraints(2, 1.5)
       );
 
     public static final Distance X_TOLERANCE = Units.Inches.of(1);
     public static final Distance Y_TOLERANCE = Units.Inches.of(1);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(6);
 
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(1.5);
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(1);
 
-    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.45);
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.5);
 
     public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
       Units.Rotations.of(0.08)
@@ -594,8 +594,6 @@ public final class Constants {
       .5,
       .6,
       .7,
-      .8,
-      .9,
     };
 
     /**
@@ -615,7 +613,7 @@ public final class Constants {
     /**
      * How far away we want to be from things that we could hit.
      */
-    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(7);
+    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(4);
 
     /**
      * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
@@ -656,12 +654,12 @@ public final class Constants {
       public static final Pose2d BRANCH_A = new Pose2d(
         Units.Meters.of(3.2332),
         Units.Meters.of(4.1914),
-        Rotation2d.kZero
+        Rotation2d.k180deg
       );
       public static final Pose2d BRANCH_B = new Pose2d(
         Units.Meters.of(3.2332),
         Units.Meters.of(3.8564),
-        Rotation2d.kZero
+        Rotation2d.k180deg
       );
       public static final Pose2d BRANCH_C = new Pose2d(
         Units.Meters.of(3.7160),
@@ -686,12 +684,12 @@ public final class Constants {
       public static final Pose2d BRANCH_G = new Pose2d(
         Units.Meters.of(5.7408),
         Units.Meters.of(3.8570),
-        Rotation2d.k180deg
+        Rotation2d.kZero
       );
       public static final Pose2d BRANCH_H = new Pose2d(
         Units.Meters.of(5.7408),
         Units.Meters.of(4.1828),
-        Rotation2d.k180deg
+        Rotation2d.kZero
       );
       public static final Pose2d BRANCH_I = new Pose2d(
         Units.Meters.of(5.2650),

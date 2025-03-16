@@ -3,6 +3,7 @@ package frc.robot.commands.drive;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.DRIVE_TO_POSE.*;
 
+import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,6 +19,7 @@ public class DriveToPoseHandler extends Command {
     Clockwise,
     CounterClockwise,
     Fastest,
+    None,
   }
 
   protected Pose2d m_currPose, m_currentTarget, m_finalGoal;
@@ -29,7 +31,7 @@ public class DriveToPoseHandler extends Command {
   protected Command m_finalApproachCommand;
 
   public DriveToPoseHandler() {
-    this(RouteAroundReef.Fastest);
+    this(RouteAroundReef.None);
   }
 
   public DriveToPoseHandler(RouteAroundReef routeAroundReef) {
@@ -103,7 +105,9 @@ public class DriveToPoseHandler extends Command {
 
   protected Pose2d getNewTarget(Pose2d currTarget, Pose2d currPose) {
     boolean isAtFinalApproach =
-      Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
+      Math.abs(
+        currPose.getTranslation().getDistance(m_finalGoal.getTranslation())
+      ) <=
       FINAL_APPROACH_DISTANCE.in(Meters);
     if (isAtFinalApproach && m_finalApproachCommand != null) {
       m_finalApproachCommand.schedule();
@@ -128,6 +132,7 @@ public class DriveToPoseHandler extends Command {
 
     Pose2d newTarget = interpolateTarget(currPose, m_finalGoal);
     if (
+      m_routeAroundReef != RouteAroundReef.None &&
       CollisionDetection.willHitReef(
         currPose,
         newTarget,
@@ -162,7 +167,7 @@ public class DriveToPoseHandler extends Command {
    * @return A pose that should be a target that follows the desired route around the reef, and going towards the goal.
    */
   protected Pose2d avoidReef(Pose2d currPose, RouteAroundReef routeAroundReef) {
-    Pose2d target;
+    Pose2d target = currPose;
     Pose2d targetClockwise = new Pose2d(
       currPose
         .getTranslation()

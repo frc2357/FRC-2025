@@ -6,6 +6,10 @@ import frc.robot.commands.scoring.CoralHome;
 public class CoralRetract extends ParallelCommandGroup {
 
   public CoralRetract() {
-    super(new CoralHome().alongWith(new CoralSettle()));
+    this(true);
+  }
+
+  public CoralRetract(boolean zero) {
+    super(new CoralHome(() -> zero).alongWith(new CoralSettle()));
   }
 }

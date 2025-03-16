@@ -1,5 +1,7 @@
 package frc.robot.controls;
 
+import static frc.robot.Constants.FIELD.REEF.BRANCH_A;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
@@ -108,48 +110,49 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   public Pose2d getPoseFromGoal() {
-    ReefSide goal = Robot.buttonboard.getSelectedReefSide();
-    ScoringDirection scoringDirection =
-      Robot.buttonboard.getSelectedScoringDirection();
+    // ReefSide goal = Robot.buttonboard.getSelectedReefSide();
+    // ScoringDirection scoringDirection =
+    //   Robot.buttonboard.getSelectedScoringDirection();
 
-    switch (scoringDirection) {
-      case Left:
-        switch (goal) {
-          case A:
-            return REEF.BRANCH_A;
-          case B:
-            return REEF.BRANCH_C;
-          case C:
-            return REEF.BRANCH_E;
-          case D:
-            return REEF.BRANCH_G;
-          case E:
-            return REEF.BRANCH_I;
-          case F:
-            return REEF.BRANCH_K;
-          default:
-            return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-        }
-      case Right:
-        switch (goal) {
-          case A:
-            return REEF.BRANCH_B;
-          case B:
-            return REEF.BRANCH_D;
-          case C:
-            return REEF.BRANCH_F;
-          case D:
-            return REEF.BRANCH_H;
-          case E:
-            return REEF.BRANCH_J;
-          case F:
-            return REEF.BRANCH_L;
-          default:
-            return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-        }
-      default:
-        return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-    }
+    // switch (scoringDirection) {
+    //   case Left:
+    //     switch (goal) {
+    //       case A:
+    //         return REEF.BRANCH_A;
+    //       case B:
+    //         return REEF.BRANCH_C;
+    //       case C:
+    //         return REEF.BRANCH_E;
+    //       case D:
+    //         return REEF.BRANCH_G;
+    //       case E:
+    //         return REEF.BRANCH_I;
+    //       case F:
+    //         return REEF.BRANCH_K;
+    //       default:
+    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+    //     }
+    //   case Right:
+    //     switch (goal) {
+    //       case A:
+    //         return REEF.BRANCH_B;
+    //       case B:
+    //         return REEF.BRANCH_D;
+    //       case C:
+    //         return REEF.BRANCH_F;
+    //       case D:
+    //         return REEF.BRANCH_H;
+    //       case E:
+    //         return REEF.BRANCH_J;
+    //       case F:
+    //         return REEF.BRANCH_L;
+    //       default:
+    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+    //     }
+    //   default:
+    //     return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+    // }
+    return BRANCH_A;
   }
 
   @Override
