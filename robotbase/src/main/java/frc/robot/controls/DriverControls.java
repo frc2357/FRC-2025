@@ -1,6 +1,5 @@
 package frc.robot.controls;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -12,14 +11,12 @@ import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveRobotRelative;
-import frc.robot.commands.drive.DriveToCoralStation;
-import frc.robot.commands.drive.DriveToCoralStation.StationToGoTo;
-import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralRetract;
+import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
@@ -73,21 +70,11 @@ public class DriverControls {
     // Intaking
     m_rightTrigger
       .and(() -> Robot.coralRunner.hasNoCoral())
-      .toggleOnTrue(
-        new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
-      );
+      .onTrue(new TeleopCoralIntake(m_rightTrigger));
 
     // Remove algae
-    m_controller
-      .a()
-      .toggleOnTrue(
-        new RemoveAlgaeLow().finallyDo(() -> new CoralHome().schedule())
-      );
-    m_controller
-      .b()
-      .toggleOnTrue(
-        new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
-      );
+    m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
+    m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
 
     // Other
     m_leftTrigger.onTrue(new CoralHome());
