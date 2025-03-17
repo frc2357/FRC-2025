@@ -173,10 +173,6 @@ public class Robot extends TimedRobot {
     );
   }
 
-  private boolean lateratorMultiple;
-  private boolean elevatorMultiple;
-  private boolean coralRunnerMultiple;
-
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
    * that you want ran during disabled, autonomous, teleoperated and test.
@@ -191,26 +187,6 @@ public class Robot extends TimedRobot {
       swerve.getFieldRelativePose2d()
     );
     CommandScheduler.getInstance().run();
-
-    SmartDashboard.putNumber("laterator", LateratorSetDistance.running);
-    SmartDashboard.putNumber("elevator", ElevatorSetDistance.running);
-    SmartDashboard.putNumber("coral runner", CoralRunnerSetSpeed.running);
-
-    if (LateratorSetDistance.running > 1) {
-      lateratorMultiple = true;
-    }
-
-    if (ElevatorSetDistance.running > 1) {
-      elevatorMultiple = true;
-    }
-
-    if (CoralRunnerSetSpeed.running > 1) {
-      coralRunnerMultiple = true;
-    }
-
-    SmartDashboard.putBoolean("laterator multiple", lateratorMultiple);
-    SmartDashboard.putBoolean("elevator multiple", elevatorMultiple);
-    SmartDashboard.putBoolean("coral runner multiple", coralRunnerMultiple);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
