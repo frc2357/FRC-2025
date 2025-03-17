@@ -6,7 +6,6 @@ import frc.robot.Robot;
 
 public class CoralRunnerSetSpeed extends Command {
 
-  public static int running = 0;
   private Dimensionless m_percent;
 
   public CoralRunnerSetSpeed(Dimensionless percent) {
@@ -16,7 +15,6 @@ public class CoralRunnerSetSpeed extends Command {
 
   @Override
   public void initialize() {
-    running++;
     Robot.coralRunner.setSpeed(m_percent);
   }
 
@@ -27,7 +25,6 @@ public class CoralRunnerSetSpeed extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    running--;
     Robot.coralRunner.stop();
   }
 }

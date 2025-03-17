@@ -8,16 +8,11 @@ import frc.robot.Robot;
 
 public class ElevatorSetDistance extends Command {
 
-  public static int running = 0;
   private Distance m_distance;
 
   public ElevatorSetDistance(Distance distance) {
     m_distance = distance;
     addRequirements(Robot.elevator);
-  }
-
-  public void initialize() {
-    running++;
   }
 
   public void execute() {
@@ -39,10 +34,5 @@ public class ElevatorSetDistance extends Command {
       Robot.elevator.getDistance(),
       ELEVATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
     );
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-    running--;
   }
 }

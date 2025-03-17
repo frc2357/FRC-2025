@@ -6,7 +6,6 @@ import frc.robot.Robot;
 
 public class LateratorSetDistance extends Command {
 
-  public static int running = 0;
   private Distance m_distance;
 
   public LateratorSetDistance(Distance distance) {
@@ -16,7 +15,6 @@ public class LateratorSetDistance extends Command {
 
   @Override
   public void initialize() {
-    running++;
     Robot.laterator.setTargetDistance(m_distance);
   }
 
@@ -27,7 +25,6 @@ public class LateratorSetDistance extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    running--;
     Robot.laterator.stop();
   }
 }
