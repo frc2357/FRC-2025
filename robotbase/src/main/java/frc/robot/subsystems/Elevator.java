@@ -9,15 +9,18 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.ELEVATOR;
 
 public class Elevator extends SubsystemBase {
@@ -26,6 +29,8 @@ public class Elevator extends SubsystemBase {
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
+  private DigitalInput m_hallEffectSensor;
+  private Debouncer m_debouncer;
 
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
   private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
@@ -60,6 +65,10 @@ public class Elevator extends SubsystemBase {
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
+    m_hallEffectSensor = new DigitalInput(
+      DIGITAL_INPUT.ELEVATOR_HALL_EFFECT_SENSOR_ID
+    );
+    m_debouncer = new Debouncer(Constants.ELEVATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -141,6 +150,10 @@ public class Elevator extends SubsystemBase {
 
   public boolean isStalling() {
     return m_motorLeft.getOutputCurrent() > ELEVATOR.ZERO_STALL_AMPS;
+  }
+
+  public boolean isAtZero() {
+    return m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 
   public void setZero() {

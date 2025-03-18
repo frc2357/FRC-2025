@@ -101,6 +101,7 @@ public final class Constants {
     public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 9;
     public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
     public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 7;
+    public static final int ELEVATOR_HALL_EFFECT_SENSOR_ID = 0;
   }
 
   public static final class SWERVE {
@@ -210,6 +211,8 @@ public final class Constants {
     }
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
+
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
 
   public static final class LATERATOR {
