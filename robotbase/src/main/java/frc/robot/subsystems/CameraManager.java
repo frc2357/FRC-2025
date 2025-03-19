@@ -1,13 +1,21 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.Constants.FIELD.REEF.BLUE_REEF_TAGS;
+import static frc.robot.Constants.FIELD.REEF.RED_REEF_TAGS;
+import static frc.robot.Constants.FIELD.REEF.REEF_BRANCHES;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
+import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.Utils;
+import com.google.errorprone.annotations.RestrictedApi;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
@@ -16,19 +24,33 @@ import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutTime;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
+import frc.robot.Constants.FIELD;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Constants.PHOTON_VISION;
+import frc.robot.Constants.ROBOT_CONFIGURATION;
 import frc.robot.Robot;
 import frc.robot.subsystems.PhotonVisionCamera.TimestampedPNPInfo;
 import frc.robot.util.CollisionDetection;
+import java.lang.invoke.VarHandle.AccessMode;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import org.opencv.objdetect.BarcodeDetector;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class CameraManager {
@@ -142,6 +164,71 @@ public class CameraManager {
     }
   }
 
+  private class TargetInfo {
+
+    public double yaw, pitch, skew;
+    public Transform3d camToTargetTransform;
+    public long timestamp;
+    public Pose3d targetFieldRelativePose;
+    public PhotonVisionCamera camera;
+
+    public TargetInfo(
+      double yaw,
+      double pitch,
+      double skew,
+      Transform3d camToTargetTransform,
+      long timestamp,
+      PhotonVisionCamera newCamera
+    ) {
+      this.yaw = yaw;
+      this.pitch = pitch;
+      this.skew = skew;
+      this.camToTargetTransform = camToTargetTransform;
+      this.timestamp = timestamp;
+      if (newCamera == null) {
+        System.out.println("CAMERA WAS NULL");
+        this.targetFieldRelativePose = null;
+        return;
+      }
+      this.targetFieldRelativePose = new Pose3d(
+        Robot.swerve.getFieldRelativePose2d()
+      )
+        .plus(newCamera.m_robotToCameraTranform) //camToTarget -> robotToTarget
+        .plus(camToTargetTransform); //robotToTarget -> fieldOriginToTarget
+      this.camera = newCamera;
+    }
+
+    public boolean isValid(long timeoutMs) {
+      long now = RobotController.getFPGATime();
+      long then = now - timeoutMs;
+
+      return (
+        camera != null &&
+        camToTargetTransform != null &&
+        targetFieldRelativePose != null &&
+        timestamp > then &&
+        (!Double.isNaN(yaw) && Math.abs(yaw) > MAX_ANGLE.in(Degrees)) &&
+        (!Double.isNaN(pitch) && Math.abs(pitch) > MAX_ANGLE.in(Degrees)) &&
+        !Double.isNaN(skew)
+      );
+    }
+
+    public void replace(PhotonTrackedTarget target, PhotonVisionCamera camera) {
+      if (target == null || camera == null) return;
+      this.yaw = target.yaw;
+      this.pitch = target.pitch;
+      this.skew = target.skew;
+      this.camera = camera;
+      this.camToTargetTransform = target.bestCameraToTarget;
+      this.timestamp = RobotController.getFPGATime();
+      this.targetFieldRelativePose = new Pose3d(
+        Robot.swerve.getFieldRelativePose2d()
+      )
+        .plus(camera.m_robotToCameraTranform) //camToTarget -> robotToTarget
+        .plus(camToTargetTransform); //robotToTarget -> fieldOriginToTarget
+    }
+  }
+
   private final ArrayList<PhotonVisionCamera> m_robotCameras = new ArrayList<
     PhotonVisionCamera
   >();
@@ -154,6 +241,13 @@ public class CameraManager {
 
   private final TimestampedPNPInfo[] m_pnpInfo =
     new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
+
+  private final TargetInfo[] m_aprilTagInfo = new TargetInfo[23];
+
+  /**
+   * Holds all the poses for all the branches and options in the BRANCH enum
+   */
+  private final Pose2d[] m_branchPositions = new Pose2d[13];
 
   private final NetworkTable m_poseConcensusTable =
     NetworkTableInstance.getDefault().getTable("VisionPose-Combined");
@@ -170,7 +264,19 @@ public class CameraManager {
 
   public CameraManager() {
     m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
+    m_poseEstimator.setPrimaryStrategy(m_primaryStrat);
     m_poseEstimator.setMultiTagFallbackStrategy(m_fallbackStrat);
+    for (int i = 0; i < m_aprilTagInfo.length; i++) {
+      m_aprilTagInfo[i] = new TargetInfo(
+        Double.NaN,
+        Double.NaN,
+        Double.NaN,
+        Transform3d.kZero,
+        -1,
+        null
+      );
+    }
+    Arrays.fill(m_branchPositions, Pose2d.kZero);
   }
 
   /**
@@ -209,7 +315,7 @@ public class CameraManager {
     PhotonVisionCamera cam = new PhotonVisionCamera(
       name,
       robotToCameraTransform,
-      this::storePNPInfo
+      this::processResult
     );
     m_robotCameras.add(cam);
     return cam;
@@ -338,7 +444,7 @@ public class CameraManager {
       // if stored data is older than allowed, invalidate it, and set it to be replaced.
       if (
         m_pnpInfo[i].result().getTimestampSeconds() <=
-        Utils.getCurrentTimeSeconds() - PNP_INFO_VALID_TIME.in(Seconds)
+        Utils.getCurrentTimeSeconds() - INFO_VALID_TIME.in(Seconds)
       ) {
         m_pnpInfo[i] = null;
         indexToReplace = i;
@@ -401,5 +507,245 @@ public class CameraManager {
 
   public EstimatedRobotPose getLastEstimatedPose() {
     return m_lastEstimatedPose;
+  }
+
+  private void cacheForGamepeices(
+    List<PhotonTrackedTarget> targetList,
+    PhotonVisionCamera camera
+  ) {
+    PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
+    m_aprilTagInfo[0].replace(bestTarget, camera);
+  }
+
+  private void cacheForAprilTags(
+    List<PhotonTrackedTarget> targets,
+    PhotonVisionCamera camera
+  ) {
+    for (PhotonTrackedTarget target : targets) {
+      m_aprilTagInfo[target.fiducialId].replace(target, camera);
+    }
+  }
+
+  public PhotonTrackedTarget calculateBestGamepeiceTarget(
+    List<PhotonTrackedTarget> targetList
+  ) {
+    double highestPitch =
+      targetList.get(0).getPitch() + BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
+    PhotonTrackedTarget bestTarget = targetList.get(0);
+    for (PhotonTrackedTarget targetSeen : targetList) {
+      if (
+        targetSeen.getPitch() < highestPitch &&
+        Math.abs(targetSeen.getYaw()) < Math.abs(bestTarget.getYaw())
+      ) {
+        bestTarget = targetSeen;
+      }
+    }
+    return bestTarget;
+  }
+
+  private void processResult(
+    PhotonPipelineResult result,
+    PhotonVisionCamera camera
+  ) {
+    if (camera == null || result == null || !result.hasTargets()) return;
+
+    storePNPInfo(createPNPInfo(result, camera));
+    if (result.getBestTarget().objDetectId != -1) {
+      cacheForGamepeices(result.targets, camera);
+    } else {
+      cacheForAprilTags(result.targets, camera);
+      calculateBranchPositions();
+    }
+  }
+
+  private TimestampedPNPInfo createPNPInfo(
+    PhotonPipelineResult result,
+    PhotonVisionCamera camera
+  ) {
+    // if the provided result has no targets, it has no value, so we do not want to store it
+    if (result == null || !result.hasTargets()) {
+      return null;
+    }
+    // double frameTimeSeconds = Utils.fpgaToCurrentTime(
+    //   result.getTimestampSeconds()
+    // );
+    // double currTimeSeconds = Utils.getCurrentTimeSeconds();
+    // // if result is older than allowed, do not store it
+    // if (frameTimeSeconds <= currTimeSeconds - INFO_VALID_TIME.in(Seconds)) {
+    //   return null;
+    // }
+    // if rotating too fast, dont create info
+    if (
+      Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
+      MAX_ACCEPTABLE_ROTATIONAL_VELOCITY.in(RadiansPerSecond)
+    ) return null;
+    // if translating too fast, dont create info
+    if (
+      Math.abs(
+        Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond)
+      ) >
+      MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY.in(MetersPerSecond)
+    ) return null;
+
+    Rotation3d heading = new Rotation3d(
+      Robot.swerve.getFieldRelativePose2d().getRotation()
+    );
+    double headingTimestampSeconds = Utils.fpgaToCurrentTime(
+      result.getTimestampSeconds()
+    );
+    return new TimestampedPNPInfo(
+      result,
+      heading,
+      headingTimestampSeconds,
+      camera.m_robotToCameraTranform,
+      camera
+    );
+  }
+
+  /**
+   * @param fiducialId The fiducial ID of the target to get the yaw of.
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
+   */
+  public Angle getTargetYaw(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? Units.Degrees.of(m_aprilTagInfo[targetId].yaw)
+      : null;
+  }
+
+  /**
+   * @param id The ID of the target to get the pitch of.
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return Returns the desired targets pitch, <strong>will return null if the cached data was invalid.</strong>
+   */
+  public Angle getTargetPitch(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? Units.Degrees.of(m_aprilTagInfo[targetId].pitch)
+      : null;
+  }
+
+  /**
+   * Returns a field relative pose of a target based on where the robot thinks it is, and the provided camera transforms
+   * @param targetId The targets fiducial ID
+   * @param timeoutMs The amount of milliseconds past which the target information is deemed expired
+   * @return Returns the desired targets field relative pose, <strong> will return null if cached data was invalid. </strong>
+   */
+  public Pose3d getFieldRelativeTargetPose(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? m_aprilTagInfo[targetId].targetFieldRelativePose
+      : null;
+  }
+
+  private void calculateBranchPositions() {
+    int[] tagsToUse = Robot.alliance == Alliance.Blue
+      ? BLUE_REEF_TAGS
+      : RED_REEF_TAGS;
+    // blues lowest tag starts on side 6 (branch K & branch L)
+    // reds lowest tag starts on side 2 (branch C & branch D)
+    // so we need this offset to give us our index number to use.
+    int reefSideOffset = Robot.alliance == Alliance.Blue ? 5 : 1;
+    for (int i = 0; i < tagsToUse.length; i++) {
+      Pair<Pose2d, Pose2d> branchPoses = calculateBranchPose(
+        m_aprilTagInfo[tagsToUse[i]],
+        tagsToUse[i]
+      );
+      if (
+        branchPoses == null ||
+        branchPoses.getFirst() == null ||
+        branchPoses.getSecond() == null
+      ) continue;
+      // i corresponds to the side of the reef were finding the poses of
+      int reefSide = ((i + reefSideOffset) % 6) + 1;
+      int leftBranchIndex = reefSide * 2 - 1;
+      int rightBranchIndex = reefSide * 2;
+      Pose2d rightBranchPose = new Pose2d(
+        branchPoses.getSecond().getTranslation(),
+        REEF_BRANCHES[rightBranchIndex - 1].getRotation()
+      );
+      rightBranchPose = rightBranchPose.transformBy(
+        new Transform2d(
+          ROBOT_CONFIGURATION.FULL_WIDTH.div(2).in(Meters),
+          0,
+          Rotation2d.kZero
+        )
+      );
+      Pose2d leftBranchPose = new Pose2d(
+        branchPoses.getFirst().getTranslation(),
+        REEF_BRANCHES[leftBranchIndex - 1].getRotation()
+      );
+      leftBranchPose = leftBranchPose.transformBy(
+        new Transform2d(
+          ROBOT_CONFIGURATION.FULL_WIDTH.div(2).in(Meters),
+          0,
+          Rotation2d.kZero
+        )
+      );
+      // 12 branches, with 6 sides of the reef. each reef has 6 tags on it, and we find which side were calculating for above.
+      // for the right branch, we use reefSide * 2 to get its number, since it will always be the higher branch.
+      // we do the same for the left branchs, but we subtract one, since its the branch before the right branch.
+      m_branchPositions[rightBranchIndex] = rightBranchPose;
+      m_branchPositions[leftBranchIndex] = leftBranchPose;
+    }
+
+    // the last branch in the BRANCH_GOAL enum is whatever the closest one is, so were assigning that here
+    m_branchPositions[0] = Pose2d.kZero;
+    m_branchPositions[0] = Robot.swerve
+      .getFieldRelativePose2d()
+      .nearest(Arrays.asList(m_branchPositions));
+  }
+
+  private Pair<Pose2d, Pose2d> calculateBranchPose(
+    TargetInfo targetInfo,
+    int id
+  ) {
+    if (targetInfo.targetFieldRelativePose == null) return null;
+
+    Pose2d tarPose = targetInfo.targetFieldRelativePose.toPose2d();
+    // transform target pose out. The target pose should be in the target coordinate frame, described in PhotonVisions documentation
+    Pose2d transformedPose = tarPose.transformBy(
+      new Transform2d(
+        FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
+        0,
+        Rotation2d.kZero
+      )
+    );
+    // branch positions are from the perspective of looking towards the center of the reef
+    Pose2d leftBranch = transformedPose.rotateAround(
+      tarPose.getTranslation(),
+      Rotation2d.kCW_90deg
+    );
+    Pose2d rightBranch = transformedPose.rotateAround(
+      tarPose.getTranslation(),
+      Rotation2d.kCCW_90deg
+    );
+    return new Pair<Pose2d, Pose2d>(leftBranch, rightBranch);
+  }
+
+  /**
+   * Compares the current system time to the last cached timestamp, and sees if it is older than the
+   * passsed in timeout.
+   *
+   * @param targetId Fiducial ID of the desired target to valid the data of. Notes have a
+   *     fiducialId of 0
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return If the camera has seen the target within the timeout given
+   */
+  public boolean isValidTarget(int targetId, long timeoutMs) {
+    return m_aprilTagInfo[targetId].isValid(timeoutMs);
+  }
+
+  /**
+   * Returns the calculated branch position of the provided branch
+   * @param branchToGet The {@link BRANCH_GOAL} to return the pose of
+   * @return The calculated field relative pose of the desired branch
+   */
+  public Pose2d getFieldRelativeBranchPose(BRANCH_GOAL branchToGet) {
+    return m_branchPositions[branchToGet.branchNum - 1];
+  }
+
+  public Pose2d getAllianceRelativeBranchPose(BRANCH_GOAL branchToGet) {
+    return Robot.alliance == Alliance.Blue
+      ? m_branchPositions[branchToGet.branchNum]
+      : ChoreoAllianceFlipUtil.flip(m_branchPositions[branchToGet.branchNum]);
   }
 }

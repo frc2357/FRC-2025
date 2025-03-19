@@ -1,12 +1,16 @@
 package frc.robot.controls;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
@@ -60,44 +64,60 @@ public class DriverControls {
       );
 
     // Scoring
-    m_controller
-      .leftBumper()
-      .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
-    m_controller
-      .rightBumper()
-      .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
-    m_controller
-      .x()
-      .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
+    // m_controller
+    //   .leftBumper()
+    //   .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
+    // m_controller
+    //   .rightBumper()
+    //   .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
+    // m_controller
+    //   .x()
+    //   .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
 
     // Intaking
-    m_rightTrigger
-      .and(() -> Robot.coralRunner.hasNoCoral())
-      .toggleOnTrue(
-        new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
-      );
+    // m_rightTrigger
+    //   .and(() -> Robot.coralRunner.hasNoCoral())
+    //   .toggleOnTrue(
+    //     new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
+    //   );
 
-    // Remove algae
-    m_controller
-      .a()
-      .toggleOnTrue(
-        new RemoveAlgaeLow().finallyDo(() -> new CoralHome().schedule())
-      );
-    m_controller
-      .b()
-      .toggleOnTrue(
-        new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
-      );
+    // // Remove algae
+    // m_controller
+    //   .a()
+    //   .toggleOnTrue(
+    //     new RemoveAlgaeLow().finallyDo(() -> new CoralHome().schedule())
+    //   );
+    // m_controller
+    //   .b()
+    //   .toggleOnTrue(
+    //     new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
+    //   );
 
-    // Other
-    m_leftTrigger.onTrue(new CoralHome());
-    m_controller.back().onTrue(new FlipPerspective());
+    // // Other
+    // m_leftTrigger.onTrue(new CoralHome());
+    // m_controller.back().onTrue(new FlipPerspective());
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-    m_controller.y().whileTrue(new DriveRobotRelative());
 
-    m_controller.y().whileTrue(new DriveToReef(RouteAroundReef.None));
+    m_controller
+      .y()
+      .whileTrue(
+        new DriveToReef(
+          RouteAroundReef.None,
+          BRANCH_GOAL.BRANCH_A,
+          REEF.BRANCH_A.getRotation()
+        )
+      );
+    m_controller
+      .x()
+      .whileTrue(
+        new InstantCommand(() ->
+          Robot.swerve.resetPose(new Pose2d(0, 0, Rotation2d.kZero))
+        ).andThen(
+          new DriveToPose((Pose2d pose) -> new Pose2d(1, 1, Rotation2d.k180deg))
+        )
+      );
   }
 
   public double getX() {

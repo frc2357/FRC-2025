@@ -49,7 +49,7 @@ public class DriveToPoseHandler extends Command {
   @Override
   public void initialize() {
     m_currentTarget = Robot.swerve.getAllianceRelativePose2d();
-    m_finalGoal = Robot.buttonboard.getPoseFromGoal();
+    // m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currDriveToPose = new DriveToPose(getTargetFunction()); // make a DriveToPose that we have control of
     m_currDriveToPose.schedule();
@@ -57,7 +57,7 @@ public class DriveToPoseHandler extends Command {
 
   @Override
   public void execute() {
-    m_finalGoal = Robot.buttonboard.getPoseFromGoal();
+    // m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     m_currPose = Robot.swerve.getAllianceRelativePose2d();
   }
 
@@ -104,30 +104,23 @@ public class DriveToPoseHandler extends Command {
   }
 
   protected Pose2d getNewTarget(Pose2d currTarget, Pose2d currPose) {
-    boolean isAtFinalApproach =
-      Math.abs(
-        currPose.getTranslation().getDistance(m_finalGoal.getTranslation())
-      ) <=
-      FINAL_APPROACH_DISTANCE.in(Meters);
-    if (isAtFinalApproach && m_finalApproachCommand != null) {
-      m_finalApproachCommand.schedule();
-    }
+    // boolean isAtFinalApproach =
+    //   Math.abs(
+    //     new Transform2d(currPose, m_finalGoal).getTranslation().getNorm()
+    //   ) <=
+    //   FINAL_APPROACH_DISTANCE.in(Meters);
+    // if (isAtFinalApproach && m_finalApproachCommand != null) {
+    //   m_finalApproachCommand.schedule();
+    // }
     // if we can go to the final goal without hitting it, just go there
-    if (
-      isAtFinalApproach ||
-      !CollisionDetection.willHitReef(
-        currPose,
-        m_finalGoal,
-        DEFAULT_INTERPOLATION_PERCENTAGES
-      )
-    ) {
-      m_currentTarget = m_finalGoal;
-      return m_finalGoal;
-    }
+    // if (isAtFinalApproach) {
+    //   m_currentTarget = m_finalGoal;
+    //   return m_finalGoal;
+    // }
 
     if (!isAtTarget(currTarget, currPose)) {
       // make it go faster by lying to it
-      return currTarget.transformBy(new Transform2d(currPose, currTarget));
+      return currTarget/*.transformBy(new Transform2d(currPose, currTarget))*/;
     }
 
     Pose2d newTarget = interpolateTarget(currPose, m_finalGoal);
@@ -143,7 +136,7 @@ public class DriveToPoseHandler extends Command {
     }
     m_currentTarget = newTarget;
     // make it go faster through deceit and deception
-    return newTarget.transformBy(new Transform2d(currPose, newTarget));
+    return newTarget/*.transformBy(new Transform2d(currPose, newTarget)) */;
   }
 
   /**
@@ -156,7 +149,8 @@ public class DriveToPoseHandler extends Command {
     double dist = Utility.findDistanceBetweenPoses(currPose, goal);
     return currPose.interpolate(
       goal,
-      (1 / dist) * INTERPOLATION_DISTANCE.in(Meters)
+      0.4
+      // (1 / dist) * INTERPOLATION_DISTANCE.in(Meters)
     );
   }
 
@@ -167,6 +161,7 @@ public class DriveToPoseHandler extends Command {
    * @return A pose that should be a target that follows the desired route around the reef, and going towards the goal.
    */
   protected Pose2d avoidReef(Pose2d currPose, RouteAroundReef routeAroundReef) {
+    if (routeAroundReef == RouteAroundReef.None) return currPose;
     Pose2d target = currPose;
     Pose2d targetClockwise = new Pose2d(
       currPose
