@@ -1,11 +1,14 @@
 package frc.robot.controls;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
@@ -55,15 +58,15 @@ public class DriverControls {
       );
 
     // Scoring
-    m_controller
-      .leftBumper()
-      .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
-    m_controller
-      .rightBumper()
-      .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
-    m_controller
-      .x()
-      .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
+    // m_controller
+    //   .leftBumper()
+    //   .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
+    // m_controller
+    //   .rightBumper()
+    //   .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
+    // m_controller
+    //   .x()
+    //   .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
 
     // Intaking
     m_rightTrigger
@@ -74,15 +77,31 @@ public class DriverControls {
     m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
     m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
 
-    // Other
-    m_leftTrigger.onTrue(new CoralHome());
-    m_controller.back().onTrue(new FlipPerspective());
+    // // Other
+    // m_leftTrigger.onTrue(new CoralHome());
+    // m_controller.back().onTrue(new FlipPerspective());
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-    m_controller.y().whileTrue(new DriveRobotRelative());
 
-    m_controller.y().whileTrue(new DriveToReef(RouteAroundReef.None));
+    m_controller
+      .y()
+      .whileTrue(
+        new DriveToReef(
+          RouteAroundReef.None,
+          BRANCH_GOAL.BRANCH_A,
+          REEF.BRANCH_A.getRotation()
+        )
+      );
+    m_controller
+      .x()
+      .whileTrue(
+        new InstantCommand(() ->
+          Robot.swerve.resetPose(new Pose2d(0, 0, Rotation2d.kZero))
+        ).andThen(
+          new DriveToPose((Pose2d pose) -> new Pose2d(1, 1, Rotation2d.k180deg))
+        )
+      );
   }
 
   public double getX() {

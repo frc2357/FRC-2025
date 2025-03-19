@@ -5,6 +5,16 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_A;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_B;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_C;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_D;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_E;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_G;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_H;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_K;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
@@ -31,9 +41,12 @@ import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
+import frc.robot.Constants.FIELD.REEF;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -443,9 +456,9 @@ public final class Constants {
       Units.RadiansPerSecond.of(0.01);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(0.001);
+      Units.MetersPerSecond.of(0.01);
 
-    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.6);
+    public static final Time INFO_VALID_TIME = Units.Seconds.of(0.6);
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 3;
 
@@ -551,6 +564,8 @@ public final class Constants {
 
     // how far off on the z axis the estimated pose can be before we invalidate it
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
+
+    public static final Distance BRANCH_TO_TAG_DIST = Units.Inches.of(6.5);
   }
 
   public static class DRIVE_TO_VECTOR {
@@ -579,7 +594,7 @@ public final class Constants {
         8,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1.5)
+        new TrapezoidProfile.Constraints(1.5, 1)
       );
 
     public static final ProfiledPIDController THETA_CONTROLLER =
@@ -587,14 +602,14 @@ public final class Constants {
         6,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1.5)
+        new TrapezoidProfile.Constraints(1.5, 1)
       );
 
     public static final Distance X_TOLERANCE = Units.Inches.of(1);
     public static final Distance Y_TOLERANCE = Units.Inches.of(1);
-    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(6);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
 
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(1);
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
 
     public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.5);
 
@@ -622,6 +637,28 @@ public final class Constants {
      * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
      */
     public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 3;
+
+    public enum BRANCH_GOAL {
+      CLOSEST(0),
+      BRANCH_A(1),
+      BRANCH_B(2),
+      BRANCH_C(3),
+      BRANCH_D(4),
+      BRANCH_E(5),
+      BRANCH_F(6),
+      BRANCH_G(7),
+      BRANCH_H(8),
+      BRANCH_I(8),
+      BRANCH_J(10),
+      BRANCH_K(11),
+      BRANCH_L(12);
+
+      public final int branchNum;
+
+      BRANCH_GOAL(int branchNum) {
+        this.branchNum = branchNum;
+      }
+    }
   }
 
   public static final class COLLISION_DETECTION {
@@ -666,6 +703,9 @@ public final class Constants {
   public static class FIELD { // pulled directly from Choreo or field drawings provided by FIRST
 
     public static class REEF {
+
+      public static final int[] BLUE_REEF_TAGS = { 17, 18, 19, 20, 21, 22 };
+      public static final int[] RED_REEF_TAGS = { 6, 7, 8, 9, 10, 11 };
 
       public static final Pose2d BRANCH_A = new Pose2d(
         Units.Meters.of(3.2332),
@@ -732,6 +772,21 @@ public final class Constants {
         Units.Meters.of(4.0135),
         Rotation2d.kZero
       );
+
+      public static final Pose2d[] REEF_BRANCHES = {
+        BRANCH_A,
+        BRANCH_B,
+        BRANCH_C,
+        BRANCH_D,
+        BRANCH_E,
+        BRANCH_F,
+        BRANCH_G,
+        BRANCH_H,
+        BRANCH_I,
+        BRANCH_J,
+        BRANCH_K,
+        BRANCH_L,
+      };
       public static final Pose2d BOTTOM_LEFT_CORNER = new Pose2d(
         3.6375527381896973,
         3.5441830158233643,

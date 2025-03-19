@@ -109,10 +109,10 @@ public class Robot extends TimedRobot {
     // algaePivot = new AlgaePivot();
     climber = new Climber();
     camManager = new CameraManager();
-    frontCam = camManager.createCamera(
-      FRONT_CAM.NAME,
-      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
+    // frontCam = camManager.createCamera(
+    //   FRONT_CAM.NAME,
+    //   FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
+    // );
     backCam = camManager.createCamera(
       BACK_CAM.NAME,
       BACK_CAM.ROBOT_TO_CAM_TRANSFORM
