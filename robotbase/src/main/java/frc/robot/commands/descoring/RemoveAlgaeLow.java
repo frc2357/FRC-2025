@@ -9,6 +9,7 @@ import frc.robot.Constants.LATERATOR;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.laterator.LateratorSetDistance;
+import frc.robot.commands.laterator.LateratorToSafeSpot;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.util.PressToContinue;
 
@@ -18,8 +19,13 @@ public class RemoveAlgaeLow extends SequentialCommandGroup {
     super(
       new ParallelDeadlineGroup(
         new PressToContinue(complete),
-        new ElevatorSetDistance(ELEVATOR.SETPOINTS.LOW_ALGAE),
-        new LateratorSetDistance(LATERATOR.SETPOINTS.L3_PREPOSE),
+        new SequentialCommandGroup(
+          new LateratorToSafeSpot(),
+          new ParallelCommandGroup(
+            new ElevatorSetDistance(ELEVATOR.SETPOINTS.LOW_ALGAE),
+            new LateratorSetDistance(LATERATOR.SETPOINTS.L3_PREPOSE)
+          )
+        ),
         new AlgaeKnockerSetSpeed(-0.5)
       ),
       new CoralHome(() -> false)

@@ -14,8 +14,6 @@ import frc.robot.commands.drive.DriveRobotRelative;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
-import frc.robot.commands.intake.CoralIntake;
-import frc.robot.commands.intake.CoralRetract;
 import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
