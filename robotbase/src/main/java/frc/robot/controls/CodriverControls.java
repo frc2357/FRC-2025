@@ -7,10 +7,8 @@ import frc.robot.Constants.LATERATOR;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.climber.ClimberAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
-import frc.robot.commands.elevator.ElevatorAmpLimitZero;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHome;
-import frc.robot.commands.elevator.ElevatorZero;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
@@ -78,10 +76,6 @@ public class CodriverControls {
       .and(m_controller.y().negate());
 
     noDpad.and(m_controller.x()).onTrue(new CoralHome());
-
-    onlyUp.and(m_controller.y()).onTrue(new ElevatorAmpLimitZero());
-
-    onlyDown.and(m_controller.y()).onTrue(new ElevatorZero());
 
     m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
     m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
