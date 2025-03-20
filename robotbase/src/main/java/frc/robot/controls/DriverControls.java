@@ -18,6 +18,7 @@ import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
+import frc.robot.commands.elevator.ElevatorAmpLimitZero;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralRetract;
 import frc.robot.commands.scoring.CoralHome;
@@ -95,9 +96,9 @@ public class DriverControls {
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-    m_controller.y().whileTrue(new DriveRobotRelative());
-
-    m_controller.y().whileTrue(new DriveToReef(RouteAroundReef.None));
+    //m_controller.y().whileTrue(new DriveRobotRelative());
+    m_controller.y().whileTrue(new ElevatorAmpLimitZero());
+    //m_controller.y().whileTrue(new DriveToReef(RouteAroundReef.None));
   }
 
   public double getX() {
