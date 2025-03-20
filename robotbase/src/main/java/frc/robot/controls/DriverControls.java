@@ -12,7 +12,6 @@ import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
-import frc.robot.commands.drive.DriveRobotRelative;
 import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
@@ -58,14 +57,24 @@ public class DriverControls {
     //   .x()
     //   .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
 
-    // Intaking
-    m_rightTrigger
-      .and(() -> Robot.coralRunner.hasNoCoral())
-      .onTrue(new TeleopCoralIntake(m_rightTrigger));
+    // // Intaking
+    // m_rightTrigger
+    //   .and(() -> Robot.coralRunner.hasNoCoral())
+    //   .toggleOnTrue(
+    //     new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
+    //   );
 
-    // Remove algae
-    m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
-    m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
+    // // Remove algae
+    // m_controller
+    //   .a()
+    //   .toggleOnTrue(
+    //     new RemoveAlgaeLow().finallyDo(() -> new CoralHome().schedule())
+    //   );
+    // m_controller
+    //   .b()
+    //   .toggleOnTrue(
+    //     new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
+    //   );
 
     // // Other
     // m_leftTrigger.onTrue(new CoralHome());
