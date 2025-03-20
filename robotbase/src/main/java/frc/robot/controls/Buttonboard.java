@@ -114,72 +114,73 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   public Pose2d getPoseFromGoal() {
-    ReefSide goal = Robot.buttonboard.getSelectedReefSide();
-    ScoringDirection scoringDirection =
-      Robot.buttonboard.getSelectedScoringDirection();
+    return null;
+    // ReefSide goal = Robot.buttonboard.getSelectedReefSide();
+    // ScoringDirection scoringDirection =
+    //   Robot.buttonboard.getSelectedScoringDirection();
 
-    switch (scoringDirection) {
-      case Left:
-        switch (goal) {
-          case A:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_A
-            );
-          case B:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_C
-            );
-          case C:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_E
-            );
-          case D:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_G
-            );
-          case E:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_I
-            );
-          case F:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_K
-            );
-          default:
-            return m_errorPose;
-        }
-      case Right:
-        switch (goal) {
-          case A:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_B
-            );
-          case B:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_D
-            );
-          case C:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_F
-            );
-          case D:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_H
-            );
-          case E:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_J
-            );
-          case F:
-            return Robot.camManager.getAllianceRelativeBranchPose(
-              BRANCH_GOAL.BRANCH_L
-            );
-          default:
-            return m_errorPose;
-        }
-      default:
-        return m_errorPose;
-    }
+    // switch (scoringDirection) {
+    //   case Left:
+    //     switch (goal) {
+    //       case A:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_A
+    //         );
+    //       case B:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_C
+    //         );
+    //       case C:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_E
+    //         );
+    //       case D:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_G
+    //         );
+    //       case E:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_I
+    //         );
+    //       case F:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_K
+    //         );
+    //       default:
+    //         return m_errorPose;
+    //     }
+    //   case Right:
+    //     switch (goal) {
+    //       case A:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_B
+    //         );
+    //       case B:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_D
+    //         );
+    //       case C:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_F
+    //         );
+    //       case D:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_H
+    //         );
+    //       case E:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_J
+    //         );
+    //       case F:
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_L
+    //         );
+    //       default:
+    //         return m_errorPose;
+    //     }
+    //   default:
+    //     return m_errorPose;
+    // }
   }
 
   @Override
