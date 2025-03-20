@@ -170,6 +170,5 @@ public class Elevator extends SubsystemBase {
       "Elevator Calculated Distance",
       getDistance().in(Units.Inches)
     );
-    SmartDashboard.putBoolean("Hall Effect In Range", isAtZero());
   }
 }
