@@ -19,9 +19,9 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 public class RobotContainer {
 
   private double MaxSpeed =
-    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * .25; // kSpeedAt12Volts desired top speed
+    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * .8; // kSpeedAt12Volts desired top speed
   private double MaxAngularRate =
-    RotationsPerSecond.of(0.75).in(RadiansPerSecond) * .25; // 3/4 of a rotation per second max angular velocity
+    RotationsPerSecond.of(0.75).in(RadiansPerSecond) * 0.5; // 3/4 of a rotation per second max angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive =
@@ -50,13 +50,17 @@ public class RobotContainer {
     // and Y is defined as to the left according to WPILib convention.
     drivetrain.setDefaultCommand(
       // Drivetrain will execute this command periodically
-      drivetrain.applyRequest(
-        () ->
-          drive
-            .withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-      )
+      drivetrain.applyRequest(() -> {
+        var y = -joystick.getLeftY();
+        var x = -joystick.getLeftX();
+        var rot = -joystick.getRightX();
+        return drive
+          .withVelocityX(Math.copySign(Math.pow(y * MaxSpeed, 1), y)) // Drive forward with negative Y (forward)
+          .withVelocityY(Math.copySign(Math.pow(x * MaxSpeed, 1), x)) // Drive left with negative X (left)
+          .withRotationalRate(
+            Math.copySign(Math.pow(rot * MaxAngularRate, 1), rot)
+          ); // Drive counterclockwise with negative X (left)
+      })
     );
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));

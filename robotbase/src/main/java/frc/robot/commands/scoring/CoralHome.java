@@ -1,7 +1,6 @@
 package frc.robot.commands.scoring;
 
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ELEVATOR;
 import frc.robot.Constants.LATERATOR;

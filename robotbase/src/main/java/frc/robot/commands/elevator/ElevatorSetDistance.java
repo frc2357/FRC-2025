@@ -30,12 +30,6 @@ public class ElevatorSetDistance extends Command {
 
   @Override
   public boolean isFinished() {
-    return m_distance.isNear(
-      Robot.elevator.getDistance(),
-      ELEVATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
-    );
+    return Robot.elevator.isAtTarget();
   }
-
-  @Override
-  public void end(boolean interrupted) {}
 }
