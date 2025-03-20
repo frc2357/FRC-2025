@@ -25,6 +25,7 @@ public class LateratorSetDistance extends Command {
 
   @Override
   public void end(boolean interrupted) {
+    System.out.println("Finished set distance");
     Robot.laterator.stop();
   }
 }

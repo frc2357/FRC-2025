@@ -174,12 +174,15 @@ public final class Constants {
       MOTOR_CONFIG_LEFT.closedLoop
         .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
         .outputRange(-1, 1);
-    public static final double SMART_MOTION_ALLOWED_ERROR_ROTATIONS = 0.1;
+    public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
+      Units.Rotations.of(0.1);
 
     @SuppressWarnings("removal")
     public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.smartMotion
-        .allowedClosedLoopError(SMART_MOTION_ALLOWED_ERROR_ROTATIONS)
+        .allowedClosedLoopError(
+          SMART_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
+        )
         .maxAcceleration(10000)
         .maxVelocity(4600);
 
@@ -237,13 +240,16 @@ public final class Constants {
         .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
         .outputRange(-1, 1);
 
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+    public static final Angle MAX_MOTION_ALLOWED_ERROR_ROTATIONS =
+      Units.Rotations.of(0.5);
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
       CLOSED_LOOP_CONFIG_LEFT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+        .allowedClosedLoopError(
+          MAX_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
+        )
         .maxAcceleration(13000)
         .maxVelocity(4600);
 

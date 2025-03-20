@@ -8,6 +8,7 @@ import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.climber.ClimberAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
+import frc.robot.commands.elevator.ElevatorHoldPosition;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
@@ -83,6 +84,7 @@ public class CodriverControls {
     onlyUp.whileTrue(
       new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY()))
     );
+    onlyUp.onFalse(new ElevatorHoldPosition());
 
     onlyUp.and(m_controller.x().whileTrue(new ElevatorHome()));
 

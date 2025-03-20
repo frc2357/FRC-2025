@@ -1,11 +1,13 @@
 package frc.robot.util;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 
 public class Utility {
@@ -27,6 +29,18 @@ public class Utility {
       currentValue.in(Inches),
       targetValue.in(Inches),
       tolerance.in(Inches)
+    );
+  }
+
+  public static boolean isWithinTolerance(
+    Angle currentValue,
+    Angle targetValue,
+    Angle tolerance
+  ) {
+    return isWithinTolerance(
+      currentValue.in(Rotations),
+      targetValue.in(Rotations),
+      tolerance.in(Rotations)
     );
   }
 

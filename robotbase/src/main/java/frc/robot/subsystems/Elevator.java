@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.ELEVATOR;
+import frc.robot.util.Utility;
 
 public class Elevator extends SubsystemBase {
 
@@ -134,8 +135,9 @@ public class Elevator extends SubsystemBase {
   }
 
   private boolean isAtTargetRotations() {
-    return m_targetRotations.isNear(
+    return Utility.isWithinTolerance(
       getRotations(),
+      m_targetRotations,
       ELEVATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
     );
   }

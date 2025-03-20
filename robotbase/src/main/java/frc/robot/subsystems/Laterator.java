@@ -21,6 +21,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.LATERATOR;
+import frc.robot.util.Utility;
 
 public class Laterator extends SubsystemBase {
 
@@ -131,9 +132,10 @@ public class Laterator extends SubsystemBase {
   }
 
   private boolean isAtTargetRotations() {
-    return m_targetRotations.isNear(
+    return Utility.isWithinTolerance(
       getRotations(),
-      LATERATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      m_targetRotations,
+      LATERATOR.MAX_MOTION_ALLOWED_ERROR_ROTATIONS
     );
   }
 
