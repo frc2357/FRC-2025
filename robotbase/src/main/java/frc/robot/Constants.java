@@ -201,16 +201,18 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.3 - 2);
-      public static final Distance L1_PREPOSE = Units.Inches.of(1 - 2);
-      public static final Distance L2_PREPOSE = Units.Inches.of(9.43 - 2);
-      public static final Distance L3_PREPOSE = Units.Inches.of(24.189 - 2);
-      public static final Distance L4_PREPOSE = Units.Inches.of(51.2 - 2);
-      public static final Distance LOW_ALGAE = Units.Inches.of(0.5 - 2);
-      public static final Distance HIGH_ALGAE = Units.Inches.of(13 - 2);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.3);
+      public static final Distance L1_PREPOSE = Units.Inches.of(1);
+      public static final Distance L2_PREPOSE = Units.Inches.of(9.43);
+      public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
+      public static final Distance L4_PREPOSE = Units.Inches.of(49.5);
+      public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
+      public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
+
+    public static final double HALL_EFFECT_OFFSET = 1.25;
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }

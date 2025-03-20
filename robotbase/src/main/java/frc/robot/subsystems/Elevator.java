@@ -160,11 +160,16 @@ public class Elevator extends SubsystemBase {
     m_encoder.setPosition(0);
   }
 
+  public void setPositionHallEffect() {
+    m_encoder.setPosition(1.5);
+  }
+
   @Override
   public void periodic() {
     SmartDashboard.putNumber(
       "Elevator Calculated Distance",
       getDistance().in(Units.Inches)
     );
+    SmartDashboard.putBoolean("Hall Effect In Range", isAtZero());
   }
 }

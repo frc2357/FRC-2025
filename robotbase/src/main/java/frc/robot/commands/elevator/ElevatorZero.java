@@ -24,7 +24,7 @@ public class ElevatorZero extends Command {
   public void end(boolean interrupted) {
     Robot.elevator.stop();
     if (!interrupted) {
-      Robot.elevator.setZero();
+      Robot.elevator.setPositionHallEffect();
     }
   }
 }
