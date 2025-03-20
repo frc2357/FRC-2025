@@ -17,11 +17,7 @@ public class LateratorToSafeSpot extends ConditionalCommand {
       () ->
         Robot.laterator
           .getDistance()
-          .lt(
-            Constants.LATERATOR.SETPOINTS.MAX_SAFE_SCORING_EXTENSION.minus(
-              Units.Inches.of(0.5)
-            )
-          )
+          .lt(Constants.LATERATOR.SETPOINTS.MAX_SAFE_SCORING_EXTENSION)
     );
   }
 }
