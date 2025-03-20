@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
@@ -14,6 +13,7 @@ import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveRobotRelative;
+import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
@@ -47,17 +47,7 @@ public class DriverControls {
   }
 
   public void mapControls() {
-    m_controller
-      .start()
-      .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetPose(
-            REEF.BRANCH_A.plus(new Transform2d(-0.2, 0, Rotation2d.kZero))
-          )
-        )
-      );
-
-    // Scoring
+    // // Scoring
     // m_controller
     //   .leftBumper()
     //   .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());

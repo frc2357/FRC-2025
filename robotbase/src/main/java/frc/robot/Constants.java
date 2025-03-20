@@ -5,16 +5,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_A;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_B;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_C;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_D;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_E;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_G;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_H;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_K;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
@@ -41,12 +31,9 @@ import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
-import frc.robot.Constants.FIELD.REEF;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
-import java.util.ArrayList;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -63,15 +50,6 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-
-  /*TODO: priorities for sunday. (below)
-  throughout day make sure pose est works
-  1. tune auto until we have a 3 peice
-  2. make sure alliance relative pose works correctly 
-  3. make sure drive to reef works without collision avoidance
-  5. make sure drive to reef works with collision avoidance
-  6. drive practice to make sure everything meshes and works well
-  7. make a 4 peice auto, or 3 peice on the other side of the reef*/
 
   public static final class CAN_ID {
 
@@ -432,7 +410,7 @@ public final class Constants {
     public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
     public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
       PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
@@ -467,11 +445,13 @@ public final class Constants {
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
     public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.5);
 
-    public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
+    public static final Distance MAX_DIST_BETWEEN_ESTIMATES = Units.Meters.of(
+      0.25
+    );
 
     public static final Time UPDATE_POSE_INTERVALS = Seconds.of(4);
 
-    public static final int MIN_ALLOWED_TARGETS = 1;
+    public static final int MIN_ALLOWED_TARGETS = 2;
 
     public static final class FRONT_CAM {
 
@@ -611,7 +591,7 @@ public final class Constants {
 
     public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
 
-    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.5);
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.2);
 
     public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
       Units.Rotations.of(0.08)

@@ -126,6 +126,7 @@ public class DriveToPose extends Command {
   @Override
   public boolean isFinished() {
     return m_driveController.atGoal() && m_thetaController.atGoal();
+    // return false;
   }
 
   @Override
