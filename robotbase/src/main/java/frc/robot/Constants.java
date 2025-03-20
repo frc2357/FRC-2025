@@ -264,7 +264,7 @@ public final class Constants {
       public static final Distance INTAKE_PREPOSE = Units.Inches.of(3);
       public static final Distance HOME = Units.Inches.of(1);
       public static final Distance MAX_SAFE_SCORING_EXTENSION = Units.Inches.of(
-        0
+        -1
       );
       public static final Distance L1_PREPOSE = Units.Inches.of(-2);
       public static final Distance L2_PREPOSE = Units.Inches.of(-6.2);

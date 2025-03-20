@@ -78,15 +78,11 @@ public class CodriverControls {
 
     noDpad.and(m_controller.x()).onTrue(new CoralHome());
 
-    m_controller.povUp().and(m_controller.x()).onTrue(new ElevatorHome());
-    m_controller.povRight().and(m_controller.x()).onTrue(new LateratorHome());
-
     onlyUp.whileTrue(
       new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY()))
     );
-    onlyUp.onFalse(new ElevatorHoldPosition());
-
     onlyUp.and(m_controller.x().whileTrue(new ElevatorHome()));
+    onlyUp.onFalse(new ElevatorHoldPosition());
 
     onlyRight
       .and(noLetterButtons)
@@ -104,10 +100,11 @@ public class CodriverControls {
       .whileTrue(new CoralRunnerAxis(() -> m_controller.getLeftTriggerAxis()));
 
     onlyRight.and(m_controller.y()).whileTrue(new LateratorFullZero());
+    onlyRight.and(m_controller.x()).whileTrue(new LateratorHome());
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
+
     onlyDown.whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));
-    onlyDown.onTrue(new LateratorSetDistance(LATERATOR.SETPOINTS.L4_PREPOSE));
   }
 
   public double deadband(double value, double deadband) {
