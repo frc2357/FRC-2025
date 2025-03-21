@@ -50,7 +50,8 @@ public class Robot extends TimedRobot {
   public static AlgaeRunner algaeRunner;
   public static AlgaeKnocker algaeKnocker;
   public static AlgaePivot algaePivot;
-  public static Climber climber;
+  public static ClimberPivot climberPivot;
+  public static ClimberWinch climberWinch;
   public static CameraManager camManager;
   public static PhotonVisionCamera frontCam;
   public static PhotonVisionCamera backCam;
@@ -104,7 +105,9 @@ public class Robot extends TimedRobot {
     // algaeRunner = new AlgaeRunner();
     algaeKnocker = new AlgaeKnocker();
     // algaePivot = new AlgaePivot();
-    climber = new Climber();
+    climberWinch = new ClimberWinch();
+    climberPivot = new ClimberPivot();
+
     camManager = new CameraManager();
     frontCam = camManager.createCamera(
       FRONT_CAM.NAME,

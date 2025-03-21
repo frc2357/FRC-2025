@@ -1,20 +1,20 @@
-package frc.robot.commands.climber;
+package frc.robot.commands.climberWinch;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
-public class ClimberSetSpeed extends Command {
+public class ClimberWinchSetSpeed extends Command {
 
   private double m_speed;
 
-  public ClimberSetSpeed(double speed) {
-    addRequirements(Robot.climber);
+  public ClimberWinchSetSpeed(double speed) {
+    addRequirements(Robot.climberWinch);
     m_speed = speed;
   }
 
   @Override
   public void initialize() {
-    Robot.climber.setSpeed(m_speed);
+    Robot.climberWinch.setSpeed(m_speed);
   }
 
   @Override
