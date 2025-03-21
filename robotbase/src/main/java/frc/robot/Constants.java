@@ -89,9 +89,9 @@ public final class Constants {
     public static final int LATERATOR_MOTOR = 28;
     public static final int CORAL_RUNNER_MOTOR = 29;
 
-    public static final int CLIMBER_MOTOR_ONE = 30;
-    public static final int CLIMBER_MOTOR_TWO = 31;
-    public static final int CLIMBER_MOTOR_THREE = 32;
+    public static final int CLIMBER_WINCH_MOTOR_LEFT = 30;
+    public static final int CLIMBER_WINCH_MOTOR_RIGHT = 31;
+    public static final int CLIMBER_PIVOT_MOTOR = 32;
 
     public static final int ALGAE_KNOCKER_MOTOR = 33;
   }
@@ -372,17 +372,28 @@ public final class Constants {
     public static final double ALGAE_HOLD_SPEED = 0.05;
   }
 
-  public static class CLIMBER {
+  public static class CLIMBER_WINCH {
 
-    public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
+    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60, 60)
       .inverted(false);
-    public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
-      .apply(MOTOR_CONFIG_ONE)
-      .follow(CAN_ID.CLIMBER_MOTOR_ONE);
+    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
+      new SparkMaxConfig()
+        .apply(MOTOR_CONFIG_LEFT)
+        .follow(CAN_ID.CLIMBER_WINCH_MOTOR_LEFT);
 
-    public static final double AXIS_MAX_SPEED = 1;
+    public static final double AXIS_MAX_SPEED = .25;
+  }
+
+  public static class CLIMBER_PIVOT {
+
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IdleMode.kBrake)
+      .smartCurrentLimit(60, 60)
+      .inverted(false);
+
+    public static final double AXIS_MAX_SPEED = .25;
   }
 
   public static final class CUSTOM_UNITS {
