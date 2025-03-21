@@ -19,6 +19,11 @@ public class ClimberPivotSetSpeed extends Command {
 
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    Robot.climberPivot.stop();
   }
 }

@@ -19,6 +19,11 @@ public class ClimberWinchSetSpeed extends Command {
 
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    Robot.climberWinch.stop();
   }
 }

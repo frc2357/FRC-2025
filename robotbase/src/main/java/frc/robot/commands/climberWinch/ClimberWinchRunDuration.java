@@ -28,7 +28,7 @@ public class ClimberWinchRunDuration extends Command {
 
   @Override
   public boolean isFinished() {
-    return m_timer.advanceIfElapsed(m_duration.in(Seconds));
+    return m_timer.hasElapsed(m_duration.in(Seconds));
   }
 
   @Override
