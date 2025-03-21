@@ -176,6 +176,14 @@ public class PhotonVisionCamera {
     return m_result != null && m_result.hasTargets();
   }
 
+  public Transform3d getBestTargetRobotRelativeTransform() {
+    return m_result != null && m_result.hasTargets()
+      ? m_result
+        .getBestTarget()
+        .bestCameraToTarget.plus(m_robotToCameraTranform)
+      : null;
+  }
+
   public String getName() {
     return m_camera.getName();
   }

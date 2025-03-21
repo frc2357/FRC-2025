@@ -92,15 +92,6 @@ public class DriverControls {
           REEF.BRANCH_A.getRotation()
         )
       );
-    m_controller
-      .x()
-      .whileTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetPose(new Pose2d(0, 0, Rotation2d.kZero))
-        ).andThen(
-          new DriveToPose((Pose2d pose) -> new Pose2d(1, 1, Rotation2d.k180deg))
-        )
-      );
   }
 
   public double getX() {

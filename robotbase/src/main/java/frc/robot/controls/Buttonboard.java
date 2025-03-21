@@ -1,5 +1,7 @@
 package frc.robot.controls;
 
+import static frc.robot.Constants.FIELD.REEF.BRANCHES;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
@@ -14,6 +16,7 @@ import frc.robot.controls.controllers.CommandButtonboardController.ReefSide;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringDirection;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringLevel;
 import frc.robot.controls.util.RumbleInterface;
+import java.util.Arrays;
 
 public class Buttonboard implements Sendable, RumbleInterface {
 
@@ -114,7 +117,7 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   public Pose2d getPoseFromGoal() {
-    return null;
+    return Robot.camManager.getFieldRelativeBranchPose(BRANCH_GOAL.CLOSEST);
     // ReefSide goal = Robot.buttonboard.getSelectedReefSide();
     // ScoringDirection scoringDirection =
     //   Robot.buttonboard.getSelectedScoringDirection();

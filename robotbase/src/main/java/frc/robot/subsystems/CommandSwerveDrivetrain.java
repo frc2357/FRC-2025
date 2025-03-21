@@ -295,7 +295,7 @@ public class CommandSwerveDrivetrain
    * The method to use for robot relative driving.
    *
    * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYSpeedMetersPerSecond The desired speed on the Y axis in meters per second.
    * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
    */
   public void driveRobotRelative(
@@ -315,7 +315,7 @@ public class CommandSwerveDrivetrain
    * The method to use for field relative driving.
    *
    * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYSpeedMetersPerSecond The desired speed on the Y axis in meters per second.
    * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
    * @param perspective The perspective to use for field relative driving.
    */
@@ -338,7 +338,7 @@ public class CommandSwerveDrivetrain
    * The method to use for field relative driving.
    *
    * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYSpeedMetersPerSecond The desired speed on the Y axis in meters per second.
    * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
    */
   public void driveFieldRelative(

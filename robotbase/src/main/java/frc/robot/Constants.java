@@ -451,7 +451,9 @@ public final class Constants {
 
     public static final Time UPDATE_POSE_INTERVALS = Seconds.of(4);
 
-    public static final int MIN_ALLOWED_TARGETS = 2;
+    public static final int MIN_ALLOWED_TARGETS = 1;
+
+    public static final int LOOPS_BETWEEN_UPDATES = 3;
 
     public static final class FRONT_CAM {
 
@@ -574,7 +576,7 @@ public final class Constants {
         8,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(1.5, 1)
+        new TrapezoidProfile.Constraints(2, 1.5)
       );
 
     public static final ProfiledPIDController THETA_CONTROLLER =
@@ -582,12 +584,18 @@ public final class Constants {
         6,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(1.5, 1)
+        new TrapezoidProfile.Constraints(2, 1.5)
       );
 
     public static final Distance X_TOLERANCE = Units.Inches.of(1);
     public static final Distance Y_TOLERANCE = Units.Inches.of(1);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
+
+    public static final Pose2d TOLERANCE_POSE = new Pose2d(
+      X_TOLERANCE,
+      Y_TOLERANCE,
+      new Rotation2d(ROTATION_TOLERANCE)
+    );
 
     public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
 
@@ -753,7 +761,7 @@ public final class Constants {
         Rotation2d.kZero
       );
 
-      public static final Pose2d[] REEF_BRANCHES = {
+      public static final Pose2d[] BRANCHES = {
         BRANCH_A,
         BRANCH_B,
         BRANCH_C,

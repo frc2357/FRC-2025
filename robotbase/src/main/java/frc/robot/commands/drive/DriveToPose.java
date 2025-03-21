@@ -76,15 +76,13 @@ public class DriveToPose extends Command {
       Robot.driverControls.getY() * m_speedAt12VoltsMPS,
       Robot.driverControls.getX() * m_speedAt12VoltsMPS
     );
-    ForwardPerspectiveValue perspective =
-      ForwardPerspectiveValue.OperatorPerspective;
+    ForwardPerspectiveValue perspective = ForwardPerspectiveValue.BlueAlliance;
 
     double thetaVelocity =
       Robot.driverControls.getRotation() *
       Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
 
     if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
-      perspective = ForwardPerspectiveValue.BlueAlliance;
       // Calculate drive speed
       double currentDistance = currentPose
         .getTranslation()

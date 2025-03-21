@@ -49,10 +49,10 @@ public class DriveToPoseHandler extends Command {
   @Override
   public void initialize() {
     // m_currentTarget = Robot.swerve.getAllianceRelativePose2d();
-    m_currentTarget = Robot.swerve.getAllianceRelativePose2d();
+    m_currentTarget = Robot.swerve.getFieldRelativePose2d();
     // m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     // m_currPose = Robot.swerve.getAllianceRelativePose2d();
-    m_currPose = Robot.swerve.getAllianceRelativePose2d();
+    m_currPose = Robot.swerve.getFieldRelativePose2d();
     m_currDriveToPose = new DriveToPose((Pose2d currPose) ->
       getNewTarget(m_currentTarget, currPose)
     ); // make a DriveToPose that we have control of
@@ -63,7 +63,7 @@ public class DriveToPoseHandler extends Command {
   public void execute() {
     // m_finalGoal = Robot.buttonboard.getPoseFromGoal();
     // m_currPose = Robot.swerve.getAllianceRelativePose2d();
-    m_currPose = Robot.swerve.getAllianceRelativePose2d();
+    m_currPose = Robot.swerve.getFieldRelativePose2d();
   }
 
   @Override
@@ -78,25 +78,11 @@ public class DriveToPoseHandler extends Command {
   }
 
   protected boolean isAtTarget(Pose2d targetPose, Pose2d currPose) {
-    if (
-      !Utility.isWithinTolerance(
-        currPose.getX(),
-        targetPose.getX(),
-        X_TOLERANCE.in(Meters)
-      )
-    ) {
-      return false;
-    }
-    if (
-      !Utility.isWithinTolerance(
-        currPose.getY(),
-        targetPose.getY(),
-        Y_TOLERANCE.in(Meters)
-      )
-    ) {
-      return false;
-    }
-    return true;
+    return Utility.isWithinTolerance(
+      currPose.getTranslation(),
+      targetPose.getTranslation(),
+      TOLERANCE_POSE.getTranslation()
+    );
   }
 
   protected Pose2d getNewTarget(Pose2d currTarget, Pose2d currPose) {
