@@ -3,9 +3,9 @@ package frc.robot.controls;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.LATERATOR;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
-import frc.robot.commands.climber.ClimberAxis;
+import frc.robot.commands.climberPivot.ClimberPivotAxis;
+import frc.robot.commands.climberWinch.ClimberWinchAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
 import frc.robot.commands.elevator.ElevatorHoldPosition;
@@ -13,7 +13,6 @@ import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
-import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.scoring.CoralHome;
 
 public class CodriverControls {
@@ -104,7 +103,13 @@ public class CodriverControls {
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
 
-    onlyDown.whileTrue(new ClimberAxis(() -> -m_controller.getRightX()));
+    onlyLeft.whileTrue(new ClimberPivotAxis(() -> -m_controller.getRightX()));
+    onlyLeft.whileTrue(
+      new ClimberWinchAxis(
+        () ->
+          m_controller.getRightTriggerAxis() - m_controller.getLeftTriggerAxis()
+      )
+    );
   }
 
   public double deadband(double value, double deadband) {
