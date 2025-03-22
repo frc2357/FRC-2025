@@ -50,9 +50,7 @@ public class Robot extends TimedRobot {
   public static Elevator elevator;
   public static Laterator laterator;
   public static CoralRunner coralRunner;
-  public static AlgaeRunner algaeRunner;
   public static AlgaeKnocker algaeKnocker;
-  public static AlgaePivot algaePivot;
   public static ClimberPivot climberPivot;
   public static ClimberWinch climberWinch;
   public static CameraManager camManager;
@@ -105,9 +103,7 @@ public class Robot extends TimedRobot {
     elevator = new Elevator();
     laterator = new Laterator();
     coralRunner = new CoralRunner();
-    // algaeRunner = new AlgaeRunner();
     algaeKnocker = new AlgaeKnocker();
-    // algaePivot = new AlgaePivot();
     climberWinch = new ClimberWinch();
     climberPivot = new ClimberPivot();
 
