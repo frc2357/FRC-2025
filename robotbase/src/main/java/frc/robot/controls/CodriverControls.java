@@ -105,11 +105,11 @@ public class CodriverControls implements RumbleInterface {
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
 
-    onlyLeft.whileTrue(new ClimberPivotAxis(() -> -m_controller.getRightX()));
+    onlyLeft.whileTrue(new ClimberPivotAxis(() -> -m_controller.getRightY()));
     onlyLeft.whileTrue(
       new ClimberWinchAxis(
         () ->
-          m_controller.getRightTriggerAxis() - m_controller.getLeftTriggerAxis()
+          m_controller.getLeftTriggerAxis() - m_controller.getRightTriggerAxis()
       )
     );
   }
