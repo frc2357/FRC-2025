@@ -2,6 +2,7 @@ package frc.robot.controls;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -19,8 +20,9 @@ import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL4;
+import frc.robot.controls.util.RumbleInterface;
 
-public class DriverControls {
+public class DriverControls implements RumbleInterface {
 
   private CommandXboxController m_controller;
 
@@ -113,5 +115,10 @@ public class DriverControls {
 
   public double modifyAxis(double value) {
     return deadband(value, m_deadband);
+  }
+
+  @Override
+  public void setRumble(double intensity) {
+    m_controller.setRumble(RumbleType.kBothRumble, intensity);
   }
 }
