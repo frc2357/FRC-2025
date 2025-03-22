@@ -210,11 +210,11 @@ public final class Constants {
       public static final Distance L4_PREPOSE = Units.Inches.of(49.5);
       public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
+
+      public static final Distance HALL_EFFECT_POSITION = Units.Inches.of(1.5);
     }
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
-
-    public static final double HALL_EFFECT_OFFSET = 1.25;
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }

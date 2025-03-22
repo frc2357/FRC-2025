@@ -9,12 +9,15 @@ import frc.robot.commands.climberPivot.ClimberPivotAxis;
 import frc.robot.commands.climberWinch.ClimberWinchAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAxis;
+import frc.robot.commands.elevator.ElevatorHallEffectZero;
 import frc.robot.commands.elevator.ElevatorHoldPosition;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
+import frc.robot.commands.laterator.LateratorZero;
 import frc.robot.commands.scoring.CoralHome;
+import frc.robot.commands.scoring.CoralZero;
 import frc.robot.controls.util.RumbleInterface;
 
 public class CodriverControls implements RumbleInterface {
@@ -77,12 +80,16 @@ public class CodriverControls implements RumbleInterface {
       .and(m_controller.x().negate())
       .and(m_controller.y().negate());
 
-    noDpad.and(m_controller.x()).onTrue(new CoralHome());
+    noDpad
+      .and(m_controller.x())
+      .onTrue(new CoralHome().andThen(new CoralZero()));
 
     onlyUp.whileTrue(
       new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY()))
     );
-    onlyUp.and(m_controller.x()).whileTrue(new ElevatorHome());
+    onlyUp
+      .and(m_controller.x())
+      .whileTrue(new ElevatorHome().andThen(new ElevatorHallEffectZero()));
     onlyUp.onFalse(new ElevatorHoldPosition());
 
     onlyRight
@@ -101,7 +108,9 @@ public class CodriverControls implements RumbleInterface {
       .whileTrue(new CoralRunnerAxis(() -> m_controller.getLeftTriggerAxis()));
 
     onlyRight.and(m_controller.y()).whileTrue(new LateratorFullZero());
-    onlyRight.and(m_controller.x()).whileTrue(new LateratorHome());
+    onlyRight
+      .and(m_controller.x())
+      .whileTrue(new LateratorHome().andThen(new LateratorFullZero()));
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
 

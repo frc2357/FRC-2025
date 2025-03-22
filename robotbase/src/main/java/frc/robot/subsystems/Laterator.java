@@ -17,7 +17,6 @@ import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.LATERATOR;
@@ -57,15 +56,7 @@ public class Laterator extends SubsystemBase {
     m_hallEffectSensor = new DigitalInput(
       DIGITAL_INPUT.LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID
     );
-    m_debouncer = new Debouncer(Constants.LATERATOR.DEBOUNCE_TIME_SECONDS);
-  }
-
-  @Override
-  public void periodic() {
-    SmartDashboard.putNumber(
-      "Laterator Calculated Distance",
-      getDistance().in(Units.Inches)
-    );
+    m_debouncer = new Debouncer(LATERATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -98,16 +89,6 @@ public class Laterator extends SubsystemBase {
     setTargetRotations(rotations);
   }
 
-  private Angle distanceToRotations(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(LATERATOR.GEAR_RATIO)
-        .magnitude()
-    );
-    return (rotations);
-  }
-
   public AngularVelocity getVelocity() {
     m_currentAngularVelocityHolder.mut_replace(
       m_encoder.getVelocity(),
@@ -125,11 +106,7 @@ public class Laterator extends SubsystemBase {
   }
 
   public Distance getDistance() {
-    return (
-      LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
-      )
-    );
+    return RotationsToDistance(getRotations());
   }
 
   private boolean isAtTargetRotations() {
@@ -154,13 +131,39 @@ public class Laterator extends SubsystemBase {
 
   public void setZeroMaxExtension() {
     m_encoder.setPosition(
-      distanceToRotations(
-        Constants.LATERATOR.SETPOINTS.FULL_SCORING_EXTENSION
-      ).in(Units.Rotations)
+      distanceToRotations(LATERATOR.SETPOINTS.FULL_SCORING_EXTENSION).in(
+        Units.Rotations
+      )
     );
   }
 
   public boolean isAtZero() {
     return m_debouncer.calculate(!m_hallEffectSensor.get());
+  }
+
+  private Angle distanceToRotations(Distance targetDistance) {
+    Angle rotations = Units.Rotations.of(
+      targetDistance
+        .div(LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
+        .times(LATERATOR.GEAR_RATIO)
+        .magnitude()
+    );
+    return rotations;
+  }
+
+  private Distance RotationsToDistance(Angle rotations) {
+    return (
+      LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
+        rotations.div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
+      )
+    );
+  }
+
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber(
+      "Laterator Calculated Distance",
+      getDistance().in(Units.Inches)
+    );
   }
 }
