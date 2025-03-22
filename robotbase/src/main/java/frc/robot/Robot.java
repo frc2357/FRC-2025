@@ -195,7 +195,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    camManager.updateAllCameras();
+    // camManager.updateAllCameras();
     elasticFieldManager.swerveFieldRep.setRobotPose(
       swerve.getFieldRelativePose2d()
     );

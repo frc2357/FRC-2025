@@ -228,7 +228,7 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
-    public static final double MOTOR_P = 0.00025;
+    public static final double MOTOR_P = 0.00008;
     public static final double MOTOR_I = 0;
     public static final double MOTOR_D = 0;
     public static final double MOTOR_F = 0;
@@ -242,7 +242,7 @@ public final class Constants {
         .outputRange(-1, 1);
 
     public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
-      Units.Rotations.of(0.5);
+      Units.Rotations.of(0.02);
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
@@ -252,8 +252,8 @@ public final class Constants {
         .allowedClosedLoopError(
           SMART_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
         )
-        .maxAcceleration(13000)
-        .maxVelocity(4600);
+        .maxAcceleration(4800)
+        .maxVelocity(2000);
 
     public static final double GEAR_RATIO = 5;
     public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
@@ -283,7 +283,7 @@ public final class Constants {
 
     public static final double NOMINAL_AMP_LIMIT = 30;
 
-    public static final double ZERO_SPEED = -0.1;
+    public static final double ZERO_SPEED = -0.05;
   }
 
   public static final class CORAL_RUNNER {
