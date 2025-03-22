@@ -173,6 +173,17 @@ public class Robot extends TimedRobot {
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
       new DriveSetCoast()
     );
+
+    // Update sensors at a faster rate
+    addPeriodic(
+      () -> {
+        Robot.coralRunner.updateSensors();
+        Robot.laterator.updateSensors();
+        Robot.elevator.updateSensors();
+      },
+      0.005,
+      0.003
+    );
   }
 
   /**

@@ -28,6 +28,7 @@ public class Laterator extends SubsystemBase {
 
   private DigitalInput m_hallEffectSensor;
   private Debouncer m_debouncer;
+  private boolean m_isAtZero = false;
 
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
@@ -138,7 +139,7 @@ public class Laterator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_debouncer.calculate(!m_hallEffectSensor.get());
+    return m_isAtZero;
   }
 
   private Angle distanceToRotations(Distance targetDistance) {
@@ -157,6 +158,10 @@ public class Laterator extends SubsystemBase {
         rotations.div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
       )
     );
+  }
+
+  public void updateSensors() {
+    m_isAtZero = m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 
   @Override

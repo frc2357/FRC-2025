@@ -99,8 +99,7 @@ public class CoralRunner extends SubsystemBase {
     return !m_isIntakeBeamBroken && !m_isOutakeBeamBroken;
   }
 
-  @Override
-  public void periodic() {
+  public void updateSensors() {
     m_isIntakeBeamBroken = m_debouncerOuttake.calculate(
       !m_beamBreakIntake.get()
     );

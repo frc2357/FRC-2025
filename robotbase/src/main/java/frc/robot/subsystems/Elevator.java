@@ -30,8 +30,10 @@ public class Elevator extends SubsystemBase {
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
+
   private DigitalInput m_hallEffectSensor;
   private Debouncer m_debouncer;
+  private boolean m_isAtZero = false;
 
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
   private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
@@ -145,7 +147,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_debouncer.calculate(!m_hallEffectSensor.get());
+    return m_isAtZero;
   }
 
   public void setZero() {
@@ -175,6 +177,10 @@ public class Elevator extends SubsystemBase {
         rotations.div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
       )
     );
+  }
+
+  public void updateSensors() {
+    m_isAtZero = m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 
   @Override
