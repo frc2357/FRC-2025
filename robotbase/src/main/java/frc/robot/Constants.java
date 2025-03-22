@@ -281,7 +281,7 @@ public final class Constants {
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
-    public static final double NOMINAL_AMP_LIMIT = 20;
+    public static final double NOMINAL_AMP_LIMIT = 30;
 
     public static final double ZERO_SPEED = -0.1;
   }
