@@ -1,11 +1,8 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Inches;
-
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.units.Units;
 import frc.robot.subsystems.CameraManager;
 import frc.robot.util.Utility;
 import org.junit.jupiter.api.Test;

@@ -407,12 +407,8 @@ public final class Constants {
 
     public static final PoseStrategy PRIMARY_STRATEGY =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
-    public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
       PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
-    public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
     public static final double PNP_HEADING_SCALE_FACTOR = 2; // no touchy.
 
@@ -438,7 +434,7 @@ public final class Constants {
 
     public static final Time INFO_VALID_TIME = Units.Seconds.of(0.6);
 
-    public static final int PNP_INFO_STORAGE_AMOUNT = 3;
+    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
@@ -452,8 +448,6 @@ public final class Constants {
     public static final Time UPDATE_POSE_INTERVALS = Seconds.of(4);
 
     public static final int MIN_ALLOWED_TARGETS = 1;
-
-    public static final int LOOPS_BETWEEN_UPDATES = 3;
 
     public static final class FRONT_CAM {
 
@@ -494,36 +488,35 @@ public final class Constants {
         )
       );
     }
+    // public static final class RIGHT_CAM {
 
-    public static final class RIGHT_CAM {
+    //   public static final String NAME = "rightCam";
+    //   public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+    //     Units.Inches.of(-8.887),
+    //     Units.Inches.of(-3.001),
+    //     Units.Inches.of(16.578),
+    //     new Rotation3d(
+    //       Units.Degrees.of(10),
+    //       Units.Degrees.of(0),
+    //       Units.Degrees.of(270)
+    //     )
+    //   );
+    // }
 
-      public static final String NAME = "rightCam";
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(-8.887),
-        Units.Inches.of(-3.001),
-        Units.Inches.of(16.578),
-        new Rotation3d(
-          Units.Degrees.of(10),
-          Units.Degrees.of(0),
-          Units.Degrees.of(270)
-        )
-      );
-    }
+    // public static final class LEFT_CAM {
 
-    public static final class LEFT_CAM {
-
-      public static final String NAME = "leftCam";
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(8.887),
-        Units.Inches.of(-3.001),
-        Units.Inches.of(16.579),
-        new Rotation3d(
-          Units.Degrees.of(-10),
-          Units.Degrees.of(0),
-          Units.Degrees.of(90)
-        )
-      );
-    }
+    //   public static final String NAME = "leftCam";
+    //   public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+    //     Units.Inches.of(8.887),
+    //     Units.Inches.of(-3.001),
+    //     Units.Inches.of(16.579),
+    //     new Rotation3d(
+    //       Units.Degrees.of(-10),
+    //       Units.Degrees.of(0),
+    //       Units.Degrees.of(90)
+    //     )
+    //   );
+    // }
   }
 
   public static final class FIELD_CONSTANTS {

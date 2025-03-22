@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.StopAllMotors;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
@@ -35,8 +36,8 @@ import frc.robot.controls.controllers.CommandButtonboardController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.networkTables.*;
 import frc.robot.subsystems.*;
-import frc.robot.util.ElasticFieldManager;
 import frc.robot.util.Telemetry;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -62,7 +63,6 @@ public class Robot extends TimedRobot {
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
   public static Buttonboard buttonboard;
-  public static ElasticFieldManager elasticFieldManager;
 
   public static Alliance alliance = null;
 
@@ -80,20 +80,6 @@ public class Robot extends TimedRobot {
    * and should be used for any initialization code.
    */
   public Robot() {
-    // forces OpenCV to load. Dont remove this.
-    for (int i = 0; i < 3; i++) {
-      try {
-        OpenCvLoader.forceLoad();
-        m_didOpenCVLoad = true;
-        break;
-      } catch (Exception e) {
-        if (i > 2) {
-          System.err.println(
-            "OpenCV Load FAILED! Pose est will be much worse!"
-          );
-        }
-      }
-    }
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
@@ -117,18 +103,14 @@ public class Robot extends TimedRobot {
       BACK_CAM.NAME,
       BACK_CAM.ROBOT_TO_CAM_TRANSFORM
     );
-    leftCam = camManager.createCamera(
-      LEFT_CAM.NAME,
-      LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
-    rightCam = camManager.createCamera(
-      RIGHT_CAM.NAME,
-      RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
-    // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
-    if (!m_didOpenCVLoad) {}
-    elasticFieldManager = new ElasticFieldManager();
-    elasticFieldManager.setupSwerveField();
+    // leftCam = camManager.createCamera(
+    //   LEFT_CAM.NAME,
+    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
+    // );
+    // rightCam = camManager.createCamera(
+    //   RIGHT_CAM.NAME,
+    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
+    // );
 
     // Define controls
     buttonboard = new Buttonboard(
@@ -153,9 +135,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Buttonboard", buttonboard);
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
     SmartDashboard.putData("Signal Logger", m_SignalLoggerManager);
-
-    elasticFieldManager = new ElasticFieldManager();
-    elasticFieldManager.setupSwerveField();
 
     // Logging
     DataLogManager.logNetworkTables(true); // enable/disable automatic NetworksTable Logging
@@ -183,9 +162,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     camManager.updateAllCameras();
-    elasticFieldManager.swerveFieldRep.setRobotPose(
-      swerve.getFieldRelativePose2d()
-    );
     CommandScheduler.getInstance().run();
   }
 

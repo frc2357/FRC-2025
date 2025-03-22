@@ -38,7 +38,7 @@ public class DriveToReef extends DriveToPoseHandler {
 
   @Override
   public void initialize() {
-    // m_finalGoal = REEF.BRANCH_A;
+    m_finalGoal = Robot.swerve.getFieldRelativePose2d();
     Pose2d newGoal = Robot.camManager.getFieldRelativeBranchPose(m_goal);
     if (newGoal == null) {
       return;
@@ -50,7 +50,7 @@ public class DriveToReef extends DriveToPoseHandler {
     System.out.println("***** START OF INIT *****");
     System.out.println("NEW GOAL   - " + newGoal);
     System.out.println("CURR POSE  - " + m_currPose);
-    // m_finalGoal = newGoal;
+    m_finalGoal = newGoal;
     System.out.println("FINAL GOAL - " + m_finalGoal);
     System.out.println("***** END OF INIT *******");
     super.initialize();

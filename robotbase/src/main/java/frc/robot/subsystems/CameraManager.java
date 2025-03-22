@@ -3,11 +3,9 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.*;
 import static frc.robot.Constants.FIELD.REEF.BLUE_REEF_TAGS;
-import static frc.robot.Constants.FIELD.REEF.BRANCHES;
 import static frc.robot.Constants.FIELD.REEF.RED_REEF_TAGS;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
-import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Pair;
@@ -37,7 +35,11 @@ import frc.robot.subsystems.PhotonVisionCamera.TimestampedPNPInfo;
 import frc.robot.util.CollisionDetection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BooleanSupplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -213,9 +215,8 @@ public class CameraManager {
     }
   }
 
-  private final ArrayList<PhotonVisionCamera> m_robotCameras = new ArrayList<
-    PhotonVisionCamera
-  >();
+  private final Map<PhotonVisionCamera, PhotonPipelineResult> m_robotCameras =
+    new HashMap<PhotonVisionCamera, PhotonPipelineResult>();
 
   private final PhotonPoseEstimator m_poseEstimator = new PhotonPoseEstimator(
     FIELD_CONSTANTS.APRIL_TAG_LAYOUT,
@@ -246,7 +247,8 @@ public class CameraManager {
   private PoseStrategy m_primaryStrat = PRIMARY_STRATEGY;
   private PoseStrategy m_fallbackStrat = FALLBACK_STRATEGY;
 
-  private int m_loopsSinceUpdate = 0;
+  private final poseEstimate[] m_poseEstimates =
+    new poseEstimate[m_pnpInfo.length];
 
   public CameraManager() {
     m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
@@ -269,24 +271,33 @@ public class CameraManager {
    * Updates all instances of {@link PhotonVisionCamera} with the latest result, and updates the pose with the updated pnpInfo.
    */
   public void updateAllCameras() {
-    if (m_loopsSinceUpdate++ < LOOPS_BETWEEN_UPDATES) return;
-    m_loopsSinceUpdate = 0;
-    poseEstimate[] estimates = new poseEstimate[PNP_INFO_STORAGE_AMOUNT];
+    Arrays.fill(m_poseEstimates, null);
     boolean updatePose = SmartDashboard.getBoolean(
       "Toggle Pose Estimation",
       false
     );
-    for (PhotonVisionCamera camera : m_robotCameras) {
+    for (var entry : m_robotCameras.entrySet()) {
+      var camera = entry.getKey();
       if (camera.isConnected()) camera.updateResult();
       else if (
         RobotModeTriggers.disabled().getAsBoolean() &&
         RobotController.getMeasureTime().in(Seconds) % 5 <= 0.1
-      ) System.err.println(
-        "CAMERA " +
-        camera.m_camera.getName() +
-        " IS DISCONNECTED! ***** TELL MAX! *****"
-      );
+      ) {
+        System.err.println(
+          "CAMERA " +
+          camera.m_camera.getName() +
+          " IS DISCONNECTED! ***** TELL MAX! *****"
+        );
+        continue;
+      }
     }
+    // checks if we have results from all cameras before estimating pose
+    if (m_robotCameras.containsValue(null)) return;
+    for (var entry : m_robotCameras.entrySet()) {
+      processResult(entry.getValue(), entry.getKey());
+      entry.setValue(null);
+    }
+
     for (int i = 0; i < m_pnpInfo.length; i++) {
       if (m_pnpInfo[i] == null) continue;
       if (!m_pnpInfo[i].exists()) {
@@ -294,10 +305,10 @@ public class CameraManager {
         continue;
       }
 
-      estimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
+      m_poseEstimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
       m_pnpInfo[i] = null;
     }
-    updatePoseFromPoseEstimates(updatePose, estimates);
+    updatePoseFromPoseEstimates(updatePose, m_poseEstimates);
   }
 
   public PhotonVisionCamera createCamera(
@@ -307,10 +318,17 @@ public class CameraManager {
     PhotonVisionCamera cam = new PhotonVisionCamera(
       name,
       robotToCameraTransform,
-      this::processResult
+      this::storeResult
     );
-    m_robotCameras.add(cam);
+    m_robotCameras.put(cam, null);
     return cam;
+  }
+
+  private void storeResult(
+    PhotonPipelineResult result,
+    PhotonVisionCamera cam
+  ) {
+    m_robotCameras.put(cam, result);
   }
 
   private void preparePoseEstimator(TimestampedPNPInfo infoToPrepFor) {
