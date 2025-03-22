@@ -6,9 +6,6 @@ import frc.robot.Constants;
 public class LateratorHome extends SequentialCommandGroup {
 
   public LateratorHome() {
-    super(
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.HOME),
-      new LateratorZero()
-    );
+    super(new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.HOME));
   }
 }

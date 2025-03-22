@@ -64,9 +64,8 @@ public class C3R3Peice extends AutoBase {
       .onTrue(
         new CoralIntake()
           .andThen(
-            new CoralHome(() -> false).andThen(
-              redSToBranchD.cmd().alongWith(new CoralSettle())
-            )
+            new CoralHome()
+              .andThen(redSToBranchD.cmd().alongWith(new CoralSettle()))
           )
       );
     // when at the branch, we score and then move back to the station
@@ -86,7 +85,7 @@ public class C3R3Peice extends AutoBase {
       .onTrue(
         new CoralIntake()
           .andThen(
-            new CoralHome(() -> false),
+            new CoralHome(),
             redSToBranchC.cmd().alongWith(new CoralSettle())
           )
       );
@@ -105,7 +104,7 @@ public class C3R3Peice extends AutoBase {
       .done()
       .onTrue(
         new CoralIntake()
-          .andThen(new CoralRetract(false))/* .andThen(RedSToBranchI.cmd())*/
+          .andThen(new CoralRetract())/* .andThen(RedSToBranchI.cmd())*/
       );
     // RedSToBranchI.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
     //   new AutoCoralPreposeL4()

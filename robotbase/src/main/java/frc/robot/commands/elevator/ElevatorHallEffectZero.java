@@ -4,9 +4,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ELEVATOR;
 import frc.robot.Robot;
 
-public class ElevatorZero extends Command {
+public class ElevatorHallEffectZero extends Command {
 
-  public ElevatorZero() {
+  public ElevatorHallEffectZero() {
     addRequirements(Robot.elevator);
   }
 
