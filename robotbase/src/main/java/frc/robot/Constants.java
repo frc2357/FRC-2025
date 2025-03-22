@@ -393,7 +393,7 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60, 60)
-      .inverted(false);
+      .inverted(true);
 
     public static final double AXIS_MAX_SPEED = .25;
   }
