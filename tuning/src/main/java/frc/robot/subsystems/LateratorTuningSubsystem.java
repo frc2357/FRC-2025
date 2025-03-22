@@ -37,7 +37,7 @@ public class LateratorTuningSubsystem implements Sendable {
   private double arbFF = 0;
   private double velFF = 0.00025;
   private double maxVel = 2000; // Desired: 4600, Max: 5600
-  private double maxAcc = 8000; // Desired: Unknown
+  private double maxAcc = 4800; // Desired: Unknown
 
   private SparkBaseConfig m_motorconfig = Constants.LATERATOR.MOTOR_CONFIG;
 
