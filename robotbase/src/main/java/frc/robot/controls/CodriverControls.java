@@ -2,6 +2,8 @@ package frc.robot.controls;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
@@ -80,9 +82,16 @@ public class CodriverControls implements RumbleInterface {
       .and(m_controller.x().negate())
       .and(m_controller.y().negate());
 
+    m_controller
+      .start()
+      .onTrue(
+        new InstantCommand(() -> CommandScheduler.getInstance().cancelAll())
+      );
+
     noDpad
       .and(m_controller.x())
-      .onTrue(new CoralHome().andThen(new CoralZero()));
+      .whileTrue(new CoralHome().andThen(new CoralZero()));
+    noDpad.and(m_controller.a()).whileTrue(new CoralZero());
 
     onlyUp.whileTrue(
       new ElevatorAxis(() -> modifyAxis(-m_controller.getRightY()))
@@ -90,6 +99,7 @@ public class CodriverControls implements RumbleInterface {
     onlyUp
       .and(m_controller.x())
       .whileTrue(new ElevatorHome().andThen(new ElevatorHallEffectZero()));
+    onlyUp.and(m_controller.a()).whileTrue(new ElevatorHallEffectZero());
     onlyUp.onFalse(new ElevatorHoldPosition());
 
     onlyRight
@@ -110,7 +120,8 @@ public class CodriverControls implements RumbleInterface {
     onlyRight.and(m_controller.y()).whileTrue(new LateratorFullZero());
     onlyRight
       .and(m_controller.x())
-      .whileTrue(new LateratorHome().andThen(new LateratorFullZero()));
+      .whileTrue(new LateratorHome().andThen(new LateratorZero()));
+    onlyRight.and(m_controller.x()).whileTrue(new LateratorZero());
     onlyRight.and(m_controller.a()).whileTrue(new AlgaeKnockerSetSpeed(0.25));
     onlyRight.and(m_controller.b()).whileTrue(new AlgaeKnockerSetSpeed(-0.25));
 
