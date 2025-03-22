@@ -84,11 +84,12 @@ public class Laterator extends SubsystemBase {
     m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
   }
 
+  @SuppressWarnings("removal")
   private void setTargetRotations(Angle targetRotations) {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl
+      ControlType.kSmartMotion
     );
   }
 
@@ -135,7 +136,7 @@ public class Laterator extends SubsystemBase {
     return Utility.isWithinTolerance(
       getRotations(),
       m_targetRotations,
-      LATERATOR.MAX_MOTION_ALLOWED_ERROR_ROTATIONS
+      LATERATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
     );
   }
 
