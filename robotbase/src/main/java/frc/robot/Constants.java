@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -229,31 +228,34 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
-    public static final double MOTOR_P = 0.3;
+    public static final double MOTOR_P = 0.00025;
     public static final double MOTOR_I = 0;
-    public static final double MOTOR_D = 1;
+    public static final double MOTOR_D = 0;
     public static final double MOTOR_F = 0;
+    public static final double MOTOR_VEL_FF = 0.00025;
 
     // Set feedback sensor to alternate encoder
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG.closedLoop
         .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
+        .velocityFF(MOTOR_VEL_FF)
         .outputRange(-1, 1);
 
-    public static final Angle MAX_MOTION_ALLOWED_ERROR_ROTATIONS =
+    public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
       Units.Rotations.of(0.5);
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
+    @SuppressWarnings("removal")
+    public static final SmartMotionConfig MAX_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.smartMotion
         .allowedClosedLoopError(
-          MAX_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
+          SMART_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
         )
         .maxAcceleration(13000)
         .maxVelocity(4600);
 
-    public static final double GEAR_RATIO = 15;
+    public static final double GEAR_RATIO = 5;
     public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
       Units.Millimeters.of(46.188);
     public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =

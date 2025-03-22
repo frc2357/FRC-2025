@@ -31,10 +31,11 @@ public class LateratorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0.3;
+  private double P = 0;
   private double I = 0;
-  private double D = 1;
+  private double D = 0;
   private double arbFF = 0;
+  private double velFF = 0;
   private double maxVel = 4600; // Desired: 4600, Max: 5600
   private double maxAcc = 13000; // Desired: Unknown
 
@@ -58,6 +59,7 @@ public class LateratorTuningSubsystem implements Sendable {
     Preferences.initDouble("lateratorI", I);
     Preferences.initDouble("lateratorD", D);
     Preferences.initDouble("lateratorFF", arbFF);
+    Preferences.initDouble("lateratorVelFF", velFF);
     Preferences.initDouble("lateratorMaxVel", maxVel);
     Preferences.initDouble("lateratorMaxAcc", maxAcc);
 
@@ -65,6 +67,7 @@ public class LateratorTuningSubsystem implements Sendable {
     I = Preferences.getDouble("lateratorI", I);
     D = Preferences.getDouble("lateratorD", D);
     arbFF = Preferences.getDouble("lateratorFF", arbFF);
+    velFF = Preferences.getDouble("lateratorVelFF", velFF);
     maxVel = Preferences.getDouble("lateratorMaxVel", maxVel);
     maxAcc = Preferences.getDouble("lateratorMaxAcc", maxAcc);
 
@@ -77,6 +80,7 @@ public class LateratorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Laterator I", I);
     SmartDashboard.putNumber("Laterator D", D);
     SmartDashboard.putNumber("Laterator arbFF", arbFF);
+    SmartDashboard.putNumber("Laterator velFF", velFF);
     SmartDashboard.putNumber("Laterator MaxVel", maxVel);
     SmartDashboard.putNumber("Laterator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -88,10 +92,9 @@ public class LateratorTuningSubsystem implements Sendable {
   }
 
   public void updatePIDs() {
-    // Rev recommends not using velocity feed forward for max motion positional control
-    m_motorconfig.closedLoop.pidf(P, I, D, 0);
+    m_motorconfig.closedLoop.pidf(P, I, D, 0).velocityFF(velFF);
 
-    m_motorconfig.closedLoop.maxMotion
+    m_motorconfig.closedLoop.smartMotion
       .maxAcceleration(maxAcc)
       .maxVelocity(maxVel);
 
@@ -107,16 +110,14 @@ public class LateratorTuningSubsystem implements Sendable {
     double newI = SmartDashboard.getNumber("Laterator I", I);
     double newD = SmartDashboard.getNumber("Laterator D", D);
     double newFF = SmartDashboard.getNumber("Laterator arbFF", arbFF);
+    double newVelFF = SmartDashboard.getNumber("Laterator velFF", velFF);
     double newMaxVel = SmartDashboard.getNumber("Laterator MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Laterator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
-    // m_targetRotations = Rotations.of(
-    //   SmartDashboard.getNumber(
-    //     "Laterator Setpoint",
-    //     m_targetRotations.in(Rotations)
-    //   )
-    // );
+    m_targetRotations = Rotations.of(
+      SmartDashboard.getNumber("Laterator Setpoint", 0)
+    );
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
     SmartDashboard.putNumber(
       "Calculated Distance",
@@ -128,6 +129,7 @@ public class LateratorTuningSubsystem implements Sendable {
       newI != I ||
       newD != D ||
       newFF != arbFF ||
+      newVelFF != velFF ||
       newMaxVel != maxVel ||
       newMaxAcc != maxAcc
     ) {
@@ -135,6 +137,7 @@ public class LateratorTuningSubsystem implements Sendable {
       I = newI;
       D = newD;
       arbFF = newFF;
+      velFF = newVelFF;
       maxVel = newMaxVel;
       maxAcc = newMaxAcc;
       updatePIDs();
@@ -190,10 +193,9 @@ public class LateratorTuningSubsystem implements Sendable {
 
   public void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
-    System.out.println("SETTING ROTATIONS");
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kMAXMotionPositionControl,
+      ControlType.kSmartMotion,
       ClosedLoopSlot.kSlot0,
       arbFF,
       ArbFFUnits.kVoltage
@@ -230,6 +232,7 @@ public class LateratorTuningSubsystem implements Sendable {
         Preferences.setDouble("lateratorI", I);
         Preferences.setDouble("lateratorD", D);
         Preferences.setDouble("lateratorFF", arbFF);
+        Preferences.setDouble("lateratorVelFF", velFF);
         Preferences.setDouble("lateratorMaxVel", maxVel);
         Preferences.setDouble("lateratorMaxAcc", maxAcc);
       }
