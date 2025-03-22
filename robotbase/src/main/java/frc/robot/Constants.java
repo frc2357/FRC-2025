@@ -82,16 +82,12 @@ public final class Constants {
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
-    public static final int ALGAE_RUNNER_MOTOR = 25;
-    public static final int ALGAE_PIVOT_LEFT_MOTOR = 26;
-    public static final int ALGAE_PIVOT_RIGHT_MOTOR = 27;
-
     public static final int LATERATOR_MOTOR = 28;
     public static final int CORAL_RUNNER_MOTOR = 29;
 
-    public static final int CLIMBER_WINCH_MOTOR_LEFT = 30;
-    public static final int CLIMBER_WINCH_MOTOR_RIGHT = 31;
-    public static final int CLIMBER_PIVOT_MOTOR = 32;
+    public static final int CLIMBER_WINCH_MOTOR_LEFT = 27;
+    public static final int CLIMBER_WINCH_MOTOR_RIGHT = 26;
+    public static final int CLIMBER_PIVOT_MOTOR = 31;
 
     public static final int ALGAE_KNOCKER_MOTOR = 33;
   }
@@ -237,17 +233,17 @@ public final class Constants {
         .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
         .outputRange(-1, 1);
 
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+    public static final double SMART_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+    public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.smartMotion
+        .allowedClosedLoopError(SMART_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(13000)
         .maxVelocity(4600);
 
-    public static final double GEAR_RATIO = 15;
+    public static final double GEAR_RATIO = 5;
     public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
       Units.Millimeters.of(46.188);
     public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
@@ -345,10 +341,6 @@ public final class Constants {
         .openLoopRampRate(.25)
         .smartCurrentLimit(40, 20)
         .voltageCompensation(12);
-
-    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
-      .apply(RIGHT_MOTOR_CONFIG)
-      .follow(CAN_ID.ALGAE_PIVOT_RIGHT_MOTOR, true);
 
     public static final double AXIS_MAX_SPEED = 0.25;
 
@@ -658,8 +650,8 @@ public final class Constants {
     public static final double CODRIVE_RUMBLE_INTENSITY = .5;
     public static final double BUTTONBOARD_RUMBLE_INTENSITY = 1;
 
-    public static final double DRIVE_RUMBLE_SECONDS = 2;
-    public static final double CODRIVE_RUMBLE_SECONDS = 2;
+    public static final double DRIVE_RUMBLE_SECONDS = 1;
+    public static final double CODRIVE_RUMBLE_SECONDS = 1;
     public static final double BUTTONBOARD_RUMBLE_SECONDS = .05;
   }
 

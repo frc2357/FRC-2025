@@ -1,5 +1,6 @@
 package frc.robot.controls;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -15,8 +16,9 @@ import frc.robot.commands.laterator.LateratorFullZero;
 import frc.robot.commands.laterator.LateratorHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.scoring.CoralHome;
+import frc.robot.controls.util.RumbleInterface;
 
-public class CodriverControls {
+public class CodriverControls implements RumbleInterface {
 
   private CommandXboxController m_controller;
 
@@ -129,5 +131,10 @@ public class CodriverControls {
 
   public double modifyAxis(double value) {
     return deadband(value, m_deadband);
+  }
+
+  @Override
+  public void setRumble(double intensity) {
+    m_controller.setRumble(RumbleType.kBothRumble, intensity);
   }
 }
