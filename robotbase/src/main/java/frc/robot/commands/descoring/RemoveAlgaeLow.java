@@ -28,7 +28,7 @@ public class RemoveAlgaeLow extends SequentialCommandGroup {
         ),
         new AlgaeKnockerSetSpeed(-0.5)
       ),
-      new CoralHome(() -> false)
+      new CoralHome()
     );
   }
 }

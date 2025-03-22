@@ -19,7 +19,7 @@ import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.ELEVATOR;
 import frc.robot.util.Utility;
@@ -30,8 +30,10 @@ public class Elevator extends SubsystemBase {
   private SparkMax m_motorRight;
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
+
   private DigitalInput m_hallEffectSensor;
   private Debouncer m_debouncer;
+  private boolean m_isAtZero = false;
 
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
   private MutAngularVelocity m_currentAngularVelocityHolder = Units.RPM.mutable(
@@ -44,21 +46,21 @@ public class Elevator extends SubsystemBase {
   public Elevator() {
     SmartDashboard.putNumber("Elevator Setpoint Modifier", 0);
     m_motorLeft = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_LEFT_MOTOR,
+      CAN_ID.ELEVATOR_LEFT_MOTOR,
       MotorType.kBrushless
     );
     m_motorRight = new SparkMax(
-      Constants.CAN_ID.ELEVATOR_RIGHT_MOTOR,
+      CAN_ID.ELEVATOR_RIGHT_MOTOR,
       MotorType.kBrushless
     );
 
     m_motorLeft.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_LEFT,
+      ELEVATOR.MOTOR_CONFIG_LEFT,
       ResetMode.kResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
     m_motorRight.configure(
-      Constants.ELEVATOR.MOTOR_CONFIG_RIGHT,
+      ELEVATOR.MOTOR_CONFIG_RIGHT,
       ResetMode.kResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
@@ -69,7 +71,7 @@ public class Elevator extends SubsystemBase {
     m_hallEffectSensor = new DigitalInput(
       DIGITAL_INPUT.ELEVATOR_HALL_EFFECT_SENSOR_ID
     );
-    m_debouncer = new Debouncer(Constants.ELEVATOR.DEBOUNCE_TIME_SECONDS);
+    m_debouncer = new Debouncer(ELEVATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -101,13 +103,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setTargetDistance(Distance targetDistance) {
-    Angle rotations = Units.Rotations.of(
-      targetDistance
-        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
-        .times(ELEVATOR.GEAR_RATIO)
-        .magnitude()
-    );
-    setTargetRotations(rotations);
+    setTargetRotations(distanceToRotations(targetDistance));
   }
 
   public AngularVelocity getVelocity() {
@@ -127,11 +123,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public Distance getDistance() {
-    return (
-      ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        getRotations().div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
-      )
-    );
+    return rotationsToDistance(getRotations());
   }
 
   private boolean isAtTargetRotations() {
@@ -155,7 +147,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean isAtZero() {
-    return m_debouncer.calculate(!m_hallEffectSensor.get());
+    return m_isAtZero;
   }
 
   public void setZero() {
@@ -163,7 +155,32 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setPositionHallEffect() {
-    m_encoder.setPosition(1.5);
+    m_encoder.setPosition(
+      distanceToRotations(ELEVATOR.SETPOINTS.HALL_EFFECT_POSITION).in(
+        Units.Rotations
+      )
+    );
+  }
+
+  private Angle distanceToRotations(Distance distance) {
+    return Units.Rotations.of(
+      distance
+        .div(ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE)
+        .times(ELEVATOR.GEAR_RATIO)
+        .magnitude()
+    );
+  }
+
+  private Distance rotationsToDistance(Angle rotations) {
+    return (
+      ELEVATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
+        rotations.div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
+      )
+    );
+  }
+
+  public void updateSensors() {
+    m_isAtZero = m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 
   @Override

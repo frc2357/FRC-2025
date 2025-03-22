@@ -65,7 +65,7 @@ public final class Constants {
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
       MOTOR_CONFIG.closedLoop.outputRange(-1, 1);
 
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.01;
 
     public static final double AXIS_MAX_SPEED = 0.75;
 

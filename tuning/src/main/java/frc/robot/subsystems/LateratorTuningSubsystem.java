@@ -31,13 +31,13 @@ public class LateratorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0;
+  private double P = 0.00008;
   private double I = 0;
   private double D = 0;
   private double arbFF = 0;
-  private double velFF = 0;
-  private double maxVel = 4600; // Desired: 4600, Max: 5600
-  private double maxAcc = 13000; // Desired: Unknown
+  private double velFF = 0.00025;
+  private double maxVel = 2000; // Desired: 4600, Max: 5600
+  private double maxAcc = 4800; // Desired: Unknown
 
   private SparkBaseConfig m_motorconfig = Constants.LATERATOR.MOTOR_CONFIG;
 
@@ -86,7 +86,10 @@ public class LateratorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
     SmartDashboard.putNumber("Motor Velocity", m_encoder.getVelocity());
     SmartDashboard.putBoolean("Is At Target", isAtTargetRotations());
-    SmartDashboard.putNumber("Calculated Distance", getDistance().magnitude());
+    SmartDashboard.putNumber(
+      "Calculated Distance",
+      getDistance().in(Units.Inches)
+    );
     SmartDashboard.putNumber("Laterator Setpoint", 0);
     SmartDashboard.putData("Save Laterator Config", this);
   }
@@ -186,7 +189,7 @@ public class LateratorTuningSubsystem implements Sendable {
   public Distance getDistance() {
     return (
       LATERATOR.OUTPUT_PULLEY_CIRCUMFERENCE.times(
-        -1 * getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
+        getRotations().div(LATERATOR.GEAR_RATIO).in(Units.Rotations)
       )
     );
   }
