@@ -671,8 +671,8 @@ public final class Constants {
     public static final double CODRIVE_RUMBLE_INTENSITY = .5;
     public static final double BUTTONBOARD_RUMBLE_INTENSITY = 1;
 
-    public static final double DRIVE_RUMBLE_SECONDS = 2;
-    public static final double CODRIVE_RUMBLE_SECONDS = 2;
+    public static final double DRIVE_RUMBLE_SECONDS = 1;
+    public static final double CODRIVE_RUMBLE_SECONDS = 1;
     public static final double BUTTONBOARD_RUMBLE_SECONDS = .05;
   }
 
