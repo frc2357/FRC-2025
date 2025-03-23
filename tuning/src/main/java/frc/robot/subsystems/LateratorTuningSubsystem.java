@@ -219,7 +219,7 @@ public class LateratorTuningSubsystem implements Sendable {
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
-      LATERATOR.MAX_MOTION_ALLOWED_ERROR_PERCENT
+      LATERATOR.SMART_MOTION_ALLOWED_ERROR_PERCENT
     );
   }
 
