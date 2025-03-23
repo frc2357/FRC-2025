@@ -339,7 +339,7 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig().apply(MOTOR_CONFIG_LEFT).inverted(true);
 
-    public static final double AXIS_MAX_SPEED = .25;
+    public static final double AXIS_MAX_SPEED = 0.5;
   }
 
   public static class CLIMBER_PIVOT {
