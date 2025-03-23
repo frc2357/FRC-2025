@@ -77,7 +77,6 @@ public class Robot extends TimedRobot {
   private SequentialCommandGroup m_setCoastOnDisable;
 
   private AutoChooserManager m_autoChooserManager;
-  private ElasticFieldManager elasticFieldManager;
   private SignalLoggerManager m_SignalLoggerManager;
   private boolean m_didOpenCVLoad = false;
 
