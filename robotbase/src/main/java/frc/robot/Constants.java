@@ -195,7 +195,7 @@ public final class Constants {
 
     public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
-    public static final double HOLD_VOLTAGE = 0.75;
+    public static final double HOLD_VOLTAGE = 0.5;
 
     public static final class SETPOINTS {
 
