@@ -7,11 +7,7 @@ public class SetStartedAtZero extends Command {
 
   @Override
   public void initialize() {
-    if (Robot.laterator.isAtZero()) {
-      Robot.laterator.setStartedAtZero(true);
-    } else {
-      Robot.laterator.setStartedAtZero(false);
-    }
+    Robot.laterator.setStartedAtZero(Robot.laterator.isAtZero());
   }
 
   @Override

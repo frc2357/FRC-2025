@@ -15,16 +15,16 @@ public class ElevatorSetDistance extends Command {
   }
 
   public void execute() {
-    if (
-      Robot.swerve
-        .getAbsoluteTranslationalVelocity()
-        .lte(Constants.SWERVE.ROBOT_NO_TIP_SPEED) ||
-      Robot.elevator.isGoingDown()
-    ) {
-      Robot.elevator.setTargetDistance(m_distance);
-    } else {
-      Robot.elevator.setTargetDistance(Robot.elevator.getDistance());
-    }
+    // if (
+    //   Robot.swerve
+    //     .getAbsoluteTranslationalVelocity()
+    //     .lte(Constants.SWERVE.ROBOT_NO_TIP_SPEED) ||
+    //   Robot.elevator.isGoingDown()
+    // ) {
+    Robot.elevator.setTargetDistance(m_distance);
+    // } else {
+    // Robot.elevator.setTargetDistance(Robot.elevator.getDistance());
+    // }
   }
 
   @Override

@@ -47,8 +47,8 @@ public class Laterator extends SubsystemBase {
 
     m_motor.configure(
       LATERATOR.MOTOR_CONFIG,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
     );
 
     m_PIDController = m_motor.getClosedLoopController();

@@ -37,8 +37,8 @@ public class CoralRunner extends SubsystemBase {
     m_motor = new SparkMax(CAN_ID.CORAL_RUNNER_MOTOR, MotorType.kBrushless);
     m_motor.configure(
       CORAL_RUNNER.MOTOR_CONFIG,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
     );
 
     m_encoder = m_motor.getEncoder();

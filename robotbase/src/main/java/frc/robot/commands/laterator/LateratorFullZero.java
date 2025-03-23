@@ -14,7 +14,8 @@ public class LateratorFullZero extends SequentialCommandGroup {
         new InstantCommand(),
         new LateratorZeroStall(),
         Robot.laterator::isAtZero
-      )
+      ),
+      new LateratorHome()
     );
   }
 }
