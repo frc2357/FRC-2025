@@ -13,7 +13,10 @@ public class LateratorHoldHome extends Command {
   @Override
   public void initialize() {
     if (Robot.laterator.startedAtZero()) {
+      System.out.println("Holding home");
       Robot.laterator.setTargetDistance(Constants.ELEVATOR.SETPOINTS.HOME);
+    } else {
+      System.out.println("Not HOLDING HOME");
     }
   }
 
