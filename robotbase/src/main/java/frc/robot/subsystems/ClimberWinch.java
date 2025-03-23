@@ -36,14 +36,22 @@ public class ClimberWinch extends SubsystemBase {
 
   public void setSpeed(double percentOutput) {
     m_motorLeft.set(percentOutput);
+    m_motorRight.set(percentOutput);
+  }
+
+  public void setSpeed(double leftOutput, double rightOutput) {
+    m_motorLeft.set(leftOutput);
+    m_motorRight.set(rightOutput);
   }
 
   public void setAxisSpeed(double speed) {
     speed *= CLIMBER_WINCH.AXIS_MAX_SPEED;
     m_motorLeft.set(speed);
+    m_motorRight.set(speed);
   }
 
   public void stop() {
     m_motorLeft.stopMotor();
+    m_motorRight.stopMotor();
   }
 }
