@@ -106,6 +106,11 @@ public class Elevator extends SubsystemBase {
     setTargetRotations(distanceToRotations(targetDistance));
   }
 
+  public void holdPosition() {
+    m_targetRotations.mut_replace(Double.NaN, Units.Rotations);
+    m_motorLeft.setVoltage(ELEVATOR.HOLD_VOLTAGE);
+  }
+
   public AngularVelocity getVelocity() {
     m_currentAngularVelocityHolder.mut_replace(
       m_encoder.getVelocity(),
@@ -189,5 +194,7 @@ public class Elevator extends SubsystemBase {
       "Elevator Calculated Distance",
       getDistance().in(Units.Inches)
     );
+
+    SmartDashboard.putBoolean("Hall Effect", isAtZero());
   }
 }
