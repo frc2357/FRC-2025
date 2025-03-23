@@ -200,11 +200,11 @@ public final class Constants {
 
       public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.3);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.1);
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
-      public static final Distance L2_PREPOSE = Units.Inches.of(9.43);
+      public static final Distance L2_PREPOSE = Units.Inches.of(8.43);
       public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
-      public static final Distance L4_PREPOSE = Units.Inches.of(49.5);
+      public static final Distance L4_PREPOSE = Units.Inches.of(48.7);
       public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
@@ -237,7 +237,7 @@ public final class Constants {
         .outputRange(-1, 1);
 
     public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
-      Units.Rotations.of(0.02);
+      Units.Rotations.of(0.05);
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
@@ -264,9 +264,9 @@ public final class Constants {
         -1
       );
       public static final Distance L1_PREPOSE = Units.Inches.of(-2);
-      public static final Distance L2_PREPOSE = Units.Inches.of(-6.2);
-      public static final Distance L3_PREPOSE = Units.Inches.of(-6.2);
-      public static final Distance L4_PREPOSE = Units.Inches.of(-6.4);
+      public static final Distance L2_PREPOSE = Units.Inches.of(-6.1);
+      public static final Distance L3_PREPOSE = Units.Inches.of(-6.1);
+      public static final Distance L4_PREPOSE = Units.Inches.of(-6.3);
       public static final Distance FULL_SCORING_EXTENSION = Units.Inches.of(
         -6.6
       );

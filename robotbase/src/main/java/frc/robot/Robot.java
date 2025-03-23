@@ -180,9 +180,9 @@ public class Robot extends TimedRobot {
       new DriveSetCoast()
     );
 
-    climberPivot.setDefaultCommand(
-      new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
-    );
+    // climberPivot.setDefaultCommand(
+    //   new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
+    // );
 
     // Update sensors at a faster rate
     addPeriodic(

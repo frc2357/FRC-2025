@@ -90,7 +90,7 @@ public class DriverControls implements RumbleInterface {
     m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
 
     // Other
-    m_leftTrigger.onTrue(new CoralHome());
+    m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
     m_controller.back().onTrue(new FlipPerspective());
     m_controller
       .start()
