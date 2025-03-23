@@ -442,41 +442,33 @@ public final class Constants {
     public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.5);
 
     public static final Distance MAX_DIST_BETWEEN_ESTIMATES = Units.Meters.of(
-      0.25
+      0.5
     );
 
     public static final Time UPDATE_POSE_INTERVALS = Seconds.of(4);
 
-    public static final int MIN_ALLOWED_TARGETS = 1;
+    public static final int MIN_ALLOWED_TARGETS = 2;
 
-    public static final class FRONT_CAM {
+    public static final Time ESTIMATE_TIMEOUT = Units.Milliseconds.of(120);
 
-      public static final String NAME = "frontCam";
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = // new Transform3d(
-        //   Units.Inches.of(7.951),
-        //   Units.Inches.of(4.624),
-        //   Units.Inches.of(22.243),
-        //   new Rotation3d(
-        //     Units.Degrees.of(0),
-        //     Units.Degrees.of(10),
-        //     Units.Degrees.of(0)
-        //   )
-        // );
-        new Transform3d(
-          Units.Inches.of(4.624),
-          Units.Inches.of(7.799),
-          Units.Inches.of(22.055),
-          new Rotation3d(
-            Units.Degrees.of(0),
-            Units.Degrees.of(-10),
-            Units.Degrees.of(180)
-          )
-        );
+    public static final class BACK_RIGHT_CAM {
+
+      public static final String NAME = "backRightCam";
+      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+        Units.Inches.of(4.624),
+        Units.Inches.of(7.799),
+        Units.Inches.of(22.055),
+        new Rotation3d(
+          Units.Degrees.of(0),
+          Units.Degrees.of(-10),
+          Units.Degrees.of(180)
+        )
+      );
     }
 
-    public static final class BACK_CAM {
+    public static final class BACK_LEFT_CAM {
 
-      public static final String NAME = "backCam";
+      public static final String NAME = "backLeftCam";
       public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
         Units.Inches.of(-6.516),
         Units.Inches.of(-5.028),
@@ -488,35 +480,6 @@ public final class Constants {
         )
       );
     }
-    // public static final class RIGHT_CAM {
-
-    //   public static final String NAME = "rightCam";
-    //   public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-    //     Units.Inches.of(-8.887),
-    //     Units.Inches.of(-3.001),
-    //     Units.Inches.of(16.578),
-    //     new Rotation3d(
-    //       Units.Degrees.of(10),
-    //       Units.Degrees.of(0),
-    //       Units.Degrees.of(270)
-    //     )
-    //   );
-    // }
-
-    // public static final class LEFT_CAM {
-
-    //   public static final String NAME = "leftCam";
-    //   public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-    //     Units.Inches.of(8.887),
-    //     Units.Inches.of(-3.001),
-    //     Units.Inches.of(16.579),
-    //     new Rotation3d(
-    //       Units.Degrees.of(-10),
-    //       Units.Degrees.of(0),
-    //       Units.Degrees.of(90)
-    //     )
-    //   );
-    // }
   }
 
   public static final class FIELD_CONSTANTS {
@@ -580,8 +543,8 @@ public final class Constants {
         new TrapezoidProfile.Constraints(2, 1.5)
       );
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(1);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(1);
+    public static final Distance X_TOLERANCE = Units.Inches.of(0.5);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(0.5);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
 
     public static final Pose2d TOLERANCE_POSE = new Pose2d(
@@ -685,8 +648,8 @@ public final class Constants {
 
     public static class REEF {
 
-      public static final int[] BLUE_REEF_TAGS = { 17, 18, 19, 20, 21, 22 };
-      public static final int[] RED_REEF_TAGS = { 6, 7, 8, 9, 10, 11 };
+      public static final int[] BLUE_REEF_TAGS = { 18, 17, 22, 21, 20, 19 };
+      public static final int[] RED_REEF_TAGS = { 7, 8, 9, 10, 11, 6 };
 
       public static final Pose2d BRANCH_A = new Pose2d(
         Units.Meters.of(3.2332),
@@ -701,22 +664,22 @@ public final class Constants {
       public static final Pose2d BRANCH_C = new Pose2d(
         Units.Meters.of(3.7160),
         Units.Meters.of(3.0202),
-        new Rotation2d(Units.Radians.of(1.0441))
+        Rotation2d.fromRadians(-2.103118631816568)
       );
       public static final Pose2d BRANCH_D = new Pose2d(
         Units.Meters.of(4.0011),
         Units.Meters.of(2.8563),
-        new Rotation2d(Units.Radians.of(1.0441))
+        Rotation2d.fromRadians(-2.103118631816568)
       );
       public static final Pose2d BRANCH_E = new Pose2d(
         Units.Meters.of(4.9734),
         Units.Meters.of(2.8552),
-        new Rotation2d(Units.Radians.of(2.0956))
+        Rotation2d.fromRadians(-1.0600454389505496)
       );
       public static final Pose2d BRANCH_F = new Pose2d(
         Units.Meters.of(5.2600),
         Units.Meters.of(3.0165),
-        new Rotation2d(Units.Radians.of(2.0956))
+        Rotation2d.fromRadians(-1.0600454389505496)
       );
       public static final Pose2d BRANCH_G = new Pose2d(
         Units.Meters.of(5.7408),
@@ -731,22 +694,22 @@ public final class Constants {
       public static final Pose2d BRANCH_I = new Pose2d(
         Units.Meters.of(5.2650),
         Units.Meters.of(5.0293),
-        new Rotation2d(Units.Radians.of(-2.0970))
+        Rotation2d.fromRadians(1.044169055361146)
       );
       public static final Pose2d BRANCH_J = new Pose2d(
         Units.Meters.of(4.9792),
         Units.Meters.of(5.1939),
-        new Rotation2d(Units.Radians.of(-2.0970))
+        Rotation2d.fromRadians(1.044169055361146)
       );
       public static final Pose2d BRANCH_K = new Pose2d(
         Units.Meters.of(4.0037),
         Units.Meters.of(5.1982),
-        new Rotation2d(Units.Radians.of(-1.0505))
+        Rotation2d.fromRadians(2.0927415702150935)
       );
       public static final Pose2d BRANCH_L = new Pose2d(
         Units.Meters.of(3.7203),
         Units.Meters.of(5.0299),
-        new Rotation2d(Units.Radians.of(-1.0505))
+        Rotation2d.fromRadians(2.0927415702150935)
       );
       public static final Pose2d CENTER = new Pose2d(
         Units.Meters.of(4.4894),

@@ -56,8 +56,8 @@ public class Robot extends TimedRobot {
   public static AlgaePivot algaePivot;
   public static Climber climber;
   public static CameraManager camManager;
-  public static PhotonVisionCamera frontCam;
-  public static PhotonVisionCamera backCam;
+  public static PhotonVisionCamera backRightCam;
+  public static PhotonVisionCamera backLeftCam;
   public static PhotonVisionCamera leftCam;
   public static PhotonVisionCamera rightCam;
   public static DriverControls driverControls;
@@ -83,7 +83,7 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
-    SmartDashboard.putBoolean("Toggle Pose Estimation", true);
+    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -95,22 +95,14 @@ public class Robot extends TimedRobot {
     // algaePivot = new AlgaePivot();
     climber = new Climber();
     camManager = new CameraManager();
-    frontCam = camManager.createCamera(
-      FRONT_CAM.NAME,
-      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
-    backCam = camManager.createCamera(
-      BACK_CAM.NAME,
-      BACK_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
-    // leftCam = camManager.createCamera(
-    //   LEFT_CAM.NAME,
-    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
+    // backRightCam = camManager.createCamera(
+    //   BACK_RIGHT_CAM.NAME,
+    //   BACK_RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
     // );
-    // rightCam = camManager.createCamera(
-    //   RIGHT_CAM.NAME,
-    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
-    // );
+    backLeftCam = camManager.createCamera(
+      BACK_LEFT_CAM.NAME,
+      BACK_LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
+    );
 
     // Define controls
     buttonboard = new Buttonboard(

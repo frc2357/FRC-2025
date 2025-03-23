@@ -3,9 +3,11 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.*;
 import static frc.robot.Constants.FIELD.REEF.BLUE_REEF_TAGS;
+import static frc.robot.Constants.FIELD.REEF.BRANCHES;
 import static frc.robot.Constants.FIELD.REEF.RED_REEF_TAGS;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
+import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Pair;
@@ -16,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -33,13 +36,12 @@ import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
 import frc.robot.Robot;
 import frc.robot.subsystems.PhotonVisionCamera.TimestampedPNPInfo;
 import frc.robot.util.CollisionDetection;
+import frc.robot.util.Utility;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BooleanSupplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -86,25 +88,25 @@ public class CameraManager {
      */
     public static poseEstimate averageOutEstimates(poseEstimate... estimates) {
       if (estimates.length == 1) return estimates[0];
-      Pose3d averagedPose = Pose3d.kZero;
+      Translation3d aveTranslation = new Translation3d();
       double averagedTimestamp = 0;
       int averageTargets = 0;
       Matrix<N3, N1> averageStdDevs = VecBuilder.fill(0, 0, 0);
       double averageCoordDev = 0;
       for (poseEstimate estimate : estimates) {
-        averagedPose = averagedPose.plus(
-          new Transform3d(Pose3d.kZero, estimate.estimPose)
+        aveTranslation = aveTranslation.plus(
+          estimate.estimPose.getTranslation()
         );
         averagedTimestamp += estimate.timestampSeconds;
         averageTargets += estimate.targetsUsedNum;
         averageCoordDev += estimate.stdDevs.get(0, 0);
       }
-      averagedPose.div(estimates.length);
+      aveTranslation.div(estimates.length);
       averagedTimestamp /= estimates.length;
       averageTargets = Math.floorDiv(averageTargets, estimates.length);
       averageStdDevs.div(estimates.length);
       return new poseEstimate(
-        averagedPose,
+        new Pose3d(aveTranslation, estimates[0].estimPose.getRotation()),
         averagedTimestamp,
         averageTargets,
         VecBuilder.fill(averageCoordDev, averageCoordDev, Double.MAX_VALUE)
@@ -116,7 +118,6 @@ public class CameraManager {
      * @return A pose estimate of the average estimate, as long as all the estimates are close enough together
      */
     public static poseEstimate findConcensus(poseEstimate... estimates) {
-      estimates = findValidEstimates(estimates);
       if (estimates == null) return null;
       if (estimates.length == 1) return estimates[0];
       poseEstimate averageEstimate = averageOutEstimates(estimates);
@@ -148,7 +149,12 @@ public class CameraManager {
     }
 
     public boolean isValid() {
-      return this.exists() && this.isInField();
+      return (
+        this.exists() &&
+        this.isInField() &&
+        (this.timestampSeconds + ESTIMATE_TIMEOUT.in(Seconds) >
+          RobotController.getMeasureFPGATime().in(Seconds))
+      );
     }
   }
 
@@ -215,14 +221,8 @@ public class CameraManager {
     }
   }
 
-  private final Map<PhotonVisionCamera, PhotonPipelineResult> m_robotCameras =
-    new HashMap<PhotonVisionCamera, PhotonPipelineResult>();
-
-  private final PhotonPoseEstimator m_poseEstimator = new PhotonPoseEstimator(
-    FIELD_CONSTANTS.APRIL_TAG_LAYOUT,
-    PRIMARY_STRATEGY,
-    new Transform3d()
-  );
+  private final Map<PhotonVisionCamera, poseEstimate> m_robotCameras =
+    new LinkedHashMap<PhotonVisionCamera, poseEstimate>();
 
   private final TimestampedPNPInfo[] m_pnpInfo =
     new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
@@ -230,7 +230,7 @@ public class CameraManager {
   private final TargetInfo[] m_aprilTagInfo = new TargetInfo[23];
 
   /**
-   * Holds all the calculated poses for all the branches and options in the BRANCH enum
+   * Holds all the calculated poses for all the branches and options in the BRANCH_GOAL enum
    */
   private final Pose2d[] m_branchPositions = new Pose2d[13];
 
@@ -247,13 +247,8 @@ public class CameraManager {
   private PoseStrategy m_primaryStrat = PRIMARY_STRATEGY;
   private PoseStrategy m_fallbackStrat = FALLBACK_STRATEGY;
 
-  private final poseEstimate[] m_poseEstimates =
-    new poseEstimate[m_pnpInfo.length];
-
   public CameraManager() {
     m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
-    m_poseEstimator.setPrimaryStrategy(m_primaryStrat);
-    m_poseEstimator.setMultiTagFallbackStrategy(m_fallbackStrat);
     for (int i = 0; i < m_aprilTagInfo.length; i++) {
       m_aprilTagInfo[i] = new TargetInfo(
         Double.NaN,
@@ -264,14 +259,13 @@ public class CameraManager {
         null
       );
     }
-    Arrays.fill(m_branchPositions, Pose2d.kZero);
+    Arrays.fill(m_branchPositions, null);
   }
 
   /**
    * Updates all instances of {@link PhotonVisionCamera} with the latest result, and updates the pose with the updated pnpInfo.
    */
   public void updateAllCameras() {
-    Arrays.fill(m_poseEstimates, null);
     boolean updatePose = SmartDashboard.getBoolean(
       "Toggle Pose Estimation",
       false
@@ -291,24 +285,19 @@ public class CameraManager {
         continue;
       }
     }
-    // checks if we have results from all cameras before estimating pose
-    if (m_robotCameras.containsValue(null)) return;
+    //checks if we have estimates from all cameras before continuing.
     for (var entry : m_robotCameras.entrySet()) {
-      processResult(entry.getValue(), entry.getKey());
-      entry.setValue(null);
+      // if were lacking an estimate from a connected camera, skip updating
+      if (
+        entry.getKey().isConnected() &&
+        (entry.getValue() == null || !entry.getValue().isValid())
+      ) return;
     }
 
-    for (int i = 0; i < m_pnpInfo.length; i++) {
-      if (m_pnpInfo[i] == null) continue;
-      if (!m_pnpInfo[i].exists()) {
-        m_pnpInfo[i] = null;
-        continue;
-      }
-
-      m_poseEstimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
-      m_pnpInfo[i] = null;
-    }
-    updatePoseFromPoseEstimates(updatePose, m_poseEstimates);
+    updatePoseFromPoseEstimates(
+      updatePose,
+      m_robotCameras.values().toArray(new poseEstimate[m_robotCameras.size()])
+    );
   }
 
   public PhotonVisionCamera createCamera(
@@ -318,37 +307,32 @@ public class CameraManager {
     PhotonVisionCamera cam = new PhotonVisionCamera(
       name,
       robotToCameraTransform,
-      this::storeResult
+      this::processResult
     );
     m_robotCameras.put(cam, null);
+    cam.m_poseEstimator.setPrimaryStrategy(m_primaryStrat);
+    cam.m_poseEstimator.setMultiTagFallbackStrategy(m_fallbackStrat);
     return cam;
   }
 
-  private void storeResult(
-    PhotonPipelineResult result,
-    PhotonVisionCamera cam
-  ) {
-    m_robotCameras.put(cam, result);
-  }
-
   private void preparePoseEstimator(TimestampedPNPInfo infoToPrepFor) {
-    m_poseEstimator.addHeadingData(
+    PhotonPoseEstimator estimator = infoToPrepFor.camera().m_poseEstimator;
+    estimator.addHeadingData(
       infoToPrepFor.headingTimestampSeconds(),
       infoToPrepFor.heading()
     );
 
     // change pose estimator settings to be correct for the provided info
-    m_poseEstimator.setRobotToCameraTransform(
-      infoToPrepFor.robotToCameraTransform()
-    );
-    m_poseEstimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+    estimator.setRobotToCameraTransform(infoToPrepFor.robotToCameraTransform());
+    estimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
   }
 
   private poseEstimate estimatePoseWithPNPInfo(TimestampedPNPInfo pnpInfo) {
     if (pnpInfo == null || !pnpInfo.exists()) return null;
     preparePoseEstimator(pnpInfo);
-    EstimatedRobotPose estimate = m_poseEstimator
-      .update(pnpInfo.result())
+    EstimatedRobotPose estimate = pnpInfo
+      .camera()
+      .m_poseEstimator.update(pnpInfo.result())
       .orElse(null);
 
     if (estimate == null) return null;
@@ -359,13 +343,13 @@ public class CameraManager {
     if (!CollisionDetection.isPoseInField(estimate.estimatedPose)) return null;
 
     double averageTargetDistance = 0;
+
     for (PhotonTrackedTarget target : estimate.targetsUsed) {
       averageTargetDistance += Math.abs(
         target.getBestCameraToTarget().getTranslation().getNorm()
       );
     }
     averageTargetDistance /= estimate.targetsUsed.size();
-
     // the higher the confidence is, the less the estimated measurment is trusted.
     double velocityConf =
       MAGIC_VEL_CONF_ADDEND +
@@ -381,6 +365,7 @@ public class CameraManager {
 
     // if estimated pose is too far from current pose
     m_lastEstimatedPose = estimate;
+
     return new poseEstimate(
       estimate,
       VecBuilder.fill(
@@ -395,14 +380,18 @@ public class CameraManager {
     boolean updatePose,
     poseEstimate... estimates
   ) {
-    // get the most common estimate
+    estimates = poseEstimate.findValidEstimates(estimates);
+    if (estimates == null) {
+      System.out.println("No good estimates");
+      return;
+    }
     poseEstimate averageEstimate = estimates.length > 1
       ? poseEstimate.findConcensus(estimates)
       : estimates[0];
-
     if (averageEstimate == null || !averageEstimate.exists()) return;
 
     m_poseConcensusFieldTypePub.set("Field2d");
+
     Pose2d pose = averageEstimate.estimPose.toPose2d();
     m_poseConcensusFieldPub.accept(
       new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
@@ -430,16 +419,16 @@ public class CameraManager {
       }
       // and we have updated the pose recently, and were not disabled, throw it out
       if (
-        measuredTime >
+        measuredTime <
         m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds)
       ) return;
     }
-
     Robot.swerve.addVisionMeasurement(
       averageEstimate.estimPose.toPose2d(),
       measuredTime,
       averageEstimate.stdDevs
     );
+
     m_lastPoseUpdateTime.mut_replace(measuredTime, Seconds);
   }
 
@@ -509,12 +498,15 @@ public class CameraManager {
 
   public void setPrimaryStrategy(PoseStrategy newStrategy) {
     m_primaryStrat = newStrategy;
-    m_poseEstimator.setPrimaryStrategy(newStrategy);
   }
 
   public void setFallbackStrategy(PoseStrategy newStrategy) {
     m_fallbackStrat = newStrategy;
-    m_poseEstimator.setMultiTagFallbackStrategy(newStrategy);
+    m_robotCameras
+      .keySet()
+      .forEach((var cam) ->
+        cam.m_poseEstimator.setMultiTagFallbackStrategy(newStrategy)
+      );
   }
 
   public EstimatedRobotPose getLastEstimatedPose() {
@@ -556,12 +548,12 @@ public class CameraManager {
   }
 
   private void processResult(
-    PhotonPipelineResult result,
-    PhotonVisionCamera camera
+    PhotonVisionCamera camera,
+    PhotonPipelineResult result
   ) {
-    if (camera == null || result == null || !result.hasTargets()) return;
-
-    storePNPInfo(createPNPInfo(result, camera));
+    var info = createPNPInfo(result, camera);
+    m_robotCameras.put(camera, estimatePoseWithPNPInfo(info));
+    storePNPInfo(info);
     if (result.getBestTarget().objDetectId != -1) {
       cacheForGamepeices(result.targets, camera);
     } else {
@@ -650,74 +642,90 @@ public class CameraManager {
     int[] tagsToUse = Robot.alliance == Alliance.Blue
       ? BLUE_REEF_TAGS
       : RED_REEF_TAGS;
-    // blues lowest tag starts on side 6 (branch K & branch L)
-    // reds lowest tag starts on side 2 (branch C & branch D)
-    // so we need this offset to give us our index number to use.
-    int reefSideOffset = Robot.alliance == Alliance.Blue ? 5 : 1;
-    for (int i = 0; i < tagsToUse.length; i++) {
-      Pair<Pose2d, Pose2d> branchPoses = calculateBranchPose(
-        m_aprilTagInfo[tagsToUse[i]].targetFieldRelativePose
+    int leftBranchIndex = 1;
+    int rightBranchIndex = 2;
+    for (int i = 0; i < Math.min(tagsToUse.length, 6); i++) {
+      Rotation2d rotation = Robot.alliance == Alliance.Blue
+        ? BRANCHES[leftBranchIndex].getRotation()
+        : ChoreoAllianceFlipUtil.flip(BRANCHES[leftBranchIndex].getRotation());
+      Pose2d[] branchPoses = calculateBranchPose(
+        m_aprilTagInfo[tagsToUse[i]].targetFieldRelativePose,
+        rotation
       );
       if (
-        branchPoses == null ||
-        branchPoses.getFirst() == null ||
-        branchPoses.getSecond() == null
-      ) continue;
+        branchPoses == null || branchPoses[0] == null || branchPoses[1] == null
+      ) {
+        leftBranchIndex += 2;
+        rightBranchIndex += 2;
+        continue;
+      }
       // i corresponds to the side of the reef were finding the poses of
       // 12 branches, with 6 sides of the reef. each reef has 6 tags on it, and we find which side were calculating for above.
       // for the right branch, we use reefSide * 2 to get its number, since it will always be the higher branch.
       // we do the same for the left branchs, but we subtract one, since its the branch before the right branch.
-      int reefSide = ((i + reefSideOffset) % 6) + 1;
-      int leftBranchIndex = reefSide * 2 - 1;
-      int rightBranchIndex = reefSide * 2;
 
-      m_branchPositions[rightBranchIndex] = branchPoses.getFirst();
-      m_branchPositions[leftBranchIndex] = branchPoses.getSecond();
+      m_branchPositions[leftBranchIndex] = branchPoses[0];
+      m_branchPositions[rightBranchIndex] = branchPoses[1];
+      leftBranchIndex += 2;
+      rightBranchIndex += 2;
     }
 
     // the last branch in the BRANCH_GOAL enum is whatever the closest one is, so were assigning that here
-    m_branchPositions[0] = new Pose2d(-20, -20, Rotation2d.kZero);
-    m_branchPositions[0] = Robot.swerve
-      .getFieldRelativePose2d()
-      .nearest(Arrays.asList(m_branchPositions));
+    m_branchPositions[0] = null;
+    Pose2d currPose = Robot.swerve.getFieldRelativePose2d();
+    Pose2d closestPose = m_branchPositions[0];
+    for (Pose2d pose : m_branchPositions) {
+      if (
+        closestPose == null ||
+        (pose != null &&
+          (Utility.findDistanceBetweenPoses(currPose, pose) <
+            Utility.findDistanceBetweenPoses(currPose, closestPose)))
+      ) closestPose = pose;
+    }
+    m_branchPositions[0] = closestPose;
   }
 
-  protected Pair<Pose2d, Pose2d> calculateBranchPose(
-    Pose3d targetFieldRelativePose
+  protected Pose2d[] calculateBranchPose(
+    Pose3d targetFieldRelativePose,
+    Rotation2d targetRotation
   ) {
-    if (targetFieldRelativePose == null) {
-      return null;
-    }
-    Pose2d tarPose = targetFieldRelativePose.toPose2d();
-    Pose2d leftBranch = tarPose.transformBy(
-      new Transform2d(
-        Units.Inches.zero(),
-        FIELD_CONSTANTS.BRANCH_TO_TAG_DIST,
-        Rotation2d.kZero
-      )
+    if (targetFieldRelativePose == null) return null;
+
+    Pose2d tarPose = new Pose2d(
+      targetFieldRelativePose.getTranslation().toTranslation2d(),
+      targetRotation
     );
-    Pose2d rightBranch = tarPose.transformBy(
-      new Transform2d(
-        Units.Inches.zero(),
-        FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.unaryMinus(),
-        Rotation2d.kZero
+    Pose2d rightBranchPose = tarPose
+      .plus(
+        new Transform2d(
+          0,
+          FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
+          Rotation2d.kZero
+        )
       )
-    );
-    Pose2d rightBranchPose = rightBranch.transformBy(
-      new Transform2d(
-        ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
-        Units.Inches.zero(),
-        Rotation2d.kZero
+      .plus(
+        new Transform2d(
+          ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
+          Units.Inches.zero(),
+          Rotation2d.kZero
+        )
+      );
+    Pose2d leftBranchPose = tarPose
+      .plus(
+        new Transform2d(
+          0,
+          -FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
+          Rotation2d.kZero
+        )
       )
-    );
-    Pose2d leftBranchPose = leftBranch.plus(
-      new Transform2d(
-        ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
-        Units.Inches.zero(),
-        Rotation2d.kZero
-      )
-    );
-    return new Pair<Pose2d, Pose2d>(leftBranchPose, rightBranchPose);
+      .plus(
+        new Transform2d(
+          ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
+          Units.Inches.zero(),
+          Rotation2d.kZero
+        )
+      );
+    return new Pose2d[] { leftBranchPose, rightBranchPose };
   }
 
   /**
@@ -739,6 +747,11 @@ public class CameraManager {
    * @return The calculated field relative pose of the desired branch
    */
   public Pose2d getFieldRelativeBranchPose(BRANCH_GOAL branchToGet) {
-    return m_branchPositions[branchToGet.branchNum - 1];
+    return (
+        m_branchPositions[branchToGet.branchNum].getX() > -10 &&
+        m_branchPositions[branchToGet.branchNum].getY() > -10
+      )
+      ? m_branchPositions[branchToGet.branchNum]
+      : null;
   }
 }

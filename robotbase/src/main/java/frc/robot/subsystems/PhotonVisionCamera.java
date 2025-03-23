@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import frc.robot.Constants.FIELD_CONSTANTS;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -53,11 +54,13 @@ public class PhotonVisionCamera {
   protected PhotonPipelineResult m_result;
 
   private final BiConsumer<
-    PhotonPipelineResult,
-    PhotonVisionCamera
+    PhotonVisionCamera,
+    PhotonPipelineResult
   > m_resultProccessor;
 
   protected int m_bestTargetFiducialId;
+
+  protected final PhotonPoseEstimator m_poseEstimator;
 
   // experimental "turbo switch" that has the ability to increase FPS. Do not fiddle with it.
   @SuppressWarnings("unused")
@@ -69,7 +72,7 @@ public class PhotonVisionCamera {
   public PhotonVisionCamera(
     String cameraName,
     Transform3d robotToCameraTransform,
-    BiConsumer<PhotonPipelineResult, PhotonVisionCamera> resultConsumer
+    BiConsumer<PhotonVisionCamera, PhotonPipelineResult> resultConsumer
   ) {
     this(
       cameraName,
@@ -85,7 +88,7 @@ public class PhotonVisionCamera {
     Transform3d robotToCameraTransform,
     Optional<Matrix<N3, N3>> camMatrix,
     Optional<Matrix<N8, N1>> distCoefs,
-    BiConsumer<PhotonPipelineResult, PhotonVisionCamera> resultConsumer
+    BiConsumer<PhotonVisionCamera, PhotonPipelineResult> resultConsumer
   ) {
     m_camera = new PhotonCamera(cameraName);
 
@@ -106,6 +109,11 @@ public class PhotonVisionCamera {
 
     m_robotToCameraTranform = robotToCameraTransform;
     m_resultProccessor = resultConsumer;
+    m_poseEstimator = new PhotonPoseEstimator(
+      FIELD_CONSTANTS.APRIL_TAG_LAYOUT,
+      PRIMARY_STRATEGY,
+      m_robotToCameraTranform
+    );
   }
 
   /**
@@ -133,7 +141,7 @@ public class PhotonVisionCamera {
       return;
     }
 
-    m_resultProccessor.accept(m_result, this); // update pnpInfo with the new result
+    m_resultProccessor.accept(this, m_result); // update pnpInfo with the new result
   }
 
   public void publishPose(Pose2d pose) {

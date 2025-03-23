@@ -85,13 +85,7 @@ public class DriverControls {
 
     m_controller
       .y()
-      .whileTrue(
-        new DriveToReef(
-          RouteAroundReef.None,
-          BRANCH_GOAL.BRANCH_A,
-          REEF.BRANCH_A.getRotation()
-        )
-      );
+      .whileTrue(new DriveToReef(RouteAroundReef.None, BRANCH_GOAL.BRANCH_D));
   }
 
   public double getX() {
