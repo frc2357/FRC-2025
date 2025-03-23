@@ -5,18 +5,17 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ALGAE_RUNNER;
 import frc.robot.Constants.CAN_ID;
+import frc.robot.Constants.CLIMBER_PIVOT;
 
-public class AlgaeRunner extends SubsystemBase {
+public class ClimberPivot extends SubsystemBase {
 
   private SparkMax m_motor;
 
-  public AlgaeRunner() {
-    m_motor = new SparkMax(CAN_ID.ALGAE_RUNNER_MOTOR, MotorType.kBrushless);
-
+  public ClimberPivot() {
+    m_motor = new SparkMax(CAN_ID.CLIMBER_PIVOT_MOTOR, MotorType.kBrushless);
     m_motor.configure(
-      ALGAE_RUNNER.MOTOR_CONFIG,
+      CLIMBER_PIVOT.MOTOR_CONFIG,
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
@@ -26,9 +25,9 @@ public class AlgaeRunner extends SubsystemBase {
     m_motor.set(percentOutput);
   }
 
-  public void setAxisSpeed(double axisSpeed) {
-    axisSpeed *= ALGAE_RUNNER.AXIS_MAX_SPEED;
-    setSpeed(axisSpeed);
+  public void setAxisSpeed(double speed) {
+    speed *= CLIMBER_PIVOT.AXIS_MAX_SPEED;
+    m_motor.set(speed);
   }
 
   public void stop() {

@@ -1,4 +1,4 @@
-package frc.robot.commands.climber;
+package frc.robot.commands.climberPivot;
 
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -7,14 +7,14 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
-public class ClimberRunDuration extends Command {
+public class ClimberPivotRunDuration extends Command {
 
   private Time m_duration;
   private double m_speed;
   private Timer m_timer;
 
-  public ClimberRunDuration(Time duration, double speed) {
-    addRequirements(Robot.climber);
+  public void climberPivotRunDuration(Time duration, double speed) {
+    addRequirements(Robot.climberPivot);
     m_duration = duration;
     m_speed = speed;
     m_timer = new Timer();
@@ -22,17 +22,17 @@ public class ClimberRunDuration extends Command {
 
   @Override
   public void initialize() {
-    Robot.climber.setSpeed(m_speed);
+    Robot.climberPivot.setSpeed(m_speed);
     m_timer.restart();
   }
 
   @Override
   public boolean isFinished() {
-    return m_timer.advanceIfElapsed(m_duration.in(Seconds));
+    return m_timer.hasElapsed(m_duration.in(Seconds));
   }
 
   @Override
   public void end(boolean interrupted) {
-    Robot.climber.stop();
+    Robot.climberPivot.stop();
   }
 }

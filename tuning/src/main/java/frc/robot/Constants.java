@@ -41,7 +41,7 @@ public final class Constants {
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop.outputRange(-1, 1);
 
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.1;
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.01;
 
     public static final double GEAR_RATIO = (38.0 / 14.0) * 2.0;
 
@@ -65,17 +65,17 @@ public final class Constants {
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
       MOTOR_CONFIG.closedLoop.outputRange(-1, 1);
 
-    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.03;
+    public static final double MAX_MOTION_ALLOWED_ERROR_PERCENT = 0.01;
 
     public static final double AXIS_MAX_SPEED = 0.75;
 
-    public static final MAXMotionConfig MAX_MOTION_CONFIG =
-      CLOSED_LOOP_CONFIG.maxMotion
+    public static final SmartMotionConfig MAX_MOTION_CONFIG =
+      CLOSED_LOOP_CONFIG.smartMotion
         .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    public static final double GEAR_RATIO = 15;
+    public static final double GEAR_RATIO = 5;
     public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
       46.188
     );

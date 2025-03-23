@@ -32,4 +32,9 @@ public class ElevatorSetDistance extends Command {
   public boolean isFinished() {
     return Robot.elevator.isAtTarget();
   }
+
+  @Override
+  public void end(boolean interrupted) {
+    Robot.elevator.holdPosition();
+  }
 }

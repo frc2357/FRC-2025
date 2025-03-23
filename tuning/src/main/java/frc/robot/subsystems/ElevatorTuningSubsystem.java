@@ -33,13 +33,13 @@ public class ElevatorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0.016;
+  private double P = 0.0;
   private double I = 0;
   private double D = 0;
-  private double arbFF = 0.05;
-  private double velFF = 0;
+  private double arbFF = 0.15;
+  private double velFF = 0.0003;
   private double maxVel = 4600; // Desired: 4600, Max: 5600
-  private double maxAcc = 5000; // Desired: 18400
+  private double maxAcc = 10000; // Desired: 18400
 
   private SparkBaseConfig m_motorconfig = Constants.ELEVATOR.MOTOR_CONFIG_LEFT;
 
@@ -85,6 +85,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     maxAcc = Preferences.getDouble("elevatorMaxAcc", maxAcc);
 
     displayDashboard();
+    updatePIDs();
   }
 
   public void displayDashboard() {
@@ -113,7 +114,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     m_motorconfig.closedLoop.smartMotion
       .maxAcceleration(maxAcc)
       .maxVelocity(maxVel)
-      .allowedClosedLoopError(0.1);
+      .allowedClosedLoopError(0.3);
 
     m_motorLeft.configure(
       m_motorconfig,
@@ -209,6 +210,9 @@ public class ElevatorTuningSubsystem implements Sendable {
   }
 
   private void setTargetRotations(Angle targetRotations) {
+    System.out.println(
+      "Setting rotations: " + targetRotations.in(Units.Rotation)
+    );
     m_targetRotations = targetRotations;
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),

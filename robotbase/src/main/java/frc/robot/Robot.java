@@ -47,33 +47,39 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 @SuppressWarnings("unused")
 public class Robot extends TimedRobot {
 
+  // Subsystems
   public static CommandSwerveDrivetrain swerve;
   public static Elevator elevator;
   public static Laterator laterator;
   public static CoralRunner coralRunner;
-  public static AlgaeRunner algaeRunner;
   public static AlgaeKnocker algaeKnocker;
-  public static AlgaePivot algaePivot;
-  public static Climber climber;
+  public static ClimberPivot climberPivot;
+  public static ClimberWinch climberWinch;
   public static CameraManager camManager;
   public static PhotonVisionCamera backRightCam;
   public static PhotonVisionCamera backLeftCam;
-  public static PhotonVisionCamera leftCam;
-  public static PhotonVisionCamera rightCam;
+
+  // state
+  public static Alliance alliance = null;
+
+  // Commands
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
   public static Buttonboard buttonboard;
 
-  public static Alliance alliance = null;
+  // PhotonVision Cameras
+  private static PhotonVisionCamera frontCam;
+  private static PhotonVisionCamera backCam;
+  private static PhotonVisionCamera leftCam;
+  private static PhotonVisionCamera rightCam;
 
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
+
   private AutoChooserManager m_autoChooserManager;
+  private ElasticFieldManager elasticFieldManager;
   private SignalLoggerManager m_SignalLoggerManager;
   private boolean m_didOpenCVLoad = false;
-
-  @SuppressWarnings("unused")
-  private SysIdChooser m_sysIdChooser;
 
   /**
    * This function is run when the robot is first started up
@@ -83,17 +89,17 @@ public class Robot extends TimedRobot {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     ); // TODO: turn this off at comp, just in case.
-    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
+    SmartDashboard.putBoolean("Toggle Pose Estimation", true);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
     elevator = new Elevator();
     laterator = new Laterator();
     coralRunner = new CoralRunner();
-    // algaeRunner = new AlgaeRunner();
     algaeKnocker = new AlgaeKnocker();
-    // algaePivot = new AlgaePivot();
-    climber = new Climber();
+    climberWinch = new ClimberWinch();
+    climberPivot = new ClimberPivot();
+
     camManager = new CameraManager();
     // backRightCam = camManager.createCamera(
     //   BACK_RIGHT_CAM.NAME,
@@ -121,7 +127,6 @@ public class Robot extends TimedRobot {
 
     // Define network table tools
     m_autoChooserManager = new AutoChooserManager();
-    m_sysIdChooser = new SysIdChooser();
     m_SignalLoggerManager = new SignalLoggerManager();
 
     SmartDashboard.putData("Buttonboard", buttonboard);
@@ -137,10 +142,23 @@ public class Robot extends TimedRobot {
     Robot.swerve.registerTelemetry(new Telemetry()::telemeterize);
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
+    elevator.setDefaultCommand(new ElevatorHoldPosition());
+
     new InitRobotCommand().schedule();
 
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
       new DriveSetCoast()
+    );
+
+    // Update sensors at a faster rate
+    addPeriodic(
+      () -> {
+        Robot.coralRunner.updateSensors();
+        Robot.laterator.updateSensors();
+        Robot.elevator.updateSensors();
+      },
+      0.005,
+      0.003
     );
   }
 
@@ -195,7 +213,6 @@ public class Robot extends TimedRobot {
     m_setCoastOnDisable.cancel();
 
     swerve.configNeutralMode(NeutralModeValue.Brake);
-    new ElevatorHoldPosition().schedule();
   }
 
   /** This function is called periodically during operator control. */

@@ -18,7 +18,7 @@ public class AutoCoralConfirmScore extends SequentialCommandGroup {
         ),
         new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_L4)
       ),
-      new CoralHome(() -> false)
+      new CoralHome()
     );
   }
 }

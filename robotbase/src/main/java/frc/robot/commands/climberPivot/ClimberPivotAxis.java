@@ -1,22 +1,22 @@
-package frc.robot.commands.climber;
+package frc.robot.commands.climberPivot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.controls.util.AxisInterface;
 
-public class ClimberAxis extends Command {
+public class ClimberPivotAxis extends Command {
 
   private AxisInterface m_axis;
 
-  public ClimberAxis(AxisInterface axis) {
+  public ClimberPivotAxis(AxisInterface axis) {
     m_axis = axis;
-    addRequirements(Robot.climber);
+    addRequirements(Robot.climberPivot);
   }
 
   @Override
   public void execute() {
     double axisValue = m_axis.getValue();
-    Robot.climber.setAxisSpeed(Math.pow(axisValue, 3));
+    Robot.climberPivot.setAxisSpeed(Math.pow(axisValue, 3));
   }
 
   @Override
@@ -26,6 +26,6 @@ public class ClimberAxis extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    Robot.climber.stop();
+    Robot.climberPivot.stop();
   }
 }

@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -73,16 +72,12 @@ public final class Constants {
     public static final int ELEVATOR_LEFT_MOTOR = 23;
     public static final int ELEVATOR_RIGHT_MOTOR = 24;
 
-    public static final int ALGAE_RUNNER_MOTOR = 25;
-    public static final int ALGAE_PIVOT_LEFT_MOTOR = 26;
-    public static final int ALGAE_PIVOT_RIGHT_MOTOR = 27;
-
     public static final int LATERATOR_MOTOR = 28;
     public static final int CORAL_RUNNER_MOTOR = 29;
 
-    public static final int CLIMBER_MOTOR_ONE = 30;
-    public static final int CLIMBER_MOTOR_TWO = 31;
-    public static final int CLIMBER_MOTOR_THREE = 32;
+    public static final int CLIMBER_WINCH_MOTOR_LEFT = 30;
+    public static final int CLIMBER_WINCH_MOTOR_RIGHT = 31;
+    public static final int CLIMBER_PIVOT_MOTOR = 32;
 
     public static final int ALGAE_KNOCKER_MOTOR = 33;
   }
@@ -191,6 +186,8 @@ public final class Constants {
 
     public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
+    public static final double HOLD_VOLTAGE = 0.75;
+
     public static final class SETPOINTS {
 
       public static final Distance HOME = Units.Inches.of(2);
@@ -202,11 +199,11 @@ public final class Constants {
       public static final Distance L4_PREPOSE = Units.Inches.of(49.5);
       public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
+
+      public static final Distance HALL_EFFECT_POSITION = Units.Inches.of(1.5);
     }
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
-
-    public static final double HALL_EFFECT_OFFSET = 1.25;
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
   }
@@ -220,31 +217,34 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
-    public static final double MOTOR_P = 0.3;
+    public static final double MOTOR_P = 0.00008;
     public static final double MOTOR_I = 0;
-    public static final double MOTOR_D = 1;
+    public static final double MOTOR_D = 0;
     public static final double MOTOR_F = 0;
+    public static final double MOTOR_VEL_FF = 0.00025;
 
     // Set feedback sensor to alternate encoder
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG.closedLoop
         .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
+        .velocityFF(MOTOR_VEL_FF)
         .outputRange(-1, 1);
 
-    public static final Angle MAX_MOTION_ALLOWED_ERROR_ROTATIONS =
-      Units.Rotations.of(0.5);
+    public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
+      Units.Rotations.of(0.02);
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
-    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.maxMotion
+    @SuppressWarnings("removal")
+    public static final SmartMotionConfig MAX_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.smartMotion
         .allowedClosedLoopError(
-          MAX_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
+          SMART_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
         )
-        .maxAcceleration(13000)
-        .maxVelocity(4600);
+        .maxAcceleration(4800)
+        .maxVelocity(2000);
 
-    public static final double GEAR_RATIO = 15;
+    public static final double GEAR_RATIO = 5;
     public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
       Units.Millimeters.of(46.188);
     public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
@@ -270,9 +270,9 @@ public final class Constants {
 
     public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
-    public static final double NOMINAL_AMP_LIMIT = 20;
+    public static final double NOMINAL_AMP_LIMIT = 30;
 
-    public static final double ZERO_SPEED = -0.1;
+    public static final double ZERO_SPEED = -0.05;
   }
 
   public static final class CORAL_RUNNER {
@@ -309,21 +309,6 @@ public final class Constants {
     public static final double BACKOUT_TIME_SECONDS = 0.5;
   }
 
-  public static final class ALGAE_RUNNER {
-
-    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
-      .idleMode(IdleMode.kBrake)
-      .inverted(false)
-      .smartCurrentLimit(30, 30)
-      .openLoopRampRate(0.25);
-
-    public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final double ALGAE_INTAKE_SPEED = 0;
-
-    public static final double ALGAE_EJECTOR_SPEED = 0;
-  }
-
   public static final class ALGAE_KNOCKER {
 
     public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
@@ -336,44 +321,26 @@ public final class Constants {
     public static final double ALGAE_KNOCK_SPEED = 0;
   }
 
-  public static final class ALGAE_PIVOT {
+  public static class CLIMBER_WINCH {
 
-    public static final int STALL_CURRENT_VOLTS = 40;
-
-    public static final SparkBaseConfig RIGHT_MOTOR_CONFIG =
-      new SparkMaxConfig()
-        .idleMode(IdleMode.kBrake)
-        .inverted(false)
-        .openLoopRampRate(.25)
-        .smartCurrentLimit(40, 20)
-        .voltageCompensation(12);
-
-    public static final SparkBaseConfig LEFT_MOTOR_CONFIG = new SparkMaxConfig()
-      .apply(RIGHT_MOTOR_CONFIG)
-      .follow(CAN_ID.ALGAE_PIVOT_RIGHT_MOTOR, true);
-
-    public static final double AXIS_MAX_SPEED = 0.25;
-
-    public static final double DEPLOY_SPEED = 0.5;
-    public static final double RETRACT_SPEED = -0.5;
-
-    public static final Time ALGAE_SCORE_TIME = Units.Seconds.of(1);
-    public static final Time ALGAE_MOVEMENT_MIN_TIME = Units.Seconds.of(0.1);
-
-    public static final double ALGAE_HOLD_SPEED = 0.05;
-  }
-
-  public static class CLIMBER {
-
-    public static final SparkBaseConfig MOTOR_CONFIG_ONE = new SparkMaxConfig()
+    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60, 60)
       .inverted(false);
-    public static final SparkBaseConfig MOTOR_CONFIG_TWO = new SparkMaxConfig()
-      .apply(MOTOR_CONFIG_ONE)
-      .follow(CAN_ID.CLIMBER_MOTOR_ONE);
+    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
+      new SparkMaxConfig().apply(MOTOR_CONFIG_LEFT).inverted(true);
 
-    public static final double AXIS_MAX_SPEED = 1;
+    public static final double AXIS_MAX_SPEED = 0.5;
+  }
+
+  public static class CLIMBER_PIVOT {
+
+    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
+      .idleMode(IdleMode.kBrake)
+      .smartCurrentLimit(60, 60)
+      .inverted(true);
+
+    public static final double AXIS_MAX_SPEED = .25;
   }
 
   public static final class CUSTOM_UNITS {
@@ -639,8 +606,8 @@ public final class Constants {
     public static final double CODRIVE_RUMBLE_INTENSITY = .5;
     public static final double BUTTONBOARD_RUMBLE_INTENSITY = 1;
 
-    public static final double DRIVE_RUMBLE_SECONDS = 2;
-    public static final double CODRIVE_RUMBLE_SECONDS = 2;
+    public static final double DRIVE_RUMBLE_SECONDS = 1;
+    public static final double CODRIVE_RUMBLE_SECONDS = 1;
     public static final double BUTTONBOARD_RUMBLE_SECONDS = .05;
   }
 

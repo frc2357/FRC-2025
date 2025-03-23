@@ -1,20 +1,20 @@
-package frc.robot.commands.algaeRunner;
+package frc.robot.commands.climberWinch;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 
-public class AlgaeRunnerSetSpeed extends Command {
+public class ClimberWinchSetSpeed extends Command {
 
   private double m_speed;
 
-  public AlgaeRunnerSetSpeed(double speed) {
+  public ClimberWinchSetSpeed(double speed) {
+    addRequirements(Robot.climberWinch);
     m_speed = speed;
-    addRequirements(Robot.algaeRunner);
   }
 
   @Override
   public void initialize() {
-    Robot.algaeRunner.setSpeed(m_speed);
+    Robot.climberWinch.setSpeed(m_speed);
   }
 
   @Override
@@ -24,6 +24,6 @@ public class AlgaeRunnerSetSpeed extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    Robot.algaeRunner.stop();
+    Robot.climberWinch.stop();
   }
 }
