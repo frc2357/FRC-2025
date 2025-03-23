@@ -6,17 +6,24 @@ import frc.robot.controls.util.AxisInterface;
 
 public class ClimberWinchAxis extends Command {
 
-  private AxisInterface m_axis;
+  private AxisInterface m_xAxis;
+  private AxisInterface m_yAxis;
 
-  public ClimberWinchAxis(AxisInterface axis) {
-    m_axis = axis;
+  public ClimberWinchAxis(AxisInterface xAxis, AxisInterface yAxis) {
+    m_xAxis = xAxis;
+    m_yAxis = yAxis;
     addRequirements(Robot.climberWinch);
   }
 
   @Override
   public void execute() {
-    double axisValue = m_axis.getValue();
-    Robot.climberWinch.setAxisSpeed(Math.pow(axisValue, 3));
+    double xAxisSpeed = m_xAxis.getValue();
+    double yAxisSpeed = m_yAxis.getValue();
+
+    double leftSpeed = (-xAxisSpeed + yAxisSpeed) / 2.0;
+    double rightSpeed = (xAxisSpeed + yAxisSpeed) / 2.0;
+
+    Robot.climberWinch.setSpeed(leftSpeed, rightSpeed);
   }
 
   @Override

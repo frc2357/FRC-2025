@@ -337,9 +337,7 @@ public final class Constants {
       .smartCurrentLimit(60, 60)
       .inverted(false);
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
-      new SparkMaxConfig()
-        .apply(MOTOR_CONFIG_LEFT)
-        .follow(CAN_ID.CLIMBER_WINCH_MOTOR_LEFT, true);
+      new SparkMaxConfig().apply(MOTOR_CONFIG_LEFT).inverted(true);
 
     public static final double AXIS_MAX_SPEED = .25;
   }
