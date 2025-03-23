@@ -25,6 +25,7 @@ import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.elevator.ElevatorHoldPosition;
 import frc.robot.commands.elevator.ElevatorSetDistance;
+import frc.robot.commands.laterator.LateratorHoldHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
@@ -169,6 +170,7 @@ public class Robot extends TimedRobot {
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
     elevator.setDefaultCommand(new ElevatorHoldPosition());
+    laterator.setDefaultCommand(new LateratorHoldHome());
 
     new InitRobotCommand().schedule();
 
