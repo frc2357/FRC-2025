@@ -54,44 +54,44 @@ void PanicControls::setXboxControlsForMechanism(PanicControls::MechanismControl 
   switch (mechanism)
   {
   case CORAL_FORWARD:
-    XInput.setTrigger(XInputControl::TRIGGER_RIGHT, analogRead(ROLLER_POT_PIN));
+    XInput.setTrigger(XInputControl::TRIGGER_RIGHT, readPot(ROLLER_POT_PIN));
     XInput.setButton(ROLLER_NEGATIVE_INDICATOR_BUTTON, false);
     break;
   case CORAL_REVERSE:
-    XInput.setTrigger(XInputControl::TRIGGER_RIGHT, analogRead(ROLLER_POT_PIN));
+    XInput.setTrigger(XInputControl::TRIGGER_RIGHT, readPot(ROLLER_POT_PIN));
     XInput.setButton(ROLLER_NEGATIVE_INDICATOR_BUTTON, true);
     break;
   case ALGAE_FORWARD:
-    XInput.setTrigger(XInputControl::TRIGGER_LEFT, analogRead(ROLLER_POT_PIN));
+    XInput.setTrigger(XInputControl::TRIGGER_LEFT, readPot(ROLLER_POT_PIN));
     XInput.setButton(ROLLER_NEGATIVE_INDICATOR_BUTTON, false);
     break;
   case ALGAE_REVERSE:
-    XInput.setTrigger(XInputControl::TRIGGER_LEFT, analogRead(ROLLER_POT_PIN));
+    XInput.setTrigger(XInputControl::TRIGGER_LEFT, readPot(ROLLER_POT_PIN));
     XInput.setButton(ROLLER_NEGATIVE_INDICATOR_BUTTON, true);
     break;
   case ELEVATOR_UP:
-    XInput.setJoystickY(XInputControl::JOY_RIGHT, analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickY(XInputControl::JOY_RIGHT, readPot(MOVEMENT_POT_PIN));
     break;
   case ELEVATOR_DOWN:
-    XInput.setJoystickY(XInputControl::JOY_RIGHT, -analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickY(XInputControl::JOY_RIGHT, -readPot(MOVEMENT_POT_PIN));
     break;
   case LATERATOR_FORWARD:
-    XInput.setJoystickX(XInputControl::JOY_RIGHT, analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickX(XInputControl::JOY_RIGHT, readPot(MOVEMENT_POT_PIN));
     break;
   case LATERATOR_REVERSE:
-    XInput.setJoystickX(XInputControl::JOY_RIGHT, -analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickX(XInputControl::JOY_RIGHT, -readPot(MOVEMENT_POT_PIN));
     break;
   case ALGAE_OUT:
-    XInput.setJoystickX(XInputControl::JOY_LEFT, analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickX(XInputControl::JOY_LEFT, readPot(MOVEMENT_POT_PIN));
     break;
   case ALGAE_IN:
-    XInput.setJoystickX(XInputControl::JOY_LEFT, -analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickX(XInputControl::JOY_LEFT, -readPot(MOVEMENT_POT_PIN));
     break;
   case CLIMBER_OUT:
-    XInput.setJoystickY(XInputControl::JOY_LEFT, analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickY(XInputControl::JOY_LEFT, readPot(MOVEMENT_POT_PIN));
     break;
   case CLIMBER_IN:
-    XInput.setJoystickY(XInputControl::JOY_LEFT, -analogRead(MOVEMENT_POT_PIN));
+    XInput.setJoystickY(XInputControl::JOY_LEFT, -readPot(MOVEMENT_POT_PIN));
     break;
   }
 }
@@ -108,4 +108,13 @@ void PanicControls::resetJoysticks()
   XInput.setJoystickY(XInputControl::JOY_LEFT, 0);
   XInput.release(ROLLER_NEGATIVE_INDICATOR_BUTTON);
   m_joysticksReset = true;
+}
+
+int PanicControls::readPot(byte potPin) {
+  int baseVal = analogRead(potPin);
+  if (POTS_REVERSED) {
+    return map(baseVal, POT_MIN_VALUE, POT_MAX_VALUE, POT_MAX_VALUE, POT_MIN_VALUE);
+  } else {
+    return baseVal;
+  }
 }

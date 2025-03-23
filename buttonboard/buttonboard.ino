@@ -7,13 +7,13 @@
 #define RIGHT_LEVEL_KEYPAD_ADDRESS 0x31
 
 #define PANIC_CONTROLS_MCP_I2C_ADDRESS 0x20
-#define PANIC_CONTROLS_MCP_INT_PIN 1
+#define PANIC_CONTROLS_MCP_INT_PIN 0
 
 #define LEDS_MCP_I2C_ADDRESS 0x21
 
 LevelSelection level(LEFT_LEVEL_KEYPAD_ADDRESS, RIGHT_LEVEL_KEYPAD_ADDRESS);
 BranchSelection branch;
-// PanicControls panic(PANIC_CONTROLS_MCP_I2C_ADDRESS, PANIC_CONTROLS_MCP_INT_PIN);
+PanicControls panic(PANIC_CONTROLS_MCP_I2C_ADDRESS, PANIC_CONTROLS_MCP_INT_PIN);
 Leds leds(LEDS_MCP_I2C_ADDRESS);
 
 void setup()
@@ -26,7 +26,7 @@ void setup()
 
   level.init();
   branch.init();
-  // panic.init();
+  panic.init();
   leds.init();
 }
 
@@ -34,8 +34,7 @@ void loop()
 {
   level.update();
   branch.update();
-  // panic.update();
-  delay(10);
+  panic.update();
   leds.update(level.getSelection(), branch.getSelection());
 }
 

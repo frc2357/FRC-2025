@@ -5,12 +5,14 @@
 #include "LevelSelection.h"
 #include "BranchSelection.h"
 
+#define ANIMATION_FRAME_DURATION_MILLIS 1000
+
 #define NUM_ROWS 4
 #define NUM_COLS 12
 
 /**
- * Columns are wired to {fill in the blank}
- * Rows are wired to {fill in the blank}
+ * Columns are wired to Anodes (HIGH)
+ * Rows are wired to Cathodes (LOW)
  */
 #define ROW_ON LOW
 #define ROW_OFF HIGH
@@ -37,5 +39,8 @@ private:
 
     byte m_mcpI2CAddress;
     Adafruit_MCP23X17 m_mcp;
+
+    int m_currentRowPin = -1;
+    int m_currentColPin = -1;
 };
 #endif // LEDS_H

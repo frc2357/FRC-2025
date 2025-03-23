@@ -8,11 +8,13 @@
 #define BUTTON_PRESSED_STATE LOW
 #define INTERRUPT_SET_STATE LOW
 
+// Sliders are installed upside down
+#define POTS_REVERSED true
 #define POT_MIN_VALUE 0
 #define POT_MAX_VALUE 1023
 
-#define ROLLER_POT_PIN A0
-#define MOVEMENT_POT_PIN A1
+#define ROLLER_POT_PIN A4
+#define MOVEMENT_POT_PIN A3
 
 // Button to indicate if the roller mechanism panic controls are reversed or not
 #define ROLLER_NEGATIVE_INDICATOR_BUTTON XInputControl::BUTTON_R3
@@ -60,6 +62,7 @@ public:
 private:
     void setXboxControlsForMechanism(PanicControls::MechanismControl mechanism);
     void resetJoysticks();
+    int readPot(byte potPin);
 
     byte m_mcpI2CAddress, m_interruptPin;
     Adafruit_MCP23X17 m_mcp;

@@ -44,10 +44,10 @@ public class Robot extends TimedRobot {
   public static AlgaeKnocker algaeKnocker;
   public static AlgaePivot algaePivot;
   public static Climber climber;
-  public static PhotonVisionCamera frontCam;
-  public static PhotonVisionCamera backCam;
-  public static PhotonVisionCamera leftCam;
-  public static PhotonVisionCamera rightCam;
+  // public static PhotonVisionCamera frontCam;
+  // public static PhotonVisionCamera backCam;
+  // public static PhotonVisionCamera leftCam;
+  // public static PhotonVisionCamera rightCam;
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
   public static Buttonboard buttonboard;
@@ -81,22 +81,22 @@ public class Robot extends TimedRobot {
     // algaeKnocker = new AlgaeKnocker();
     // algaePivot = new AlgaePivot(); // commented out because they are currently NOT on the robot, and it will not run without them commented out.
     // climber = new Climber();
-    frontCam = new PhotonVisionCamera(
-      PHOTON_VISION.FRONT_CAMERA_NAME,
-      PHOTON_VISION.FRONT_CAMERA_TRANSFORM
-    );
-    backCam = new PhotonVisionCamera(
-      PHOTON_VISION.BACK_CAMERA_NAME,
-      PHOTON_VISION.BACK_CAMERA_TRANSFORM
-    );
-    leftCam = new PhotonVisionCamera(
-      PHOTON_VISION.LEFT_CAMERA_NAME,
-      PHOTON_VISION.LEFT_CAMERA_TRANSFORM
-    );
-    rightCam = new PhotonVisionCamera(
-      PHOTON_VISION.RIGHT_CAMERA_NAME,
-      PHOTON_VISION.RIGHT_CAMERA_TRANSFORM
-    );
+    // frontCam = new PhotonVisionCamera(
+    //   PHOTON_VISION.FRONT_CAMERA_NAME,
+    //   PHOTON_VISION.FRONT_CAMERA_TRANSFORM
+    // );
+    // backCam = new PhotonVisionCamera(
+    //   PHOTON_VISION.BACK_CAMERA_NAME,
+    //   PHOTON_VISION.BACK_CAMERA_TRANSFORM
+    // );
+    // leftCam = new PhotonVisionCamera(
+    //   PHOTON_VISION.LEFT_CAMERA_NAME,
+    //   PHOTON_VISION.LEFT_CAMERA_TRANSFORM
+    // );
+    // rightCam = new PhotonVisionCamera(
+    //   PHOTON_VISION.RIGHT_CAMERA_NAME,
+    //   PHOTON_VISION.RIGHT_CAMERA_TRANSFORM
+    // );
     elasticFieldManager = new ElasticFieldManager();
     elasticFieldManager.setupSwerveField();
 
@@ -110,10 +110,10 @@ public class Robot extends TimedRobot {
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
     );
-    codriverControls = new CodriverControls(
-      new CommandXboxController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT),
-      Constants.CONTROLLER.CODRIVE_CONTROLLER_DEADBAND
-    );
+    // codriverControls = new CodriverControls(
+    //   new CommandXboxController(Constants.CONTROLLER.CODRIVER_CONTROLLER_PORT),
+    //   Constants.CONTROLLER.CODRIVE_CONTROLLER_DEADBAND
+    // );
 
     // Define network table tools
     m_autoChooserManager = new AutoChooserManager();
@@ -155,10 +155,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    frontCam.updateResult();
-    backCam.updateResult();
-    leftCam.updateResult();
-    rightCam.updateResult();
+    // frontCam.updateResult();
+    // backCam.updateResult();
+    // leftCam.updateResult();
+    // rightCam.updateResult();
     elasticFieldManager.swerveFieldRep.setRobotPose(
       swerve.getFieldRelativePose2d()
     );
