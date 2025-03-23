@@ -519,7 +519,7 @@ public class CommandSwerveDrivetrain
     var translationalVelocity = Math.sqrt(
       Math.pow(xVel, 2) + Math.pow(yVel, 2)
     ); // A^2 + B^2 = C^2
-    return Units.FeetPerSecond.of(translationalVelocity);
+    return Units.MetersPerSecond.of(translationalVelocity);
   }
 
   public AngularVelocity getAngularVelocity() {
