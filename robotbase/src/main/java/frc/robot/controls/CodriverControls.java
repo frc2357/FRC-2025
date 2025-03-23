@@ -112,7 +112,6 @@ public class CodriverControls implements RumbleInterface {
       .and(m_controller.x())
       .whileTrue(new ElevatorHome().andThen(new ElevatorHallEffectZero()));
     onlyUp.and(m_controller.a()).whileTrue(new ElevatorHallEffectZero());
-    onlyUp.onFalse(new ElevatorHoldPosition());
 
     onlyRight
       .and(noLetterButtons)

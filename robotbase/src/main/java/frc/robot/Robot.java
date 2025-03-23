@@ -168,6 +168,8 @@ public class Robot extends TimedRobot {
     Robot.swerve.registerTelemetry(new Telemetry()::telemeterize);
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
+    elevator.setDefaultCommand(new ElevatorHoldPosition());
+
     new InitRobotCommand().schedule();
 
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
@@ -240,7 +242,6 @@ public class Robot extends TimedRobot {
     m_setCoastOnDisable.cancel();
 
     swerve.configNeutralMode(NeutralModeValue.Brake);
-    new ElevatorHoldPosition().schedule();
   }
 
   /** This function is called periodically during operator control. */
