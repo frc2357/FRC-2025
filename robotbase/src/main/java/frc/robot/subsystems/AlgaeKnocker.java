@@ -16,8 +16,8 @@ public class AlgaeKnocker extends SubsystemBase {
 
     m_motor.configure(
       ALGAE_KNOCKER.MOTOR_CONFIG,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
     );
   }
 

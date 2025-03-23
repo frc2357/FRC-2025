@@ -75,7 +75,7 @@ public final class Constants {
         .maxAcceleration(0)
         .maxVelocity(0);
 
-    public static final double GEAR_RATIO = 5;
+    public static final double GEAR_RATIO = 15;
     public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
       46.188
     );

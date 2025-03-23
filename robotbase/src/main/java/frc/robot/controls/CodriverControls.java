@@ -11,8 +11,8 @@ import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.climberPivot.ClimberPivotAxis;
 import frc.robot.commands.climberWinch.ClimberWinchAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
+import frc.robot.commands.elevator.ElevatorAmpLimitZero;
 import frc.robot.commands.elevator.ElevatorAxis;
-import frc.robot.commands.elevator.ElevatorHallEffectZero;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
@@ -109,8 +109,8 @@ public class CodriverControls implements RumbleInterface {
     );
     onlyUp
       .and(m_controller.x())
-      .whileTrue(new ElevatorHome().andThen(new ElevatorHallEffectZero()));
-    onlyUp.and(m_controller.a()).whileTrue(new ElevatorHallEffectZero());
+      .whileTrue(new ElevatorHome().andThen(new ElevatorAmpLimitZero()));
+    onlyUp.and(m_controller.a()).whileTrue(new ElevatorAmpLimitZero());
 
     onlyRight
       .and(noLetterButtons)
