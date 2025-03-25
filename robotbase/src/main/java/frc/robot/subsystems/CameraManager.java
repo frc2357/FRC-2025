@@ -163,7 +163,7 @@ public class CameraManager {
     public double yaw, pitch, skew;
     public Transform3d camToTargetTransform;
     public long timestamp;
-    public Pose3d targetFieldRelativePose;
+    public Pose2d targetFieldRelativePose;
     public PhotonVisionCamera camera;
 
     public TargetInfo(
@@ -187,7 +187,8 @@ public class CameraManager {
         Robot.swerve.getFieldRelativePose2d()
       )
         .plus(newCamera.m_robotToCameraTranform) //fieldToRobot -> fieldToCamera
-        .plus(camToTargetTransform); //fieldToCamera -> fieldToTarget
+        .plus(camToTargetTransform)
+        .toPose2d(); //fieldToCamera -> fieldToTarget
       this.camera = newCamera;
     }
 
@@ -217,7 +218,8 @@ public class CameraManager {
         Robot.swerve.getFieldRelativePose2d()
       )
         .plus(camera.m_robotToCameraTranform) //camToTarget -> robotToTarget
-        .plus(camToTargetTransform); //robotToTarget -> fieldOriginToTarget
+        .plus(camToTargetTransform)
+        .toPose2d(); //robotToTarget -> fieldOriginToTarget
     }
   }
 
@@ -632,7 +634,7 @@ public class CameraManager {
    * @param timeoutMs The amount of milliseconds past which the target information is deemed expired
    * @return Returns the desired targets field relative pose, <strong> will return null if cached data was invalid. </strong>
    */
-  public Pose3d getFieldRelativeTargetPose(int targetId, long timeoutMs) {
+  public Pose2d getFieldRelativeTargetPose(int targetId, long timeoutMs) {
     return isValidTarget(targetId, timeoutMs)
       ? m_aprilTagInfo[targetId].targetFieldRelativePose
       : null;
@@ -686,24 +688,26 @@ public class CameraManager {
   }
 
   protected Pose2d[] calculateBranchPose(
-    Pose3d targetFieldRelativePose,
+    Pose2d targetFieldRelativePose,
     Rotation2d targetRotation
   ) {
-    if (targetFieldRelativePose == null) return null;
+    if (targetFieldRelativePose == null || targetRotation == null) return null;
 
     Pose2d tarPose = new Pose2d(
-      targetFieldRelativePose.getTranslation().toTranslation2d(),
+      targetFieldRelativePose.getTranslation(),
       targetRotation
     );
     Pose2d rightBranchPose = tarPose
-      .plus(
+      .transformBy(
+        // gets where the branch actually is
         new Transform2d(
           0,
           FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
           Rotation2d.kZero
         )
       )
-      .plus(
+      .transformBy(
+        // makes it a position we can drive too and score at
         new Transform2d(
           ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
           Units.Inches.zero(),
@@ -711,14 +715,16 @@ public class CameraManager {
         )
       );
     Pose2d leftBranchPose = tarPose
-      .plus(
+      .transformBy(
+        // gets where the branch actually is
         new Transform2d(
           0,
           -FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
           Rotation2d.kZero
         )
       )
-      .plus(
+      // makes it a position we can drive too and score at
+      .transformBy(
         new Transform2d(
           ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
           Units.Inches.zero(),
