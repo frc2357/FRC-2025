@@ -217,11 +217,11 @@ public final class Constants {
       .voltageCompensation(12)
       .smartCurrentLimit(40, 40);
 
-    public static final double MOTOR_P = 0.00008;
+    public static final double MOTOR_P = 0.0002;
     public static final double MOTOR_I = 0;
     public static final double MOTOR_D = 0;
     public static final double MOTOR_F = 0;
-    public static final double MOTOR_VEL_FF = 0.00025;
+    public static final double MOTOR_VEL_FF = 0.0004;
 
     // Set feedback sensor to alternate encoder
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
@@ -241,10 +241,10 @@ public final class Constants {
         .allowedClosedLoopError(
           SMART_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
         )
-        .maxAcceleration(4800)
-        .maxVelocity(2000);
+        .maxAcceleration(10000)
+        .maxVelocity(3500);
 
-    public static final double GEAR_RATIO = 5;
+    public static final double GEAR_RATIO = 15;
     public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
       Units.Millimeters.of(46.188);
     public static final Distance OUTPUT_PULLEY_CIRCUMFERENCE =
