@@ -38,15 +38,7 @@ public class DriveToPose extends Command {
   @Override
   public void initialize() {
     Pose2d currentPose = Robot.swerve.getFieldRelativePose2d();
-    System.out.println("CURR POSE - " + currentPose);
-    System.out.println(
-      "CURR POSE FLIPPED - " +
-      Robot.swerve.makePoseAllianceRelative(currentPose)
-    );
-    Pose2d targetPose = Robot.swerve.makePoseAllianceRelative(
-      m_targetPoseFunction.apply(currentPose)
-    );
-    System.out.println("TAR POSE - " + targetPose);
+    Pose2d targetPose = m_targetPoseFunction.apply(currentPose);
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     m_driveController.reset(
@@ -84,15 +76,13 @@ public class DriveToPose extends Command {
       Robot.driverControls.getY() * m_speedAt12VoltsMPS,
       Robot.driverControls.getX() * m_speedAt12VoltsMPS
     );
-    ForwardPerspectiveValue perspective =
-      ForwardPerspectiveValue.OperatorPerspective;
+    ForwardPerspectiveValue perspective = ForwardPerspectiveValue.BlueAlliance;
 
     double thetaVelocity =
       Robot.driverControls.getRotation() *
       Constants.SWERVE.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
 
     if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
-      perspective = ForwardPerspectiveValue.BlueAlliance;
       // Calculate drive speed
       double currentDistance = currentPose
         .getTranslation()
@@ -123,7 +113,6 @@ public class DriveToPose extends Command {
         .getTranslation();
     }
 
-    // System.out.println("ROTO = " + m_rotoOutput);
     Robot.swerve.driveFieldRelative(
       driveVelocity.getX(),
       driveVelocity.getY(),
@@ -135,6 +124,7 @@ public class DriveToPose extends Command {
   @Override
   public boolean isFinished() {
     return m_driveController.atGoal() && m_thetaController.atGoal();
+    // return false;
   }
 
   @Override

@@ -1,6 +1,6 @@
 package frc.robot.controls;
 
-import static frc.robot.Constants.FIELD.REEF.BRANCH_A;
+import static frc.robot.Constants.FIELD.REEF.BRANCHES;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -9,13 +9,14 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Constants.FIELD.REEF;
+import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
 import frc.robot.Robot;
 import frc.robot.controls.controllers.CommandButtonboardController;
 import frc.robot.controls.controllers.CommandButtonboardController.ReefSide;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringDirection;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringLevel;
 import frc.robot.controls.util.RumbleInterface;
+import java.util.Arrays;
 
 public class Buttonboard implements Sendable, RumbleInterface {
 
@@ -24,6 +25,12 @@ public class Buttonboard implements Sendable, RumbleInterface {
   private ReefSide m_selectedReefSide = ReefSide.None;
   private ScoringLevel m_selectedScoringLevel = ScoringLevel.None;
   private ScoringDirection m_selectScoringDirection = ScoringDirection.None;
+
+  public static final Pose2d m_errorPose = new Pose2d(
+    -1,
+    -1,
+    new Rotation2d(Units.Degrees.of(-1))
+  );
 
   public Buttonboard(CommandButtonboardController controller) {
     m_controller = controller;
@@ -110,6 +117,7 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   public Pose2d getPoseFromGoal() {
+    return Robot.camManager.getFieldRelativeBranchPose(BRANCH_GOAL.CLOSEST);
     // ReefSide goal = Robot.buttonboard.getSelectedReefSide();
     // ScoringDirection scoringDirection =
     //   Robot.buttonboard.getSelectedScoringDirection();
@@ -118,41 +126,64 @@ public class Buttonboard implements Sendable, RumbleInterface {
     //   case Left:
     //     switch (goal) {
     //       case A:
-    //         return REEF.BRANCH_A;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_A
+    //         );
     //       case B:
-    //         return REEF.BRANCH_C;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_C
+    //         );
     //       case C:
-    //         return REEF.BRANCH_E;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_E
+    //         );
     //       case D:
-    //         return REEF.BRANCH_G;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_G
+    //         );
     //       case E:
-    //         return REEF.BRANCH_I;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_I
+    //         );
     //       case F:
-    //         return REEF.BRANCH_K;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_K
+    //         );
     //       default:
-    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+    //         return m_errorPose;
     //     }
     //   case Right:
     //     switch (goal) {
     //       case A:
-    //         return REEF.BRANCH_B;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_B
+    //         );
     //       case B:
-    //         return REEF.BRANCH_D;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_D
+    //         );
     //       case C:
-    //         return REEF.BRANCH_F;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_F
+    //         );
     //       case D:
-    //         return REEF.BRANCH_H;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_H
+    //         );
     //       case E:
-    //         return REEF.BRANCH_J;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_J
+    //         );
     //       case F:
-    //         return REEF.BRANCH_L;
+    //         return Robot.camManager.getAllianceRelativeBranchPose(
+    //           BRANCH_GOAL.BRANCH_L
+    //         );
     //       default:
-    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+    //         return m_errorPose;
     //     }
     //   default:
-    //     return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
+    //     return m_errorPose;
     // }
-    return BRANCH_A;
   }
 
   @Override

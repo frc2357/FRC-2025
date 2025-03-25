@@ -50,15 +50,6 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
  */
 public final class Constants {
 
-  /*TODO: priorities for sunday. (below)
-  throughout day make sure pose est works
-  1. tune auto until we have a 3 peice
-  2. make sure alliance relative pose works correctly 
-  3. make sure drive to reef works without collision avoidance
-  5. make sure drive to reef works with collision avoidance
-  6. drive practice to make sure everything meshes and works well
-  7. make a 4 peice auto, or 3 peice on the other side of the reef*/
-
   public static final class CAN_ID {
 
     public static final int PIGEON_ID = 5;
@@ -383,12 +374,8 @@ public final class Constants {
 
     public static final PoseStrategy PRIMARY_STRATEGY =
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
-    public static final PoseStrategy PRIMARY_STRAT_FOR_FAILED_LOAD =
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
-    public static final PoseStrategy FALLBACK_STRAT_FOR_FAILED_LOAD =
-      PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
+      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
 
     public static final double PNP_HEADING_SCALE_FACTOR = 2; // no touchy.
 
@@ -410,55 +397,34 @@ public final class Constants {
       Units.RadiansPerSecond.of(0.01);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(0.001);
+      Units.MetersPerSecond.of(0.01);
 
-    public static final Time PNP_INFO_VALID_TIME = Units.Seconds.of(0.6);
+    public static final Time INFO_VALID_TIME = Units.Seconds.of(0.6);
 
-    public static final int PNP_INFO_STORAGE_AMOUNT = 3;
+    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
     public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.5);
 
-    public static final double MAX_DIST_BETWEEN_ESTIMATES = 1;
+    public static final Distance MAX_DIST_BETWEEN_ESTIMATES = Units.Meters.of(
+      0.5
+    );
 
     public static final Time UPDATE_POSE_INTERVALS = Seconds.of(4);
 
-    public static final int MIN_ALLOWED_TARGETS = 1;
+    public static final int MIN_ALLOWED_TARGETS = 2;
 
-    public static final class FRONT_CAM {
+    public static final Time ESTIMATE_TIMEOUT = Units.Milliseconds.of(120);
 
-      public static final String NAME = "frontCam";
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = // new Transform3d(
-        //   Units.Inches.of(7.951),
-        //   Units.Inches.of(4.624),
-        //   Units.Inches.of(22.243),
-        //   new Rotation3d(
-        //     Units.Degrees.of(0),
-        //     Units.Degrees.of(10),
-        //     Units.Degrees.of(0)
-        //   )
-        // );
-        new Transform3d(
-          Units.Inches.of(4.624),
-          Units.Inches.of(7.799),
-          Units.Inches.of(22.055),
-          new Rotation3d(
-            Units.Degrees.of(0),
-            Units.Degrees.of(-10),
-            Units.Degrees.of(180)
-          )
-        );
-    }
+    public static final class BACK_RIGHT_CAM {
 
-    public static final class BACK_CAM {
-
-      public static final String NAME = "backCam";
+      public static final String NAME = "backRightCam";
       public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(-6.516),
-        Units.Inches.of(-5.028),
-        Units.Inches.of(21.137),
+        Units.Inches.of(4.624),
+        Units.Inches.of(7.799),
+        Units.Inches.of(22.055),
         new Rotation3d(
           Units.Degrees.of(0),
           Units.Degrees.of(-10),
@@ -467,32 +433,17 @@ public final class Constants {
       );
     }
 
-    public static final class RIGHT_CAM {
+    public static final class BACK_LEFT_CAM {
 
-      public static final String NAME = "rightCam";
+      public static final String NAME = "backLeftCam";
       public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(-8.887),
-        Units.Inches.of(-3.001),
-        Units.Inches.of(16.578),
+        Units.Inches.of(-6.516),
+        Units.Inches.of(-5.028),
+        Units.Inches.of(21.137),
         new Rotation3d(
-          Units.Degrees.of(10),
           Units.Degrees.of(0),
-          Units.Degrees.of(270)
-        )
-      );
-    }
-
-    public static final class LEFT_CAM {
-
-      public static final String NAME = "leftCam";
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(8.887),
-        Units.Inches.of(-3.001),
-        Units.Inches.of(16.579),
-        new Rotation3d(
           Units.Degrees.of(-10),
-          Units.Degrees.of(0),
-          Units.Degrees.of(90)
+          Units.Degrees.of(180)
         )
       );
     }
@@ -518,6 +469,8 @@ public final class Constants {
 
     // how far off on the z axis the estimated pose can be before we invalidate it
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
+
+    public static final Distance BRANCH_TO_TAG_DIST = Units.Inches.of(6.5);
   }
 
   public static class DRIVE_TO_VECTOR {
@@ -557,13 +510,19 @@ public final class Constants {
         new TrapezoidProfile.Constraints(2, 1.5)
       );
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(1);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(1);
-    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(6);
+    public static final Distance X_TOLERANCE = Units.Inches.of(0.5);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(0.5);
+    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(4);
 
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(1);
+    public static final Pose2d TOLERANCE_POSE = new Pose2d(
+      X_TOLERANCE,
+      Y_TOLERANCE,
+      new Rotation2d(ROTATION_TOLERANCE)
+    );
 
-    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.5);
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
+
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.2);
 
     public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
       Units.Rotations.of(0.08)
@@ -589,6 +548,28 @@ public final class Constants {
      * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
      */
     public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 3;
+
+    public enum BRANCH_GOAL {
+      CLOSEST(0),
+      BRANCH_A(1),
+      BRANCH_B(2),
+      BRANCH_C(3),
+      BRANCH_D(4),
+      BRANCH_E(5),
+      BRANCH_F(6),
+      BRANCH_G(7),
+      BRANCH_H(8),
+      BRANCH_I(8),
+      BRANCH_J(10),
+      BRANCH_K(11),
+      BRANCH_L(12);
+
+      public final int branchNum;
+
+      BRANCH_GOAL(int branchNum) {
+        this.branchNum = branchNum;
+      }
+    }
   }
 
   public static final class COLLISION_DETECTION {
@@ -634,6 +615,9 @@ public final class Constants {
 
     public static class REEF {
 
+      public static final int[] BLUE_REEF_TAGS = { 18, 17, 22, 21, 20, 19 };
+      public static final int[] RED_REEF_TAGS = { 7, 8, 9, 10, 11, 6 };
+
       public static final Pose2d BRANCH_A = new Pose2d(
         Units.Meters.of(3.2332),
         Units.Meters.of(4.1914),
@@ -647,22 +631,22 @@ public final class Constants {
       public static final Pose2d BRANCH_C = new Pose2d(
         Units.Meters.of(3.7160),
         Units.Meters.of(3.0202),
-        new Rotation2d(Units.Radians.of(1.0441))
+        Rotation2d.fromRadians(-2.103118631816568)
       );
       public static final Pose2d BRANCH_D = new Pose2d(
         Units.Meters.of(4.0011),
         Units.Meters.of(2.8563),
-        new Rotation2d(Units.Radians.of(1.0441))
+        Rotation2d.fromRadians(-2.103118631816568)
       );
       public static final Pose2d BRANCH_E = new Pose2d(
         Units.Meters.of(4.9734),
         Units.Meters.of(2.8552),
-        new Rotation2d(Units.Radians.of(2.0956))
+        Rotation2d.fromRadians(-1.0600454389505496)
       );
       public static final Pose2d BRANCH_F = new Pose2d(
         Units.Meters.of(5.2600),
         Units.Meters.of(3.0165),
-        new Rotation2d(Units.Radians.of(2.0956))
+        Rotation2d.fromRadians(-1.0600454389505496)
       );
       public static final Pose2d BRANCH_G = new Pose2d(
         Units.Meters.of(5.7408),
@@ -677,28 +661,43 @@ public final class Constants {
       public static final Pose2d BRANCH_I = new Pose2d(
         Units.Meters.of(5.2650),
         Units.Meters.of(5.0293),
-        new Rotation2d(Units.Radians.of(-2.0970))
+        Rotation2d.fromRadians(1.044169055361146)
       );
       public static final Pose2d BRANCH_J = new Pose2d(
         Units.Meters.of(4.9792),
         Units.Meters.of(5.1939),
-        new Rotation2d(Units.Radians.of(-2.0970))
+        Rotation2d.fromRadians(1.044169055361146)
       );
       public static final Pose2d BRANCH_K = new Pose2d(
         Units.Meters.of(4.0037),
         Units.Meters.of(5.1982),
-        new Rotation2d(Units.Radians.of(-1.0505))
+        Rotation2d.fromRadians(2.0927415702150935)
       );
       public static final Pose2d BRANCH_L = new Pose2d(
         Units.Meters.of(3.7203),
         Units.Meters.of(5.0299),
-        new Rotation2d(Units.Radians.of(-1.0505))
+        Rotation2d.fromRadians(2.0927415702150935)
       );
       public static final Pose2d CENTER = new Pose2d(
         Units.Meters.of(4.4894),
         Units.Meters.of(4.0135),
         Rotation2d.kZero
       );
+
+      public static final Pose2d[] BRANCHES = {
+        BRANCH_A,
+        BRANCH_B,
+        BRANCH_C,
+        BRANCH_D,
+        BRANCH_E,
+        BRANCH_F,
+        BRANCH_G,
+        BRANCH_H,
+        BRANCH_I,
+        BRANCH_J,
+        BRANCH_K,
+        BRANCH_L,
+      };
       public static final Pose2d BOTTOM_LEFT_CORNER = new Pose2d(
         3.6375527381896973,
         3.5441830158233643,

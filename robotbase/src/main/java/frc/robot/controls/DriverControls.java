@@ -1,5 +1,6 @@
 package frc.robot.controls;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -7,11 +8,12 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
-import frc.robot.commands.drive.DriveRobotRelative;
+import frc.robot.commands.drive.DriveToPose;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
@@ -46,45 +48,46 @@ public class DriverControls implements RumbleInterface {
   }
 
   public void mapControls() {
-    m_controller
-      .start()
-      .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetPose(
-            REEF.BRANCH_A.plus(new Transform2d(-0.2, 0, Rotation2d.kZero))
-          )
-        )
-      );
+    // // Scoring
+    // m_controller
+    //   .leftBumper()
+    //   .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
+    // m_controller
+    //   .rightBumper()
+    //   .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
+    // m_controller
+    //   .x()
+    //   .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
 
-    // Scoring
-    m_controller
-      .leftBumper()
-      .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
-    m_controller
-      .rightBumper()
-      .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
-    m_controller
-      .x()
-      .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
+    // // Intaking
+    // m_rightTrigger
+    //   .and(() -> Robot.coralRunner.hasNoCoral())
+    //   .toggleOnTrue(
+    //     new CoralIntake().finallyDo(() -> new CoralRetract().schedule())
+    //   );
 
-    // Intaking
-    m_rightTrigger
-      .and(() -> Robot.coralRunner.hasNoCoral())
-      .onTrue(new TeleopCoralIntake(m_rightTrigger));
+    // // Remove algae
+    // m_controller
+    //   .a()
+    //   .toggleOnTrue(
+    //     new RemoveAlgaeLow().finallyDo(() -> new CoralHome().schedule())
+    //   );
+    // m_controller
+    //   .b()
+    //   .toggleOnTrue(
+    //     new RemoveAlgaeHigh().finallyDo(() -> new CoralHome().schedule())
+    //   );
 
-    // Remove algae
-    m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
-    m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
-
-    // Other
-    m_leftTrigger.onTrue(new CoralHome());
-    m_controller.back().onTrue(new FlipPerspective());
+    // // Other
+    // m_leftTrigger.onTrue(new CoralHome());
+    // m_controller.back().onTrue(new FlipPerspective());
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-    m_controller.y().whileTrue(new DriveRobotRelative());
 
-    m_controller.y().whileTrue(new DriveToReef(RouteAroundReef.None));
+    m_controller
+      .y()
+      .whileTrue(new DriveToReef(RouteAroundReef.None, BRANCH_GOAL.BRANCH_D));
   }
 
   public double getX() {
