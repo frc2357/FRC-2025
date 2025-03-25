@@ -10,10 +10,6 @@ import frc.robot.commands.scoring.CoralHome;
 public class CoralRetract extends SequentialCommandGroup {
 
   public CoralRetract() {
-    this(true);
-  }
-
-  public CoralRetract(boolean zero) {
     super(
       new CoralHome().alongWith(new CoralSettle()),
       new InstantCommand(() -> {
