@@ -172,7 +172,6 @@ public class Robot extends TimedRobot {
     // Setup commands
     swerve.setDefaultCommand(new DefaultDrive());
     elevator.setDefaultCommand(new ElevatorHoldPosition());
-    laterator.setDefaultCommand(new LateratorHoldHome());
 
     new InitRobotCommand().schedule();
 
