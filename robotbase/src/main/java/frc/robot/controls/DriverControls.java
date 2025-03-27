@@ -17,6 +17,7 @@ import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
+import frc.robot.commands.scoring.CoralZero;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL4;
@@ -59,13 +60,25 @@ public class DriverControls implements RumbleInterface {
     // Scoring
     m_controller
       .leftBumper()
-      .onTrue(new TeleopCoralScoreL4(m_rightTrigger).getCommand());
+      .onTrue(
+        new TeleopCoralScoreL4(m_rightTrigger)
+          .getCommand()
+          .andThen(new CoralZero())
+      );
     m_controller
       .rightBumper()
-      .onTrue(new TeleopCoralScoreL3(m_rightTrigger).getCommand());
+      .onTrue(
+        new TeleopCoralScoreL3(m_rightTrigger)
+          .getCommand()
+          .andThen(new CoralZero())
+      );
     m_controller
       .x()
-      .onTrue(new TeleopCoralScoreL2(m_rightTrigger).getCommand());
+      .onTrue(
+        new TeleopCoralScoreL2(m_rightTrigger)
+          .getCommand()
+          .andThen(new CoralZero())
+      );
 
     // Intaking
     m_rightTrigger
@@ -77,7 +90,7 @@ public class DriverControls implements RumbleInterface {
     m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
 
     // Other
-    m_leftTrigger.onTrue(new CoralHome());
+    m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
     m_controller.back().onTrue(new FlipPerspective());
     m_controller
       .start()

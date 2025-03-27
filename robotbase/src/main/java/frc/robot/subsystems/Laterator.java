@@ -29,6 +29,7 @@ public class Laterator extends SubsystemBase {
   private DigitalInput m_hallEffectSensor;
   private Debouncer m_debouncer;
   private boolean m_isAtZero = false;
+  private boolean m_startedAtZero = false;
 
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
@@ -46,8 +47,8 @@ public class Laterator extends SubsystemBase {
 
     m_motor.configure(
       LATERATOR.MOTOR_CONFIG,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
     );
 
     m_PIDController = m_motor.getClosedLoopController();
@@ -162,6 +163,14 @@ public class Laterator extends SubsystemBase {
 
   public void updateSensors() {
     m_isAtZero = m_debouncer.calculate(!m_hallEffectSensor.get());
+  }
+
+  public boolean startedAtZero() {
+    return m_startedAtZero;
+  }
+
+  public boolean setStartedAtZero(boolean startedAtZero) {
+    return m_startedAtZero = startedAtZero;
   }
 
   @Override

@@ -11,6 +11,7 @@ import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.laterator.LateratorToSafeSpot;
 import frc.robot.commands.scoring.CoralHome;
+import frc.robot.commands.scoring.CoralZero;
 import frc.robot.commands.util.PressToContinue;
 
 public class RemoveAlgaeLow extends SequentialCommandGroup {
@@ -28,7 +29,8 @@ public class RemoveAlgaeLow extends SequentialCommandGroup {
         ),
         new AlgaeKnockerSetSpeed(-0.5)
       ),
-      new CoralHome()
+      new CoralHome(),
+      new CoralZero()
     );
   }
 }

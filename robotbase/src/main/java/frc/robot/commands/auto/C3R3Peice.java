@@ -1,13 +1,10 @@
 package frc.robot.commands.auto;
 
-import static frc.robot.Constants.CHOREO.*;
-
 import choreo.auto.AutoTrajectory;
 import frc.robot.Constants;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
 import frc.robot.commands.intake.CoralRetract;
-import frc.robot.commands.intake.CoralSettle;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.auto.AutoCoralConfirmScore;
 import frc.robot.commands.scoring.auto.AutoCoralPreposeL4;
@@ -65,7 +62,7 @@ public class C3R3Peice extends AutoBase {
         new CoralIntake()
           .andThen(
             new CoralHome()
-              .andThen(redSToBranchD.cmd().alongWith(new CoralSettle()))
+              .andThen(redSToBranchD.cmd().alongWith(new CoralRetract()))
           )
       );
     // when at the branch, we score and then move back to the station
@@ -76,7 +73,7 @@ public class C3R3Peice extends AutoBase {
           .andThen(
             new AutoCoralConfirmScore(
               Constants.CORAL_RUNNER.SCORING_PERCENT_L4
-            ).andThen(new CoralPreposeIntake(), branchDToRedS.cmd())
+            ).andThen(new CoralPreposeIntake().alongWith(branchDToRedS.cmd()))
           ) // score coral 2
       );
     // when at the coral station, we intake coral and then go to the next branch
@@ -84,10 +81,7 @@ public class C3R3Peice extends AutoBase {
       .done()
       .onTrue(
         new CoralIntake()
-          .andThen(
-            new CoralHome(),
-            redSToBranchC.cmd().alongWith(new CoralSettle())
-          )
+          .andThen(redSToBranchC.cmd().alongWith(new CoralRetract()))
       );
     redSToBranchC
       .done()
@@ -96,7 +90,7 @@ public class C3R3Peice extends AutoBase {
           .andThen(
             new AutoCoralConfirmScore(
               Constants.CORAL_RUNNER.SCORING_PERCENT_L4
-            ).andThen(new CoralPreposeIntake(), branchCToRedS.cmd()) // score coral 3
+            ).andThen(new CoralPreposeIntake().alongWith(branchCToRedS.cmd())) // score coral 3
           )
       );
     // when at the coral station, we intake coral and then go to the next branch
@@ -104,7 +98,7 @@ public class C3R3Peice extends AutoBase {
       .done()
       .onTrue(
         new CoralIntake()
-          .andThen(new CoralRetract())/* .andThen(RedSToBranchI.cmd())*/
+          .andThen(new CoralRetract())/* .alongWith(RedSToBranchI.cmd())*/
       );
     // RedSToBranchI.atTimeBeforeEnd(PREPOSE_SECONDS).onTrue(
     //   new AutoCoralPreposeL4()

@@ -31,8 +31,6 @@ public class Elevator extends SubsystemBase {
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
 
-  private DigitalInput m_hallEffectSensor;
-  private Debouncer m_debouncer;
   private boolean m_isAtZero = false;
 
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
@@ -56,22 +54,18 @@ public class Elevator extends SubsystemBase {
 
     m_motorLeft.configure(
       ELEVATOR.MOTOR_CONFIG_LEFT,
-      ResetMode.kResetSafeParameters,
+      ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
     m_motorRight.configure(
       ELEVATOR.MOTOR_CONFIG_RIGHT,
-      ResetMode.kResetSafeParameters,
+      ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
 
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
-    m_hallEffectSensor = new DigitalInput(
-      DIGITAL_INPUT.ELEVATOR_HALL_EFFECT_SENSOR_ID
-    );
-    m_debouncer = new Debouncer(ELEVATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -159,14 +153,6 @@ public class Elevator extends SubsystemBase {
     m_encoder.setPosition(0);
   }
 
-  public void setPositionHallEffect() {
-    m_encoder.setPosition(
-      distanceToRotations(ELEVATOR.SETPOINTS.HALL_EFFECT_POSITION).in(
-        Units.Rotations
-      )
-    );
-  }
-
   private Angle distanceToRotations(Distance distance) {
     return Units.Rotations.of(
       distance
@@ -182,10 +168,6 @@ public class Elevator extends SubsystemBase {
         rotations.div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
       )
     );
-  }
-
-  public void updateSensors() {
-    m_isAtZero = m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 
   @Override

@@ -16,8 +16,8 @@ public class ClimberPivot extends SubsystemBase {
     m_motor = new SparkMax(CAN_ID.CLIMBER_PIVOT_MOTOR, MotorType.kBrushless);
     m_motor.configure(
       CLIMBER_PIVOT.MOTOR_CONFIG,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
     );
   }
 

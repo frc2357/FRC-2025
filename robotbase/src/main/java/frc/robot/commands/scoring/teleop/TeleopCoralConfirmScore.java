@@ -9,6 +9,7 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.scoring.CoralHome;
+import frc.robot.commands.scoring.CoralZero;
 
 public class TeleopCoralConfirmScore extends SequentialCommandGroup {
 
@@ -19,9 +20,10 @@ public class TeleopCoralConfirmScore extends SequentialCommandGroup {
           new WaitUntilCommand(() -> Robot.coralRunner.hasNoCoral()),
           new WaitCommand(Constants.CORAL_RUNNER.TELEOP_SCORING_WAIT_TIME)
         ),
-        new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_L4)
+        new CoralRunnerSetSpeed(coralRunnerSpeed)
       ),
-      new CoralHome()
+      new CoralHome(),
+      new CoralZero()
     );
   }
 }

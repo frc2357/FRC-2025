@@ -20,8 +20,8 @@ public class ClimberWinch extends SubsystemBase {
     );
     m_motorLeft.configure(
       CLIMBER_WINCH.MOTOR_CONFIG_LEFT,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
     );
     m_motorRight = new SparkMax(
       CAN_ID.CLIMBER_WINCH_MOTOR_RIGHT,
@@ -29,8 +29,8 @@ public class ClimberWinch extends SubsystemBase {
     );
     m_motorRight.configure(
       CLIMBER_WINCH.MOTOR_CONFIG_RIGHT,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
     );
   }
 
