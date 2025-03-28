@@ -86,24 +86,10 @@ public class Robot extends TimedRobot {
    * and should be used for any initialization code.
    */
   public Robot() {
-    // forces OpenCV to load. Dont remove this.
-    for (int i = 0; i < 3; i++) {
-      try {
-        OpenCvLoader.forceLoad();
-        m_didOpenCVLoad = true;
-        break;
-      } catch (Exception e) {
-        if (i > 2) {
-          System.err.println(
-            "OpenCV Load FAILED! Pose est will be much worse!"
-          );
-        }
-      }
-    }
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
     );
-    SmartDashboard.putBoolean("Toggle Pose Estimation", true);
+    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -115,14 +101,14 @@ public class Robot extends TimedRobot {
     climberPivot = new ClimberPivot();
 
     camManager = new CameraManager();
-    frontCam = camManager.createCamera(
-      FRONT_CAM.NAME,
-      FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
-    backCam = camManager.createCamera(
-      BACK_CAM.NAME,
-      BACK_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
+    // frontCam = camManager.createCamera(
+    //   FRONT_CAM.NAME,
+    //   FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
+    // );
+    // backCam = camManager.createCamera(
+    //   BACK_CAM.NAME,
+    //   BACK_CAM.ROBOT_TO_CAM_TRANSFORM
+    // );
     // leftCam = camManager.createCamera(
     //   LEFT_CAM.NAME,
     //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
@@ -131,10 +117,6 @@ public class Robot extends TimedRobot {
     //   RIGHT_CAM.NAME,
     //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
     // );
-    // if openCV fails to load, we cant use our normal strategies, and must change them accordingly.
-    if (!m_didOpenCVLoad) {}
-    elasticFieldManager = new ElasticFieldManager();
-    elasticFieldManager.setupSwerveField();
 
     // Define controls
     buttonboard = new Buttonboard(
@@ -159,9 +141,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
     SmartDashboard.putData("Signal Logger", m_SignalLoggerManager);
 
-    elasticFieldManager = new ElasticFieldManager();
-    elasticFieldManager.setupSwerveField();
-
     // Logging
     DataLogManager.logNetworkTables(true); // enable/disable automatic NetworksTable Logging
     DataLogManager.start("", "", 1.0); // defaults, flush to flash every 1 seconds
@@ -179,9 +158,9 @@ public class Robot extends TimedRobot {
       new DriveSetCoast()
     );
 
-    // climberPivot.setDefaultCommand(
-    //   new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
-    // );
+    climberPivot.setDefaultCommand(
+      new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
+    );
 
     // Update sensors at a faster rate
     addPeriodic(
@@ -204,9 +183,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     // camManager.updateAllCameras();
-    elasticFieldManager.swerveFieldRep.setRobotPose(
-      swerve.getFieldRelativePose2d()
-    );
     CommandScheduler.getInstance().run();
   }
 

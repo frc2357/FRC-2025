@@ -204,7 +204,7 @@ public final class Constants {
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
       public static final Distance L2_PREPOSE = Units.Inches.of(8.43);
       public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
-      public static final Distance L4_PREPOSE = Units.Inches.of(48.7);
+      public static final Distance L4_PREPOSE = Units.Inches.of(50.7);
       public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
@@ -292,11 +292,11 @@ public final class Constants {
 
     public static final double STALL_AMPS = 40;
 
-    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
+    public static final double DEBOUNCE_TIME_SECONDS = 0.01;
 
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(
-      0.5
+      0.32
     );
     public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(
       0.2
@@ -310,9 +310,9 @@ public final class Constants {
     );
 
     public static final double TELEOP_SCORING_WAIT_TIME = 0;
-    public static final double AUTO_SCORING_WAIT_TIME = 0.3;
+    public static final double AUTO_SCORING_WAIT_TIME = 0;
 
-    public static final double BACKOUT_TIME_SECONDS = 0.5;
+    public static final double BACKOUT_TIME_SECONDS = 0.3;
   }
 
   public static final class ALGAE_KNOCKER {
@@ -336,7 +336,7 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig().apply(MOTOR_CONFIG_LEFT).inverted(true);
 
-    public static final double AXIS_MAX_SPEED = 0.5;
+    public static final double AXIS_MAX_SPEED = 0.8;
   }
 
   public static class CLIMBER_PIVOT {

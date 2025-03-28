@@ -50,7 +50,7 @@ public class C3L3Peice extends AutoBase {
             new AutoCoralConfirmScore(
               Constants.CORAL_RUNNER.SCORING_PERCENT_L4
             ),
-            new CoralPreposeIntake().alongWith(branchIToBlueS.cmd())
+            new CoralPreposeIntake().andThen(branchIToBlueS.cmd())
           )
       ); //score coral 1
 
@@ -59,7 +59,7 @@ public class C3L3Peice extends AutoBase {
       .done()
       .onTrue(
         new CoralIntake()
-          .andThen(new CoralRetract().withDeadline(BlueSToBranchK.cmd()))
+          .andThen(new CoralRetract().andThen(BlueSToBranchK.cmd()))
       );
     // when at the branch, we score and then move back to the station
     BlueSToBranchK.done()
@@ -68,7 +68,7 @@ public class C3L3Peice extends AutoBase {
           .andThen(
             new AutoCoralConfirmScore(
               Constants.CORAL_RUNNER.SCORING_PERCENT_L4
-            ).andThen(new CoralPreposeIntake().alongWith(branchKToBlueS.cmd()))
+            ).andThen(new CoralPreposeIntake().andThen(branchKToBlueS.cmd()))
           ) // score coral 2
       );
     // when at the coral station, we intake coral and then go to the next branch
@@ -76,7 +76,7 @@ public class C3L3Peice extends AutoBase {
       .done()
       .onTrue(
         new CoralIntake()
-          .andThen(new CoralRetract().withDeadline(BlueSToBranchL.cmd()))
+          .andThen(new CoralRetract().andThen(BlueSToBranchL.cmd()))
       );
     BlueSToBranchL.done()
       .onTrue(
@@ -84,7 +84,7 @@ public class C3L3Peice extends AutoBase {
           .andThen(
             new AutoCoralConfirmScore(
               Constants.CORAL_RUNNER.SCORING_PERCENT_L4
-            ).andThen(new CoralPreposeIntake().alongWith(branchLToBlueS.cmd())) // score coral 3
+            ).andThen(new CoralPreposeIntake().andThen(branchLToBlueS.cmd())) // score coral 3
           )
       );
     // when at the coral station, we intake coral and then go to the next branch
