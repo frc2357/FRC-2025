@@ -140,21 +140,20 @@ public class CodriverControls implements RumbleInterface {
     onlyRight
       .and(m_controller.rightBumper())
       .whileTrue(new AlgaeKnockerSetSpeed(-0.25));
-
-    onlyLeft.whileTrue(
-      new ClimberPivotAxis(
-        () ->
-          m_controller.getLeftTriggerAxis() - m_controller.getRightTriggerAxis()
-      )
-    );
-    onlyLeft.whileTrue(
-      new ClimberWinchAxis(
-        () -> m_controller.getRightX(),
-        () -> m_controller.getRightY()
-      )
-    );
-    onlyLeft.and(m_controller.a()).whileTrue(new ClimberWinchSetSpeed(0.8));
-    onlyLeft.and(m_controller.y()).whileTrue(new ClimberWinchSetSpeed(-0.8));
+    // onlyLeft.whileTrue(
+    //   new ClimberPivotAxis(
+    //     () ->
+    //       m_controller.getLeftTriggerAxis() - m_controller.getRightTriggerAxis()
+    //   )
+    // );
+    // onlyLeft.whileTrue(
+    //   new ClimberWinchAxis(
+    //     () -> m_controller.getRightX(),
+    //     () -> m_controller.getRightY()
+    //   )
+    // );
+    // onlyLeft.and(m_controller.a()).whileTrue(new ClimberWinchSetSpeed(0.8));
+    // onlyLeft.and(m_controller.y()).whileTrue(new ClimberWinchSetSpeed(-0.8));
   }
 
   public double deadband(double value, double deadband) {

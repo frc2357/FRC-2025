@@ -97,8 +97,8 @@ public class Robot extends TimedRobot {
     laterator = new Laterator();
     coralRunner = new CoralRunner();
     algaeKnocker = new AlgaeKnocker();
-    climberWinch = new ClimberWinch();
-    climberPivot = new ClimberPivot();
+    // climberWinch = new ClimberWinch();
+    // climberPivot = new ClimberPivot();
 
     camManager = new CameraManager();
     // frontCam = camManager.createCamera(
@@ -158,9 +158,9 @@ public class Robot extends TimedRobot {
       new DriveSetCoast()
     );
 
-    climberPivot.setDefaultCommand(
-      new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
-    );
+    // climberPivot.setDefaultCommand(
+    //   new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
+    // );
 
     // Update sensors at a faster rate
     addPeriodic(

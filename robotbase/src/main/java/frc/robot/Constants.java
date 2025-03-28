@@ -190,7 +190,7 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final double ZERO_SPEED = -0.1;
 
-    public static final double ZERO_STALL_AMPS = 27; //TODO: tune this ASAP.
+    public static final double ZERO_STALL_AMPS = 34; //TODO: tune this ASAP.
 
     public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
@@ -266,7 +266,7 @@ public final class Constants {
       public static final Distance L1_PREPOSE = Units.Inches.of(-2);
       public static final Distance L2_PREPOSE = Units.Inches.of(-6.1);
       public static final Distance L3_PREPOSE = Units.Inches.of(-6.1);
-      public static final Distance L4_PREPOSE = Units.Inches.of(-6.3);
+      public static final Distance L4_PREPOSE = Units.Inches.of(-6.25);
       public static final Distance FULL_SCORING_EXTENSION = Units.Inches.of(
         -6.6
       );
