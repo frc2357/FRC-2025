@@ -204,7 +204,7 @@ public final class Constants {
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
       public static final Distance L2_PREPOSE = Units.Inches.of(8.43);
       public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
-      public static final Distance L4_PREPOSE = Units.Inches.of(50.7);
+      public static final Distance L4_PREPOSE = Units.Inches.of(49.5);
       public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
     }
@@ -292,7 +292,7 @@ public final class Constants {
 
     public static final double STALL_AMPS = 40;
 
-    public static final double DEBOUNCE_TIME_SECONDS = 0.01;
+    public static final double DEBOUNCE_TIME_SECONDS = 0.02;
 
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(
@@ -301,7 +301,7 @@ public final class Constants {
     public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(
       0.2
     );
-    public static final Dimensionless BACK_OUT_PERCENT = Units.Percent.of(-0.1);
+    public static final Dimensionless BACK_OUT_PERCENT = Units.Percent.of(-0.2);
     public static final Dimensionless SCORING_PERCENT_L4 = Units.Percent.of(
       0.5
     );
@@ -310,7 +310,7 @@ public final class Constants {
     );
 
     public static final double TELEOP_SCORING_WAIT_TIME = 0;
-    public static final double AUTO_SCORING_WAIT_TIME = 0;
+    public static final double AUTO_SCORING_WAIT_TIME = 0.3;
 
     public static final double BACKOUT_TIME_SECONDS = 0.3;
   }
