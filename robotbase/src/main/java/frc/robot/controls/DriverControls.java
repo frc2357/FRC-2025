@@ -7,13 +7,12 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
+import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
-import frc.robot.commands.drive.DriveRobotRelative;
-import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
-import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.drive.FlipPerspective;
 import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
@@ -95,9 +94,12 @@ public class DriverControls implements RumbleInterface {
     m_controller
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-    m_controller.y().whileTrue(new DriveRobotRelative());
 
-    m_controller.y().whileTrue(new DriveToReef(RouteAroundReef.None));
+    m_controller
+      .y()
+      .whileTrue(
+        new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.BACK_OUT_PERCENT)
+      );
   }
 
   public double getX() {

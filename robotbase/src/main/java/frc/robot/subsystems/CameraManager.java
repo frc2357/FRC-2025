@@ -170,6 +170,7 @@ public class CameraManager {
 
   public CameraManager() {
     m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
+    m_poseEstimator.setPrimaryStrategy(m_primaryStrat);
     m_poseEstimator.setMultiTagFallbackStrategy(m_fallbackStrat);
   }
 
@@ -187,11 +188,11 @@ public class CameraManager {
       else if (
         RobotModeTriggers.disabled().getAsBoolean() &&
         RobotController.getMeasureTime().in(Seconds) % 5 <= 0.1
-      ) System.err.println(
-        "CAMERA " +
-        camera.m_camera.getName() +
-        " IS DISCONNECTED! ***** TELL MAX! *****"
-      );
+      ) /* System.err.println(
+         "CAMERA " +
+         camera.m_camera.getName() +
+         " IS DISCONNECTED! ***** TELL MAX! *****"
+       )*/;
     }
     for (int i = 0; i < m_pnpInfo.length; i++) {
       if (m_pnpInfo[i] == null) continue;

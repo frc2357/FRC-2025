@@ -12,6 +12,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.CORAL_RUNNER;
@@ -103,8 +104,10 @@ public class CoralRunner extends SubsystemBase {
     m_isIntakeBeamBroken = m_debouncerOuttake.calculate(
       !m_beamBreakIntake.get()
     );
+    SmartDashboard.putBoolean("Intake Broken", m_isIntakeBeamBroken);
     m_isOutakeBeamBroken = m_debouncerIntake.calculate(
       !m_beamBreakOuttake.get()
     );
+    SmartDashboard.putBoolean("Outtake Broken", m_isOutakeBeamBroken);
   }
 }
