@@ -45,10 +45,7 @@ public class CoralSettle extends Command {
 
   @Override
   public boolean isFinished() {
-    return (
-      Robot.coralRunner.isOuttakeBeamBroken() ||
-      (Robot.coralRunner.hasNoCoral())
-    );
+    return Robot.coralRunner.isOuttakeBeamBroken();
   }
 
   @Override

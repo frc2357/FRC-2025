@@ -9,18 +9,15 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CAN_ID;
-import frc.robot.Constants.DIGITAL_INPUT;
 import frc.robot.Constants.ELEVATOR;
 import frc.robot.util.Utility;
 
@@ -31,8 +28,6 @@ public class Elevator extends SubsystemBase {
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
 
-  private DigitalInput m_hallEffectSensor;
-  private Debouncer m_debouncer;
   private boolean m_isAtZero = false;
 
   private MutAngle m_targetRotations = Units.Rotations.mutable(Double.NaN);
@@ -56,22 +51,18 @@ public class Elevator extends SubsystemBase {
 
     m_motorLeft.configure(
       ELEVATOR.MOTOR_CONFIG_LEFT,
-      ResetMode.kResetSafeParameters,
+      ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
     m_motorRight.configure(
       ELEVATOR.MOTOR_CONFIG_RIGHT,
-      ResetMode.kResetSafeParameters,
+      ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
 
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
-    m_hallEffectSensor = new DigitalInput(
-      DIGITAL_INPUT.ELEVATOR_HALL_EFFECT_SENSOR_ID
-    );
-    m_debouncer = new Debouncer(ELEVATOR.DEBOUNCE_TIME_SECONDS);
   }
 
   public void setSpeed(double percentOutput) {
@@ -159,14 +150,6 @@ public class Elevator extends SubsystemBase {
     m_encoder.setPosition(0);
   }
 
-  public void setPositionHallEffect() {
-    m_encoder.setPosition(
-      distanceToRotations(ELEVATOR.SETPOINTS.HALL_EFFECT_POSITION).in(
-        Units.Rotations
-      )
-    );
-  }
-
   private Angle distanceToRotations(Distance distance) {
     return Units.Rotations.of(
       distance
@@ -182,10 +165,6 @@ public class Elevator extends SubsystemBase {
         rotations.div(ELEVATOR.GEAR_RATIO).in(Units.Rotations)
       )
     );
-  }
-
-  public void updateSensors() {
-    m_isAtZero = m_debouncer.calculate(!m_hallEffectSensor.get());
   }
 
   @Override

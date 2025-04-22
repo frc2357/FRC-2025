@@ -8,11 +8,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
-import frc.robot.commands.climberPivot.ClimberPivotAxis;
-import frc.robot.commands.climberWinch.ClimberWinchAxis;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
+import frc.robot.commands.elevator.ElevatorAmpLimitZero;
 import frc.robot.commands.elevator.ElevatorAxis;
-import frc.robot.commands.elevator.ElevatorHallEffectZero;
 import frc.robot.commands.elevator.ElevatorHome;
 import frc.robot.commands.laterator.LateratorAxis;
 import frc.robot.commands.laterator.LateratorFullZero;
@@ -42,6 +40,7 @@ public class CodriverControls implements RumbleInterface {
     mapControls();
   }
 
+  @SuppressWarnings("unused")
   public void mapControls() {
     Trigger noDpad = m_controller
       .povUp()
@@ -109,8 +108,8 @@ public class CodriverControls implements RumbleInterface {
     );
     onlyUp
       .and(m_controller.x())
-      .whileTrue(new ElevatorHome().andThen(new ElevatorHallEffectZero()));
-    onlyUp.and(m_controller.a()).whileTrue(new ElevatorHallEffectZero());
+      .whileTrue(new ElevatorHome().andThen(new ElevatorAmpLimitZero()));
+    onlyUp.and(m_controller.a()).whileTrue(new ElevatorAmpLimitZero());
 
     onlyRight
       .and(noLetterButtons)
@@ -138,19 +137,20 @@ public class CodriverControls implements RumbleInterface {
     onlyRight
       .and(m_controller.rightBumper())
       .whileTrue(new AlgaeKnockerSetSpeed(-0.25));
-
-    onlyLeft.whileTrue(
-      new ClimberPivotAxis(
-        () ->
-          m_controller.getLeftTriggerAxis() - m_controller.getRightTriggerAxis()
-      )
-    );
-    onlyLeft.whileTrue(
-      new ClimberWinchAxis(
-        () -> m_controller.getRightX(),
-        () -> m_controller.getRightY()
-      )
-    );
+    // onlyLeft.whileTrue(
+    //   new ClimberPivotAxis(
+    //     () ->
+    //       m_controller.getLeftTriggerAxis() - m_controller.getRightTriggerAxis()
+    //   )
+    // );
+    // onlyLeft.whileTrue(
+    //   new ClimberWinchAxis(
+    //     () -> m_controller.getRightX(),
+    //     () -> m_controller.getRightY()
+    //   )
+    // );
+    // onlyLeft.and(m_controller.a()).whileTrue(new ClimberWinchSetSpeed(0.8));
+    // onlyLeft.and(m_controller.y()).whileTrue(new ClimberWinchSetSpeed(-0.8));
   }
 
   public double deadband(double value, double deadband) {

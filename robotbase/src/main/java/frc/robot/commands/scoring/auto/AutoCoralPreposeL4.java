@@ -10,7 +10,9 @@ public class AutoCoralPreposeL4 extends SequentialCommandGroup {
   public AutoCoralPreposeL4() {
     super(
       new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L4_PREPOSE),
-      new LateratorSetDistance(Constants.LATERATOR.SETPOINTS.L4_PREPOSE)
+      new LateratorSetDistance(
+        Constants.LATERATOR.SETPOINTS.L4_PREPOSE
+      ).withTimeout(0.3)
     );
   }
 }

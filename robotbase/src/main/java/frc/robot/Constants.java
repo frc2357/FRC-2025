@@ -87,7 +87,6 @@ public final class Constants {
     public static final int LATERATOR_CENTER_HALL_EFFECT_SENSOR_ID = 9;
     public static final int CORAL_RUNNER_BEAM_BREAK_OUTTAKE_ID = 8;
     public static final int CORAL_RUNNER_BEAM_BREAK_INTAKE_ID = 7;
-    public static final int ELEVATOR_HALL_EFFECT_SENSOR_ID = 0;
   }
 
   public static final class SWERVE {
@@ -182,25 +181,23 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final double ZERO_SPEED = -0.1;
 
-    public static final double ZERO_STALL_AMPS = 27; //TODO: tune this ASAP.
+    public static final double ZERO_STALL_AMPS = 34; //TODO: tune this ASAP.
 
     public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
-    public static final double HOLD_VOLTAGE = 0.75;
+    public static final double HOLD_VOLTAGE = 0.5;
 
     public static final class SETPOINTS {
 
       public static final Distance HOME = Units.Inches.of(2);
 
-      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.3);
+      public static final Distance INTAKE_PREPOSE = Units.Inches.of(1.1);
       public static final Distance L1_PREPOSE = Units.Inches.of(1);
-      public static final Distance L2_PREPOSE = Units.Inches.of(9.43);
+      public static final Distance L2_PREPOSE = Units.Inches.of(8.43);
       public static final Distance L3_PREPOSE = Units.Inches.of(24.189);
       public static final Distance L4_PREPOSE = Units.Inches.of(49.5);
       public static final Distance LOW_ALGAE = Units.Inches.of(0.5);
       public static final Distance HIGH_ALGAE = Units.Inches.of(13);
-
-      public static final Distance HALL_EFFECT_POSITION = Units.Inches.of(1.5);
     }
 
     public static final Time FULL_EXTENSION_TIME = Units.Seconds.of(0.5);
@@ -231,7 +228,7 @@ public final class Constants {
         .outputRange(-1, 1);
 
     public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
-      Units.Rotations.of(0.02);
+      Units.Rotations.of(0.05);
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
@@ -258,9 +255,9 @@ public final class Constants {
         -1
       );
       public static final Distance L1_PREPOSE = Units.Inches.of(-2);
-      public static final Distance L2_PREPOSE = Units.Inches.of(-6.2);
-      public static final Distance L3_PREPOSE = Units.Inches.of(-6.2);
-      public static final Distance L4_PREPOSE = Units.Inches.of(-6.4);
+      public static final Distance L2_PREPOSE = Units.Inches.of(-6.1);
+      public static final Distance L3_PREPOSE = Units.Inches.of(-6.1);
+      public static final Distance L4_PREPOSE = Units.Inches.of(-6.25);
       public static final Distance FULL_SCORING_EXTENSION = Units.Inches.of(
         -6.6
       );
@@ -290,12 +287,12 @@ public final class Constants {
 
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final Dimensionless FAST_INTAKE_PERCENT = Units.Percent.of(
-      0.5
+      0.32
     );
     public static final Dimensionless SLOW_INTAKE_PERCENT = Units.Percent.of(
       0.2
     );
-    public static final Dimensionless BACK_OUT_PERCENT = Units.Percent.of(-0.1);
+    public static final Dimensionless BACK_OUT_PERCENT = Units.Percent.of(-0.2);
     public static final Dimensionless SCORING_PERCENT_L4 = Units.Percent.of(
       0.5
     );
@@ -304,9 +301,9 @@ public final class Constants {
     );
 
     public static final double TELEOP_SCORING_WAIT_TIME = 0;
-    public static final double AUTO_SCORING_WAIT_TIME = 0.4;
+    public static final double AUTO_SCORING_WAIT_TIME = 0.5;
 
-    public static final double BACKOUT_TIME_SECONDS = 0.5;
+    public static final double BACKOUT_TIME_SECONDS = 0.3;
   }
 
   public static final class ALGAE_KNOCKER {
@@ -330,7 +327,7 @@ public final class Constants {
     public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
       new SparkMaxConfig().apply(MOTOR_CONFIG_LEFT).inverted(true);
 
-    public static final double AXIS_MAX_SPEED = 0.5;
+    public static final double AXIS_MAX_SPEED = 0.8;
   }
 
   public static class CLIMBER_PIVOT {
@@ -341,6 +338,8 @@ public final class Constants {
       .inverted(true);
 
     public static final double AXIS_MAX_SPEED = .25;
+
+    public static final double HOLD_AGAINST_WINCH_SPEED = -.02;
   }
 
   public static final class CUSTOM_UNITS {

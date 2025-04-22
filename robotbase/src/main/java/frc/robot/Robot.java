@@ -19,13 +19,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.PHOTON_VISION;
+import frc.robot.Constants.CLIMBER_PIVOT;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.StopAllMotors;
+import frc.robot.commands.climberPivot.ClimberPivotSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
 import frc.robot.commands.elevator.ElevatorHoldPosition;
 import frc.robot.commands.elevator.ElevatorSetDistance;
+import frc.robot.commands.laterator.LateratorHoldHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
@@ -96,8 +99,8 @@ public class Robot extends TimedRobot {
     laterator = new Laterator();
     coralRunner = new CoralRunner();
     algaeKnocker = new AlgaeKnocker();
-    climberWinch = new ClimberWinch();
-    climberPivot = new ClimberPivot();
+    // climberWinch = new ClimberWinch();
+    // climberPivot = new ClimberPivot();
 
     camManager = new CameraManager();
     // backRightCam = camManager.createCamera(
@@ -108,6 +111,14 @@ public class Robot extends TimedRobot {
       BACK_LEFT_CAM.NAME,
       BACK_LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
+    // leftCam = camManager.createCamera(
+    //   LEFT_CAM.NAME,
+    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
+    // );
+    // rightCam = camManager.createCamera(
+    //   RIGHT_CAM.NAME,
+    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
+    // );
 
     // Define controls
     buttonboard = new Buttonboard(
@@ -149,12 +160,15 @@ public class Robot extends TimedRobot {
       new DriveSetCoast()
     );
 
+    // climberPivot.setDefaultCommand(
+    //   new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
+    // );
+
     // Update sensors at a faster rate
     addPeriodic(
       () -> {
         Robot.coralRunner.updateSensors();
         Robot.laterator.updateSensors();
-        Robot.elevator.updateSensors();
       },
       0.005,
       0.003

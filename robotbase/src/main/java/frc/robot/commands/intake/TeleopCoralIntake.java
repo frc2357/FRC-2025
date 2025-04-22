@@ -17,7 +17,11 @@ public class TeleopCoralIntake extends SequentialCommandGroup {
       new ParallelDeadlineGroup(
         new ParallelRaceGroup(
           new PressToContinue(complete),
-          new WaitUntilCommand(Robot.coralRunner::isIntakeBeamBroken)
+          new WaitUntilCommand(
+            () ->
+              Robot.coralRunner.isIntakeBeamBroken() ||
+              Robot.coralRunner.isStalling()
+          )
         ),
         new CoralPreposeIntake(),
         new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.FAST_INTAKE_PERCENT)
