@@ -15,8 +15,7 @@ public class AutoCoralConfirmScore extends SequentialCommandGroup {
   public AutoCoralConfirmScore(Dimensionless coralRunnerSpeed) {
     super(
       new ParallelDeadlineGroup(
-        new SequentialCommandGroup(
-          new WaitUntilCommand(() -> Robot.coralRunner.hasNoCoral()),
+        new WaitUntilCommand(() -> Robot.coralRunner.hasNoCoral()).withDeadline(
           new WaitCommand(Constants.CORAL_RUNNER.AUTO_SCORING_WAIT_TIME)
         ),
         new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.SCORING_PERCENT_L4)

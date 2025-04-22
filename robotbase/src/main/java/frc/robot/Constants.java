@@ -310,7 +310,7 @@ public final class Constants {
     );
 
     public static final double TELEOP_SCORING_WAIT_TIME = 0;
-    public static final double AUTO_SCORING_WAIT_TIME = 0.3;
+    public static final double AUTO_SCORING_WAIT_TIME = 0.5;
 
     public static final double BACKOUT_TIME_SECONDS = 0.3;
   }
