@@ -2,14 +2,9 @@ package frc.robot.commands.auto;
 
 import choreo.auto.AutoTrajectory;
 import frc.robot.Constants;
-import frc.robot.Constants.ELEVATOR;
-import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.intake.CoralIntake;
 import frc.robot.commands.intake.CoralPreposeIntake;
 import frc.robot.commands.intake.CoralRetract;
-import frc.robot.commands.laterator.LateratorHome;
-import frc.robot.commands.laterator.LateratorSetDistance;
-import frc.robot.commands.laterator.LateratorZero;
 import frc.robot.commands.scoring.auto.AutoCoralConfirmScore;
 import frc.robot.commands.scoring.auto.AutoCoralPreposeL4;
 

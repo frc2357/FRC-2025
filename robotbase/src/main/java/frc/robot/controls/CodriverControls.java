@@ -8,10 +8,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
-import frc.robot.commands.climberPivot.ClimberPivotAxis;
-import frc.robot.commands.climberPivot.ClimberPivotSetSpeed;
-import frc.robot.commands.climberWinch.ClimberWinchAxis;
-import frc.robot.commands.climberWinch.ClimberWinchSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAmpLimitZero;
 import frc.robot.commands.elevator.ElevatorAxis;
@@ -44,6 +40,7 @@ public class CodriverControls implements RumbleInterface {
     mapControls();
   }
 
+  @SuppressWarnings("unused")
   public void mapControls() {
     Trigger noDpad = m_controller
       .povUp()
