@@ -12,11 +12,13 @@ import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -32,6 +34,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
+import java.util.List;
 import java.util.Optional;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -387,16 +390,15 @@ public final class Constants {
       );
 
     // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
-    // yes, these are essentially magic numbers
     public static final double X_STD_DEV_COEFFIECIENT = 0.8;
     public static final double Y_STD_DEV_COEFFIECIENT = 0.8;
 
-    // if were going faster than this, we wont accept any pose est.
+    // if were going faster than these, we wont accept any pose est.
     public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.01);
+      Units.RadiansPerSecond.of(0.1);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(0.01);
+      Units.MetersPerSecond.of(0.1);
 
     public static final Time INFO_VALID_TIME = Units.Seconds.of(0.6);
 
@@ -453,8 +455,220 @@ public final class Constants {
     public static final AprilTagFields APRIL_TAG_FIELD =
       AprilTagFields.k2025ReefscapeAndyMark;
 
+    // a tragic yet neccessary (maybe) sin.
+    public static final AprilTagFieldLayout HOME_FIELD_LAYOUT =
+      new AprilTagFieldLayout(
+        List.of(
+          new AprilTag(
+            1,
+            new Pose3d(
+              16.687292,
+              0.628142,
+              1.4859,
+              new Rotation3d(0.0, 0.0, 2.199114857512855)
+            )
+          ),
+          new AprilTag(
+            2,
+            new Pose3d(
+              16.687292,
+              7.414259999999999,
+              1.4859,
+              new Rotation3d(0.0, 0.0, -2.1991148575128556)
+            )
+          ),
+          new AprilTag(
+            3,
+            new Pose3d(
+              11.49096,
+              8.031733999999998,
+              1.30175,
+              new Rotation3d(0.0, 0.0, -1.570796326794897)
+            )
+          ),
+          new AprilTag(
+            4,
+            new Pose3d(
+              9.276079999999999,
+              6.132575999999999,
+              1.8679160000000001,
+              new Rotation3d(0.0, 0.5235987755982988, 0.0)
+            )
+          ),
+          new AprilTag(
+            5,
+            new Pose3d(
+              9.276079999999999,
+              1.9098259999999998,
+              1.8679160000000001,
+              new Rotation3d(0.0, 0.5235987755982988, 0.0)
+            )
+          ),
+          new AprilTag(
+            6,
+            new Pose3d(
+              13.474446,
+              3.3012379999999997,
+              0.308102,
+              new Rotation3d(0.0, 0.0, -1.0471975511965976)
+            )
+          ),
+          new AprilTag(
+            7,
+            new Pose3d(
+              13.890498,
+              4.0208200000000005,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 0.0)
+            )
+          ),
+          new AprilTag(
+            8,
+            new Pose3d(
+              13.474446,
+              4.740402,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 1.0471975511965976)
+            )
+          ),
+          new AprilTag(
+            9,
+            new Pose3d(
+              12.643358,
+              4.740402,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 2.0943951023931953)
+            )
+          ),
+          new AprilTag(
+            10,
+            new Pose3d(
+              12.227305999999999,
+              4.0208200000000005,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 3.141592653589793)
+            )
+          ),
+          new AprilTag(
+            11,
+            new Pose3d(
+              12.643358,
+              3.3012379999999997,
+              0.308102,
+              new Rotation3d(0.0, 0.0, -2.094395102393196)
+            )
+          ),
+          new AprilTag(
+            12,
+            new Pose3d(
+              0.8613139999999999,
+              0.628142,
+              1.4859,
+              new Rotation3d(0.0, 0.0, 0.9424777960769379)
+            )
+          ),
+          new AprilTag(
+            13,
+            new Pose3d(
+              0.8613139999999999,
+              7.414259999999999,
+              1.4859,
+              new Rotation3d(0.0, 0.0, -0.942477796076938)
+            )
+          ),
+          new AprilTag(
+            14,
+            new Pose3d(
+              8.272272,
+              6.132575999999999,
+              1.8679160000000001,
+              new Rotation3d(0.0, 0.5235987755982988, 3.141592653589793)
+            )
+          ),
+          new AprilTag(
+            15,
+            new Pose3d(
+              8.272272,
+              1.9098259999999998,
+              1.8679160000000001,
+              new Rotation3d(0.0, 0.5235987755982988, 3.141592653589793)
+            )
+          ),
+          new AprilTag(
+            16,
+            new Pose3d(
+              6.057646,
+              0.010667999999999999,
+              1.30175,
+              new Rotation3d(0.0, 0.0, 1.570796326794897)
+            )
+          ),
+          new AprilTag(
+            17,
+            new Pose3d(
+              4.073905999999999,
+              3.3012379999999997,
+              0.308102,
+              new Rotation3d(0.0, -0.0, -2.094395102393196)
+            )
+          ),
+          new AprilTag(
+            18,
+            new Pose3d(
+              3.6576,
+              4.0684450000000005,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 3.141592653589793)
+            )
+          ),
+          new AprilTag(
+            19,
+            new Pose3d(
+              4.120649721169264,
+              4.767389499999999,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 2.0943951023931953)
+            )
+          ),
+          new AprilTag(
+            20,
+            new Pose3d(
+              4.951483721169264,
+              4.7134145,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 1.0471975511965976)
+            )
+          ),
+          new AprilTag(
+            21,
+            new Pose3d(
+              5.321046,
+              3.9652575000000003,
+              0.308102,
+              new Rotation3d(0.0, 0.0, 0.0)
+            )
+          ),
+          new AprilTag(
+            22,
+            new Pose3d(
+              4.907489630657015,
+              3.3028254999999995,
+              0.308102,
+              new Rotation3d(0.0, -0.0, -1.0471975511965976)
+            )
+          )
+        ),
+        AprilTagFieldLayout.loadField(
+          AprilTagFields.k2025ReefscapeAndyMark
+        ).getFieldLength(),
+        AprilTagFieldLayout.loadField(
+          AprilTagFields.k2025ReefscapeAndyMark
+        ).getFieldWidth()
+      );
+
     public static final AprilTagFieldLayout APRIL_TAG_LAYOUT =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+      // AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+      HOME_FIELD_LAYOUT;
 
     public static final Distance FIELD_LENGTH = Units.Meters.of(
       APRIL_TAG_LAYOUT.getFieldLength()
@@ -614,6 +828,7 @@ public final class Constants {
 
     public static class REEF {
 
+      // the reef tags in order of what side of the reef they are on. do not sort these.
       public static final int[] BLUE_REEF_TAGS = { 18, 17, 22, 21, 20, 19 };
       public static final int[] RED_REEF_TAGS = { 7, 8, 9, 10, 11, 6 };
 

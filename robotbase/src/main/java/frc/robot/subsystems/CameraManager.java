@@ -9,8 +9,9 @@ import static frc.robot.Constants.PHOTON_VISION.*;
 
 import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.Utils;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -187,8 +188,8 @@ public class CameraManager {
         Robot.swerve.getFieldRelativePose2d()
       )
         .plus(newCamera.m_robotToCameraTranform) //fieldToRobot -> fieldToCamera
-        .plus(camToTargetTransform)
-        .toPose2d(); //fieldToCamera -> fieldToTarget
+        .plus(camToTargetTransform) //fieldToCamera -> fieldToTarget
+        .toPose2d();
       this.camera = newCamera;
     }
 
@@ -218,8 +219,8 @@ public class CameraManager {
         Robot.swerve.getFieldRelativePose2d()
       )
         .plus(camera.m_robotToCameraTranform) //camToTarget -> robotToTarget
-        .plus(camToTargetTransform)
-        .toPose2d(); //robotToTarget -> fieldOriginToTarget
+        .plus(camToTargetTransform) //robotToTarget -> fieldOriginToTarget
+        .toPose2d();
     }
   }
 
@@ -471,7 +472,7 @@ public class CameraManager {
             m_pnpInfo[indexToReplace].result().targets.size() ==
             m_pnpInfo[i].result().targets.size()
           ) {
-            // if (i) was taken later than (indexToReplace), replace (i) instead
+            // if result (i) was taken later than result (indexToReplace), replace result (i) instead
             if (
               m_pnpInfo[indexToReplace].result()
                 .metadata.captureTimestampMicros >
@@ -479,7 +480,7 @@ public class CameraManager {
             ) {
               indexToReplace = i;
             }
-            // if (i) has worse ambiguity than (indexToReplace), replace (i) instead
+            // if result (i) has worse ambiguity than result (indexToReplace), replace result (i) instead
             else if (
               m_pnpInfo[indexToReplace].result().targets.get(0).poseAmbiguity <
               m_pnpInfo[i].result().targets.get(0).poseAmbiguity
@@ -607,28 +608,6 @@ public class CameraManager {
   }
 
   /**
-   * @param fiducialId The fiducial ID of the target to get the yaw of.
-   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
-   */
-  public Angle getTargetYaw(int targetId, long timeoutMs) {
-    return isValidTarget(targetId, timeoutMs)
-      ? Units.Degrees.of(m_aprilTagInfo[targetId].yaw)
-      : null;
-  }
-
-  /**
-   * @param id The ID of the target to get the pitch of.
-   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
-   * @return Returns the desired targets pitch, <strong>will return null if the cached data was invalid.</strong>
-   */
-  public Angle getTargetPitch(int targetId, long timeoutMs) {
-    return isValidTarget(targetId, timeoutMs)
-      ? Units.Degrees.of(m_aprilTagInfo[targetId].pitch)
-      : null;
-  }
-
-  /**
    * Returns a field relative pose of a target based on where the robot thinks it is, and the provided camera transforms
    * @param targetId The targets fiducial ID
    * @param timeoutMs The amount of milliseconds past which the target information is deemed expired
@@ -697,40 +676,50 @@ public class CameraManager {
       targetFieldRelativePose.getTranslation(),
       targetRotation
     );
-    Pose2d rightBranchPose = tarPose
-      .transformBy(
-        // gets where the branch actually is
-        new Transform2d(
-          0,
-          FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
-          Rotation2d.kZero
-        )
-      )
-      .transformBy(
-        // makes it a position we can drive too and score at
+    Pose2d rightBranchPose = tarPose.transformBy(
+      // gets where the branch actually is
+      new Transform2d(
+        0,
+        FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
+        Rotation2d.kZero
+      ).plus(
         new Transform2d(
           ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
           Units.Inches.zero(),
           Rotation2d.kZero
         )
-      );
-    Pose2d leftBranchPose = tarPose
-      .transformBy(
-        // gets where the branch actually is
-        new Transform2d(
-          0,
-          -FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
-          Rotation2d.kZero
-        )
       )
-      // makes it a position we can drive too and score at
-      .transformBy(
+      // )
+      // .transformBy(
+      //   // makes it a position we can drive to and score at
+      //   new Transform2d(
+      //     ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
+      //     Units.Inches.zero(),
+      //     Rotation2d.kZero
+      //   )
+    );
+    Pose2d leftBranchPose = tarPose.transformBy(
+      // gets where the branch actually is
+      new Transform2d(
+        0,
+        -FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
+        Rotation2d.kZero
+      ).plus(
         new Transform2d(
           ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
           Units.Inches.zero(),
           Rotation2d.kZero
         )
-      );
+      )
+      // )
+      // // makes it a position we can drive to and score at
+      // .transformBy(
+      //   new Transform2d(
+      //     ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
+      //     Units.Inches.zero(),
+      //     Rotation2d.kZero
+      //   )
+    );
     return new Pose2d[] { leftBranchPose, rightBranchPose };
   }
 
@@ -758,6 +747,28 @@ public class CameraManager {
         m_branchPositions[branchToGet.branchNum].getY() > -10
       )
       ? m_branchPositions[branchToGet.branchNum]
+      : null;
+  }
+
+  /**
+   * @param fiducialId The fiducial ID of the target to get the yaw of.
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
+   */
+  public Angle getTargetYaw(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? Units.Degrees.of(m_aprilTagInfo[targetId].yaw)
+      : null;
+  }
+
+  /**
+   * @param id The ID of the target to get the pitch of.
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return Returns the desired targets pitch, <strong>will return null if the cached data was invalid.</strong>
+   */
+  public Angle getTargetPitch(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? Units.Degrees.of(m_aprilTagInfo[targetId].pitch)
       : null;
   }
 }
