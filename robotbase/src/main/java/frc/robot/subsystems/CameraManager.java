@@ -91,7 +91,7 @@ public class CameraManager {
       if (estimates.length == 1) return estimates[0];
       Translation3d aveTranslation = new Translation3d();
       double averagedTimestamp = 0;
-      int averageTargets = 0;
+      int cummulativeTargets = 0;
       Matrix<N3, N1> averageStdDevs = VecBuilder.fill(0, 0, 0);
       double averageCoordDev = 0;
       for (poseEstimate estimate : estimates) {
@@ -99,17 +99,16 @@ public class CameraManager {
           estimate.estimPose.getTranslation()
         );
         averagedTimestamp += estimate.timestampSeconds;
-        averageTargets += estimate.targetsUsedNum;
+        cummulativeTargets += estimate.targetsUsedNum;
         averageCoordDev += estimate.stdDevs.get(0, 0);
       }
-      aveTranslation.div(estimates.length);
+      aveTranslation = aveTranslation.div(estimates.length);
       averagedTimestamp /= estimates.length;
-      averageTargets = Math.floorDiv(averageTargets, estimates.length);
-      averageStdDevs.div(estimates.length);
+      averageStdDevs = averageStdDevs.div(estimates.length);
       return new poseEstimate(
         new Pose3d(aveTranslation, estimates[0].estimPose.getRotation()),
         averagedTimestamp,
-        averageTargets,
+        cummulativeTargets,
         VecBuilder.fill(averageCoordDev, averageCoordDev, Double.MAX_VALUE)
       );
     }
@@ -438,7 +437,9 @@ public class CameraManager {
   private void storePNPInfo(TimestampedPNPInfo pnpInfo) {
     if (pnpInfo == null || !pnpInfo.exists()) return;
     int indexToReplace = -1;
-    if (pnpInfo.result().targets.size() < MIN_ALLOWED_TARGETS) return;
+    if (
+      pnpInfo.result().targets.size() < MIN_ALLOWED_CUMMULATIVE_TARGETS
+    ) return;
     for (int i = 0; i < m_pnpInfo.length; i++) {
       // if selected info does not exist, replace it and stop the loop
       if (m_pnpInfo[i] == null) {
