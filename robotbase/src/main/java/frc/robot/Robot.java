@@ -107,10 +107,10 @@ public class Robot extends TimedRobot {
       BACK_RIGHT_CAM.NAME,
       BACK_RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
     );
-    // backLeftCam = camManager.createCamera(
-    //   BACK_LEFT_CAM.NAME,
-    //   BACK_LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
-    // );
+    backLeftCam = camManager.createCamera(
+      BACK_LEFT_CAM.NAME,
+      BACK_LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
+    );
     // leftCam = camManager.createCamera(
     //   LEFT_CAM.NAME,
     //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM

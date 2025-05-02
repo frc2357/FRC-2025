@@ -9,17 +9,9 @@ import static frc.robot.Constants.PHOTON_VISION.*;
 
 import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.Utils;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -28,7 +20,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.MutTime;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -92,7 +85,6 @@ public class CameraManager {
       Translation3d aveTranslation = new Translation3d();
       double averagedTimestamp = 0;
       int cummulativeTargets = 0;
-      Matrix<N3, N1> averageStdDevs = VecBuilder.fill(0, 0, 0);
       double averageCoordDev = 0;
       for (poseEstimate estimate : estimates) {
         aveTranslation = aveTranslation.plus(
@@ -104,12 +96,12 @@ public class CameraManager {
       }
       aveTranslation = aveTranslation.div(estimates.length);
       averagedTimestamp /= estimates.length;
-      averageStdDevs = averageStdDevs.div(estimates.length);
+      averageCoordDev /= estimates.length;
       return new poseEstimate(
         new Pose3d(aveTranslation, estimates[0].estimPose.getRotation()),
         averagedTimestamp,
         cummulativeTargets,
-        VecBuilder.fill(averageCoordDev, averageCoordDev, Double.MAX_VALUE)
+        VecBuilder.fill(averageCoordDev, averageCoordDev, 100000)
       );
     }
 
@@ -135,10 +127,25 @@ public class CameraManager {
       return averageEstimate;
     }
 
-    public static poseEstimate[] findValidEstimates(poseEstimate... estimates) {
+    public static poseEstimate[] findValidEstimates(
+      Rotation2d desiredHeading,
+      poseEstimate... estimates
+    ) {
       ArrayList<poseEstimate> validEstimates = new ArrayList<poseEstimate>();
       for (poseEstimate estimate : estimates) {
-        if (estimate != null && estimate.isValid()) {
+        if (estimate == null || !estimate.isValid()) {
+          continue;
+        }
+        if (
+          Math.abs(
+            estimate.estimPose
+              .getRotation()
+              .toRotation2d()
+              .minus(desiredHeading)
+              .getDegrees()
+          ) <=
+          HEADING_TOLERANCE.getDegrees()
+        ) {
           validEstimates.add(estimate);
         }
       }
@@ -243,14 +250,24 @@ public class CameraManager {
   private final StringPublisher m_poseConcensusFieldTypePub =
     m_poseConcensusTable.getStringTopic(".type").publish();
 
-  private MutTime m_lastPoseUpdateTime;
+  private final String m_alertGroupName = "Camera Manager";
+  private final Alert m_alertEstimateInfo = new Alert(
+    m_alertGroupName,
+    "Initializing",
+    AlertType.kInfo
+  );
+  private final Alert m_alertTargetNumInfo = new Alert(
+    m_alertGroupName,
+    "Initializing",
+    AlertType.kInfo
+  );
+
   private EstimatedRobotPose m_lastEstimatedPose;
 
   private PoseStrategy m_primaryStrat = PRIMARY_STRATEGY;
   private PoseStrategy m_fallbackStrat = FALLBACK_STRATEGY;
 
   public CameraManager() {
-    m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
     for (int i = 0; i < m_aprilTagInfo.length; i++) {
       m_aprilTagInfo[i] = new TargetInfo(
         Double.NaN,
@@ -262,6 +279,7 @@ public class CameraManager {
       );
     }
     Arrays.fill(m_branchPositions, null);
+    m_alertEstimateInfo.set(false);
   }
 
   /**
@@ -382,11 +400,16 @@ public class CameraManager {
     boolean updatePose,
     poseEstimate... estimates
   ) {
-    estimates = poseEstimate.findValidEstimates(estimates);
+    estimates = poseEstimate.findValidEstimates(
+      Robot.swerve.getFieldRelativePose2d().getRotation(),
+      estimates
+    );
     if (estimates == null) {
-      System.out.println("No good estimates");
+      m_alertEstimateInfo.setText("No Valid Estimates");
+      m_alertEstimateInfo.set(true);
       return;
     }
+    m_alertEstimateInfo.set(false);
     poseEstimate averageEstimate = estimates.length > 1
       ? poseEstimate.findConcensus(estimates)
       : estimates[0];
@@ -395,6 +418,9 @@ public class CameraManager {
     m_poseConcensusFieldTypePub.set("Field2d");
 
     Pose2d pose = averageEstimate.estimPose.toPose2d();
+    m_alertTargetNumInfo.setText(
+      "Target Num: " + averageEstimate.targetsUsedNum
+    );
     m_poseConcensusFieldPub.accept(
       new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
     );
@@ -407,31 +433,23 @@ public class CameraManager {
     );
     // if estimated pose it too far from swerve pose
     if (
-      new Transform2d(
-        Robot.swerve.getFieldRelativePose2d(),
-        averageEstimate.estimPose.toPose2d()
-      )
-        .getTranslation()
-        .getNorm() >
+      Math.abs(
+        Robot.swerve
+          .getFieldRelativePose2d()
+          .getTranslation()
+          .getDistance(averageEstimate.estimPose.toPose2d().getTranslation())
+      ) >
       MAX_DIST_FROM_CURR_POSE.in(Meters)
     ) {
-      if (RobotModeTriggers.disabled().getAsBoolean()) {
-        Robot.swerve.resetPose(pose);
+      if (!RobotModeTriggers.disabled().getAsBoolean()) {
         return;
       }
-      // and we have updated the pose recently, and were not disabled, throw it out
-      if (
-        measuredTime <
-        m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds)
-      ) return;
     }
     Robot.swerve.addVisionMeasurement(
       averageEstimate.estimPose.toPose2d(),
       measuredTime,
       averageEstimate.stdDevs
     );
-
-    m_lastPoseUpdateTime.mut_replace(measuredTime, Seconds);
   }
 
   private void storePNPInfo(TimestampedPNPInfo pnpInfo) {

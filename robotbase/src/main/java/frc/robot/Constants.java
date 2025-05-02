@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Seconds;
 
 import choreo.auto.AutoFactory;
@@ -375,16 +376,13 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+      PoseStrategy.CONSTRAINED_SOLVEPNP;
     public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
+      PoseStrategy.LOWEST_AMBIGUITY;
 
-    public static final double PNP_HEADING_SCALE_FACTOR = 1; // no touchy.
+    public static final double PNP_HEADING_SCALE_FACTOR = 4; // no touchy.
 
     public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
-      // heading free essentailly determines whether or not the calculations are done in 2D or 3D space.
-      // if its false, its done in 2D and heading scale matters.
-      // if its true, calcs are done in 3D, and heading scale is essentially 0.
       Optional.of(
         new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
       );
@@ -395,19 +393,19 @@ public final class Constants {
 
     // if were going faster than these, we wont accept any pose est.
     public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.3);
+      Units.RadiansPerSecond.of(0.5);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(0.3);
+      Units.MetersPerSecond.of(0.5);
 
-    public static final Time INFO_VALID_TIME = Units.Seconds.of(0.6);
+    public static final Time INFO_VALID_TIME = Units.Seconds.of(0.4);
 
     public static final int PNP_INFO_STORAGE_AMOUNT = 2;
 
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
     public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
-    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.5);
+    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.3);
 
     public static final Distance MAX_DIST_BETWEEN_ESTIMATES = Units.Meters.of(
       0.75
@@ -418,6 +416,10 @@ public final class Constants {
     public static final int MIN_ALLOWED_CUMMULATIVE_TARGETS = 1;
 
     public static final Time ESTIMATE_TIMEOUT = Units.Milliseconds.of(120);
+
+    public static final Rotation2d HEADING_TOLERANCE = Rotation2d.fromDegrees(
+      15
+    );
 
     public static final class BACK_RIGHT_CAM {
 

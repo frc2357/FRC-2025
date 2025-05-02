@@ -8,13 +8,9 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.Units;
 import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.Constants.ROBOT_CONFIGURATION;
@@ -27,6 +23,9 @@ import org.junit.jupiter.api.Test;
 public class PoseEstTests extends CameraManager {
 
   CameraManager m_camManager;
+
+  // change this to true to print out a copy and pasteable AprilTagFieldLayout of the measured out home field tags.
+  final boolean m_printOutHomeFieldCode = false;
 
   @Test
   // making absolutley sure nothing is wrong with the branch estimation at any translation or rotation
@@ -83,6 +82,9 @@ public class PoseEstTests extends CameraManager {
 
   @Test
   void fieldMapTest() {
+    if (!m_printOutHomeFieldCode) {
+      return;
+    }
     double correctDistFromLeftInches = 14.25;
     double[] tagDists = { 16.125, 14.25, 14.125, 16.4375, 16.375, 16.375 };
     var normalLayout = AprilTagFieldLayout.loadField(
