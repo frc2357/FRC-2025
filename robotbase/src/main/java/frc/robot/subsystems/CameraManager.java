@@ -136,18 +136,7 @@ public class CameraManager {
         if (estimate == null || !estimate.isValid()) {
           continue;
         }
-        if (
-          Math.abs(
-            estimate.estimPose
-              .getRotation()
-              .toRotation2d()
-              .minus(desiredHeading)
-              .getDegrees()
-          ) <=
-          HEADING_TOLERANCE.getDegrees()
-        ) {
-          validEstimates.add(estimate);
-        }
+        validEstimates.add(estimate);
       }
       if (validEstimates.size() == 0) {
         return null;
@@ -232,9 +221,6 @@ public class CameraManager {
 
   private final Map<PhotonVisionCamera, poseEstimate> m_robotCameras =
     new LinkedHashMap<PhotonVisionCamera, poseEstimate>();
-
-  private final TimestampedPNPInfo[] m_pnpInfo =
-    new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
 
   private final TargetInfo[] m_aprilTagInfo = new TargetInfo[23];
 
@@ -337,14 +323,13 @@ public class CameraManager {
 
   private void preparePoseEstimator(TimestampedPNPInfo infoToPrepFor) {
     PhotonPoseEstimator estimator = infoToPrepFor.camera().m_poseEstimator;
+    // change pose estimator settings to be correct for the provided info
+    estimator.setRobotToCameraTransform(infoToPrepFor.robotToCameraTransform());
+    estimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
     estimator.addHeadingData(
       infoToPrepFor.headingTimestampSeconds(),
       infoToPrepFor.heading()
     );
-
-    // change pose estimator settings to be correct for the provided info
-    estimator.setRobotToCameraTransform(infoToPrepFor.robotToCameraTransform());
-    estimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
   }
 
   private poseEstimate estimatePoseWithPNPInfo(TimestampedPNPInfo pnpInfo) {
@@ -452,72 +437,6 @@ public class CameraManager {
     );
   }
 
-  private void storePNPInfo(TimestampedPNPInfo pnpInfo) {
-    if (pnpInfo == null || !pnpInfo.exists()) return;
-    int indexToReplace = -1;
-    if (
-      pnpInfo.result().targets.size() < MIN_ALLOWED_CUMMULATIVE_TARGETS
-    ) return;
-    for (int i = 0; i < m_pnpInfo.length; i++) {
-      // if selected info does not exist, replace it and stop the loop
-      if (m_pnpInfo[i] == null) {
-        m_pnpInfo[i] = pnpInfo;
-        break;
-      }
-      // if stored data is older than allowed, invalidate it, and set it to be replaced.
-      if (
-        m_pnpInfo[i].result().getTimestampSeconds() <=
-        Utils.getCurrentTimeSeconds() - INFO_VALID_TIME.in(Seconds)
-      ) {
-        m_pnpInfo[i] = null;
-        indexToReplace = i;
-        continue;
-      }
-      // if selected info has less targets than the provided result
-      else if (
-        m_pnpInfo[i].result().targets.size() <= pnpInfo.result().targets.size()
-      ) {
-        // if we have already selected info to replace
-        if (indexToReplace > -1) {
-          // if we found a worse result, replace that one instead
-          if (
-            m_pnpInfo[indexToReplace].result().targets.size() >
-            m_pnpInfo[i].result().targets.size()
-          ) {
-            indexToReplace = i;
-          }
-          // if both results have the same number of targets
-          else if (
-            m_pnpInfo[indexToReplace].result().targets.size() ==
-            m_pnpInfo[i].result().targets.size()
-          ) {
-            // if result (i) was taken later than result (indexToReplace), replace result (i) instead
-            if (
-              m_pnpInfo[indexToReplace].result()
-                .metadata.captureTimestampMicros >
-              m_pnpInfo[i].result().metadata.captureTimestampMicros
-            ) {
-              indexToReplace = i;
-            }
-            // if result (i) has worse ambiguity than result (indexToReplace), replace result (i) instead
-            else if (
-              m_pnpInfo[indexToReplace].result().targets.get(0).poseAmbiguity <
-              m_pnpInfo[i].result().targets.get(0).poseAmbiguity
-            ) {
-              indexToReplace = i;
-            }
-          }
-        }
-        // if we have not already selected something to replace
-        else {
-          indexToReplace = i;
-        }
-      }
-    }
-    // if an index has been selected to replace, replace it
-    if (indexToReplace != -1) m_pnpInfo[indexToReplace] = pnpInfo;
-  }
-
   public void setPrimaryStrategy(PoseStrategy newStrategy) {
     m_primaryStrat = newStrategy;
   }
@@ -575,7 +494,7 @@ public class CameraManager {
   ) {
     var info = createPNPInfo(result, camera);
     m_robotCameras.put(camera, estimatePoseWithPNPInfo(info));
-    storePNPInfo(info);
+    // storePNPInfo(info);
     if (result.getBestTarget().objDetectId != -1) {
       cacheForGamepeices(result.targets, camera);
     } else {

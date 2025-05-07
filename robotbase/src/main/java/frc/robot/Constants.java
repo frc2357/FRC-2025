@@ -376,7 +376,7 @@ public final class Constants {
     public static final boolean ACTIVATE_TURBO_SWITCH = false;
 
     public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.CONSTRAINED_SOLVEPNP;
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     public static final PoseStrategy FALLBACK_STRATEGY =
       PoseStrategy.LOWEST_AMBIGUITY;
 
@@ -393,27 +393,25 @@ public final class Constants {
 
     // if were going faster than these, we wont accept any pose est.
     public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
-      Units.RadiansPerSecond.of(0.5);
+      Units.RadiansPerSecond.of(0.75);
 
     public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(0.5);
+      Units.MetersPerSecond.of(1);
 
     public static final Time INFO_VALID_TIME = Units.Seconds.of(0.4);
 
-    public static final int PNP_INFO_STORAGE_AMOUNT = 2;
-
     public static final double MAGIC_VEL_CONF_ADDEND = 0.4;
 
-    public static final double MAGIC_VEL_CONF_EXPONENT = 0.8;
-    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(0.3);
+    public static final double MAGIC_VEL_CONF_EXPONENT = 1.3;
+    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(
+      0.75
+    );
 
     public static final Distance MAX_DIST_BETWEEN_ESTIMATES = Units.Meters.of(
       0.75
     );
 
-    public static final Time UPDATE_POSE_INTERVALS = Seconds.of(4);
-
-    public static final int MIN_ALLOWED_CUMMULATIVE_TARGETS = 1;
+    public static final int MIN_ALLOWED_CUMMULATIVE_TARGETS = 2;
 
     public static final Time ESTIMATE_TIMEOUT = Units.Milliseconds.of(120);
 
@@ -424,6 +422,7 @@ public final class Constants {
     public static final class BACK_RIGHT_CAM {
 
       public static final String NAME = "backRightCam";
+      // real transform
       public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
         Units.Inches.of(4.624),
         Units.Inches.of(7.799),
@@ -434,14 +433,37 @@ public final class Constants {
           Units.Degrees.of(180)
         )
       );
+      // lying transform
+      // public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+      //   Units.Inches.of(4.624),
+      //   Units.Inches.of(7.799),
+      //   Units.Inches.of(22.055),
+      //   new Rotation3d(
+      //     Units.Degrees.of(0),
+      //     Units.Degrees.of(-10),
+      //     Units.Degrees.of(180)
+      //   )
+      // );
     }
 
     public static final class BACK_LEFT_CAM {
 
       public static final String NAME = "backLeftCam";
+      // true transform
+      // public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
+      //   Units.Inches.of(-6.516),
+      //   Units.Inches.of(-5.028),
+      //   Units.Inches.of(21.137),
+      //   new Rotation3d(
+      //     Units.Degrees.of(0),
+      //     Units.Degrees.of(-10),
+      //     Units.Degrees.of(180)
+      //   )
+      // );
+      // lying transform (that makes it work way better)
       public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(-6.516),
-        Units.Inches.of(-5.028),
+        Units.Inches.of(6),
+        Units.Inches.of(-8.5),
         Units.Inches.of(21.137),
         new Rotation3d(
           Units.Degrees.of(0),
@@ -839,6 +861,11 @@ public final class Constants {
         Units.Meters.of(4.1914),
         Rotation2d.k180deg
       );
+      // public static final Pose2d BRANCH_A = new Pose2d(
+      //   Units.Meters.of(3.332),
+      //   Units.Meters.of(4.2914),
+      //   Rotation2d.k180deg
+      // );
       public static final Pose2d BRANCH_B = new Pose2d(
         Units.Meters.of(3.2332),
         Units.Meters.of(3.8564),
