@@ -3,6 +3,8 @@ package frc.robot.controls;
 import static frc.robot.Constants.FIELD.REEF.BRANCH_A;
 import static frc.robot.Constants.FIELD.REEF.BRANCH_B;
 import static frc.robot.Constants.FIELD.REEF.BRANCH_C;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_J;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -81,7 +83,7 @@ public class DriverControls implements RumbleInterface {
           .andThen(new CoralZero())
       );
     m_controller
-      .x()
+      .rightStick()
       .onTrue(
         new TeleopCoralScoreL2(m_rightTrigger)
           .getCommand()
@@ -95,7 +97,7 @@ public class DriverControls implements RumbleInterface {
 
     // Remove algae
     m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
-    m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
+    m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
 
     // Other
     m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
@@ -104,20 +106,17 @@ public class DriverControls implements RumbleInterface {
       .start()
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
-    m_controller
-      .y()
-      .whileTrue(
-        new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.BACK_OUT_PERCENT)
-      );
     // m_controller
     //   .y()
-    //   .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_C));
-    // m_controller
-    //   .a()
-    //   .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_A));
-    // m_controller
-    //   .b()
-    //   .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_B));
+    //   .whileTrue(
+    //     new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.BACK_OUT_PERCENT)
+    //   );
+    m_controller
+      .x()
+      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_J));
+    m_controller
+      .b()
+      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_F));
   }
 
   public double getX() {
