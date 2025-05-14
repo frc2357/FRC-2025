@@ -4,35 +4,19 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Rotation;
-import static edu.wpi.first.units.Units.Seconds;
-
 import choreo.auto.AutoFactory;
-import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.SmartMotionConfig;
-import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Dimensionless;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.*;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import java.util.List;
@@ -706,8 +690,6 @@ public final class Constants {
 
     // how far off on the z axis the estimated pose can be before we invalidate it
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
-
-    public static final Distance BRANCH_TO_TAG_DIST = Units.Inches.of(6.5);
   }
 
   public static class DRIVE_TO_VECTOR {
@@ -736,7 +718,7 @@ public final class Constants {
         8,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1.5)
+        new TrapezoidProfile.Constraints(1.6, 1.4)
       );
 
     public static final ProfiledPIDController THETA_CONTROLLER =
@@ -744,22 +726,28 @@ public final class Constants {
         6,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1.5)
+        new TrapezoidProfile.Constraints(2, 1.4)
       );
 
     public static final Distance X_TOLERANCE = Units.Inches.of(0.2);
     public static final Distance Y_TOLERANCE = Units.Inches.of(0.2);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(2);
 
-    public static final Pose2d TOLERANCE_POSE = new Pose2d(
+    public static final Pose2d FINAL_APPROACH_TOLERANCE_POSE = new Pose2d(
       X_TOLERANCE,
       Y_TOLERANCE,
       new Rotation2d(ROTATION_TOLERANCE)
     );
 
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(3);
+    public static final Pose2d WAYPOINT_APPROACH_TOLERANCE_POSE = new Pose2d(
+      X_TOLERANCE.times(6),
+      Y_TOLERANCE.times(6),
+      new Rotation2d(ROTATION_TOLERANCE.times(6))
+    );
 
-    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.2);
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(2);
+
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.4);
 
     public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
       Units.Rotations.of(0.08)
@@ -785,28 +773,6 @@ public final class Constants {
      * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
      */
     public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 3;
-
-    public enum BRANCH_GOAL {
-      CLOSEST(0),
-      BRANCH_A(1),
-      BRANCH_B(2),
-      BRANCH_C(3),
-      BRANCH_D(4),
-      BRANCH_E(5),
-      BRANCH_F(6),
-      BRANCH_G(7),
-      BRANCH_H(8),
-      BRANCH_I(8),
-      BRANCH_J(10),
-      BRANCH_K(11),
-      BRANCH_L(12);
-
-      public final int branchNum;
-
-      BRANCH_GOAL(int branchNum) {
-        this.branchNum = branchNum;
-      }
-    }
   }
 
   public static final class COLLISION_DETECTION {
@@ -861,11 +827,6 @@ public final class Constants {
         Units.Meters.of(4.36),
         Rotation2d.k180deg
       );
-      // public static final Pose2d BRANCH_A = new Pose2d(
-      //   Units.Meters.of(3.332),
-      //   Units.Meters.of(4.2914),
-      //   Rotation2d.k180deg
-      // );
       public static final Pose2d BRANCH_B = new Pose2d(
         Units.Meters.of(3.48),
         Units.Meters.of(4.01),

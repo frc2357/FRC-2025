@@ -83,7 +83,7 @@ public class CommandSwerveDrivetrain
   private final SwerveRequest.SwerveDriveBrake m_brakeRequest =
     new SwerveRequest.SwerveDriveBrake();
 
-  private Twist2d m_fieldVelocity = new Twist2d();
+  private Twist2d m_fieldRelativeRobotVelocity = new Twist2d();
 
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -208,8 +208,8 @@ public class CommandSwerveDrivetrain
   /**
    * The method to use for robot relative driving.
    *
-   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the Y axis in meters per second.
+   * @param velocityXMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYMetersPerSecond The desired speed on the Y axis in meters per second.
    * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
    */
   public void driveRobotRelative(
@@ -228,8 +228,8 @@ public class CommandSwerveDrivetrain
   /**
    * The method to use for field relative driving.
    *
-   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the Y axis in meters per second.
+   * @param velocityXMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYMetersPerSecond The desired speed on the Y axis in meters per second.
    * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
    * @param perspective The perspective to use for field relative driving.
    */
@@ -251,8 +251,8 @@ public class CommandSwerveDrivetrain
   /**
    * The method to use for field relative driving.
    *
-   * @param velocityXSpeedMetersPerSecond The desired speed on the X axis in meters per second.
-   * @param velocityYSpeedMetersPerSecond The desired speed on the Y axis in meters per second.
+   * @param velocityXMetersPerSecond The desired speed on the X axis in meters per second.
+   * @param velocityYMetersPerSecond The desired speed on the Y axis in meters per second.
    * @param rotationRateRadiansPerSecond The desired rotation rate in radians per second.
    */
   public void driveFieldRelative(
@@ -464,8 +464,8 @@ public class CommandSwerveDrivetrain
     );
   }
 
-  public Twist2d getFieldVelocity() {
-    return m_fieldVelocity;
+  public Twist2d getFieldRelativeRobotVelocity() {
+    return m_fieldRelativeRobotVelocity;
   }
 
   private void updateFieldVelocity() {
@@ -474,7 +474,7 @@ public class CommandSwerveDrivetrain
       getYVelocity().in(Units.MetersPerSecond)
     ).rotateBy(getFieldRelativePose2d().getRotation());
 
-    m_fieldVelocity = new Twist2d(
+    m_fieldRelativeRobotVelocity = new Twist2d(
       linearFieldVelocity.getX(),
       linearFieldVelocity.getY(),
       getPigeon2()

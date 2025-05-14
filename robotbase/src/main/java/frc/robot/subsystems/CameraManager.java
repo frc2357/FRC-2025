@@ -1,13 +1,8 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.Constants.*;
-import static frc.robot.Constants.FIELD.REEF.BLUE_REEF_TAGS;
-import static frc.robot.Constants.FIELD.REEF.BRANCHES;
-import static frc.robot.Constants.FIELD.REEF.RED_REEF_TAGS;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
-import choreo.util.ChoreoAllianceFlipUtil;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -22,17 +17,13 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import frc.robot.Constants.DRIVE_TO_POSE.BRANCH_GOAL;
 import frc.robot.Robot;
 import frc.robot.subsystems.PhotonVisionCamera.TimestampedPNPInfo;
 import frc.robot.util.CollisionDetection;
-import frc.robot.util.Utility;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,11 +215,6 @@ public class CameraManager {
 
   private final TargetInfo[] m_aprilTagInfo = new TargetInfo[23];
 
-  /**
-   * Holds all the calculated poses for all the branches and options in the BRANCH_GOAL enum
-   */
-  private final Pose2d[] m_branchPositions = new Pose2d[13];
-
   private final NetworkTable m_poseConcensusTable =
     NetworkTableInstance.getDefault().getTable("VisionPose-Combined");
   private final DoubleArrayPublisher m_poseConcensusFieldPub =
@@ -248,7 +234,7 @@ public class CameraManager {
     AlertType.kInfo
   );
 
-  private EstimatedRobotPose m_lastEstimatedPose;
+  private Pose3d m_lastEstimatedPose;
 
   private PoseStrategy m_primaryStrat = PRIMARY_STRATEGY;
   private PoseStrategy m_fallbackStrat = FALLBACK_STRATEGY;
@@ -264,8 +250,8 @@ public class CameraManager {
         null
       );
     }
-    Arrays.fill(m_branchPositions, null);
     m_alertEstimateInfo.set(false);
+    m_lastEstimatedPose = Pose3d.kZero;
   }
 
   /**
@@ -368,9 +354,6 @@ public class CameraManager {
       MAGIC_VEL_CONF_EXPONENT
     );
 
-    // if estimated pose is too far from current pose
-    m_lastEstimatedPose = estimate;
-
     return new poseEstimate(
       estimate,
       VecBuilder.fill(
@@ -409,10 +392,11 @@ public class CameraManager {
     m_poseConcensusFieldPub.accept(
       new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
     );
-    // if we dont want to update the pose, throw it away
-    if (!updatePose) return;
     // if estimate isnt in the field, throw it away
     if (!averageEstimate.isInField()) return;
+    m_lastEstimatedPose = averageEstimate.estimPose;
+    // if we dont want to update the pose, throw it away
+    if (!updatePose) return;
     double measuredTime = Utils.fpgaToCurrentTime(
       averageEstimate.timestampSeconds
     );
@@ -426,6 +410,7 @@ public class CameraManager {
       ) >
       MAX_DIST_FROM_CURR_POSE.in(Meters)
     ) {
+      // and is NOT disabled, throw away pose.
       if (!RobotModeTriggers.disabled().getAsBoolean()) {
         return;
       }
@@ -439,6 +424,10 @@ public class CameraManager {
 
   public void setPrimaryStrategy(PoseStrategy newStrategy) {
     m_primaryStrat = newStrategy;
+    m_robotCameras
+      .keySet()
+      .forEach((var cam) -> cam.m_poseEstimator.setPrimaryStrategy(newStrategy)
+      );
   }
 
   public void setFallbackStrategy(PoseStrategy newStrategy) {
@@ -450,7 +439,7 @@ public class CameraManager {
       );
   }
 
-  public EstimatedRobotPose getLastEstimatedPose() {
+  public Pose3d getLastEstimatedPose() {
     return m_lastEstimatedPose;
   }
 
@@ -499,7 +488,6 @@ public class CameraManager {
       cacheForGamepeices(result.targets, camera);
     } else {
       cacheForAprilTags(result.targets, camera);
-      calculateBranchPositions();
     }
   }
 
@@ -511,14 +499,6 @@ public class CameraManager {
     if (result == null || !result.hasTargets()) {
       return null;
     }
-    // double frameTimeSeconds = Utils.fpgaToCurrentTime(
-    //   result.getTimestampSeconds()
-    // );
-    // double currTimeSeconds = Utils.getCurrentTimeSeconds();
-    // // if result is older than allowed, do not store it
-    // if (frameTimeSeconds <= currTimeSeconds - INFO_VALID_TIME.in(Seconds)) {
-    //   return null;
-    // }
     // if rotating too fast, dont create info
     if (
       Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
@@ -557,110 +537,6 @@ public class CameraManager {
       : null;
   }
 
-  protected void calculateBranchPositions() {
-    int[] tagsToUse = Robot.alliance == Alliance.Blue
-      ? BLUE_REEF_TAGS
-      : RED_REEF_TAGS;
-    int leftBranchIndex = 1;
-    int rightBranchIndex = 2;
-    for (int i = 0; i < Math.min(tagsToUse.length, 6); i++) {
-      Rotation2d rotation = Robot.alliance == Alliance.Blue
-        ? BRANCHES[leftBranchIndex].getRotation()
-        : ChoreoAllianceFlipUtil.flip(BRANCHES[leftBranchIndex].getRotation());
-      Pose2d[] branchPoses = calculateBranchPose(
-        m_aprilTagInfo[tagsToUse[i]].targetFieldRelativePose,
-        rotation
-      );
-      if (
-        branchPoses == null || branchPoses[0] == null || branchPoses[1] == null
-      ) {
-        leftBranchIndex += 2;
-        rightBranchIndex += 2;
-        continue;
-      }
-      // i corresponds to the side of the reef were finding the poses of
-      // 12 branches, with 6 sides of the reef. each reef has 6 tags on it, and we find which side were calculating for above.
-      // for the right branch, we use reefSide * 2 to get its number, since it will always be the higher branch.
-      // we do the same for the left branchs, but we subtract one, since its the branch before the right branch.
-
-      m_branchPositions[leftBranchIndex] = branchPoses[0];
-      m_branchPositions[rightBranchIndex] = branchPoses[1];
-      leftBranchIndex += 2;
-      rightBranchIndex += 2;
-    }
-
-    // the last branch in the BRANCH_GOAL enum is whatever the closest one is, so were assigning that here
-    m_branchPositions[0] = null;
-    Pose2d currPose = Robot.swerve.getFieldRelativePose2d();
-    Pose2d closestPose = m_branchPositions[0];
-    for (Pose2d pose : m_branchPositions) {
-      if (
-        closestPose == null ||
-        (pose != null &&
-          (Utility.findDistanceBetweenPoses(currPose, pose) <
-            Utility.findDistanceBetweenPoses(currPose, closestPose)))
-      ) closestPose = pose;
-    }
-    m_branchPositions[0] = closestPose;
-  }
-
-  protected Pose2d[] calculateBranchPose(
-    Pose2d targetFieldRelativePose,
-    Rotation2d targetRotation
-  ) {
-    if (targetFieldRelativePose == null || targetRotation == null) return null;
-
-    Pose2d tarPose = new Pose2d(
-      targetFieldRelativePose.getTranslation(),
-      targetRotation
-    );
-    Pose2d rightBranchPose = tarPose.transformBy(
-      // gets where the branch actually is
-      new Transform2d(
-        0,
-        FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
-        Rotation2d.kZero
-      ).plus(
-        new Transform2d(
-          ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
-          Units.Inches.zero(),
-          Rotation2d.kZero
-        )
-      )
-      // )
-      // .transformBy(
-      //   // makes it a position we can drive to and score at
-      //   new Transform2d(
-      //     ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
-      //     Units.Inches.zero(),
-      //     Rotation2d.kZero
-      //   )
-    );
-    Pose2d leftBranchPose = tarPose.transformBy(
-      // gets where the branch actually is
-      new Transform2d(
-        0,
-        -FIELD_CONSTANTS.BRANCH_TO_TAG_DIST.in(Meters),
-        Rotation2d.kZero
-      ).plus(
-        new Transform2d(
-          ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
-          Units.Inches.zero(),
-          Rotation2d.kZero
-        )
-      )
-      // )
-      // // makes it a position we can drive to and score at
-      // .transformBy(
-      //   new Transform2d(
-      //     ROBOT_CONFIGURATION.FULL_LENGTH.div(2),
-      //     Units.Inches.zero(),
-      //     Rotation2d.kZero
-      //   )
-    );
-    return new Pose2d[] { leftBranchPose, rightBranchPose };
-  }
-
   /**
    * Compares the current system time to the last cached timestamp, and sees if it is older than the
    * passsed in timeout.
@@ -672,20 +548,6 @@ public class CameraManager {
    */
   public boolean isValidTarget(int targetId, long timeoutMs) {
     return m_aprilTagInfo[targetId].isValid(timeoutMs);
-  }
-
-  /**
-   * Returns the calculated branch position of the provided branch
-   * @param branchToGet The {@link BRANCH_GOAL} to return the pose of
-   * @return The calculated field relative pose of the desired branch
-   */
-  public Pose2d getFieldRelativeBranchPose(BRANCH_GOAL branchToGet) {
-    return (
-        m_branchPositions[branchToGet.branchNum].getX() > -10 &&
-        m_branchPositions[branchToGet.branchNum].getY() > -10
-      )
-      ? m_branchPositions[branchToGet.branchNum]
-      : null;
   }
 
   /**
