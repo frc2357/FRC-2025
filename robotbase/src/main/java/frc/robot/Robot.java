@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.CLIMBER_PIVOT;
+import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.StopAllMotors;
 import frc.robot.commands.climberPivot.ClimberPivotSetSpeed;
@@ -38,8 +39,8 @@ import frc.robot.controls.controllers.CommandButtonboardController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.networkTables.*;
 import frc.robot.subsystems.*;
-import frc.robot.util.ElasticFieldManager;
 import frc.robot.util.Telemetry;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -58,6 +59,8 @@ public class Robot extends TimedRobot {
   public static ClimberPivot climberPivot;
   public static ClimberWinch climberWinch;
   public static CameraManager camManager;
+  public static PhotonVisionCamera backRightCam;
+  public static PhotonVisionCamera backLeftCam;
 
   // state
   public static Alliance alliance = null;
@@ -77,7 +80,6 @@ public class Robot extends TimedRobot {
   private SequentialCommandGroup m_setCoastOnDisable;
 
   private AutoChooserManager m_autoChooserManager;
-  private ElasticFieldManager elasticFieldManager;
   private SignalLoggerManager m_SignalLoggerManager;
   private boolean m_didOpenCVLoad = false;
 
@@ -88,8 +90,8 @@ public class Robot extends TimedRobot {
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
-    );
-    SmartDashboard.putBoolean("Toggle Pose Estimation", false);
+    ); // TODO: turn this off at comp, just in case.
+    SmartDashboard.putBoolean("Toggle Pose Estimation", true);
 
     // Define subsystems
     swerve = TunerConstants.createDrivetrain();
@@ -101,14 +103,14 @@ public class Robot extends TimedRobot {
     // climberPivot = new ClimberPivot();
 
     camManager = new CameraManager();
-    // frontCam = camManager.createCamera(
-    //   FRONT_CAM.NAME,
-    //   FRONT_CAM.ROBOT_TO_CAM_TRANSFORM
-    // );
-    // backCam = camManager.createCamera(
-    //   BACK_CAM.NAME,
-    //   BACK_CAM.ROBOT_TO_CAM_TRANSFORM
-    // );
+    backRightCam = camManager.createCamera(
+      BACK_RIGHT_CAM.NAME,
+      BACK_RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
+    );
+    backLeftCam = camManager.createCamera(
+      BACK_LEFT_CAM.NAME,
+      BACK_LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
+    );
     // leftCam = camManager.createCamera(
     //   LEFT_CAM.NAME,
     //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
@@ -182,7 +184,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    // camManager.updateAllCameras();
+    camManager.updateAllCameras();
     CommandScheduler.getInstance().run();
   }
 

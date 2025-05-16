@@ -7,10 +7,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 
 public class Utility {
+
+  private static final Angle m_angle180Degrees = Units.Degrees.of(180);
 
   public static boolean isWithinTolerance(
     double currentValue,
@@ -41,6 +44,25 @@ public class Utility {
       currentValue.in(Rotations),
       targetValue.in(Rotations),
       tolerance.in(Rotations)
+    );
+  }
+
+  public static boolean isWithinTolerance(
+    Translation2d currentValue,
+    Translation2d targetValue,
+    Translation2d tolerance
+  ) {
+    return (
+      isWithinTolerance(
+        currentValue.getX(),
+        targetValue.getX(),
+        tolerance.getX()
+      ) &&
+      isWithinTolerance(
+        currentValue.getY(),
+        targetValue.getY(),
+        tolerance.getY()
+      )
     );
   }
 
@@ -91,5 +113,13 @@ public class Utility {
    */
   public static double findDistanceBetweenPoses(Pose2d here, Pose2d there) {
     return here.getTranslation().getDistance(there.getTranslation());
+  }
+
+  public static Rotation2d invert(Rotation2d rotation) {
+    return rotation.plus(Rotation2d.k180deg);
+  }
+
+  public static Angle invert(Angle angle) {
+    return angle.plus(m_angle180Degrees);
   }
 }
