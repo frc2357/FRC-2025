@@ -8,6 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -16,7 +17,6 @@ import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.Utility;
 import java.util.function.Function;
-import org.ejml.data.MatrixType;
 
 public class DriveToPose extends Command {
 
@@ -26,6 +26,8 @@ public class DriveToPose extends Command {
   private ProfiledPIDController m_thetaController;
 
   private Pose2d m_targetPose;
+
+  private Pose2d m_startingPose;
 
   private static final double m_speedAt12VoltsMPS =
     TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -41,6 +43,7 @@ public class DriveToPose extends Command {
   @Override
   public void initialize() {
     Pose2d currentPose = Robot.swerve.getFieldRelativePose2d();
+    m_startingPose = currentPose;
     m_targetPose = m_targetPoseFunction.apply(currentPose);
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -61,7 +64,7 @@ public class DriveToPose extends Command {
       )
     ) {
       m_targetPose = newTargetPose;
-      resetControllers(currentPose, m_targetPose);
+      // resetControllers(currentPose, m_targetPose);
     }
     Translation2d driveVelocity = new Translation2d(
       Robot.driverControls.getY() * m_speedAt12VoltsMPS,
@@ -74,13 +77,20 @@ public class DriveToPose extends Command {
 
     if (driveVelocity.equals(Translation2d.kZero) && thetaVelocity == 0) {
       // Calculate drive speed
-      double currentDistanceFromTarPose = currentPose
+      double currDistFromTarPose = currentPose
         .getTranslation()
         .getDistance(m_targetPose.getTranslation());
-      double driveErrorAbs = currentDistanceFromTarPose;
+      double currDistFromStartPose = m_startingPose
+        .getTranslation()
+        .getDistance(currentPose.getTranslation());
+      double startPoseToTarPose = m_startingPose
+        .getTranslation()
+        .getDistance(m_targetPose.getTranslation());
+      // double driveErrorAbs = currDistFromTarPose;
+      double driveErrorAbs = currDistFromStartPose;
       double driveVelocityScalar = m_driveController.calculate(
         driveErrorAbs,
-        0.0
+        startPoseToTarPose
       );
       if (m_driveController.atGoal()) driveVelocityScalar = 0.0;
 
@@ -102,7 +112,7 @@ public class DriveToPose extends Command {
       )
         // then pushes that pose by the driveVelocityScalar.
         // this pushes it towards the goal, as the transform used only has an X component.
-        .transformBy(Utility.translationToTransform(driveVelocityScalar, 0.0))
+        .transformBy(Utility.translationToTransform(-driveVelocityScalar, 0.0))
         // then uses that translation and its X & Y components as the drive velocities.
         .getTranslation();
     }
@@ -116,13 +126,12 @@ public class DriveToPose extends Command {
   }
 
   private void resetControllers(Pose2d currPose, Pose2d targetPose) {
+    Twist2d robotVelocity = Robot.swerve.getFieldRelativeRobotVelocity();
+    System.out.println("ROBOT VEL = " + robotVelocity);
     m_driveController.reset(
       new TrapezoidProfile.State(
-        currPose.getTranslation().getDistance(targetPose.getTranslation()),
-        -new Translation2d(
-          Robot.swerve.getFieldRelativeRobotVelocity().dx,
-          Robot.swerve.getFieldRelativeRobotVelocity().dy
-        )
+        0,
+        -new Translation2d(robotVelocity.dx, robotVelocity.dy)
           .rotateBy(
             targetPose
               .getTranslation()

@@ -123,8 +123,12 @@ public class DriverControls implements RumbleInterface {
     //   .whileTrue(
     //     new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.BACK_OUT_PERCENT)
     //   );
-    m_controller.x().whileTrue(new DriveToReef(RouteAroundReef.None, BRANCH_J));
-    m_controller.b().whileTrue(new DriveToReef(RouteAroundReef.None, BRANCH_F));
+    m_controller
+      .x()
+      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_J));
+    m_controller
+      .b()
+      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_F));
   }
 
   public double getX() {

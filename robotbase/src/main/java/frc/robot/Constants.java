@@ -718,7 +718,7 @@ public final class Constants {
         8,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(1.6, 1.4)
+        new TrapezoidProfile.Constraints(30, 10.5)
       );
 
     public static final ProfiledPIDController THETA_CONTROLLER =
@@ -726,7 +726,7 @@ public final class Constants {
         6,
         0.0,
         0.0,
-        new TrapezoidProfile.Constraints(2, 1.4)
+        new TrapezoidProfile.Constraints(2, 1.2)
       );
 
     public static final Distance X_TOLERANCE = Units.Inches.of(0.2);
@@ -740,14 +740,14 @@ public final class Constants {
     );
 
     public static final Pose2d WAYPOINT_APPROACH_TOLERANCE_POSE = new Pose2d(
-      X_TOLERANCE.times(6),
-      Y_TOLERANCE.times(6),
-      new Rotation2d(ROTATION_TOLERANCE.times(6))
+      Units.Inches.of(4),
+      Units.Inches.of(4),
+      Rotation2d.fromDegrees(35)
     );
 
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(2);
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(0.25);
 
-    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.4);
+    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.2);
 
     public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
       Units.Rotations.of(0.08)
@@ -761,13 +761,11 @@ public final class Constants {
       .5,
       .6,
       .7,
+      .8,
     };
 
-    /**
-     * REEF_BOUNDARY + X distance away from the center of the reef
-     */
     public static final Distance IDEAL_DISTANCE_FROM_REEF =
-      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(3));
+      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(4));
 
     /**
      * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
@@ -780,7 +778,7 @@ public final class Constants {
     /**
      * How far away we want to be from things that we could hit.
      */
-    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(4);
+    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(8);
 
     /**
      * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
@@ -843,8 +841,8 @@ public final class Constants {
         Rotation2d.fromDegrees(-117.85)
       );
       public static final Pose2d BRANCH_E = new Pose2d(
-        Units.Meters.of(4.9734),
-        Units.Meters.of(2.8552),
+        Units.Meters.of(5.04),
+        Units.Meters.of(2.99),
         Rotation2d.fromRadians(-1.0600454389505496)
       );
       public static final Pose2d BRANCH_F = new Pose2d(
