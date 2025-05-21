@@ -46,11 +46,8 @@ public class DriveToPoseHandler extends Command {
 
   @Override
   public void initialize() {
-    // m_currentTarget = Robot.swerve.getAllianceRelativePose2d();
     m_currentTarget = Robot.swerve.getFieldRelativePose2d();
     m_currentToldTarget = m_currentTarget;
-    // m_finalGoal = Robot.buttonboard.getPoseFromGoal();
-    // m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currPose = Robot.swerve.getFieldRelativePose2d();
     m_currDriveToPose = new DriveToPose((Pose2d currPose) ->
       getNewTarget(m_currentTarget, currPose)
@@ -60,8 +57,6 @@ public class DriveToPoseHandler extends Command {
 
   @Override
   public void execute() {
-    // m_finalGoal = Robot.buttonboard.getPoseFromGoal();
-    // m_currPose = Robot.swerve.getAllianceRelativePose2d();
     m_currPose = Robot.swerve.getFieldRelativePose2d();
   }
 
@@ -90,14 +85,14 @@ public class DriveToPoseHandler extends Command {
 
   protected Pose2d getNewTarget(Pose2d currTarget, Pose2d currPose) {
     boolean isAtFinalApproach =
-      Math.abs(Utility.findDistanceBetweenPoses(m_currPose, m_finalGoal)) <=
+      Math.abs(Utility.findDistanceBetweenPoses(currPose, m_finalGoal)) <=
       FINAL_APPROACH_DISTANCE.in(Meters);
     if (isAtFinalApproach && m_finalApproachCommand != null) {
       m_finalApproachCommand.schedule();
     }
     // if we can go to the final goal without hitting it, just go there
     if (isAtFinalApproach) {
-      m_currentTarget = m_finalGoal;
+      currTarget = m_finalGoal;
       if (
         m_currDriveToPose.getDriveConstraints().maxVelocity >
         DRIVE_FINAL_APPROACH_CONSTRAINTS.maxVelocity
@@ -142,14 +137,13 @@ public class DriveToPoseHandler extends Command {
    * @return The interpolated pose
    */
   protected Pose2d interpolateTarget(Pose2d currPose, Pose2d goal) {
-    // return goal;
     Transform2d currPoseToGoalTransform = new Transform2d(
       new Pose2d(currPose.getTranslation(), Rotation2d.kZero),
       new Pose2d(goal.getTranslation(), Rotation2d.kZero)
     );
     double dist = Math.abs(currPoseToGoalTransform.getTranslation().getNorm());
-    Pose2d newTarget = m_currPose.interpolate(
-      m_finalGoal,
+    Pose2d newTarget = currPose.interpolate(
+      goal,
       (1 / dist) * INTERPOLATION_DISTANCE.in(Meters)
     );
     return newTarget;
