@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.SWERVE.FACING_ANGLE_D;
@@ -399,6 +400,14 @@ public class CommandSwerveDrivetrain
         ? poseToSet
         : ChoreoAllianceFlipUtil.flip(poseToSet)
     );
+  }
+
+  public void resetHeading(Rotation2d heading) {
+    super.resetRotation(heading);
+  }
+
+  public void resetTranslation(Translation2d translation) {
+    super.resetTranslation(translation);
   }
 
   public ChassisSpeeds getCurrentChassisSpeeds() {

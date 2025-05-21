@@ -251,6 +251,7 @@ public class CameraManager {
       );
     }
     m_alertEstimateInfo.set(false);
+    m_alertTargetNumInfo.set(true);
     m_lastEstimatedPose = Pose3d.kZero;
   }
 
@@ -400,7 +401,7 @@ public class CameraManager {
     double measuredTime = Utils.fpgaToCurrentTime(
       averageEstimate.timestampSeconds
     );
-    // if estimated pose it too far from swerve pose
+    // if estimated pose is too far from swerve pose
     if (
       Math.abs(
         Robot.swerve

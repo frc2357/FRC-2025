@@ -1,17 +1,14 @@
 package frc.robot.controls;
 
 import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_J;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
@@ -49,16 +46,6 @@ public class DriverControls implements RumbleInterface {
   }
 
   public void mapControls() {
-    m_controller
-      .start()
-      .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetPose(
-            REEF.BRANCH_A.plus(new Transform2d(-0.2, 0, Rotation2d.kZero))
-          )
-        )
-      );
-
     // Scoring
     m_controller
       .leftBumper()
@@ -97,7 +84,7 @@ public class DriverControls implements RumbleInterface {
       .back()
       .onTrue(
         new InstantCommand(() ->
-          Robot.swerve.setFieldRelativeTranslation2d(
+          Robot.swerve.resetTranslation(
             Robot.camManager
               .getLastEstimatedPose()
               .getTranslation()
@@ -108,24 +95,11 @@ public class DriverControls implements RumbleInterface {
     m_controller
       .start()
       .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.setFieldRelativePose2d(
-            new Pose2d(
-              Robot.swerve.getFieldRelativePose2d().getTranslation(),
-              Rotation2d.kZero
-            )
-          )
-        )
+        new InstantCommand(() -> Robot.swerve.resetHeading(Rotation2d.kZero))
       );
-
-    // m_controller
-    //   .y()
-    //   .whileTrue(
-    //     new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.BACK_OUT_PERCENT)
-    //   );
     m_controller
       .x()
-      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_J));
+      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_I));
     m_controller
       .b()
       .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_F));

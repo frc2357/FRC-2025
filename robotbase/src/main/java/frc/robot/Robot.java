@@ -5,10 +5,18 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static frc.robot.Constants.FIELD.REEF.BLUE_REEF_TAGS;
 import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.cscore.OpenCvLoader;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -20,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.CLIMBER_PIVOT;
 import frc.robot.Constants.PHOTON_VISION;
+import frc.robot.Constants.PHOTON_VISION.BACK_LEFT_CAM;
+import frc.robot.Constants.PHOTON_VISION.BACK_RIGHT_CAM;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.StopAllMotors;
 import frc.robot.commands.climberPivot.ClimberPivotSetSpeed;
@@ -90,7 +100,7 @@ public class Robot extends TimedRobot {
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(
       !DriverStation.isFMSAttached()
-    ); // TODO: turn this off at comp, just in case.
+    );
     SmartDashboard.putBoolean("Toggle Pose Estimation", true);
 
     // Define subsystems
@@ -99,8 +109,6 @@ public class Robot extends TimedRobot {
     laterator = new Laterator();
     coralRunner = new CoralRunner();
     algaeKnocker = new AlgaeKnocker();
-    // climberWinch = new ClimberWinch();
-    // climberPivot = new ClimberPivot();
 
     camManager = new CameraManager();
     backRightCam = camManager.createCamera(
@@ -249,4 +257,31 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
+
+  public static AprilTagFieldLayout makeHomeField() {
+    double correctDistFromLeftInches = 14.25;
+    double[] tagDists = { 16.125, 14.25, 14.125, 16.4375, 16.375, 16.375 };
+    var normalLayout = AprilTagFieldLayout.loadField(
+      AprilTagFields.k2025ReefscapeAndyMark
+    );
+    var poses = normalLayout.getTags();
+    for (int i = 0; i < BLUE_REEF_TAGS.length; i++) {
+      int tag = BLUE_REEF_TAGS[i];
+      var tagPose = poses.get(tag - 1).pose;
+      var correctionTransform = new Transform2d(
+        Units.Inches.zero(),
+        Units.Inches.of(correctDistFromLeftInches - tagDists[i]),
+        Rotation2d.kZero
+      );
+      var correctedTagPose = tagPose.transformBy(
+        new Transform3d(correctionTransform)
+      );
+      poses.set(tag - 1, new AprilTag(tag, correctedTagPose));
+    }
+    return new AprilTagFieldLayout(
+      poses,
+      normalLayout.getFieldLength(),
+      normalLayout.getFieldWidth()
+    );
+  }
 }

@@ -7,19 +7,18 @@ package frc.robot;
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
-import java.util.List;
 import java.util.Optional;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -395,7 +394,7 @@ public final class Constants {
       0.5
     );
 
-    public static final int MIN_ALLOWED_CUMMULATIVE_TARGETS = 2;
+    public static final int MIN_ALLOWED_CUMMULATIVE_TARGETS = 1;
 
     public static final Time ESTIMATE_TIMEOUT = Units.Milliseconds.of(120);
 
@@ -463,216 +462,8 @@ public final class Constants {
     public static final AprilTagFields APRIL_TAG_FIELD =
       AprilTagFields.k2025ReefscapeAndyMark;
 
-    // a tragic yet neccessary sin.
     public static final AprilTagFieldLayout HOME_FIELD_LAYOUT =
-      new AprilTagFieldLayout(
-        List.of(
-          new AprilTag(
-            1,
-            new Pose3d(
-              16.687292,
-              0.628142,
-              1.4859,
-              new Rotation3d(0.0, 0.0, 2.199114857512855)
-            )
-          ),
-          new AprilTag(
-            2,
-            new Pose3d(
-              16.687292,
-              7.414259999999999,
-              1.4859,
-              new Rotation3d(0.0, 0.0, -2.1991148575128556)
-            )
-          ),
-          new AprilTag(
-            3,
-            new Pose3d(
-              11.49096,
-              8.031733999999998,
-              1.30175,
-              new Rotation3d(0.0, 0.0, -1.570796326794897)
-            )
-          ),
-          new AprilTag(
-            4,
-            new Pose3d(
-              9.276079999999999,
-              6.132575999999999,
-              1.8679160000000001,
-              new Rotation3d(0.0, 0.5235987755982988, 0.0)
-            )
-          ),
-          new AprilTag(
-            5,
-            new Pose3d(
-              9.276079999999999,
-              1.9098259999999998,
-              1.8679160000000001,
-              new Rotation3d(0.0, 0.5235987755982988, 0.0)
-            )
-          ),
-          new AprilTag(
-            6,
-            new Pose3d(
-              13.474446,
-              3.3012379999999997,
-              0.308102,
-              new Rotation3d(0.0, 0.0, -1.0471975511965976)
-            )
-          ),
-          new AprilTag(
-            7,
-            new Pose3d(
-              13.890498,
-              4.0208200000000005,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 0.0)
-            )
-          ),
-          new AprilTag(
-            8,
-            new Pose3d(
-              13.474446,
-              4.740402,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 1.0471975511965976)
-            )
-          ),
-          new AprilTag(
-            9,
-            new Pose3d(
-              12.643358,
-              4.740402,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 2.0943951023931953)
-            )
-          ),
-          new AprilTag(
-            10,
-            new Pose3d(
-              12.227305999999999,
-              4.0208200000000005,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 3.141592653589793)
-            )
-          ),
-          new AprilTag(
-            11,
-            new Pose3d(
-              12.643358,
-              3.3012379999999997,
-              0.308102,
-              new Rotation3d(0.0, 0.0, -2.094395102393196)
-            )
-          ),
-          new AprilTag(
-            12,
-            new Pose3d(
-              0.8613139999999999,
-              0.628142,
-              1.4859,
-              new Rotation3d(0.0, 0.0, 0.9424777960769379)
-            )
-          ),
-          new AprilTag(
-            13,
-            new Pose3d(
-              0.8613139999999999,
-              7.414259999999999,
-              1.4859,
-              new Rotation3d(0.0, 0.0, -0.942477796076938)
-            )
-          ),
-          new AprilTag(
-            14,
-            new Pose3d(
-              8.272272,
-              6.132575999999999,
-              1.8679160000000001,
-              new Rotation3d(0.0, 0.5235987755982988, 3.141592653589793)
-            )
-          ),
-          new AprilTag(
-            15,
-            new Pose3d(
-              8.272272,
-              1.9098259999999998,
-              1.8679160000000001,
-              new Rotation3d(0.0, 0.5235987755982988, 3.141592653589793)
-            )
-          ),
-          new AprilTag(
-            16,
-            new Pose3d(
-              6.057646,
-              0.010667999999999999,
-              1.30175,
-              new Rotation3d(0.0, 0.0, 1.570796326794897)
-            )
-          ),
-          new AprilTag(
-            17,
-            new Pose3d(
-              4.073905999999999,
-              3.3012379999999997,
-              0.308102,
-              new Rotation3d(0.0, -0.0, -2.094395102393196)
-            )
-          ),
-          new AprilTag(
-            18,
-            new Pose3d(
-              3.6576,
-              4.0684450000000005,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 3.141592653589793)
-            )
-          ),
-          new AprilTag(
-            19,
-            new Pose3d(
-              4.120649721169264,
-              4.767389499999999,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 2.0943951023931953)
-            )
-          ),
-          new AprilTag(
-            20,
-            new Pose3d(
-              4.951483721169264,
-              4.7134145,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 1.0471975511965976)
-            )
-          ),
-          new AprilTag(
-            21,
-            new Pose3d(
-              5.321046,
-              3.9652575000000003,
-              0.308102,
-              new Rotation3d(0.0, 0.0, 0.0)
-            )
-          ),
-          new AprilTag(
-            22,
-            new Pose3d(
-              4.907489630657015,
-              3.3028254999999995,
-              0.308102,
-              new Rotation3d(0.0, -0.0, -1.0471975511965976)
-            )
-          )
-        ),
-        AprilTagFieldLayout.loadField(
-          AprilTagFields.k2025ReefscapeAndyMark
-        ).getFieldLength(),
-        AprilTagFieldLayout.loadField(
-          AprilTagFields.k2025ReefscapeAndyMark
-        ).getFieldWidth()
-      );
+      Robot.makeHomeField();
 
     public static final AprilTagFieldLayout APRIL_TAG_LAYOUT =
       // AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
@@ -692,45 +483,24 @@ public final class Constants {
     public static final Distance Z_MARGIN = Units.Feet.of(0.5);
   }
 
-  public static class DRIVE_TO_VECTOR {
-
-    public static final ProfiledPIDController DRIVE_CONTROLLER =
-      new ProfiledPIDController(
-        8,
-        0.0,
-        0.0,
-        new TrapezoidProfile.Constraints(1.5, 1)
-      );
-
-    public static final ProfiledPIDController THETA_CONTROLLER =
-      new ProfiledPIDController(
-        6,
-        0.0,
-        0.0,
-        new TrapezoidProfile.Constraints(2, 1)
-      );
-  }
-
   public static class DRIVE_TO_POSE {
 
+    public static final Constraints DRIVE_DEFAULT_CONSTRAINTS =
+      new TrapezoidProfile.Constraints(30, 9);
+    public static final Constraints DRIVE_FINAL_APPROACH_CONSTRAINTS =
+      new TrapezoidProfile.Constraints(10, 5);
+
+    public static final Constraints THETA_DEFAULT_CONSTRAINTS =
+      new TrapezoidProfile.Constraints(15, 9);
+
     public static final ProfiledPIDController DRIVE_CONTROLLER =
-      new ProfiledPIDController(
-        8,
-        0.0,
-        0.0,
-        new TrapezoidProfile.Constraints(30, 10.5)
-      );
+      new ProfiledPIDController(8, 0.0, 0.0, DRIVE_DEFAULT_CONSTRAINTS);
 
     public static final ProfiledPIDController THETA_CONTROLLER =
-      new ProfiledPIDController(
-        6,
-        0.0,
-        0.0,
-        new TrapezoidProfile.Constraints(2, 1.2)
-      );
+      new ProfiledPIDController(6, 0.0, 0.0, THETA_DEFAULT_CONSTRAINTS);
 
-    public static final Distance X_TOLERANCE = Units.Inches.of(0.2);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(0.2);
+    public static final Distance X_TOLERANCE = Units.Inches.of(0.1);
+    public static final Distance Y_TOLERANCE = Units.Inches.of(0.1);
     public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(2);
 
     public static final Pose2d FINAL_APPROACH_TOLERANCE_POSE = new Pose2d(
@@ -740,12 +510,12 @@ public final class Constants {
     );
 
     public static final Pose2d WAYPOINT_APPROACH_TOLERANCE_POSE = new Pose2d(
-      Units.Inches.of(4),
-      Units.Inches.of(4),
+      Units.Inches.of(3),
+      Units.Inches.of(3),
       Rotation2d.fromDegrees(35)
     );
 
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(0.25);
+    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(1);
 
     public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.2);
 
@@ -766,23 +536,12 @@ public final class Constants {
 
     public static final Distance IDEAL_DISTANCE_FROM_REEF =
       COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(4));
-
-    /**
-     * The slot number, starting at 1, from the alliance wall out, that we want to use. this can be changed on a per-match basis.
-     */
-    public static final int DESIRED_CORAL_STATION_SLOT_NUMBER = 3;
   }
 
   public static final class COLLISION_DETECTION {
 
-    /**
-     * How far away we want to be from things that we could hit.
-     */
     public static final Distance COLLISION_TOLERANCE = Units.Inches.of(8);
 
-    /**
-     * How close we want to get to the reef at any point in time. If were closer than this when traveling, a collision is likely.
-     */
     public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
       .plus(ROBOT_CONFIGURATION.BOUNDARY)
       .plus(COLLISION_TOLERANCE);
@@ -846,9 +605,9 @@ public final class Constants {
         Rotation2d.fromRadians(-1.0600454389505496)
       );
       public static final Pose2d BRANCH_F = new Pose2d(
-        Units.Meters.of(5.17),
-        Units.Meters.of(3.18),
-        Rotation2d.fromRadians(-1.0600454389505496)
+        Units.Meters.of(5.1060645),
+        Units.Meters.of(3.173368),
+        Rotation2d.fromRadians((2.0956364836439327 + 3.14))
       );
       public static final Pose2d BRANCH_G = new Pose2d(
         Units.Meters.of(5.7408),
@@ -861,13 +620,13 @@ public final class Constants {
         Rotation2d.kZero
       );
       public static final Pose2d BRANCH_I = new Pose2d(
-        Units.Meters.of(5.2650),
-        Units.Meters.of(5.0293),
+        Units.Meters.of(5.310347859),
+        Units.Meters.of(4.792431222),
         Rotation2d.fromRadians(1.044169055361146)
       );
       public static final Pose2d BRANCH_J = new Pose2d(
-        Units.Meters.of(5.34),
-        Units.Meters.of(4.74),
+        Units.Meters.of(4.9792),
+        Units.Meters.of(5.1939),
         Rotation2d.fromRadians(1.044169055361146)
       );
       public static final Pose2d BRANCH_K = new Pose2d(
