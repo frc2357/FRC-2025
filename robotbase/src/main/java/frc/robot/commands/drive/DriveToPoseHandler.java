@@ -3,6 +3,7 @@ package frc.robot.commands.drive;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.DRIVE_TO_POSE.*;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -123,11 +124,9 @@ public class DriveToPoseHandler extends Command {
     // }
     m_currentTarget = newTarget;
     m_currentToldTarget = newTarget.transformBy(
-      new Transform2d(currPose, newTarget).times(0.75)
+      new Transform2d(currPose, newTarget)
     );
-    return newTarget.transformBy(
-      new Transform2d(currPose, newTarget).times(0.75)
-    );
+    return newTarget.transformBy(new Transform2d(currPose, newTarget));
   }
 
   /**
