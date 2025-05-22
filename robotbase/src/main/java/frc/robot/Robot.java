@@ -258,30 +258,4 @@ public class Robot extends TimedRobot {
   @Override
   public void simulationPeriodic() {}
 
-  public static AprilTagFieldLayout makeHomeField() {
-    double correctDistFromLeftInches = 14.25;
-    double[] tagDists = { 16.125, 14.25, 14.125, 16.4375, 16.375, 16.375 };
-    var normalLayout = AprilTagFieldLayout.loadField(
-      AprilTagFields.k2025ReefscapeAndyMark
-    );
-    var poses = normalLayout.getTags();
-    for (int i = 0; i < BLUE_REEF_TAGS.length; i++) {
-      int tag = BLUE_REEF_TAGS[i];
-      var tagPose = poses.get(tag - 1).pose;
-      var correctionTransform = new Transform2d(
-        Units.Inches.zero(),
-        Units.Inches.of(correctDistFromLeftInches - tagDists[i]),
-        Rotation2d.kZero
-      );
-      var correctedTagPose = tagPose.transformBy(
-        new Transform3d(correctionTransform)
-      );
-      poses.set(tag - 1, new AprilTag(tag, correctedTagPose));
-    }
-    return new AprilTagFieldLayout(
-      poses,
-      normalLayout.getFieldLength(),
-      normalLayout.getFieldWidth()
-    );
-  }
 }

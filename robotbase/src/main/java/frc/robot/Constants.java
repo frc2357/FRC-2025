@@ -19,6 +19,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
+import frc.robot.util.Utility;
 import java.util.Optional;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -463,7 +464,7 @@ public final class Constants {
       AprilTagFields.k2025ReefscapeAndyMark;
 
     public static final AprilTagFieldLayout HOME_FIELD_LAYOUT =
-      Robot.makeHomeField();
+      Utility.makeHomeField();
 
     public static final AprilTagFieldLayout APRIL_TAG_LAYOUT =
       // AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);

@@ -73,26 +73,26 @@ public class CameraManager {
      */
     public static poseEstimate averageOutEstimates(poseEstimate... estimates) {
       if (estimates.length == 1) return estimates[0];
-      Translation3d aveTranslation = new Translation3d();
+      Translation3d averageTranslation = new Translation3d();
       double averagedTimestamp = 0;
       int cummulativeTargets = 0;
       double averageCoordDev = 0;
       for (poseEstimate estimate : estimates) {
-        aveTranslation = aveTranslation.plus(
+        averageTranslation = averageTranslation.plus(
           estimate.estimPose.getTranslation()
         );
         averagedTimestamp += estimate.timestampSeconds;
         cummulativeTargets += estimate.targetsUsedNum;
         averageCoordDev += estimate.stdDevs.get(0, 0);
       }
-      aveTranslation = aveTranslation.div(estimates.length);
+      averageTranslation = averageTranslation.div(estimates.length);
       averagedTimestamp /= estimates.length;
       averageCoordDev /= estimates.length;
       return new poseEstimate(
-        new Pose3d(aveTranslation, estimates[0].estimPose.getRotation()),
+        new Pose3d(averageTranslation, estimates[0].estimPose.getRotation()),
         averagedTimestamp,
         cummulativeTargets,
-        VecBuilder.fill(averageCoordDev, averageCoordDev, 100000)
+        VecBuilder.fill(averageCoordDev, averageCoordDev, Double.MAX_VALUE)
       );
     }
 
