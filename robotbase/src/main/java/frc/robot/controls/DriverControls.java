@@ -1,19 +1,19 @@
 package frc.robot.controls;
 
+import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
+
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
-import frc.robot.Constants.FIELD.REEF;
 import frc.robot.Robot;
-import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
-import frc.robot.commands.drive.FlipPerspective;
+import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
+import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.CoralZero;
@@ -46,16 +46,6 @@ public class DriverControls implements RumbleInterface {
   }
 
   public void mapControls() {
-    m_controller
-      .start()
-      .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetPose(
-            REEF.BRANCH_A.plus(new Transform2d(-0.2, 0, Rotation2d.kZero))
-          )
-        )
-      );
-
     // Scoring
     m_controller
       .leftBumper()
@@ -72,7 +62,7 @@ public class DriverControls implements RumbleInterface {
           .andThen(new CoralZero())
       );
     m_controller
-      .x()
+      .rightStick()
       .onTrue(
         new TeleopCoralScoreL2(m_rightTrigger)
           .getCommand()
@@ -86,20 +76,33 @@ public class DriverControls implements RumbleInterface {
 
     // Remove algae
     m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
-    m_controller.b().onTrue(new RemoveAlgaeHigh(m_controller.b()));
+    m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
 
     // Other
     m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
-    m_controller.back().onTrue(new FlipPerspective());
+    m_controller
+      .back()
+      .onTrue(
+        new InstantCommand(() ->
+          Robot.swerve.resetTranslation(
+            Robot.camManager
+              .getLastEstimatedPose()
+              .getTranslation()
+              .toTranslation2d()
+          )
+        )
+      );
     m_controller
       .start()
-      .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
-
-    m_controller
-      .y()
-      .whileTrue(
-        new CoralRunnerSetSpeed(Constants.CORAL_RUNNER.BACK_OUT_PERCENT)
+      .onTrue(
+        new InstantCommand(() -> Robot.swerve.resetHeading(Rotation2d.kZero))
       );
+    m_controller
+      .x()
+      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_I));
+    m_controller
+      .b()
+      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_F));
   }
 
   public double getX() {
