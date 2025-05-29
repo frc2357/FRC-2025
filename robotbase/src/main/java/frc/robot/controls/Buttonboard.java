@@ -1,12 +1,26 @@
 package frc.robot.controls;
 
 import static frc.robot.Constants.FIELD.REEF.BRANCH_A;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_B;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_C;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_D;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_E;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_G;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_H;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_J;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_K;
+import static frc.robot.Constants.FIELD.REEF.BRANCH_L;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Robot;
 import frc.robot.controls.controllers.CommandButtonboardController;
 import frc.robot.controls.controllers.CommandButtonboardController.ReefSide;
 import frc.robot.controls.controllers.CommandButtonboardController.ScoringDirection;
@@ -20,6 +34,12 @@ public class Buttonboard implements Sendable, RumbleInterface {
   private ReefSide m_selectedReefSide = ReefSide.None;
   private ScoringLevel m_selectedScoringLevel = ScoringLevel.None;
   private ScoringDirection m_selectScoringDirection = ScoringDirection.None;
+
+  public static final Pose2d m_errorPose = new Pose2d(
+    -1,
+    -1,
+    new Rotation2d(Units.Degrees.of(-1))
+  );
 
   public Buttonboard(CommandButtonboardController controller) {
     m_controller = controller;
@@ -106,49 +126,48 @@ public class Buttonboard implements Sendable, RumbleInterface {
   }
 
   public Pose2d getPoseFromGoal() {
-    // ReefSide goal = Robot.buttonboard.getSelectedReefSide();
-    // ScoringDirection scoringDirection =
-    //   Robot.buttonboard.getSelectedScoringDirection();
+    ReefSide goal = Robot.buttonboard.getSelectedReefSide();
+    ScoringDirection scoringDirection =
+      Robot.buttonboard.getSelectedScoringDirection();
 
-    // switch (scoringDirection) {
-    //   case Left:
-    //     switch (goal) {
-    //       case A:
-    //         return REEF.BRANCH_A;
-    //       case B:
-    //         return REEF.BRANCH_C;
-    //       case C:
-    //         return REEF.BRANCH_E;
-    //       case D:
-    //         return REEF.BRANCH_G;
-    //       case E:
-    //         return REEF.BRANCH_I;
-    //       case F:
-    //         return REEF.BRANCH_K;
-    //       default:
-    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-    //     }
-    //   case Right:
-    //     switch (goal) {
-    //       case A:
-    //         return REEF.BRANCH_B;
-    //       case B:
-    //         return REEF.BRANCH_D;
-    //       case C:
-    //         return REEF.BRANCH_F;
-    //       case D:
-    //         return REEF.BRANCH_H;
-    //       case E:
-    //         return REEF.BRANCH_J;
-    //       case F:
-    //         return REEF.BRANCH_L;
-    //       default:
-    //         return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-    //     }
-    //   default:
-    //     return new Pose2d(-1, -1, new Rotation2d(Units.Degrees.of(-1)));
-    // }
-    return BRANCH_A;
+    switch (scoringDirection) {
+      case Left:
+        switch (goal) {
+          case A:
+            return BRANCH_A;
+          case B:
+            return BRANCH_C;
+          case C:
+            return BRANCH_E;
+          case D:
+            return BRANCH_G;
+          case E:
+            return BRANCH_I;
+          case F:
+            return BRANCH_K;
+          default:
+            return m_errorPose;
+        }
+      case Right:
+        switch (goal) {
+          case A:
+            return BRANCH_B;
+          case B:
+            return BRANCH_D;
+          case C:
+            return BRANCH_F;
+          case D:
+            return BRANCH_H;
+          case E:
+            return BRANCH_J;
+          case F:
+            return BRANCH_L;
+          default:
+            return m_errorPose;
+        }
+      default:
+        return m_errorPose;
+    }
   }
 
   @Override

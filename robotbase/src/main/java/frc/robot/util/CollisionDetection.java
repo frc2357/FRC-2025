@@ -124,4 +124,30 @@ public class CollisionDetection {
       FIELD_CONSTANTS.FIELD_WIDTH.plus(FIELD_BORDER_MARGIN).in(Meters)
     );
   }
+
+  public static boolean isOnBlueSide(Pose2d pose) {
+    return !(
+      pose.getX() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getX() >
+      FIELD_CONSTANTS.FIELD_LENGTH.div(2)
+        .plus(FIELD_BORDER_MARGIN)
+        .in(Meters) ||
+      pose.getY() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getY() >
+      FIELD_CONSTANTS.FIELD_WIDTH.plus(FIELD_BORDER_MARGIN).in(Meters)
+    );
+  }
+
+  public static boolean isOnRedSide(Pose2d pose) {
+    return !(
+      pose.getX() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getX() <
+      FIELD_CONSTANTS.FIELD_LENGTH.div(2)
+        .plus(FIELD_BORDER_MARGIN)
+        .in(Meters) ||
+      pose.getY() < -FIELD_BORDER_MARGIN.in(Meters) ||
+      pose.getY() >
+      FIELD_CONSTANTS.FIELD_WIDTH.plus(FIELD_BORDER_MARGIN).in(Meters)
+    );
+  }
 }

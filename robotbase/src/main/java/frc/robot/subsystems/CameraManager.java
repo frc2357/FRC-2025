@@ -6,29 +6,31 @@ import static frc.robot.Constants.PHOTON_VISION.*;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.units.measure.MutTime;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import frc.robot.Constants.FIELD_CONSTANTS;
-import frc.robot.Constants.PHOTON_VISION;
 import frc.robot.Robot;
 import frc.robot.subsystems.PhotonVisionCamera.TimestampedPNPInfo;
 import frc.robot.util.CollisionDetection;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class CameraManager {
@@ -71,27 +73,25 @@ public class CameraManager {
      */
     public static poseEstimate averageOutEstimates(poseEstimate... estimates) {
       if (estimates.length == 1) return estimates[0];
-      Pose3d averagedPose = Pose3d.kZero;
+      Translation3d averageTranslation = new Translation3d();
       double averagedTimestamp = 0;
-      int averageTargets = 0;
-      Matrix<N3, N1> averageStdDevs = VecBuilder.fill(0, 0, 0);
+      int cummulativeTargets = 0;
       double averageCoordDev = 0;
       for (poseEstimate estimate : estimates) {
-        averagedPose = averagedPose.plus(
-          new Transform3d(Pose3d.kZero, estimate.estimPose)
+        averageTranslation = averageTranslation.plus(
+          estimate.estimPose.getTranslation()
         );
         averagedTimestamp += estimate.timestampSeconds;
-        averageTargets += estimate.targetsUsedNum;
+        cummulativeTargets += estimate.targetsUsedNum;
         averageCoordDev += estimate.stdDevs.get(0, 0);
       }
-      averagedPose.div(estimates.length);
+      averageTranslation = averageTranslation.div(estimates.length);
       averagedTimestamp /= estimates.length;
-      averageTargets = Math.floorDiv(averageTargets, estimates.length);
-      averageStdDevs.div(estimates.length);
+      averageCoordDev /= estimates.length;
       return new poseEstimate(
-        averagedPose,
+        new Pose3d(averageTranslation, estimates[0].estimPose.getRotation()),
         averagedTimestamp,
-        averageTargets,
+        cummulativeTargets,
         VecBuilder.fill(averageCoordDev, averageCoordDev, Double.MAX_VALUE)
       );
     }
@@ -101,35 +101,33 @@ public class CameraManager {
      * @return A pose estimate of the average estimate, as long as all the estimates are close enough together
      */
     public static poseEstimate findConcensus(poseEstimate... estimates) {
-      estimates = findValidEstimates(estimates);
       if (estimates == null) return null;
       if (estimates.length == 1) return estimates[0];
       poseEstimate averageEstimate = averageOutEstimates(estimates);
       if (averageEstimate == null || !averageEstimate.exists()) return null;
-      Pose2d averagedPose = averageEstimate.estimPose.toPose2d();
       double averageDistBetweenEstimates = 0;
       for (poseEstimate estimate : estimates) {
-        Transform2d transform = new Transform2d(
-          estimate.estimPose.toPose2d(),
-          averagedPose
-        );
-        averageDistBetweenEstimates += Math.abs(
-          transform.getTranslation().getNorm()
-        );
+        averageDistBetweenEstimates += estimate.estimPose
+          .getTranslation()
+          .getDistance(averageEstimate.estimPose.getTranslation());
       }
       averageDistBetweenEstimates /= estimates.length;
       if (
-        averageDistBetweenEstimates > PHOTON_VISION.MAX_DIST_BETWEEN_ESTIMATES
+        averageDistBetweenEstimates >= MAX_DIST_BETWEEN_ESTIMATES.in(Meters)
       ) return null;
       return averageEstimate;
     }
 
-    public static poseEstimate[] findValidEstimates(poseEstimate... estimates) {
+    public static poseEstimate[] findValidEstimates(
+      Rotation2d desiredHeading,
+      poseEstimate... estimates
+    ) {
       ArrayList<poseEstimate> validEstimates = new ArrayList<poseEstimate>();
       for (poseEstimate estimate : estimates) {
-        if (estimate != null && estimate.isValid()) {
-          validEstimates.add(estimate);
+        if (estimate == null || !estimate.isValid()) {
+          continue;
         }
+        validEstimates.add(estimate);
       }
       if (validEstimates.size() == 0) {
         return null;
@@ -138,22 +136,84 @@ public class CameraManager {
     }
 
     public boolean isValid() {
-      return this.exists() && this.isInField();
+      return (
+        this.exists() &&
+        this.isInField() &&
+        (this.timestampSeconds + ESTIMATE_TIMEOUT.in(Seconds) >
+          RobotController.getMeasureFPGATime().in(Seconds))
+      );
     }
   }
 
-  private final ArrayList<PhotonVisionCamera> m_robotCameras = new ArrayList<
-    PhotonVisionCamera
-  >();
+  public class TargetInfo {
 
-  private final PhotonPoseEstimator m_poseEstimator = new PhotonPoseEstimator(
-    FIELD_CONSTANTS.APRIL_TAG_LAYOUT,
-    PRIMARY_STRATEGY,
-    new Transform3d()
-  );
+    public double yaw, pitch, skew;
+    public Transform3d camToTargetTransform;
+    public long timestamp;
+    public Pose2d targetFieldRelativePose;
+    public PhotonVisionCamera camera;
 
-  private final TimestampedPNPInfo[] m_pnpInfo =
-    new TimestampedPNPInfo[PNP_INFO_STORAGE_AMOUNT];
+    public TargetInfo(
+      double yaw,
+      double pitch,
+      double skew,
+      Transform3d camToTargetTransform,
+      long timestamp,
+      PhotonVisionCamera newCamera
+    ) {
+      this.yaw = yaw;
+      this.pitch = pitch;
+      this.skew = skew;
+      this.camToTargetTransform = camToTargetTransform;
+      this.timestamp = timestamp;
+      if (newCamera == null) {
+        this.targetFieldRelativePose = null;
+        return;
+      }
+      this.targetFieldRelativePose = new Pose3d(
+        Robot.swerve.getFieldRelativePose2d()
+      )
+        .plus(newCamera.m_robotToCameraTranform) //fieldToRobot -> fieldToCamera
+        .plus(camToTargetTransform) //fieldToCamera -> fieldToTarget
+        .toPose2d();
+      this.camera = newCamera;
+    }
+
+    public boolean isValid(long timeoutMs) {
+      long now = RobotController.getFPGATime();
+      long then = now - timeoutMs;
+
+      return (
+        camera != null &&
+        camToTargetTransform != null &&
+        targetFieldRelativePose != null &&
+        timestamp > then &&
+        (!Double.isNaN(yaw) && Math.abs(yaw) > MAX_ANGLE.in(Degrees)) &&
+        (!Double.isNaN(pitch) && Math.abs(pitch) > MAX_ANGLE.in(Degrees)) &&
+        !Double.isNaN(skew)
+      );
+    }
+
+    public void replace(PhotonTrackedTarget target, PhotonVisionCamera camera) {
+      this.yaw = target.yaw;
+      this.pitch = target.pitch;
+      this.skew = target.skew;
+      this.camera = camera;
+      this.camToTargetTransform = target.bestCameraToTarget;
+      this.timestamp = RobotController.getFPGATime();
+      this.targetFieldRelativePose = new Pose3d(
+        Robot.swerve.getFieldRelativePose2d()
+      )
+        .plus(camera.m_robotToCameraTranform) //camToTarget -> robotToTarget
+        .plus(camToTargetTransform) //robotToTarget -> fieldOriginToTarget
+        .toPose2d();
+    }
+  }
+
+  private final Map<PhotonVisionCamera, poseEstimate> m_robotCameras =
+    new LinkedHashMap<PhotonVisionCamera, poseEstimate>();
+
+  private final TargetInfo[] m_aprilTagInfo = new TargetInfo[23];
 
   private final NetworkTable m_poseConcensusTable =
     NetworkTableInstance.getDefault().getTable("VisionPose-Combined");
@@ -162,45 +222,75 @@ public class CameraManager {
   private final StringPublisher m_poseConcensusFieldTypePub =
     m_poseConcensusTable.getStringTopic(".type").publish();
 
-  private MutTime m_lastPoseUpdateTime;
-  private EstimatedRobotPose m_lastEstimatedPose;
+  private final String m_alertGroupName = "Camera Manager";
+  private final Alert m_alertEstimateInfo = new Alert(
+    m_alertGroupName,
+    "Initializing",
+    AlertType.kInfo
+  );
+  private final Alert m_alertTargetNumInfo = new Alert(
+    m_alertGroupName,
+    "Initializing",
+    AlertType.kInfo
+  );
+
+  private Pose3d m_lastEstimatedPose;
 
   private PoseStrategy m_primaryStrat = PRIMARY_STRATEGY;
   private PoseStrategy m_fallbackStrat = FALLBACK_STRATEGY;
 
   public CameraManager() {
-    m_lastPoseUpdateTime = new MutTime(0, 0, Seconds);
-    m_poseEstimator.setPrimaryStrategy(m_primaryStrat);
-    m_poseEstimator.setMultiTagFallbackStrategy(m_fallbackStrat);
+    for (int i = 0; i < m_aprilTagInfo.length; i++) {
+      m_aprilTagInfo[i] = new TargetInfo(
+        Double.NaN,
+        Double.NaN,
+        Double.NaN,
+        Transform3d.kZero,
+        -1,
+        null
+      );
+    }
+    m_alertEstimateInfo.set(false);
+    m_alertTargetNumInfo.set(true);
+    m_lastEstimatedPose = Pose3d.kZero;
   }
 
   /**
    * Updates all instances of {@link PhotonVisionCamera} with the latest result, and updates the pose with the updated pnpInfo.
    */
   public void updateAllCameras() {
-    poseEstimate[] estimates = new poseEstimate[PNP_INFO_STORAGE_AMOUNT];
     boolean updatePose = SmartDashboard.getBoolean(
       "Toggle Pose Estimation",
       false
     );
-    for (PhotonVisionCamera camera : m_robotCameras) {
+    for (var entry : m_robotCameras.entrySet()) {
+      var camera = entry.getKey();
       if (camera.isConnected()) camera.updateResult();
       else if (
         RobotModeTriggers.disabled().getAsBoolean() &&
         RobotController.getMeasureTime().in(Seconds) % 5 <= 0.1
-      ) /* System.err.println(
-         "CAMERA " +
-         camera.m_camera.getName() +
-         " IS DISCONNECTED! ***** TELL MAX! *****"
-       )*/;
+      ) {
+        System.err.println(
+          "CAMERA " +
+          camera.m_camera.getName() +
+          " IS DISCONNECTED! ***** TELL MAX! *****"
+        );
+        continue;
+      }
     }
-    for (int i = 0; i < m_pnpInfo.length; i++) {
-      if (m_pnpInfo[i] == null) continue;
+    //checks if we have estimates from all cameras before continuing.
+    for (var entry : m_robotCameras.entrySet()) {
+      // if were lacking an estimate from a connected camera, skip updating
+      if (
+        entry.getKey().isConnected() &&
+        (entry.getValue() == null || !entry.getValue().isValid())
+      ) return;
+    }
 
-      estimates[i] = estimatePoseWithPNPInfo(m_pnpInfo[i]);
-      m_pnpInfo[i] = null;
-    }
-    updatePoseFromPoseEstimates(updatePose, estimates);
+    updatePoseFromPoseEstimates(
+      updatePose,
+      m_robotCameras.values().toArray(new poseEstimate[m_robotCameras.size()])
+    );
   }
 
   public PhotonVisionCamera createCamera(
@@ -210,29 +300,31 @@ public class CameraManager {
     PhotonVisionCamera cam = new PhotonVisionCamera(
       name,
       robotToCameraTransform,
-      this::storePNPInfo
+      this::processResult
     );
-    m_robotCameras.add(cam);
+    m_robotCameras.put(cam, null);
+    cam.m_poseEstimator.setPrimaryStrategy(m_primaryStrat);
+    cam.m_poseEstimator.setMultiTagFallbackStrategy(m_fallbackStrat);
     return cam;
   }
 
   private void preparePoseEstimator(TimestampedPNPInfo infoToPrepFor) {
-    m_poseEstimator.addHeadingData(
+    PhotonPoseEstimator estimator = infoToPrepFor.camera().m_poseEstimator;
+    // change pose estimator settings to be correct for the provided info
+    estimator.setRobotToCameraTransform(infoToPrepFor.robotToCameraTransform());
+    estimator.setReferencePose(Robot.swerve.getFieldRelativePose2d());
+    estimator.addHeadingData(
       infoToPrepFor.headingTimestampSeconds(),
       infoToPrepFor.heading()
-    );
-
-    // change pose estimator settings to be correct for the provided info
-    m_poseEstimator.setRobotToCameraTransform(
-      infoToPrepFor.robotToCameraTransform()
     );
   }
 
   private poseEstimate estimatePoseWithPNPInfo(TimestampedPNPInfo pnpInfo) {
     if (pnpInfo == null || !pnpInfo.exists()) return null;
     preparePoseEstimator(pnpInfo);
-    EstimatedRobotPose estimate = m_poseEstimator
-      .update(pnpInfo.result())
+    EstimatedRobotPose estimate = pnpInfo
+      .camera()
+      .m_poseEstimator.update(pnpInfo.result())
       .orElse(null);
 
     if (estimate == null) return null;
@@ -243,13 +335,13 @@ public class CameraManager {
     if (!CollisionDetection.isPoseInField(estimate.estimatedPose)) return null;
 
     double averageTargetDistance = 0;
+
     for (PhotonTrackedTarget target : estimate.targetsUsed) {
       averageTargetDistance += Math.abs(
         target.getBestCameraToTarget().getTranslation().getNorm()
       );
     }
     averageTargetDistance /= estimate.targetsUsed.size();
-
     // the higher the confidence is, the less the estimated measurment is trusted.
     double velocityConf =
       MAGIC_VEL_CONF_ADDEND +
@@ -263,8 +355,6 @@ public class CameraManager {
       MAGIC_VEL_CONF_EXPONENT
     );
 
-    // if estimated pose is too far from current pose
-    m_lastEstimatedPose = estimate;
     return new poseEstimate(
       estimate,
       VecBuilder.fill(
@@ -279,128 +369,207 @@ public class CameraManager {
     boolean updatePose,
     poseEstimate... estimates
   ) {
-    // get the most common estimate
+    estimates = poseEstimate.findValidEstimates(
+      Robot.swerve.getFieldRelativePose2d().getRotation(),
+      estimates
+    );
+    if (estimates == null) {
+      m_alertEstimateInfo.setText("No Valid Estimates");
+      m_alertEstimateInfo.set(true);
+      return;
+    }
+    m_alertEstimateInfo.set(false);
     poseEstimate averageEstimate = estimates.length > 1
       ? poseEstimate.findConcensus(estimates)
       : estimates[0];
-
     if (averageEstimate == null || !averageEstimate.exists()) return;
 
     m_poseConcensusFieldTypePub.set("Field2d");
+
     Pose2d pose = averageEstimate.estimPose.toPose2d();
+    m_alertTargetNumInfo.setText(
+      "Target Num: " + averageEstimate.targetsUsedNum
+    );
     m_poseConcensusFieldPub.accept(
       new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() }
     );
-    // if we dont want to update the pose, throw it away
-    if (!updatePose) return;
     // if estimate isnt in the field, throw it away
     if (!averageEstimate.isInField()) return;
+    m_lastEstimatedPose = averageEstimate.estimPose;
+    // if we dont want to update the pose, throw it away
+    if (!updatePose) return;
     double measuredTime = Utils.fpgaToCurrentTime(
       averageEstimate.timestampSeconds
     );
-    // if estimated pose it too far from swerve pose
+    // if estimated pose is too far from swerve pose
     if (
-      new Transform2d(
-        Robot.swerve.getFieldRelativePose2d(),
-        averageEstimate.estimPose.toPose2d()
-      )
-        .getTranslation()
-        .getNorm() >
+      Math.abs(
+        Robot.swerve
+          .getFieldRelativePose2d()
+          .getTranslation()
+          .getDistance(averageEstimate.estimPose.toPose2d().getTranslation())
+      ) >
       MAX_DIST_FROM_CURR_POSE.in(Meters)
     ) {
-      if (RobotModeTriggers.disabled().getAsBoolean()) {
-        Robot.swerve.resetPose(pose);
+      // and is NOT disabled, throw away pose.
+      if (!RobotModeTriggers.disabled().getAsBoolean()) {
+        return;
       }
-      // and we have updated the pose recently, and were not disabled, throw it out
-      if (
-        measuredTime >
-        m_lastPoseUpdateTime.plus(UPDATE_POSE_INTERVALS).in(Seconds)
-      ) return;
     }
-
     Robot.swerve.addVisionMeasurement(
       averageEstimate.estimPose.toPose2d(),
       measuredTime,
       averageEstimate.stdDevs
     );
-    m_lastPoseUpdateTime.mut_replace(measuredTime, Seconds);
-  }
-
-  private void storePNPInfo(TimestampedPNPInfo pnpInfo) {
-    if (pnpInfo == null || !pnpInfo.exists()) return;
-    int indexToReplace = -1;
-    if (pnpInfo.result().targets.size() < MIN_ALLOWED_TARGETS) return;
-    for (int i = 0; i < m_pnpInfo.length; i++) {
-      // if selected info does not exist, replace it and stop the loop
-      if (m_pnpInfo[i] == null) {
-        m_pnpInfo[i] = pnpInfo;
-        break;
-      }
-      // if stored data is older than allowed, invalidate it, and set it to be replaced.
-      if (
-        m_pnpInfo[i].result().getTimestampSeconds() <=
-        Utils.getCurrentTimeSeconds() - PNP_INFO_VALID_TIME.in(Seconds)
-      ) {
-        m_pnpInfo[i] = null;
-        indexToReplace = i;
-        continue;
-      }
-      // if selected info has less targets than the provided result
-      else if (
-        m_pnpInfo[i].result().targets.size() <= pnpInfo.result().targets.size()
-      ) {
-        // if we have already selected info to replace
-        if (indexToReplace > -1) {
-          // if we found a worse result, replace that one instead
-          if (
-            m_pnpInfo[indexToReplace].result().targets.size() >
-            m_pnpInfo[i].result().targets.size()
-          ) {
-            indexToReplace = i;
-          }
-          // if both results have the same number of targets
-          else if (
-            m_pnpInfo[indexToReplace].result().targets.size() ==
-            m_pnpInfo[i].result().targets.size()
-          ) {
-            // if (i) was taken later than (indexToReplace), replace (i) instead
-            if (
-              m_pnpInfo[indexToReplace].result()
-                .metadata.captureTimestampMicros >
-              m_pnpInfo[i].result().metadata.captureTimestampMicros
-            ) {
-              indexToReplace = i;
-            }
-            // if (i) has worse ambiguity than (indexToReplace), replace (i) instead
-            else if (
-              m_pnpInfo[indexToReplace].result().targets.get(0).poseAmbiguity <
-              m_pnpInfo[i].result().targets.get(0).poseAmbiguity
-            ) {
-              indexToReplace = i;
-            }
-          }
-        }
-        // if we have not already selected something to replace
-        else {
-          indexToReplace = i;
-        }
-      }
-    }
-    // if an index has been selected to replace, replace it
-    if (indexToReplace != -1) m_pnpInfo[indexToReplace] = pnpInfo;
   }
 
   public void setPrimaryStrategy(PoseStrategy newStrategy) {
     m_primaryStrat = newStrategy;
-    m_poseEstimator.setPrimaryStrategy(newStrategy);
+    m_robotCameras
+      .keySet()
+      .forEach((var cam) -> cam.m_poseEstimator.setPrimaryStrategy(newStrategy)
+      );
   }
 
   public void setFallbackStrategy(PoseStrategy newStrategy) {
     m_fallbackStrat = newStrategy;
-    m_poseEstimator.setMultiTagFallbackStrategy(newStrategy);
+    m_robotCameras
+      .keySet()
+      .forEach((var cam) ->
+        cam.m_poseEstimator.setMultiTagFallbackStrategy(newStrategy)
+      );
   }
 
-  public EstimatedRobotPose getLastEstimatedPose() {
+  public Pose3d getLastEstimatedPose() {
     return m_lastEstimatedPose;
+  }
+
+  private void cacheForGamepeices(
+    List<PhotonTrackedTarget> targetList,
+    PhotonVisionCamera camera
+  ) {
+    PhotonTrackedTarget bestTarget = calculateBestGamepeiceTarget(targetList);
+    m_aprilTagInfo[0].replace(bestTarget, camera);
+  }
+
+  private void cacheForAprilTags(
+    List<PhotonTrackedTarget> targets,
+    PhotonVisionCamera camera
+  ) {
+    for (PhotonTrackedTarget target : targets) {
+      m_aprilTagInfo[target.fiducialId].replace(target, camera);
+    }
+  }
+
+  public PhotonTrackedTarget calculateBestGamepeiceTarget(
+    List<PhotonTrackedTarget> targetList
+  ) {
+    double highestPitch =
+      targetList.get(0).getPitch() + BEST_TARGET_PITCH_TOLERANCE.in(Degrees);
+    PhotonTrackedTarget bestTarget = targetList.get(0);
+    for (PhotonTrackedTarget targetSeen : targetList) {
+      if (
+        targetSeen.getPitch() < highestPitch &&
+        Math.abs(targetSeen.getYaw()) < Math.abs(bestTarget.getYaw())
+      ) {
+        bestTarget = targetSeen;
+      }
+    }
+    return bestTarget;
+  }
+
+  private void processResult(
+    PhotonVisionCamera camera,
+    PhotonPipelineResult result
+  ) {
+    var info = createPNPInfo(result, camera);
+    m_robotCameras.put(camera, estimatePoseWithPNPInfo(info));
+    // storePNPInfo(info);
+    if (result.getBestTarget().objDetectId != -1) {
+      cacheForGamepeices(result.targets, camera);
+    } else {
+      cacheForAprilTags(result.targets, camera);
+    }
+  }
+
+  private TimestampedPNPInfo createPNPInfo(
+    PhotonPipelineResult result,
+    PhotonVisionCamera camera
+  ) {
+    // if the provided result has no targets, it has no value, so we do not want to store it
+    if (result == null || !result.hasTargets()) {
+      return null;
+    }
+    // if rotating too fast, dont create info
+    if (
+      Math.abs(Robot.swerve.getAngularVelocity().in(RadiansPerSecond)) >
+      MAX_ACCEPTABLE_ROTATIONAL_VELOCITY.in(RadiansPerSecond)
+    ) return null;
+    // if translating too fast, dont create info
+    if (
+      Robot.swerve.getAbsoluteTranslationalVelocity().in(MetersPerSecond) >
+      MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY.in(MetersPerSecond)
+    ) return null;
+
+    Rotation3d heading = new Rotation3d(
+      Robot.swerve.getFieldRelativePose2d().getRotation()
+    );
+    double headingTimestampSeconds = Utils.fpgaToCurrentTime(
+      result.getTimestampSeconds()
+    );
+    return new TimestampedPNPInfo(
+      result,
+      heading,
+      headingTimestampSeconds,
+      camera.m_robotToCameraTranform,
+      camera
+    );
+  }
+
+  /**
+   * Returns a field relative pose of a target based on where the robot thinks it is, and the provided camera transforms
+   * @param targetId The targets fiducial ID
+   * @param timeoutMs The amount of milliseconds past which the target information is deemed expired
+   * @return Returns the desired targets field relative pose, <strong> will return null if cached data was invalid. </strong>
+   */
+  public Pose2d getFieldRelativeTargetPose(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? m_aprilTagInfo[targetId].targetFieldRelativePose
+      : null;
+  }
+
+  /**
+   * Compares the current system time to the last cached timestamp, and sees if it is older than the
+   * passsed in timeout.
+   *
+   * @param targetId Fiducial ID of the desired target to valid the data of. Notes have a
+   *     fiducialId of 0
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return If the camera has seen the target within the timeout given
+   */
+  public boolean isValidTarget(int targetId, long timeoutMs) {
+    return m_aprilTagInfo[targetId].isValid(timeoutMs);
+  }
+
+  /**
+   * @param fiducialId The fiducial ID of the target to get the yaw of.
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return Returns the desired targets yaw. <strong>Will be null if the cached data was invalid.
+   */
+  public Angle getTargetYaw(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? Units.Degrees.of(m_aprilTagInfo[targetId].yaw)
+      : null;
+  }
+
+  /**
+   * @param id The ID of the target to get the pitch of.
+   * @param timeoutMs The amount of milliseconds past which target info is deemed expired
+   * @return Returns the desired targets pitch, <strong>will return null if the cached data was invalid.</strong>
+   */
+  public Angle getTargetPitch(int targetId, long timeoutMs) {
+    return isValidTarget(targetId, timeoutMs)
+      ? Units.Degrees.of(m_aprilTagInfo[targetId].pitch)
+      : null;
   }
 }

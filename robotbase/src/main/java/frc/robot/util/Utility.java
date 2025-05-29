@@ -3,14 +3,22 @@ package frc.robot.util;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Rotations;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import frc.robot.Constants.FIELD.REEF;
 
 public class Utility {
+
+  private static final Angle m_angle180Degrees = Units.Degrees.of(180);
 
   public static boolean isWithinTolerance(
     double currentValue,
@@ -41,6 +49,25 @@ public class Utility {
       currentValue.in(Rotations),
       targetValue.in(Rotations),
       tolerance.in(Rotations)
+    );
+  }
+
+  public static boolean isWithinTolerance(
+    Translation2d currentValue,
+    Translation2d targetValue,
+    Translation2d tolerance
+  ) {
+    return (
+      isWithinTolerance(
+        currentValue.getX(),
+        targetValue.getX(),
+        tolerance.getX()
+      ) &&
+      isWithinTolerance(
+        currentValue.getY(),
+        targetValue.getY(),
+        tolerance.getY()
+      )
     );
   }
 
@@ -91,5 +118,40 @@ public class Utility {
    */
   public static double findDistanceBetweenPoses(Pose2d here, Pose2d there) {
     return here.getTranslation().getDistance(there.getTranslation());
+  }
+
+  public static Rotation2d invert(Rotation2d rotation) {
+    return rotation.plus(Rotation2d.k180deg);
+  }
+
+  public static Angle invert(Angle angle) {
+    return angle.plus(m_angle180Degrees);
+  }
+
+  public static AprilTagFieldLayout makeHomeField() {
+    double correctDistFromLeftInches = 14.25;
+    double[] tagDists = { 16.125, 14.25, 14.125, 16.4375, 16.375, 16.375 };
+    var normalLayout = AprilTagFieldLayout.loadField(
+      AprilTagFields.k2025ReefscapeAndyMark
+    );
+    var poses = normalLayout.getTags();
+    for (int i = 0; i < REEF.BLUE_REEF_TAGS.length; i++) {
+      int tag = REEF.BLUE_REEF_TAGS[i];
+      var tagPose = poses.get(tag - 1).pose;
+      var correctionTransform = new Transform2d(
+        Units.Inches.zero(),
+        Units.Inches.of(correctDistFromLeftInches - tagDists[i]),
+        Rotation2d.kZero
+      );
+      var correctedTagPose = tagPose.transformBy(
+        new Transform3d(correctionTransform)
+      );
+      poses.set(tag - 1, new AprilTag(tag, correctedTagPose));
+    }
+    return new AprilTagFieldLayout(
+      poses,
+      normalLayout.getFieldLength(),
+      normalLayout.getFieldWidth()
+    );
   }
 }
