@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.SWERVE.FACING_ANGLE_D;
 import static frc.robot.Constants.SWERVE.FACING_ANGLE_I;
 import static frc.robot.Constants.SWERVE.FACING_ANGLE_P;
+import static frc.robot.Constants.SWERVE.TOGGLE_SPEED;
 
 import choreo.trajectory.SwerveSample;
 import choreo.util.ChoreoAllianceFlipUtil;
@@ -107,7 +108,7 @@ public class CommandSwerveDrivetrain
     if (Utils.isSimulation()) {
       startSimThread();
     }
-    SmartDashboard.putBoolean("Toggle Speed", false);
+    SmartDashboard.putBoolean(TOGGLE_SPEED, false);
   }
 
   /**
