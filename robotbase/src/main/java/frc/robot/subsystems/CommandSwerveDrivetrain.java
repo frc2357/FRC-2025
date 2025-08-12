@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -52,6 +53,8 @@ import java.util.function.Supplier;
 public class CommandSwerveDrivetrain
   extends TunerSwerveDrivetrain
   implements Subsystem {
+
+  public boolean togglespeed;
 
   private static final double kSimLoopPeriod = 0.005; // 5 ms
   private Notifier m_simNotifier = null;
@@ -104,6 +107,7 @@ public class CommandSwerveDrivetrain
     if (Utils.isSimulation()) {
       startSimThread();
     }
+    SmartDashboard.putBoolean("Toggle Speed", false);
   }
 
   /**
@@ -494,7 +498,7 @@ public class CommandSwerveDrivetrain
   }
 
   /**
-   * @return A list of module states in the order Front Left, Front Right, Back Left, Back Right
+   * @return A list of module states in the order fFront Left, Front Right, Back Left, Back Right
    */
   public SwerveModuleState[] getModuleStates() {
     return super.getState().ModuleStates;
