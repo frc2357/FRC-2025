@@ -14,6 +14,7 @@ import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
+import frc.robot.commands.drive.ToggleSpeed;
 import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.CoralZero;
@@ -76,7 +77,8 @@ public class DriverControls implements RumbleInterface {
 
     // Remove algae
     m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
-    m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
+    // m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
+    m_controller.y().toggleOnTrue(new ToggleSpeed());
 
     // Other
     m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
