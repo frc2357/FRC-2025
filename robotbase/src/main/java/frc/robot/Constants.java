@@ -86,6 +86,8 @@ public final class Constants {
 
   public static final class SWERVE {
 
+    public static final String TOGGLE_SPEED = "Toggle Speed";
+
     public static final AngularVelocity MAX_ANGULAR_VELOCITY =
       Units.RadiansPerSecond.of((Math.PI * 2) / 1.5);
 
