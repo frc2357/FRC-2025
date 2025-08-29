@@ -7,6 +7,8 @@ package frc.robot;
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
@@ -20,9 +22,13 @@ import edu.wpi.first.units.measure.*;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import frc.robot.util.Utility;
+
+import java.util.List;
 import java.util.Optional;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.estimation.TargetModel;
+import org.photonvision.simulation.VisionTargetSim;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -403,6 +409,10 @@ public final class Constants {
       15
     );
 
+    public static final List<VisionTargetSim> SIM_TARGETS = FIELD_CONSTANTS.APRIL_TAG_LAYOUT.getTags().stream().map((AprilTag tag) -> {
+      return new VisionTargetSim(tag.pose, TargetModel.kAprilTag36h11, tag.ID);
+    }).toList();
+
     public static final class BACK_RIGHT_CAM {
 
       public static final String NAME = "backRightCam";
@@ -428,6 +438,7 @@ public final class Constants {
           Units.Degrees.of(180)
         )
       );
+
     }
 
     public static final class BACK_LEFT_CAM {
