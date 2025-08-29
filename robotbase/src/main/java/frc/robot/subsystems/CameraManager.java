@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Robot;
 import frc.robot.subsystems.PhotonVisionCamera.TimestampedPNPInfo;
 import frc.robot.util.CollisionDetection;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -297,7 +299,8 @@ public class CameraManager {
     String name,
     Transform3d robotToCameraTransform
   ) {
-    PhotonVisionCamera cam = new PhotonVisionCamera(
+    PhotonVisionCamera cam;
+    cam = new PhotonVisionCamera(
       name,
       robotToCameraTransform,
       this::processResult

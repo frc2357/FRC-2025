@@ -74,6 +74,8 @@ public class Robot extends TimedRobot {
 
   // state
   public static Alliance alliance = null;
+  // The function calls through a few things that can be costly, and we need this a lot. So im making a constant we can call neatly here.
+  public static final boolean isReal = isReal();
 
   // Commands
   public static DriverControls driverControls;

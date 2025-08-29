@@ -11,12 +11,19 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import frc.robot.Robot;
 import frc.robot.Constants.FIELD_CONSTANTS;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import org.photonvision.*;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.targeting.PhotonPipelineResult;
+
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 /** Controls the photon vision camera options. */
 public class PhotonVisionCamera {
@@ -61,6 +68,9 @@ public class PhotonVisionCamera {
   protected int m_bestTargetFiducialId;
 
   protected final PhotonPoseEstimator m_poseEstimator;
+
+  private PhotonCameraSim m_simCamera;
+  private SimCameraProperties m_simProperties;
 
   // experimental "turbo switch" that has the ability to increase FPS. Do not fiddle with it.
   @SuppressWarnings("unused")
@@ -114,15 +124,33 @@ public class PhotonVisionCamera {
       PRIMARY_STRATEGY,
       m_robotToCameraTranform
     );
+    try {
+      if(!Robot.isReal){
+        m_simProperties = new SimCameraProperties("Placeholder", 1290, 960);
+        m_simProperties.setAvgLatencyMs(20);
+        m_simProperties.setFPS(30);
+        m_simCamera = new PhotonCameraSim(m_camera, m_simProperties, FIELD_CONSTANTS.HOME_FIELD_LAYOUT);
+      }
+      else {
+        m_simProperties = null;
+        m_simCamera = null;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.err.println("[PV CAMERA] | INIT ERROR | IO EXCEPTION ON CREATING SIM CAMERA PROPS");
+      m_simProperties = new SimCameraProperties();
+      m_simCamera = new PhotonCameraSim(m_camera);
+    }
   }
 
   /**
    * Fetches the latest pipeline result for this instance
    */
   protected void updateResult() {
-    if (!m_camera.isConnected()) return;
+    if (!m_camera.isConnected() && Robot.isReal) return;
 
-    List<PhotonPipelineResult> results = m_camera.getAllUnreadResults();
+    List<PhotonPipelineResult> results = Robot.isReal ? m_camera.getAllUnreadResults() : 
+      List.of(m_simCamera.process(15, new Pose3d(Robot.swerve.getFieldRelativePose2d()).plus(m_robotToCameraTranform), SIM_TARGETS));
 
     // no new results, so we stop here.
     if (results.isEmpty()) return;
@@ -155,7 +183,7 @@ public class PhotonVisionCamera {
   }
 
   public boolean isConnected() {
-    return m_camera.isConnected();
+    return m_camera.isConnected() || !Robot.isReal;
   }
 
   public double getLatencyMillis() {
