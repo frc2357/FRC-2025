@@ -23,6 +23,7 @@ import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import frc.robot.util.Utility;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
@@ -412,6 +413,11 @@ public final class Constants {
     public static final List<VisionTargetSim> SIM_TARGETS = FIELD_CONSTANTS.APRIL_TAG_LAYOUT.getTags().stream().map((AprilTag tag) -> {
       return new VisionTargetSim(tag.pose, TargetModel.kAprilTag36h11, tag.ID);
     }).toList();
+
+    /**
+     * <strong> DO NOT USE THIS OR ANY FILE SYSTEM STUFF IF THE ROBOT IS ACTUALLY RUNNING. THIS IS FOR SIMULATION ONLY.
+     */
+    public static final String CALIBRATION_FOLDER_PATH = "..\\PhotonSettings\\Calibrations\\";
 
     public static final class BACK_RIGHT_CAM {
 
