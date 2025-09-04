@@ -92,6 +92,10 @@ public class DriverControls implements RumbleInterface {
           )
         )
       );
+      
+    // swaps operator perspective in simulation ONLY
+    m_leftTrigger.and(m_controller.back()).and(() -> (!Robot.isReal)).onTrue(new InstantCommand(() -> {Robot.swerve.setOperatorPerspectiveForward(Robot.swerve.getOperatorForwardDirection().rotateBy(Rotation2d.k180deg));}));
+
     m_controller
       .start()
       .onTrue(

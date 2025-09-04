@@ -18,13 +18,14 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Robot;
+import frc.robot.Constants.FIELD_CONSTANTS;
 import frc.robot.subsystems.PhotonVisionCamera.TimestampedPNPInfo;
 import frc.robot.util.CollisionDetection;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.Map;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -223,6 +225,13 @@ public class CameraManager {
     m_poseConcensusTable.getDoubleArrayTopic("pose").publish();
   private final StringPublisher m_poseConcensusFieldTypePub =
     m_poseConcensusTable.getStringTopic(".type").publish();
+  
+  // private final NetworkTable m_simPoseTable =
+  //   NetworkTableInstance.getDefault().getTable("SimDebugField");
+  // private final DoubleArrayPublisher m_simPoseFieldPub =
+  //   m_simPoseTable.getDoubleArrayTopic("pose").publish();
+  // private final StringPublisher m_simPoseFieldTypePub =
+  //   m_simPoseTable.getStringTopic(".type").publish();
 
   private final String m_alertGroupName = "Camera Manager";
   private final Alert m_alertEstimateInfo = new Alert(
@@ -241,6 +250,8 @@ public class CameraManager {
   private PoseStrategy m_primaryStrat = PRIMARY_STRATEGY;
   private PoseStrategy m_fallbackStrat = FALLBACK_STRATEGY;
 
+  private VisionSystemSim m_simSystem = null;
+
   public CameraManager() {
     for (int i = 0; i < m_aprilTagInfo.length; i++) {
       m_aprilTagInfo[i] = new TargetInfo(
@@ -255,6 +266,10 @@ public class CameraManager {
     m_alertEstimateInfo.set(false);
     m_alertTargetNumInfo.set(true);
     m_lastEstimatedPose = Pose3d.kZero;
+    if(!Robot.isReal){
+      m_simSystem = new VisionSystemSim("Vision System Simulation");
+      m_simSystem.addAprilTags(FIELD_CONSTANTS.APRIL_TAG_LAYOUT);
+    }
   }
 
   /**
@@ -265,6 +280,9 @@ public class CameraManager {
       "Toggle Pose Estimation",
       false
     );
+    if(!Robot.isReal){
+      m_simSystem.update(Robot.swerve.getFieldRelativePose2d());
+    }
     for (var entry : m_robotCameras.entrySet()) {
       var camera = entry.getKey();
       if (camera.isConnected()) camera.updateResult();
@@ -308,6 +326,9 @@ public class CameraManager {
     m_robotCameras.put(cam, null);
     cam.m_poseEstimator.setPrimaryStrategy(m_primaryStrat);
     cam.m_poseEstimator.setMultiTagFallbackStrategy(m_fallbackStrat);
+    if(!Robot.isReal){
+      m_simSystem.addCamera(cam.m_simCamera, cam.m_robotToCameraTranform);
+    }
     return cam;
   }
 
@@ -400,7 +421,7 @@ public class CameraManager {
     if (!averageEstimate.isInField()) return;
     m_lastEstimatedPose = averageEstimate.estimPose;
     // if we dont want to update the pose, throw it away
-    if (!updatePose) return;
+    if (!updatePose || !Robot.isReal) return;
     double measuredTime = Utils.fpgaToCurrentTime(
       averageEstimate.timestampSeconds
     );

@@ -76,7 +76,7 @@ public class PhotonVisionCamera {
 
   protected final PhotonPoseEstimator m_poseEstimator;
 
-  private PhotonCameraSim m_simCamera;
+  protected PhotonCameraSim m_simCamera;
   private SimCameraProperties m_simProperties;
 
   // experimental "turbo switch" that has the ability to increase FPS. Do not fiddle with it.
@@ -120,12 +120,17 @@ public class PhotonVisionCamera {
       m_simProperties.setAvgLatencyMs(60);
       m_simProperties.setFPS(30);
       m_simProperties.setExposureTimeMs(30);
-      //this MIGHT work. just maybe.
       String relativeFilePath = CALIBRATION_FOLDER_PATH+cameraName+"\\"+cameraName+"1280x960Calib.json";
       var camIntrinMatrix = getCameraIntrinsicsFromJson(relativeFilePath);
       var distCoeffMatrix = getDistCoeffsFromJson(relativeFilePath);
-      m_simProperties.setCalibration(1280, 960, camIntrinMatrix, distCoeffMatrix);
-      m_simCamera = new PhotonCameraSim(m_camera, m_simProperties, FIELD_CONSTANTS.HOME_FIELD_LAYOUT);
+      if(camIntrinMatrix != null && distCoeffMatrix != null){
+        m_simProperties.setCalibration(1280, 960, camIntrinMatrix, distCoeffMatrix);
+        System.out.println("[PhotonVisionCamera] | " + cameraName + " | Sim camera props set successfully.");
+      }
+      
+      m_simCamera = new PhotonCameraSim(m_camera, m_simProperties, FIELD_CONSTANTS.APRIL_TAG_LAYOUT);
+      m_simCamera.setMaxSightRange(6);
+      // m_simCamera.setMinTargetAreaPercent(2);
     }
     else {
       m_simProperties = null;
@@ -140,7 +145,7 @@ public class PhotonVisionCamera {
     if (!m_camera.isConnected() && Robot.isReal) return;
 
     List<PhotonPipelineResult> results = Robot.isReal ? m_camera.getAllUnreadResults() : 
-      List.of(m_simCamera.process(15, new Pose3d(Robot.swerve.getFieldRelativePose2d()).plus(m_robotToCameraTranform), SIM_TARGETS));
+      List.of(m_simCamera.process(60, new Pose3d(Robot.swerve.getFieldRelativePose2d()).plus(m_robotToCameraTranform), SIM_TARGETS));
 
     // no new results, so we stop here.
     if (results.isEmpty()) return;
@@ -229,6 +234,7 @@ public class PhotonVisionCamera {
       for (int i = 0; i < 9; i++) {
         camIntrinMatrix.set(i/3, i%3, camIntrinValList.get(i));
       }
+      System.out.println("[PhotonVisionCamera] Succesfully retreived cameraIntrinsics from JSON file.");
       return camIntrinMatrix;
     } catch (Exception e) {
       System.out.println("Getting camera intrinsics from Json failed. Returning null.");
@@ -251,6 +257,7 @@ public class PhotonVisionCamera {
       for (int i = 0; i < 8; i++) {
         distCoeffMatrix.set(i, 0, distCoeffValList.get(i));
       }
+      System.out.println("[PhotonVisionCamera] Succesfully retreived distCoeffs from JSON file.");
       return distCoeffMatrix;
     } catch (Exception e) {
       System.out.println("Getting dist coeffs from Json failed. Returning null.");
