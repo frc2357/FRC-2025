@@ -435,7 +435,7 @@ public final class Constants {
       // );
       // lying transform
       public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(8.824),
+        Units.Inches.of(-8.824),
         Units.Inches.of(9),
         Units.Inches.of(22.055),
         new Rotation3d(
@@ -463,7 +463,7 @@ public final class Constants {
       // );
       // lying transform (that makes it work way better)
       public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(10.15),
+        Units.Inches.of(-10.15),
         Units.Inches.of(-7),
         Units.Inches.of(21.137),
         new Rotation3d(
