@@ -131,6 +131,8 @@ public class PhotonVisionCamera {
       m_simCamera = new PhotonCameraSim(m_camera, m_simProperties, FIELD_CONSTANTS.APRIL_TAG_LAYOUT);
       m_simCamera.setMaxSightRange(6);
       // m_simCamera.setMinTargetAreaPercent(2);
+      m_simCamera.enableProcessedStream(true);
+      m_simCamera.enableDrawWireframe(true);
     }
     else {
       m_simProperties = null;
