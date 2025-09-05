@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.sim.SparkMaxSim;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -9,14 +10,20 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import frc.robot.Robot;
 import frc.robot.Constants.CAN_ID;
 import frc.robot.Constants.ELEVATOR;
 import frc.robot.util.Utility;
@@ -25,6 +32,8 @@ public class Elevator extends SubsystemBase {
 
   private SparkMax m_motorLeft;
   private SparkMax m_motorRight;
+  private SparkMaxSim m_simMotorLeft;
+  private SparkMaxSim m_simMotorRight;
   private SparkClosedLoopController m_PIDController;
   private RelativeEncoder m_encoder;
 
@@ -37,6 +46,8 @@ public class Elevator extends SubsystemBase {
   private MutAngle m_currentRotationsHolder = Units.Rotations.mutable(
     Double.NaN
   );
+
+  private ElevatorSim m_simElevatorModel;
 
   public Elevator() {
     SmartDashboard.putNumber("Elevator Setpoint Modifier", 0);
@@ -59,7 +70,11 @@ public class Elevator extends SubsystemBase {
       ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
-
+    if(!Robot.isReal){
+      m_simMotorLeft = new SparkMaxSim(m_motorLeft, DCMotor.getNEO(1));
+      m_simMotorRight = new SparkMaxSim(m_motorRight, DCMotor.getNEO(1));
+      m_simElevatorModel = new ElevatorSim(DCMotor.getNEO(2), ELEVATOR.GEAR_RATIO, 6.803, 0.0381, 0, 2, false, 0, 0);
+    }
     m_PIDController = m_motorLeft.getClosedLoopController();
 
     m_encoder = m_motorLeft.getEncoder();
@@ -173,7 +188,10 @@ public class Elevator extends SubsystemBase {
       "Elevator Calculated Distance",
       getDistance().in(Units.Inches)
     );
+  }
 
-    SmartDashboard.putBoolean("Hall Effect", isAtZero());
+  public void simulationUpdate(){
+    m_simElevatorModel.setInput((m_simMotorLeft.getVelocity() * RobotController.getBatteryVoltage()) + (m_simMotorRight.getVelocity() * RobotController.getBatteryVoltage()));
+
   }
 }
