@@ -2,7 +2,9 @@ package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc.robot.Constants.SWERVE.TOGGLE_SPEED;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -19,10 +21,16 @@ public class DefaultDrive extends Command {
 
   @Override
   public void execute() {
-    double x = Robot.driverControls.getX();
-    double y = Robot.driverControls.getY();
-    double rotation = Robot.driverControls.getRotation();
-
+    double x, y, rotation;
+    if (SmartDashboard.getBoolean(TOGGLE_SPEED, true)) {
+      x = Robot.driverControls.getX() * 0.2;
+      y = Robot.driverControls.getY() * 0.2;
+      rotation = Robot.driverControls.getRotation() * 0.2;
+    } else {
+      x = Robot.driverControls.getX();
+      y = Robot.driverControls.getY();
+      rotation = Robot.driverControls.getRotation();
+    }
     if (x == 0 && y == 0 && rotation == 0) {
       Robot.swerve.stopMotors();
     } else {
