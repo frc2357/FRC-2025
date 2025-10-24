@@ -1,8 +1,5 @@
 package frc.robot.controls;
 
-import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -12,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.commands.descoring.RemoveAlgaeHigh;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
-import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
-import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.CoralZero;
@@ -81,28 +76,10 @@ public class DriverControls implements RumbleInterface {
     // Other
     m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
     m_controller
-      .back()
-      .onTrue(
-        new InstantCommand(() ->
-          Robot.swerve.resetTranslation(
-            Robot.camManager
-              .getLastEstimatedPose()
-              .getTranslation()
-              .toTranslation2d()
-          )
-        )
-      );
-    m_controller
       .start()
       .onTrue(
         new InstantCommand(() -> Robot.swerve.resetHeading(Rotation2d.kZero))
       );
-    m_controller
-      .x()
-      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_I));
-    m_controller
-      .b()
-      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_F));
   }
 
   public double getX() {

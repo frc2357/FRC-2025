@@ -41,10 +41,4 @@ public class RobotConfigurationTests {
       " meters wide"
     );
   }
-
-  @Test
-  void BoundaryTest() {
-    System.out.println("Robot Boundary: " + BOUNDARY.in(Inches) + "\"");
-    assertEquals(20, BOUNDARY.in(Inches), 2); // boundary should be around 20 inches or so, depending on bumper thickness.
-  }
 }

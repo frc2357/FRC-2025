@@ -7,7 +7,6 @@ package frc.robot;
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -19,10 +18,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
-import frc.robot.util.CollisionDetection;
-import frc.robot.util.SATCollisionDetector.SATVector;
 import frc.robot.util.Utility;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -114,14 +110,6 @@ public final class Constants {
     public static final AutoFactory AUTO_FACTORY = new AutoFactory(
       Robot.swerve::getFieldRelativePose2d,
       Robot.swerve::setFieldRelativePose2d,
-      Robot.swerve::followChoreoPath,
-      true,
-      Robot.swerve
-    );
-
-    public static final AutoFactory Y_FLIPPED_FACTORY = new AutoFactory(
-      () -> Robot.swerve.flipYAxis(Robot.swerve.getFieldRelativePose2d()),
-      (Pose2d pose) -> Robot.swerve.resetPose(Robot.swerve.flipYAxis(pose)),
       Robot.swerve::followChoreoPath,
       true,
       Robot.swerve
@@ -313,168 +301,6 @@ public final class Constants {
     public static final double ALGAE_KNOCK_SPEED = 0;
   }
 
-  public static class CLIMBER_WINCH {
-
-    public static final SparkBaseConfig MOTOR_CONFIG_LEFT = new SparkMaxConfig()
-      .idleMode(IdleMode.kBrake)
-      .smartCurrentLimit(60, 60)
-      .inverted(false);
-    public static final SparkBaseConfig MOTOR_CONFIG_RIGHT =
-      new SparkMaxConfig().apply(MOTOR_CONFIG_LEFT).inverted(true);
-
-    public static final double AXIS_MAX_SPEED = 0.8;
-  }
-
-  public static class CLIMBER_PIVOT {
-
-    public static final SparkBaseConfig MOTOR_CONFIG = new SparkMaxConfig()
-      .idleMode(IdleMode.kBrake)
-      .smartCurrentLimit(60, 60)
-      .inverted(true);
-
-    public static final double AXIS_MAX_SPEED = .25;
-
-    public static final double HOLD_AGAINST_WINCH_SPEED = -.02;
-  }
-
-  public static final class CUSTOM_UNITS {
-
-    // These units are ONLY for the output shaft on the neo. Any pulley will require
-    // the addition of a gear ratio.
-    public static final Distance NEO_SHAFT_CIRCUMFERENCE = Units.Millimeters.of(
-      8 * Math.PI
-    );
-    public static final AngleUnit NEO_ENCODER_TICK = Units.derive(
-      Units.Revolutions
-    )
-      .splitInto(42)
-      .named("Neo Encoder Tick")
-      .symbol("NET")
-      .make();
-  }
-
-  public static final class PHOTON_VISION {
-
-    public static final String LOST_CONNECTION_ERROR_MESSAGE =
-      "**************LOST CONNECTION WITH ORANGE PI";
-    public static final String CONNECTION_REGAINED_MESSAGE =
-      "CONNECTION REGAINED WITH ORANGE PI*********";
-
-    public static final Angle BEST_TARGET_PITCH_TOLERANCE = Units.Degrees.of(4);
-
-    public static final Angle MAX_ANGLE = Units.Degrees.of(35);
-
-    public static final boolean ACTIVATE_TURBO_SWITCH = false;
-
-    public static final PoseStrategy PRIMARY_STRATEGY =
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
-    public static final PoseStrategy FALLBACK_STRATEGY =
-      PoseStrategy.LOWEST_AMBIGUITY;
-
-    public static final double PNP_HEADING_SCALE_FACTOR = 4; // no touchy.
-
-    public static final Optional<ConstrainedSolvepnpParams> POSE_EST_PARAMS =
-      Optional.of(
-        new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
-      );
-
-    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
-    public static final double X_STD_DEV_COEFFIECIENT = 0.8;
-    public static final double Y_STD_DEV_COEFFIECIENT = 0.8;
-
-    // if were going faster than these, we wont accept any pose est.
-    public static final AngularVelocity MAX_ACCEPTABLE_ROTATIONAL_VELOCITY =
-      Units.RadiansPerSecond.of(1);
-
-    public static final LinearVelocity MAX_ACCEPTABLE_TRANSLATIONAL_VELOCITY =
-      Units.MetersPerSecond.of(1.5);
-
-    public static final Time INFO_VALID_TIME = Units.Seconds.of(0.4);
-
-    public static final double MAGIC_VEL_CONF_ADDEND = 0.6;
-
-    public static final double MAGIC_VEL_CONF_EXPONENT = 1.3;
-    public static final Distance MAX_DIST_FROM_CURR_POSE = Units.Meters.of(
-      0.75
-    );
-
-    public static final Distance MAX_DIST_BETWEEN_ESTIMATES = Units.Meters.of(
-      0.5
-    );
-
-    public static final int MIN_ALLOWED_CUMMULATIVE_TARGETS = 1;
-
-    public static final Time ESTIMATE_TIMEOUT = Units.Milliseconds.of(120);
-
-    public static final Rotation2d HEADING_TOLERANCE = Rotation2d.fromDegrees(
-      15
-    );
-
-    public static final List<VisionTargetSim> SIM_TARGETS = FIELD_CONSTANTS.APRIL_TAG_LAYOUT.getTags().stream().map((AprilTag tag) -> {
-      return new VisionTargetSim(tag.pose, TargetModel.kAprilTag36h11, tag.ID);
-    }).toList();
-
-    /**
-     * <strong> DO NOT USE THIS OR ANY FILE SYSTEM STUFF IF THE ROBOT IS ACTUALLY RUNNING. THIS IS FOR SIMULATION ONLY.
-     */
-    public static final String CALIBRATION_FOLDER_PATH = "..\\PhotonSettings\\Calibrations\\";
-
-    public static final class BACK_RIGHT_CAM {
-
-      public static final String NAME = "backRightCam";
-      // real transform
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(-4.624),
-        Units.Inches.of(7.799),
-        Units.Inches.of(22.055),
-        new Rotation3d(
-          Units.Degrees.of(0),
-          Units.Degrees.of(10),
-          Units.Degrees.of(180)
-        )
-      );
-      // lying transform
-      // public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-      //   Units.Inches.of(-8.824),
-      //   Units.Inches.of(9),
-      //   Units.Inches.of(22.055),
-      //   new Rotation3d(
-      //     Units.Degrees.of(0),
-      //     Units.Degrees.of(10),
-      //     Units.Degrees.of(180)
-      //   )
-      // );
-
-    }
-
-    public static final class BACK_LEFT_CAM {
-
-      public static final String NAME = "backLeftCam";
-      // true transform
-      public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-        Units.Inches.of(-6.516),
-        Units.Inches.of(-5.028),
-        Units.Inches.of(21.137),
-        new Rotation3d(
-          Units.Degrees.of(0),
-          Units.Degrees.of(10),
-          Units.Degrees.of(180)
-        )
-      );
-      // lying transform (that makes it work way better)
-      // public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-      //   Units.Inches.of(-10.15),
-      //   Units.Inches.of(-7),
-      //   Units.Inches.of(21.137),
-      //   new Rotation3d(
-      //     Units.Degrees.of(0),
-      //     Units.Degrees.of(10),
-      //     Units.Degrees.of(180)
-      //   )
-      // );
-    }
-  }
-
   public static final class FIELD_CONSTANTS {
 
     public static final AprilTagFields APRIL_TAG_FIELD =
@@ -493,79 +319,6 @@ public final class Constants {
     public static final Distance FIELD_WIDTH = Units.Meters.of(
       APRIL_TAG_LAYOUT.getFieldWidth()
     );
-
-    // how close the estimated pose can get to the field border before we invalidate it
-    public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.1);
-
-    // how far off on the z axis the estimated pose can be before we invalidate it
-    public static final Distance Z_MARGIN = Units.Feet.of(0.5);
-  }
-
-  public static class DRIVE_TO_POSE {
-
-    public static final Constraints DRIVE_DEFAULT_CONSTRAINTS =
-      new TrapezoidProfile.Constraints(30, 9);
-    public static final Constraints DRIVE_FINAL_APPROACH_CONSTRAINTS =
-      new TrapezoidProfile.Constraints(10, 5);
-
-    public static final Constraints THETA_DEFAULT_CONSTRAINTS =
-      new TrapezoidProfile.Constraints(15, 9);
-
-    public static final ProfiledPIDController DRIVE_CONTROLLER =
-      new ProfiledPIDController(8, 0.0, 0.0, DRIVE_DEFAULT_CONSTRAINTS);
-
-    public static final ProfiledPIDController THETA_CONTROLLER =
-      new ProfiledPIDController(6, 0.0, 0.0, THETA_DEFAULT_CONSTRAINTS);
-
-    public static final Distance X_TOLERANCE = Units.Inches.of(0.1);
-    public static final Distance Y_TOLERANCE = Units.Inches.of(0.1);
-    public static final Angle ROTATION_TOLERANCE = Units.Degrees.of(2);
-
-    public static final Pose2d FINAL_APPROACH_TOLERANCE_POSE = new Pose2d(
-      X_TOLERANCE,
-      Y_TOLERANCE,
-      new Rotation2d(ROTATION_TOLERANCE)
-    );
-
-    public static final Pose2d WAYPOINT_APPROACH_TOLERANCE_POSE = new Pose2d(
-      Units.Inches.of(3),
-      Units.Inches.of(3),
-      Rotation2d.fromDegrees(35)
-    );
-
-    public static final Distance FINAL_APPROACH_DISTANCE = Units.Feet.of(1);
-
-    public static final Distance INTERPOLATION_DISTANCE = Units.Meters.of(0.2);
-
-    public static final Rotation2d ROTATE_AROUND_REEF_ROTATION = new Rotation2d(
-      Units.Rotations.of(0.08)
-    );
-
-    public static final double[] DEFAULT_INTERPOLATION_PERCENTAGES = {
-      .1,
-      .2,
-      .3,
-      .4,
-      .5,
-      .6,
-      .7,
-      .8,
-    };
-
-    public static final Distance IDEAL_DISTANCE_FROM_REEF =
-      COLLISION_DETECTION.REEF_BOUNDARY.plus(Units.Feet.of(4));
-  }
-
-  public static final class COLLISION_DETECTION {
-
-    public static final Distance COLLISION_TOLERANCE = Units.Inches.of(8);
-
-    public static final Distance REEF_BOUNDARY = FIELD.REEF.DIAMETER.div(2)
-      .plus(ROBOT_CONFIGURATION.BOUNDARY)
-      .plus(COLLISION_TOLERANCE);
-
-    public static final SATVector[] REEF_SAT_POLY =
-      CollisionDetection.createReefPolygon();
   }
 
   public static final class CONTROLLER {
@@ -743,43 +496,6 @@ public final class Constants {
     );
     public static final Distance FULL_WIDTH = FRAME_WIDTH.plus(
       BUMPER_THICKNESS.times(2)
-    );
-
-    public static final Transform2d FRONT_LEFT_CORNER_TRANSFORM =
-      new Transform2d(
-        FRAME_WIDTH.div(2),
-        FRAME_LENGTH.div(2),
-        Rotation2d.kZero
-      );
-    public static final Transform2d FRONT_RIGHT_CORNER_TRANSFORM =
-      new Transform2d(
-        FRAME_WIDTH.div(2),
-        FRAME_LENGTH.div(2).unaryMinus(),
-        Rotation2d.kZero
-      );
-    public static final Transform2d BACK_LEFT_CORNER_TRANSFORM =
-      new Transform2d(
-        FRAME_WIDTH.div(2).unaryMinus(),
-        FRAME_LENGTH.div(2),
-        Rotation2d.kZero
-      );
-    public static final Transform2d BACK_RIGHT_CORNER_TRANSFORM =
-      new Transform2d(
-        FRAME_WIDTH.div(2).unaryMinus(),
-        FRAME_LENGTH.div(2).unaryMinus(),
-        Rotation2d.kZero
-      );
-
-    /**
-     * The distance that for any given object, if it is closer to the robot than this, it is hitting it, or will hit it when the robot turns.
-     * Do not let anything get inside this.
-     */
-    public static final Distance BOUNDARY = Units.Inches.of(
-      (Math.sqrt(
-          Math.pow(FRAME_LENGTH.in(Units.Inches), 2) +
-          Math.pow(FRAME_WIDTH.in(Units.Inches), 2)
-        ) /
-        2)
     );
 
     /**

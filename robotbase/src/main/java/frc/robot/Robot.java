@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static frc.robot.Constants.FIELD.REEF.BLUE_REEF_TAGS;
-import static frc.robot.Constants.PHOTON_VISION.*;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.apriltag.AprilTag;
@@ -26,13 +25,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.CLIMBER_PIVOT;
-import frc.robot.Constants.PHOTON_VISION;
-import frc.robot.Constants.PHOTON_VISION.BACK_LEFT_CAM;
-import frc.robot.Constants.PHOTON_VISION.BACK_RIGHT_CAM;
 import frc.robot.Constants.SWERVE;
 import frc.robot.commands.StopAllMotors;
-import frc.robot.commands.climberPivot.ClimberPivotSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerSetSpeed;
 import frc.robot.commands.drive.DefaultDrive;
 import frc.robot.commands.drive.DriveSetCoast;
@@ -40,9 +34,7 @@ import frc.robot.commands.elevator.ElevatorHoldPosition;
 import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.laterator.LateratorHoldHome;
 import frc.robot.commands.laterator.LateratorSetDistance;
-import frc.robot.commands.rumble.ClearButtonboard;
 import frc.robot.commands.util.InitRobotCommand;
-import frc.robot.controls.Buttonboard;
 import frc.robot.controls.CodriverControls;
 import frc.robot.controls.DriverControls;
 import frc.robot.controls.controllers.CommandButtonboardController;
@@ -66,11 +58,6 @@ public class Robot extends TimedRobot {
   public static Laterator laterator;
   public static CoralRunner coralRunner;
   public static AlgaeKnocker algaeKnocker;
-  public static ClimberPivot climberPivot;
-  public static ClimberWinch climberWinch;
-  public static CameraManager camManager;
-  public static PhotonVisionCamera backRightCam;
-  public static PhotonVisionCamera backLeftCam;
 
   // state
   public static Alliance alliance = null;
@@ -80,13 +67,6 @@ public class Robot extends TimedRobot {
   // Commands
   public static DriverControls driverControls;
   public static CodriverControls codriverControls;
-  public static Buttonboard buttonboard;
-
-  // PhotonVision Cameras
-  private static PhotonVisionCamera frontCam;
-  private static PhotonVisionCamera backCam;
-  private static PhotonVisionCamera leftCam;
-  private static PhotonVisionCamera rightCam;
 
   private Command m_autonomousCommand;
   private SequentialCommandGroup m_setCoastOnDisable;
@@ -112,30 +92,7 @@ public class Robot extends TimedRobot {
     coralRunner = new CoralRunner();
     algaeKnocker = new AlgaeKnocker();
 
-    camManager = new CameraManager();
-    backRightCam = camManager.createCamera(
-      BACK_RIGHT_CAM.NAME,
-      BACK_RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
-    backLeftCam = camManager.createCamera(
-      BACK_LEFT_CAM.NAME,
-      BACK_LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
-    );
-    // leftCam = camManager.createCamera(
-    //   LEFT_CAM.NAME,
-    //   LEFT_CAM.ROBOT_TO_CAM_TRANSFORM
-    // );
-    // rightCam = camManager.createCamera(
-    //   RIGHT_CAM.NAME,
-    //   RIGHT_CAM.ROBOT_TO_CAM_TRANSFORM
-    // );
-
     // Define controls
-    buttonboard = new Buttonboard(
-      new CommandButtonboardController(
-        Constants.CONTROLLER.BUTTONBOARD_CONTROLLER_PORT
-      )
-    );
     driverControls = new DriverControls(
       new CommandXboxController(Constants.CONTROLLER.DRIVE_CONTROLLER_PORT),
       Constants.CONTROLLER.DRIVE_CONTROLLER_DEADBAND
@@ -149,8 +106,6 @@ public class Robot extends TimedRobot {
     m_autoChooserManager = new AutoChooserManager();
     m_SignalLoggerManager = new SignalLoggerManager();
 
-    SmartDashboard.putData("Buttonboard", buttonboard);
-    SmartDashboard.putData("ClearButtonboard", new ClearButtonboard());
     SmartDashboard.putData("Signal Logger", m_SignalLoggerManager);
 
     // Logging
@@ -169,10 +124,6 @@ public class Robot extends TimedRobot {
     m_setCoastOnDisable = new WaitCommand(SWERVE.TIME_TO_COAST).andThen(
       new DriveSetCoast()
     );
-
-    // climberPivot.setDefaultCommand(
-    //   new ClimberPivotSetSpeed(CLIMBER_PIVOT.HOLD_AGAINST_WINCH_SPEED)
-    // );
 
     // Update sensors at a faster rate
     addPeriodic(
@@ -194,7 +145,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    camManager.updateAllCameras();
     CommandScheduler.getInstance().run();
   }
 
@@ -259,5 +209,4 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
-
 }
