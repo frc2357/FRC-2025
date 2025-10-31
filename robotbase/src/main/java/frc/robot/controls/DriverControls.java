@@ -52,31 +52,35 @@ public class DriverControls implements RumbleInterface {
     // Scoring
     m_controller
         .leftBumper()
-        .onTrue(new ConditionalCommand(new InstantCommand(() -> new TeleopCoralScoreL4(m_rightTrigger).getCommand()
-            .andThen(new CoralZero())),
-            new InstantCommand(), () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
+        .onTrue(new ConditionalCommand(new TeleopCoralScoreL4(m_rightTrigger).getCommand()
+            .andThen(new CoralZero()),
+            new InstantCommand(), () -> {
+              boolean temp = !SmartDashboard.getBoolean(CHILD_PROOF, false);
+              System.out.println(temp);
+              return temp;
+            }));
     m_controller
         .rightBumper()
-        .onTrue(new ConditionalCommand(new InstantCommand(() -> new TeleopCoralScoreL3(m_rightTrigger).getCommand()
-            .andThen(new CoralZero())),
+        .onTrue(new ConditionalCommand(new TeleopCoralScoreL3(m_rightTrigger).getCommand()
+            .andThen(new CoralZero()),
             new InstantCommand(), () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
     m_controller
         .rightStick()
-        .onTrue(new ConditionalCommand(new InstantCommand(() -> new TeleopCoralScoreL2(m_rightTrigger).getCommand()
-            .andThen(new CoralZero())),
+        .onTrue(new ConditionalCommand(new TeleopCoralScoreL2(m_rightTrigger).getCommand()
+            .andThen(new CoralZero()),
             new InstantCommand(), () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
 
     // Intaking
 
     m_rightTrigger.and(() -> Robot.coralRunner.hasNoCoral())
-        .onTrue(new ConditionalCommand(new InstantCommand(() -> new TeleopCoralIntake(m_rightTrigger)),
+        .onTrue(new ConditionalCommand(new TeleopCoralIntake(m_rightTrigger),
             new InstantCommand(),
             () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)));
 
     // Remove algae
 
     m_controller.a().onTrue(
-        new ConditionalCommand(new InstantCommand(() -> new RemoveAlgaeLow(m_controller.a())), new InstantCommand(),
+        new ConditionalCommand(new RemoveAlgaeLow(m_controller.a()), new InstantCommand(),
             () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)));
     // m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
     m_controller.y().toggleOnTrue(new ToggleSpeed());
@@ -84,7 +88,7 @@ public class DriverControls implements RumbleInterface {
     // Other
 
     m_leftTrigger.onTrue(
-        new ConditionalCommand(new InstantCommand(() -> new CoralHome().andThen(new CoralZero())), new InstantCommand(),
+        new ConditionalCommand(new CoralHome().andThen(new CoralZero()), new InstantCommand(),
             () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
     m_controller
         .back()
