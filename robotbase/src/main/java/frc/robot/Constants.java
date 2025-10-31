@@ -7,7 +7,6 @@ package frc.robot;
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -22,7 +21,6 @@ import edu.wpi.first.units.measure.*;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import frc.robot.util.Utility;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -85,6 +83,8 @@ public final class Constants {
   }
 
   public static final class SWERVE {
+
+    public static final String CHILD_PROOF = "Child Proof";
 
     public static final AngularVelocity MAX_ANGULAR_VELOCITY =
       Units.RadiansPerSecond.of((Math.PI * 2) / 1.5);
@@ -176,7 +176,7 @@ public final class Constants {
     public static final double AXIS_MAX_SPEED = 0.5;
     public static final double ZERO_SPEED = -0.1;
 
-    public static final double ZERO_STALL_AMPS = 34; //TODO: tune this ASAP.
+    public static final double ZERO_STALL_AMPS = 34; // TODO: tune this ASAP.
 
     public static final Time ZERO_TIME = Units.Seconds.of(0.2);
 
@@ -378,7 +378,8 @@ public final class Constants {
         new ConstrainedSolvepnpParams(false, PNP_HEADING_SCALE_FACTOR)
       );
 
-    // coeffiecients for pose trust from vision. Can be raised or lowered depending on how much we trust them.
+    // coeffiecients for pose trust from vision. Can be raised or lowered depending
+    // on how much we trust them.
     public static final double X_STD_DEV_COEFFIECIENT = 0.8;
     public static final double Y_STD_DEV_COEFFIECIENT = 0.8;
 
@@ -410,14 +411,24 @@ public final class Constants {
       15
     );
 
-    public static final List<VisionTargetSim> SIM_TARGETS = FIELD_CONSTANTS.APRIL_TAG_LAYOUT.getTags().stream().map((AprilTag tag) -> {
-      return new VisionTargetSim(tag.pose, TargetModel.kAprilTag36h11, tag.ID);
-    }).toList();
+    public static final List<VisionTargetSim> SIM_TARGETS =
+      FIELD_CONSTANTS.APRIL_TAG_LAYOUT.getTags()
+        .stream()
+        .map((AprilTag tag) -> {
+          return new VisionTargetSim(
+            tag.pose,
+            TargetModel.kAprilTag36h11,
+            tag.ID
+          );
+        })
+        .toList();
 
     /**
-     * <strong> DO NOT USE THIS OR ANY FILE SYSTEM STUFF IF THE ROBOT IS ACTUALLY RUNNING. THIS IS FOR SIMULATION ONLY.
+     * <strong> DO NOT USE THIS OR ANY FILE SYSTEM STUFF IF THE ROBOT IS ACTUALLY
+     * RUNNING. THIS IS FOR SIMULATION ONLY.
      */
-    public static final String CALIBRATION_FOLDER_PATH = "..\\PhotonSettings\\Calibrations\\";
+    public static final String CALIBRATION_FOLDER_PATH =
+      "..\\PhotonSettings\\Calibrations\\";
 
     public static final class BACK_RIGHT_CAM {
 
@@ -435,14 +446,14 @@ public final class Constants {
       );
       // lying transform
       // public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-      //   Units.Inches.of(-8.824),
-      //   Units.Inches.of(9),
-      //   Units.Inches.of(22.055),
-      //   new Rotation3d(
-      //     Units.Degrees.of(0),
-      //     Units.Degrees.of(10),
-      //     Units.Degrees.of(180)
-      //   )
+      // Units.Inches.of(-8.824),
+      // Units.Inches.of(9),
+      // Units.Inches.of(22.055),
+      // new Rotation3d(
+      // Units.Degrees.of(0),
+      // Units.Degrees.of(10),
+      // Units.Degrees.of(180)
+      // )
       // );
 
     }
@@ -463,14 +474,14 @@ public final class Constants {
       );
       // lying transform (that makes it work way better)
       // public static final Transform3d ROBOT_TO_CAM_TRANSFORM = new Transform3d(
-      //   Units.Inches.of(-10.15),
-      //   Units.Inches.of(-7),
-      //   Units.Inches.of(21.137),
-      //   new Rotation3d(
-      //     Units.Degrees.of(0),
-      //     Units.Degrees.of(10),
-      //     Units.Degrees.of(180)
-      //   )
+      // Units.Inches.of(-10.15),
+      // Units.Inches.of(-7),
+      // Units.Inches.of(21.137),
+      // new Rotation3d(
+      // Units.Degrees.of(0),
+      // Units.Degrees.of(10),
+      // Units.Degrees.of(180)
+      // )
       // );
     }
   }
@@ -494,7 +505,8 @@ public final class Constants {
       APRIL_TAG_LAYOUT.getFieldWidth()
     );
 
-    // how close the estimated pose can get to the field border before we invalidate it
+    // how close the estimated pose can get to the field border before we invalidate
+    // it
     public static final Distance FIELD_BORDER_MARGIN = Units.Inches.of(0.1);
 
     // how far off on the z axis the estimated pose can be before we invalidate it
@@ -593,7 +605,8 @@ public final class Constants {
 
     public static class REEF {
 
-      // the reef tags in order of what side of the reef they are on. do not sort these.
+      // the reef tags in order of what side of the reef they are on. do not sort
+      // these.
       public static final int[] BLUE_REEF_TAGS = { 18, 17, 22, 21, 20, 19 };
       public static final int[] RED_REEF_TAGS = { 7, 8, 9, 10, 11, 6 };
 
@@ -727,7 +740,8 @@ public final class Constants {
   }
 
   /**
-   * Class for numbers like the robots weight, its dimensions, bumper thickness, and anything else that should be written down about the robot.
+   * Class for numbers like the robots weight, its dimensions, bumper thickness,
+   * and anything else that should be written down about the robot.
    */
   public static class ROBOT_CONFIGURATION {
 
@@ -771,7 +785,8 @@ public final class Constants {
       );
 
     /**
-     * The distance that for any given object, if it is closer to the robot than this, it is hitting it, or will hit it when the robot turns.
+     * The distance that for any given object, if it is closer to the robot than
+     * this, it is hitting it, or will hit it when the robot turns.
      * Do not let anything get inside this.
      */
     public static final Distance BOUNDARY = Units.Inches.of(

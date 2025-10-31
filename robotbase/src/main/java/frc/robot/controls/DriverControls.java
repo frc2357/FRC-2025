@@ -1,19 +1,19 @@
 package frc.robot.controls;
 
-import static frc.robot.Constants.FIELD.REEF.BRANCH_F;
-import static frc.robot.Constants.FIELD.REEF.BRANCH_I;
+import static frc.robot.Constants.SWERVE.CHILD_PROOF;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
-import frc.robot.commands.descoring.RemoveAlgaeHigh;
+import frc.robot.commands.childProof.ChildElevator;
 import frc.robot.commands.descoring.RemoveAlgaeLow;
-import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
-import frc.robot.commands.drive.DriveToReef;
+import frc.robot.commands.drive.ToggleSpeed;
 import frc.robot.commands.intake.TeleopCoralIntake;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.CoralZero;
@@ -45,41 +45,84 @@ public class DriverControls implements RumbleInterface {
     return m_controller.getRightY();
   }
 
+  /**
+   *
+   */
   public void mapControls() {
     // Scoring
     m_controller
       .leftBumper()
       .onTrue(
-        new TeleopCoralScoreL4(m_rightTrigger)
-          .getCommand()
-          .andThen(new CoralZero())
+        new ConditionalCommand(
+          new TeleopCoralScoreL4(m_rightTrigger)
+            .getCommand()
+            .andThen(new CoralZero()),
+          new InstantCommand(),
+          () -> {
+            boolean temp = !SmartDashboard.getBoolean(CHILD_PROOF, false);
+            System.out.println(temp);
+            return temp;
+          }
+        )
       );
     m_controller
       .rightBumper()
       .onTrue(
-        new TeleopCoralScoreL3(m_rightTrigger)
-          .getCommand()
-          .andThen(new CoralZero())
+        new ConditionalCommand(
+          new TeleopCoralScoreL3(m_rightTrigger)
+            .getCommand()
+            .andThen(new CoralZero()),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+        )
       );
     m_controller
       .rightStick()
       .onTrue(
-        new TeleopCoralScoreL2(m_rightTrigger)
-          .getCommand()
-          .andThen(new CoralZero())
+        new ConditionalCommand(
+          new TeleopCoralScoreL2(m_rightTrigger)
+            .getCommand()
+            .andThen(new CoralZero()),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+        )
       );
 
     // Intaking
+
     m_rightTrigger
       .and(() -> Robot.coralRunner.hasNoCoral())
-      .onTrue(new TeleopCoralIntake(m_rightTrigger));
+      .onTrue(
+        new ConditionalCommand(
+          new TeleopCoralIntake(m_rightTrigger),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)
+        )
+      );
 
     // Remove algae
-    m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
-    m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
+
+    m_controller
+      .a()
+      .onTrue(
+        new ConditionalCommand(
+          new RemoveAlgaeLow(m_controller.a()),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)
+        )
+      );
+    // m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
+    m_controller.y().toggleOnTrue(new ToggleSpeed());
 
     // Other
-    m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
+
+    m_leftTrigger.onTrue(
+      new ConditionalCommand(
+        new CoralHome().andThen(new CoralZero()),
+        new InstantCommand(),
+        () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+      )
+    );
     m_controller
       .back()
       .onTrue(
@@ -92,17 +135,21 @@ public class DriverControls implements RumbleInterface {
           )
         )
       );
+
     m_controller
       .start()
       .onTrue(
-        new InstantCommand(() -> Robot.swerve.resetHeading(Rotation2d.kZero))
+        new ConditionalCommand(
+          new InstantCommand(() -> Robot.swerve.resetHeading(Rotation2d.kZero)),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+        )
       );
-    m_controller
-      .x()
-      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_I));
-    m_controller
-      .b()
-      .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_F));
+    // m_controller.x().whileTrue(new DriveToReef(RouteAroundReef.Fastest,
+    // BRANCH_I));
+
+    m_controller.x().onTrue(new ChildElevator(m_controller.b()));
+    // m_controller.b().whileTrue(new Child));
   }
 
   public double getX() {
