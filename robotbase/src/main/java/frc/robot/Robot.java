@@ -65,7 +65,7 @@ public class Robot extends TimedRobot {
   public static Elevator elevator;
   public static Laterator laterator;
   public static CoralRunner coralRunner;
-  public static AlgaeKnocker algaeKnocker;
+
   public static ClimberPivot climberPivot;
   public static ClimberWinch climberWinch;
   public static CameraManager camManager;
@@ -110,7 +110,6 @@ public class Robot extends TimedRobot {
     elevator = new Elevator();
     laterator = new Laterator();
     coralRunner = new CoralRunner();
-    algaeKnocker = new AlgaeKnocker();
 
     camManager = new CameraManager();
     backRightCam = camManager.createCamera(
@@ -259,5 +258,4 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
-
 }

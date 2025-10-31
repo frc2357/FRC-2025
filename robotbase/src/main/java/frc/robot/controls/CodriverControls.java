@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
 import frc.robot.commands.coralRunner.CoralRunnerAxis;
 import frc.robot.commands.elevator.ElevatorAmpLimitZero;
 import frc.robot.commands.elevator.ElevatorAxis;
@@ -131,12 +130,6 @@ public class CodriverControls implements RumbleInterface {
       .and(m_controller.x())
       .whileTrue(new LateratorHome().andThen(new LateratorZero()));
     onlyRight.and(m_controller.a()).whileTrue(new LateratorZero());
-    onlyRight
-      .and(m_controller.leftBumper())
-      .whileTrue(new AlgaeKnockerSetSpeed(0.25));
-    onlyRight
-      .and(m_controller.rightBumper())
-      .whileTrue(new AlgaeKnockerSetSpeed(-0.25));
     // onlyLeft.whileTrue(
     //   new ClimberPivotAxis(
     //     () ->

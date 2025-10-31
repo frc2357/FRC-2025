@@ -10,8 +10,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
-import frc.robot.commands.descoring.RemoveAlgaeHigh;
-import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
 import frc.robot.commands.intake.TeleopCoralIntake;
@@ -75,8 +73,6 @@ public class DriverControls implements RumbleInterface {
       .onTrue(new TeleopCoralIntake(m_rightTrigger));
 
     // Remove algae
-    m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
-    m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
 
     // Other
     m_leftTrigger.onTrue(new CoralHome().andThen(new CoralZero()));
