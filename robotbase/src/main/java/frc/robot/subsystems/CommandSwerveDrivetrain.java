@@ -3,10 +3,10 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.Constants.SWERVE.CHILD_PROOF;
 import static frc.robot.Constants.SWERVE.FACING_ANGLE_D;
 import static frc.robot.Constants.SWERVE.FACING_ANGLE_I;
 import static frc.robot.Constants.SWERVE.FACING_ANGLE_P;
-import static frc.robot.Constants.SWERVE.CHILD_PROOF;
 
 import choreo.trajectory.SwerveSample;
 import choreo.util.ChoreoAllianceFlipUtil;
@@ -52,8 +52,8 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unused")
 public class CommandSwerveDrivetrain
-    extends TunerSwerveDrivetrain
-    implements Subsystem {
+  extends TunerSwerveDrivetrain
+  implements Subsystem {
 
   public boolean togglespeed;
 
@@ -62,24 +62,31 @@ public class CommandSwerveDrivetrain
   private double m_lastSimTime;
 
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
-  private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
+  private static final Rotation2d kBlueAlliancePerspectiveRotation =
+    Rotation2d.kZero;
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
-  private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
+  private static final Rotation2d kRedAlliancePerspectiveRotation =
+    Rotation2d.k180deg;
 
-  private final SwerveRequest.RobotCentric m_robotRelative = new SwerveRequest.RobotCentric()
+  private final SwerveRequest.RobotCentric m_robotRelative =
+    new SwerveRequest.RobotCentric()
       .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors;
 
-  private final SwerveRequest.FieldCentric m_fieldRelative = new SwerveRequest.FieldCentric()
+  private final SwerveRequest.FieldCentric m_fieldRelative =
+    new SwerveRequest.FieldCentric()
       .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors;
 
-  private final SwerveRequest.ApplyFieldSpeeds m_fieldSpeedsRequest = new SwerveRequest.ApplyFieldSpeeds()
+  private final SwerveRequest.ApplyFieldSpeeds m_fieldSpeedsRequest =
+    new SwerveRequest.ApplyFieldSpeeds()
       .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors;
 
-  private final SwerveRequest.FieldCentricFacingAngle m_fieldCentricFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+  private final SwerveRequest.FieldCentricFacingAngle m_fieldCentricFacingAngle =
+    new SwerveRequest.FieldCentricFacingAngle()
       .withDriveRequestType(DriveRequestType.Velocity)
       .withHeadingPID(FACING_ANGLE_P, FACING_ANGLE_I, FACING_ANGLE_D); // Use open-loop control for drive motors;
 
-  private final SwerveRequest.SwerveDriveBrake m_brakeRequest = new SwerveRequest.SwerveDriveBrake();
+  private final SwerveRequest.SwerveDriveBrake m_brakeRequest =
+    new SwerveRequest.SwerveDriveBrake();
 
   private Twist2d m_fieldRelativeRobotVelocity = new Twist2d();
 
@@ -96,8 +103,9 @@ public class CommandSwerveDrivetrain
    * @param modules             Constants for each specific module
    */
   public CommandSwerveDrivetrain(
-      SwerveDrivetrainConstants drivetrainConstants,
-      SwerveModuleConstants<?, ?, ?>... modules) {
+    SwerveDrivetrainConstants drivetrainConstants,
+    SwerveModuleConstants<?, ?, ?>... modules
+  ) {
     super(drivetrainConstants, modules);
     if (Utils.isSimulation()) {
       startSimThread();
@@ -121,9 +129,10 @@ public class CommandSwerveDrivetrain
    * @param modules                 Constants for each specific module
    */
   public CommandSwerveDrivetrain(
-      SwerveDrivetrainConstants drivetrainConstants,
-      double odometryUpdateFrequency,
-      SwerveModuleConstants<?, ?, ?>... modules) {
+    SwerveDrivetrainConstants drivetrainConstants,
+    double odometryUpdateFrequency,
+    SwerveModuleConstants<?, ?, ?>... modules
+  ) {
     super(drivetrainConstants, odometryUpdateFrequency, modules);
     if (Utils.isSimulation()) {
       startSimThread();
@@ -158,17 +167,19 @@ public class CommandSwerveDrivetrain
    * @param modules                   Constants for each specific module
    */
   public CommandSwerveDrivetrain(
-      SwerveDrivetrainConstants drivetrainConstants,
-      double odometryUpdateFrequency,
-      Matrix<N3, N1> odometryStandardDeviation,
-      Matrix<N3, N1> visionStandardDeviation,
-      SwerveModuleConstants<?, ?, ?>... modules) {
+    SwerveDrivetrainConstants drivetrainConstants,
+    double odometryUpdateFrequency,
+    Matrix<N3, N1> odometryStandardDeviation,
+    Matrix<N3, N1> visionStandardDeviation,
+    SwerveModuleConstants<?, ?, ?>... modules
+  ) {
     super(
-        drivetrainConstants,
-        odometryUpdateFrequency,
-        odometryStandardDeviation,
-        visionStandardDeviation,
-        modules);
+      drivetrainConstants,
+      odometryUpdateFrequency,
+      odometryStandardDeviation,
+      visionStandardDeviation,
+      modules
+    );
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -192,9 +203,10 @@ public class CommandSwerveDrivetrain
 
   public void setOperatorPerspectiveForward(DriverStation.Alliance alliance) {
     setOperatorPerspectiveForward(
-        alliance == Alliance.Red
-            ? kRedAlliancePerspectiveRotation
-            : kBlueAlliancePerspectiveRotation);
+      alliance == Alliance.Red
+        ? kRedAlliancePerspectiveRotation
+        : kBlueAlliancePerspectiveRotation
+    );
   }
 
   private void startSimThread() {
@@ -223,14 +235,16 @@ public class CommandSwerveDrivetrain
    *                                     second.
    */
   public void driveRobotRelative(
-      double velocityXMetersPerSecond,
-      double velocityYMetersPerSecond,
-      double rotationRateRadiansPerSecond) {
+    double velocityXMetersPerSecond,
+    double velocityYMetersPerSecond,
+    double rotationRateRadiansPerSecond
+  ) {
     setControl(
-        m_robotRelative
-            .withVelocityX(velocityXMetersPerSecond)
-            .withVelocityY(velocityYMetersPerSecond)
-            .withRotationalRate(rotationRateRadiansPerSecond));
+      m_robotRelative
+        .withVelocityX(velocityXMetersPerSecond)
+        .withVelocityY(velocityYMetersPerSecond)
+        .withRotationalRate(rotationRateRadiansPerSecond)
+    );
   }
 
   /**
@@ -246,16 +260,18 @@ public class CommandSwerveDrivetrain
    *                                     driving.
    */
   public void driveFieldRelative(
-      double velocityXMetersPerSecond,
-      double velocityYMetersPerSecond,
-      double rotationRateRadiansPerSecond,
-      ForwardPerspectiveValue perspective) {
+    double velocityXMetersPerSecond,
+    double velocityYMetersPerSecond,
+    double rotationRateRadiansPerSecond,
+    ForwardPerspectiveValue perspective
+  ) {
     setControl(
-        m_fieldRelative
-            .withVelocityX(velocityXMetersPerSecond)
-            .withVelocityY(velocityYMetersPerSecond)
-            .withRotationalRate(rotationRateRadiansPerSecond)
-            .withForwardPerspective(perspective));
+      m_fieldRelative
+        .withVelocityX(velocityXMetersPerSecond)
+        .withVelocityY(velocityYMetersPerSecond)
+        .withRotationalRate(rotationRateRadiansPerSecond)
+        .withForwardPerspective(perspective)
+    );
   }
 
   /**
@@ -269,14 +285,16 @@ public class CommandSwerveDrivetrain
    *                                     second.
    */
   public void driveFieldRelative(
-      double velocityXMetersPerSecond,
-      double velocityYMetersPerSecond,
-      double rotationRateRadiansPerSecond) {
+    double velocityXMetersPerSecond,
+    double velocityYMetersPerSecond,
+    double rotationRateRadiansPerSecond
+  ) {
     driveFieldRelative(
-        velocityXMetersPerSecond,
-        velocityYMetersPerSecond,
-        rotationRateRadiansPerSecond,
-        ForwardPerspectiveValue.OperatorPerspective);
+      velocityXMetersPerSecond,
+      velocityYMetersPerSecond,
+      rotationRateRadiansPerSecond,
+      ForwardPerspectiveValue.OperatorPerspective
+    );
   }
 
   /**
@@ -289,14 +307,16 @@ public class CommandSwerveDrivetrain
    * @param targetAngle              The target angle.
    */
   public void driveTargetAngle(
-      double velocityXMetersPerSecond,
-      double velocityYMetersPerSecond,
-      Rotation2d targetAngle) {
+    double velocityXMetersPerSecond,
+    double velocityYMetersPerSecond,
+    Rotation2d targetAngle
+  ) {
     setControl(
-        m_fieldCentricFacingAngle
-            .withVelocityX(velocityXMetersPerSecond)
-            .withVelocityY(velocityYMetersPerSecond)
-            .withTargetDirection(targetAngle));
+      m_fieldCentricFacingAngle
+        .withVelocityX(velocityXMetersPerSecond)
+        .withVelocityY(velocityYMetersPerSecond)
+        .withTargetDirection(targetAngle)
+    );
   }
 
   /**
@@ -312,24 +332,28 @@ public class CommandSwerveDrivetrain
 
     var targetSpeeds = sample.getChassisSpeeds();
     targetSpeeds.vxMetersPerSecond += CHOREO.X_CONTROLLER.calculate(
-        pose.getX(),
-        sample.x);
+      pose.getX(),
+      sample.x
+    );
     targetSpeeds.vyMetersPerSecond += CHOREO.Y_CONTROLLER.calculate(
-        pose.getY(),
-        sample.y);
+      pose.getY(),
+      sample.y
+    );
     targetSpeeds.omegaRadiansPerSecond += CHOREO.ROTATION_CONTROLLER.calculate(
-        pose.getRotation().getRadians(),
-        sample.heading);
+      pose.getRotation().getRadians(),
+      sample.heading
+    );
     setControl(
-        m_fieldSpeedsRequest
-            .withSpeeds(targetSpeeds)
-            .withWheelForceFeedforwardsX(sample.moduleForcesX())
-            .withWheelForceFeedforwardsY(sample.moduleForcesY()));
+      m_fieldSpeedsRequest
+        .withSpeeds(targetSpeeds)
+        .withWheelForceFeedforwardsX(sample.moduleForcesX())
+        .withWheelForceFeedforwardsY(sample.moduleForcesY())
+    );
   }
 
   /**
    * Gets the pose, with no flipping to compensate for alliance.
-   * 
+   *
    * @return The field relative pose.
    */
   public Pose2d getFieldRelativePose2d() {
@@ -338,40 +362,42 @@ public class CommandSwerveDrivetrain
 
   /**
    * The pose with flipping to ensure it is always on the blue origin.
-   * 
+   *
    * @return The pose flipped to ensure it is on the blue origin.
    */
   public Pose2d getAllianceRelativePose2d() {
     var curPose = getFieldRelativePose2d();
     return Robot.alliance == Alliance.Blue
-        ? curPose
-        : ChoreoAllianceFlipUtil.flip(curPose);
+      ? curPose
+      : ChoreoAllianceFlipUtil.flip(curPose);
   }
 
   public Pose2d makePoseAllianceRelative(Pose2d pose) {
     return Robot.alliance == Alliance.Blue
-        ? pose
-        : ChoreoAllianceFlipUtil.flip(pose);
+      ? pose
+      : ChoreoAllianceFlipUtil.flip(pose);
   }
 
   public Pose2d flipYAxis(Pose2d poseToFlip) {
     return new Pose2d(
-        poseToFlip.getX(),
-        ChoreoAllianceFlipUtil.flipY(poseToFlip.getY()),
-        poseToFlip.getRotation());
+      poseToFlip.getX(),
+      ChoreoAllianceFlipUtil.flipY(poseToFlip.getY()),
+      poseToFlip.getRotation()
+    );
   }
 
   public Pose2d flipXAxis(Pose2d poseToFlip) {
     return new Pose2d(
-        ChoreoAllianceFlipUtil.flipX(poseToFlip.getX()),
-        poseToFlip.getY(),
-        poseToFlip.getRotation());
+      ChoreoAllianceFlipUtil.flipX(poseToFlip.getX()),
+      poseToFlip.getY(),
+      poseToFlip.getRotation()
+    );
   }
 
   /**
    * Sets the pose straight as you input it, with no flipping to compensate for
    * alliance.
-   * 
+   *
    * @param poseToSet The pose it will set.
    */
   public void setFieldRelativePose2d(Pose2d poseToSet) {
@@ -381,7 +407,7 @@ public class CommandSwerveDrivetrain
   /**
    * Sets the translation straight as you input it, with no flipping to compensate
    * for alliance.
-   * 
+   *
    * @param translationToSet The translation it will set.
    */
   public void setFieldRelativeTranslation2d(Translation2d translationToSet) {
@@ -391,27 +417,29 @@ public class CommandSwerveDrivetrain
   /**
    * Sets the translation straight as you input it, with no flipping to compensate
    * for alliance.
-   * 
+   *
    * @param translationToSet The translation it will set.
    */
   public void setAllianceRelativeTranslation2d(Translation2d translationToSet) {
     super.resetTranslation(
-        Robot.alliance == Alliance.Blue
-            ? translationToSet
-            : ChoreoAllianceFlipUtil.flip(translationToSet));
+      Robot.alliance == Alliance.Blue
+        ? translationToSet
+        : ChoreoAllianceFlipUtil.flip(translationToSet)
+    );
   }
 
   /**
    * Sets the pose relative to the alliance, if alliance is red, flips the pose.
-   * 
+   *
    * @param poseToSet The pose to set. Its origin must be on the blue origin to
    *                  set correctly.
    */
   public void setAllianceRelativePose2d(Pose2d poseToSet) {
     super.resetPose(
-        Robot.alliance == Alliance.Blue
-            ? poseToSet
-            : ChoreoAllianceFlipUtil.flip(poseToSet));
+      Robot.alliance == Alliance.Blue
+        ? poseToSet
+        : ChoreoAllianceFlipUtil.flip(poseToSet)
+    );
   }
 
   public void resetHeading(Rotation2d heading) {
@@ -428,12 +456,14 @@ public class CommandSwerveDrivetrain
 
   public LinearVelocity getXVelocity() {
     return Units.MetersPerSecond.of(
-        getCurrentChassisSpeeds().vxMetersPerSecond);
+      getCurrentChassisSpeeds().vxMetersPerSecond
+    );
   }
 
   public LinearVelocity getYVelocity() {
     return Units.MetersPerSecond.of(
-        getCurrentChassisSpeeds().vyMetersPerSecond);
+      getCurrentChassisSpeeds().vyMetersPerSecond
+    );
   }
 
   public LinearVelocity getAbsoluteTranslationalVelocity() {
@@ -441,7 +471,8 @@ public class CommandSwerveDrivetrain
     var xVel = Math.abs(speeds.vxMetersPerSecond);
     var yVel = Math.abs(speeds.vyMetersPerSecond);
     var translationalVelocity = Math.sqrt(
-        Math.pow(xVel, 2) + Math.pow(yVel, 2)); // A^2 + B^2 = C^2
+      Math.pow(xVel, 2) + Math.pow(yVel, 2)
+    ); // A^2 + B^2 = C^2
     return Units.MetersPerSecond.of(translationalVelocity);
   }
 
@@ -473,12 +504,13 @@ public class CommandSwerveDrivetrain
 
   public Twist2d getRobotVelocity() {
     return new Twist2d(
-        getXVelocity().in(Units.MetersPerSecond),
-        getYVelocity().in(Units.MetersPerSecond),
-        getPigeon2()
-            .getAngularVelocityZWorld()
-            .getValue()
-            .in(Units.RadiansPerSecond));
+      getXVelocity().in(Units.MetersPerSecond),
+      getYVelocity().in(Units.MetersPerSecond),
+      getPigeon2()
+        .getAngularVelocityZWorld()
+        .getValue()
+        .in(Units.RadiansPerSecond)
+    );
   }
 
   public Twist2d getFieldRelativeRobotVelocity() {
@@ -487,16 +519,18 @@ public class CommandSwerveDrivetrain
 
   private void updateFieldVelocity() {
     Translation2d linearFieldVelocity = new Translation2d(
-        getXVelocity().in(Units.MetersPerSecond),
-        getYVelocity().in(Units.MetersPerSecond)).rotateBy(getFieldRelativePose2d().getRotation());
+      getXVelocity().in(Units.MetersPerSecond),
+      getYVelocity().in(Units.MetersPerSecond)
+    ).rotateBy(getFieldRelativePose2d().getRotation());
 
     m_fieldRelativeRobotVelocity = new Twist2d(
-        linearFieldVelocity.getX(),
-        linearFieldVelocity.getY(),
-        getPigeon2()
-            .getAngularVelocityZWorld()
-            .getValue()
-            .in(Units.RadiansPerSecond));
+      linearFieldVelocity.getX(),
+      linearFieldVelocity.getY(),
+      getPigeon2()
+        .getAngularVelocityZWorld()
+        .getValue()
+        .in(Units.RadiansPerSecond)
+    );
   }
 
   /**

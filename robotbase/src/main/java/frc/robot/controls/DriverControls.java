@@ -46,69 +46,109 @@ public class DriverControls implements RumbleInterface {
   }
 
   /**
-   * 
+   *
    */
   public void mapControls() {
     // Scoring
     m_controller
-        .leftBumper()
-        .onTrue(new ConditionalCommand(new TeleopCoralScoreL4(m_rightTrigger).getCommand()
+      .leftBumper()
+      .onTrue(
+        new ConditionalCommand(
+          new TeleopCoralScoreL4(m_rightTrigger)
+            .getCommand()
             .andThen(new CoralZero()),
-            new InstantCommand(), () -> {
-              boolean temp = !SmartDashboard.getBoolean(CHILD_PROOF, false);
-              System.out.println(temp);
-              return temp;
-            }));
+          new InstantCommand(),
+          () -> {
+            boolean temp = !SmartDashboard.getBoolean(CHILD_PROOF, false);
+            System.out.println(temp);
+            return temp;
+          }
+        )
+      );
     m_controller
-        .rightBumper()
-        .onTrue(new ConditionalCommand(new TeleopCoralScoreL3(m_rightTrigger).getCommand()
+      .rightBumper()
+      .onTrue(
+        new ConditionalCommand(
+          new TeleopCoralScoreL3(m_rightTrigger)
+            .getCommand()
             .andThen(new CoralZero()),
-            new InstantCommand(), () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+        )
+      );
     m_controller
-        .rightStick()
-        .onTrue(new ConditionalCommand(new TeleopCoralScoreL2(m_rightTrigger).getCommand()
+      .rightStick()
+      .onTrue(
+        new ConditionalCommand(
+          new TeleopCoralScoreL2(m_rightTrigger)
+            .getCommand()
             .andThen(new CoralZero()),
-            new InstantCommand(), () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+        )
+      );
 
     // Intaking
 
-    m_rightTrigger.and(() -> Robot.coralRunner.hasNoCoral())
-        .onTrue(new ConditionalCommand(new TeleopCoralIntake(m_rightTrigger),
-            new InstantCommand(),
-            () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)));
+    m_rightTrigger
+      .and(() -> Robot.coralRunner.hasNoCoral())
+      .onTrue(
+        new ConditionalCommand(
+          new TeleopCoralIntake(m_rightTrigger),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)
+        )
+      );
 
     // Remove algae
 
-    m_controller.a().onTrue(
-        new ConditionalCommand(new RemoveAlgaeLow(m_controller.a()), new InstantCommand(),
-            () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)));
+    m_controller
+      .a()
+      .onTrue(
+        new ConditionalCommand(
+          new RemoveAlgaeLow(m_controller.a()),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, true)
+        )
+      );
     // m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.b()));
     m_controller.y().toggleOnTrue(new ToggleSpeed());
 
     // Other
 
     m_leftTrigger.onTrue(
-        new ConditionalCommand(new CoralHome().andThen(new CoralZero()), new InstantCommand(),
-            () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
+      new ConditionalCommand(
+        new CoralHome().andThen(new CoralZero()),
+        new InstantCommand(),
+        () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+      )
+    );
     m_controller
-        .back()
-        .onTrue(
-            new InstantCommand(() -> Robot.swerve.resetTranslation(
-                Robot.camManager
-                    .getLastEstimatedPose()
-                    .getTranslation()
-                    .toTranslation2d())));
+      .back()
+      .onTrue(
+        new InstantCommand(() ->
+          Robot.swerve.resetTranslation(
+            Robot.camManager
+              .getLastEstimatedPose()
+              .getTranslation()
+              .toTranslation2d()
+          )
+        )
+      );
 
     m_controller
-        .start()
-        .onTrue(
-            new ConditionalCommand(new InstantCommand(() -> Robot.swerve.resetHeading(Rotation2d.kZero)),
-                new InstantCommand(), () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)));
+      .start()
+      .onTrue(
+        new ConditionalCommand(
+          new InstantCommand(() -> Robot.swerve.resetHeading(Rotation2d.kZero)),
+          new InstantCommand(),
+          () -> !SmartDashboard.getBoolean(CHILD_PROOF, false)
+        )
+      );
     // m_controller.x().whileTrue(new DriveToReef(RouteAroundReef.Fastest,
     // BRANCH_I));
 
     m_controller.x().onTrue(new ChildElevator(m_controller.b()));
-
     // m_controller.b().whileTrue(new Child));
   }
 

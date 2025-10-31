@@ -8,12 +8,12 @@ import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.util.PressToContinue;
 
 public class ChildElevator extends SequentialCommandGroup {
-    public ChildElevator(Trigger button) {
-        super(
-                new ElevatorSetDistance(
-                        Constants.ELEVATOR.SETPOINTS.L2_PREPOSE),
-                new PressToContinue(button), new ElevatorHome());
 
-    }
-
+  public ChildElevator(Trigger button) {
+    super(
+      new ElevatorSetDistance(Constants.ELEVATOR.SETPOINTS.L2_PREPOSE),
+      new PressToContinue(button),
+      new ElevatorHome()
+    );
+  }
 }
