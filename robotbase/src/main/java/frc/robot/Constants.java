@@ -7,7 +7,6 @@ package frc.robot;
 import choreo.auto.AutoFactory;
 import com.revrobotics.spark.config.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -18,11 +17,15 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Dimensionless;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.util.CollisionDetection;
 import frc.robot.util.SATCollisionDetector.SATVector;
 import frc.robot.util.Utility;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -152,19 +155,24 @@ public final class Constants {
 
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
       MOTOR_CONFIG_LEFT.closedLoop
-        .pidf(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D, LEFT_MOTOR_VEL_F)
+        .pid(LEFT_MOTOR_P, LEFT_MOTOR_I, LEFT_MOTOR_D)
         .outputRange(-1, 1);
+
+    public static final FeedForwardConfig FEED_FORWARD_CONFIG =
+      CLOSED_LOOP_CONFIG_LEFT.feedForward
+        .kV(LEFT_MOTOR_VEL_F)
+        .kS(LEFT_MOTOR_ARB_F);
+
     public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
       Units.Rotations.of(0.1);
 
-    @SuppressWarnings("removal")
-    public static final SmartMotionConfig SMART_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.smartMotion
-        .allowedClosedLoopError(
+    public static final MAXMotionConfig SMART_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.maxMotion
+        .allowedProfileError(
           SMART_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
         )
         .maxAcceleration(10000)
-        .maxVelocity(4600);
+        .cruiseVelocity(4600);
 
     public static final double GEAR_RATIO = (38.0 / 14.0) * 2.0;
 
@@ -217,24 +225,23 @@ public final class Constants {
 
     // Set feedback sensor to alternate encoder
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG_LEFT =
-      MOTOR_CONFIG.closedLoop
-        .pidf(MOTOR_P, MOTOR_I, MOTOR_D, MOTOR_F)
-        .velocityFF(MOTOR_VEL_FF)
-        .outputRange(-1, 1);
+      MOTOR_CONFIG.closedLoop.pid(MOTOR_P, MOTOR_I, MOTOR_D).outputRange(-1, 1);
+
+    public static final FeedForwardConfig FEED_FORWARD_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.feedForward.kV(MOTOR_VEL_FF);
 
     public static final Angle SMART_MOTION_ALLOWED_ERROR_ROTATIONS =
       Units.Rotations.of(0.05);
 
     public static final double AXIS_MAX_SPEED = 0.5;
 
-    @SuppressWarnings("removal")
-    public static final SmartMotionConfig MAX_MOTION_CONFIG_LEFT =
-      CLOSED_LOOP_CONFIG_LEFT.smartMotion
-        .allowedClosedLoopError(
+    public static final MAXMotionConfig MAX_MOTION_CONFIG_LEFT =
+      CLOSED_LOOP_CONFIG_LEFT.maxMotion
+        .allowedProfileError(
           SMART_MOTION_ALLOWED_ERROR_ROTATIONS.in(Units.Rotations)
         )
         .maxAcceleration(10000)
-        .maxVelocity(3500);
+        .cruiseVelocity(3500);
 
     public static final double GEAR_RATIO = 15;
     public static final Distance OUTPUT_PULLEY_PITCH_DIAMETER =
@@ -410,14 +417,23 @@ public final class Constants {
       15
     );
 
-    public static final List<VisionTargetSim> SIM_TARGETS = FIELD_CONSTANTS.APRIL_TAG_LAYOUT.getTags().stream().map((AprilTag tag) -> {
-      return new VisionTargetSim(tag.pose, TargetModel.kAprilTag36h11, tag.ID);
-    }).toList();
+    public static final List<VisionTargetSim> SIM_TARGETS =
+      FIELD_CONSTANTS.APRIL_TAG_LAYOUT.getTags()
+        .stream()
+        .map((AprilTag tag) -> {
+          return new VisionTargetSim(
+            tag.pose,
+            TargetModel.kAprilTag36h11,
+            tag.ID
+          );
+        })
+        .toList();
 
     /**
      * <strong> DO NOT USE THIS OR ANY FILE SYSTEM STUFF IF THE ROBOT IS ACTUALLY RUNNING. THIS IS FOR SIMULATION ONLY.
      */
-    public static final String CALIBRATION_FOLDER_PATH = "..\\PhotonSettings\\Calibrations\\";
+    public static final String CALIBRATION_FOLDER_PATH =
+      "..\\PhotonSettings\\Calibrations\\";
 
     public static final class BACK_RIGHT_CAM {
 

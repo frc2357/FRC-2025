@@ -86,10 +86,8 @@ public class Elevator extends SubsystemBase {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kSmartMotion,
-      ClosedLoopSlot.kSlot0,
-      ELEVATOR.LEFT_MOTOR_ARB_F,
-      ArbFFUnits.kVoltage
+      ControlType.kMAXMotionPositionControl,
+      ClosedLoopSlot.kSlot0
     );
   }
 

@@ -2,6 +2,10 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.PHOTON_VISION.*;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.*;
@@ -12,9 +16,8 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
-import frc.robot.Robot;
 import frc.robot.Constants.FIELD_CONSTANTS;
-
+import frc.robot.Robot;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -25,12 +28,6 @@ import org.photonvision.*;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.targeting.PhotonPipelineResult;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
-
 
 /** Controls the photon vision camera options. */
 public class PhotonVisionCamera {
@@ -115,26 +112,43 @@ public class PhotonVisionCamera {
       PRIMARY_STRATEGY,
       m_robotToCameraTranform
     );
-    if(!Robot.isReal){
+    if (!Robot.isReal) {
       m_simProperties = new SimCameraProperties();
       m_simProperties.setAvgLatencyMs(60);
       m_simProperties.setFPS(30);
       m_simProperties.setExposureTimeMs(30);
-      String relativeFilePath = CALIBRATION_FOLDER_PATH+cameraName+"\\"+cameraName+"1280x960Calib.json";
+      String relativeFilePath =
+        CALIBRATION_FOLDER_PATH +
+        cameraName +
+        "\\" +
+        cameraName +
+        "1280x960Calib.json";
       var camIntrinMatrix = getCameraIntrinsicsFromJson(relativeFilePath);
       var distCoeffMatrix = getDistCoeffsFromJson(relativeFilePath);
-      if(camIntrinMatrix != null && distCoeffMatrix != null){
-        m_simProperties.setCalibration(1280, 960, camIntrinMatrix, distCoeffMatrix);
-        System.out.println("[PhotonVisionCamera] | " + cameraName + " | Sim camera props set successfully.");
+      if (camIntrinMatrix != null && distCoeffMatrix != null) {
+        m_simProperties.setCalibration(
+          1280,
+          960,
+          camIntrinMatrix,
+          distCoeffMatrix
+        );
+        System.out.println(
+          "[PhotonVisionCamera] | " +
+          cameraName +
+          " | Sim camera props set successfully."
+        );
       }
-      
-      m_simCamera = new PhotonCameraSim(m_camera, m_simProperties, FIELD_CONSTANTS.APRIL_TAG_LAYOUT);
+
+      m_simCamera = new PhotonCameraSim(
+        m_camera,
+        m_simProperties,
+        FIELD_CONSTANTS.APRIL_TAG_LAYOUT
+      );
       m_simCamera.setMaxSightRange(6);
       // m_simCamera.setMinTargetAreaPercent(2);
       m_simCamera.enableProcessedStream(true);
       m_simCamera.enableDrawWireframe(true);
-    }
-    else {
+    } else {
       m_simProperties = null;
       m_simCamera = null;
     }
@@ -146,8 +160,17 @@ public class PhotonVisionCamera {
   protected void updateResult() {
     if (!m_camera.isConnected() && Robot.isReal) return;
 
-    List<PhotonPipelineResult> results = Robot.isReal ? m_camera.getAllUnreadResults() : 
-      List.of(m_simCamera.process(60, new Pose3d(Robot.swerve.getFieldRelativePose2d()).plus(m_robotToCameraTranform), SIM_TARGETS));
+    List<PhotonPipelineResult> results = Robot.isReal
+      ? m_camera.getAllUnreadResults()
+      : List.of(
+        m_simCamera.process(
+          60,
+          new Pose3d(Robot.swerve.getFieldRelativePose2d()).plus(
+            m_robotToCameraTranform
+          ),
+          SIM_TARGETS
+        )
+      );
 
     // no new results, so we stop here.
     if (results.isEmpty()) return;
@@ -221,48 +244,70 @@ public class PhotonVisionCamera {
     return m_camera.getName();
   }
 
-  private Matrix<N3,N3> getCameraIntrinsicsFromJson(String relativeFilePath){
-    if(Robot.isReal) return null; // If the robot is real, attempting this will throw an exception, so we bail early.
+  private Matrix<N3, N3> getCameraIntrinsicsFromJson(String relativeFilePath) {
+    if (Robot.isReal) return null; // If the robot is real, attempting this will throw an exception, so we bail early.
     try {
       var canonicalFilePath = new File(relativeFilePath).getCanonicalPath();
-      Map<String,JsonElement> calibJsonMap = JsonParser.parseReader(new JsonReader(new FileReader(canonicalFilePath))).getAsJsonObject().asMap();
-      Map<String,JsonElement> camIntrinMap = calibJsonMap.get("cameraIntrinsics").getAsJsonObject().asMap();
+      Map<String, JsonElement> calibJsonMap = JsonParser.parseReader(
+        new JsonReader(new FileReader(canonicalFilePath))
+      )
+        .getAsJsonObject()
+        .asMap();
+      Map<String, JsonElement> camIntrinMap = calibJsonMap
+        .get("cameraIntrinsics")
+        .getAsJsonObject()
+        .asMap();
       JsonArray camIntrinJsonArray = camIntrinMap.get("data").getAsJsonArray();
       ArrayList<Double> camIntrinValList = new ArrayList<Double>();
-      for(JsonElement e : camIntrinJsonArray.asList()){
+      for (JsonElement e : camIntrinJsonArray.asList()) {
         camIntrinValList.add(e.getAsDouble());
       }
-      Matrix<N3,N3> camIntrinMatrix = new Matrix<N3,N3>(Nat.N3(), Nat.N3());
+      Matrix<N3, N3> camIntrinMatrix = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
       for (int i = 0; i < 9; i++) {
-        camIntrinMatrix.set(i/3, i%3, camIntrinValList.get(i));
+        camIntrinMatrix.set(i / 3, i % 3, camIntrinValList.get(i));
       }
-      System.out.println("[PhotonVisionCamera] Succesfully retreived cameraIntrinsics from JSON file.");
+      System.out.println(
+        "[PhotonVisionCamera] Succesfully retreived cameraIntrinsics from JSON file."
+      );
       return camIntrinMatrix;
     } catch (Exception e) {
-      System.out.println("Getting camera intrinsics from Json failed. Returning null.");
+      System.out.println(
+        "Getting camera intrinsics from Json failed. Returning null."
+      );
     }
     return null;
   }
 
-  private Matrix<N8,N1> getDistCoeffsFromJson(String relativeFilePath){
-    if(Robot.isReal) return null; // If the robot is real, attempting this will throw an exception, so we bail early.
+  private Matrix<N8, N1> getDistCoeffsFromJson(String relativeFilePath) {
+    if (Robot.isReal) return null; // If the robot is real, attempting this will throw an exception, so we bail early.
     try {
       var canonicalFilePath = new File(relativeFilePath).getCanonicalPath();
-      Map<String,JsonElement> calibJsonMap = JsonParser.parseReader(new JsonReader(new FileReader(canonicalFilePath))).getAsJsonObject().asMap();
-      Map<String,JsonElement> distCoeffMap = calibJsonMap.get("distCoeffs").getAsJsonObject().asMap();
+      Map<String, JsonElement> calibJsonMap = JsonParser.parseReader(
+        new JsonReader(new FileReader(canonicalFilePath))
+      )
+        .getAsJsonObject()
+        .asMap();
+      Map<String, JsonElement> distCoeffMap = calibJsonMap
+        .get("distCoeffs")
+        .getAsJsonObject()
+        .asMap();
       JsonArray distCoeffJsonArray = distCoeffMap.get("data").getAsJsonArray();
       ArrayList<Double> distCoeffValList = new ArrayList<Double>();
-      for(JsonElement e : distCoeffJsonArray.asList()){
+      for (JsonElement e : distCoeffJsonArray.asList()) {
         distCoeffValList.add(e.getAsDouble());
       }
-      Matrix<N8,N1> distCoeffMatrix = new Matrix<N8,N1>(Nat.N8(), Nat.N1());
+      Matrix<N8, N1> distCoeffMatrix = new Matrix<N8, N1>(Nat.N8(), Nat.N1());
       for (int i = 0; i < 8; i++) {
         distCoeffMatrix.set(i, 0, distCoeffValList.get(i));
       }
-      System.out.println("[PhotonVisionCamera] Succesfully retreived distCoeffs from JSON file.");
+      System.out.println(
+        "[PhotonVisionCamera] Succesfully retreived distCoeffs from JSON file."
+      );
       return distCoeffMatrix;
     } catch (Exception e) {
-      System.out.println("Getting dist coeffs from Json failed. Returning null.");
+      System.out.println(
+        "Getting dist coeffs from Json failed. Returning null."
+      );
     }
     return null;
   }

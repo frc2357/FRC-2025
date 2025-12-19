@@ -82,7 +82,7 @@ public class Laterator extends SubsystemBase {
     m_targetRotations.mut_replace(targetRotations);
     m_PIDController.setReference(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kSmartMotion
+      ControlType.kMAXMotionPositionControl
     );
   }
 

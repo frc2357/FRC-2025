@@ -105,6 +105,7 @@ Temporary Items
 
 ### VisualStudioCode ###
 .vscode/*
+!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -170,7 +171,6 @@ out/
 # Simulation GUI and other tools window save file
 networktables.json
 simgui.json
-simgui-ds.json
 *-window.json
 
 # Simulation data log directory
