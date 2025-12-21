@@ -8,7 +8,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -16,7 +15,6 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Preferences;
@@ -109,12 +107,13 @@ public class ElevatorTuningSubsystem implements Sendable {
 
   public void updatePIDs() {
     // Rev recommends not using velocity feed forward for max motion positional control
-    m_motorconfig.closedLoop.pidf(P, I, D, velFF);
+    m_motorconfig.closedLoop.pid(P, I, D);
+    m_motorconfig.closedLoop.feedForward.kV(velFF).kS(arbFF);
 
-    m_motorconfig.closedLoop.smartMotion
+    m_motorconfig.closedLoop.maxMotion
       .maxAcceleration(maxAcc)
-      .maxVelocity(maxVel)
-      .allowedClosedLoopError(0.3);
+      .cruiseVelocity(maxVel)
+      .allowedProfileError(0.3);
 
     m_motorLeft.configure(
       m_motorconfig,
@@ -214,12 +213,10 @@ public class ElevatorTuningSubsystem implements Sendable {
       "Setting rotations: " + targetRotations.in(Units.Rotation)
     );
     m_targetRotations = targetRotations;
-    m_PIDController.setReference(
+    m_PIDController.setSetpoint(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kSmartMotion,
-      ClosedLoopSlot.kSlot0,
-      arbFF,
-      ArbFFUnits.kVoltage
+      ControlType.kMAXMotionPositionControl,
+      ClosedLoopSlot.kSlot0
     );
   }
 

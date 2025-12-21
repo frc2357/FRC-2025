@@ -8,7 +8,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -31,13 +30,13 @@ public class LateratorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0.00008;
+  private double P = 0.0002;
   private double I = 0;
   private double D = 0;
   private double arbFF = 0;
-  private double velFF = 0.00025;
-  private double maxVel = 2000; // Desired: 4600, Max: 5600
-  private double maxAcc = 4800; // Desired: Unknown
+  private double velFF = 0.0004;
+  private double maxVel = 3500; // Desired: 4600, Max: 5600
+  private double maxAcc = 10000; // Desired: Unknown
 
   private SparkBaseConfig m_motorconfig = Constants.LATERATOR.MOTOR_CONFIG;
 
@@ -95,11 +94,12 @@ public class LateratorTuningSubsystem implements Sendable {
   }
 
   public void updatePIDs() {
-    m_motorconfig.closedLoop.pidf(P, I, D, 0).velocityFF(velFF);
+    m_motorconfig.closedLoop.pid(P, I, D);
+    m_motorconfig.closedLoop.feedForward.kV(velFF).kS(arbFF);
 
-    m_motorconfig.closedLoop.smartMotion
+    m_motorconfig.closedLoop.maxMotion
       .maxAcceleration(maxAcc)
-      .maxVelocity(maxVel);
+      .cruiseVelocity(maxVel);
 
     m_motor.configure(
       m_motorconfig,
@@ -196,12 +196,10 @@ public class LateratorTuningSubsystem implements Sendable {
 
   public void setTargetRotations(Angle targetRotations) {
     m_targetRotations = targetRotations;
-    m_PIDController.setReference(
+    m_PIDController.setSetpoint(
       m_targetRotations.in(Units.Rotations),
-      ControlType.kSmartMotion,
-      ClosedLoopSlot.kSlot0,
-      arbFF,
-      ArbFFUnits.kVoltage
+      ControlType.kMAXMotionPositionControl,
+      ClosedLoopSlot.kSlot0
     );
   }
 

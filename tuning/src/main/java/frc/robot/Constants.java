@@ -1,9 +1,8 @@
 package frc.robot;
 
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.MAXMotionConfig;
-import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -69,11 +68,11 @@ public final class Constants {
 
     public static final double AXIS_MAX_SPEED = 0.75;
 
-    public static final SmartMotionConfig SMART_MOTION_CONFIG =
-      CLOSED_LOOP_CONFIG.smartMotion
-        .allowedClosedLoopError(SMART_MOTION_ALLOWED_ERROR_PERCENT)
+    public static final MAXMotionConfig SMART_MOTION_CONFIG =
+      CLOSED_LOOP_CONFIG.maxMotion
+        .allowedProfileError(SMART_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
-        .maxVelocity(0);
+        .cruiseVelocity(0);
 
     public static final double GEAR_RATIO = 15;
     public static final Distance OUTPUT_PULLEY_DIAMETER = Units.Millimeters.of(
@@ -107,9 +106,9 @@ public final class Constants {
 
     public static final MAXMotionConfig MAX_MOTION_CONFIG_RIGHT =
       CLOSED_LOOP_CONFIG_RIGHT.maxMotion
-        .allowedClosedLoopError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
+        .allowedProfileError(MAX_MOTION_ALLOWED_ERROR_PERCENT)
         .maxAcceleration(0)
-        .maxVelocity(0);
+        .cruiseVelocity(0);
 
     public static final double AXIS_MAX_SPEED = 0.75;
   }
