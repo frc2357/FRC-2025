@@ -30,13 +30,14 @@ public class LateratorTuningSubsystem implements Sendable {
   private RelativeEncoder m_encoder;
   private Angle m_targetRotations = Units.Rotations.of(Double.NaN);
 
-  private double P = 0.0002;
+  private double P = 1.0;
   private double I = 0;
   private double D = 0;
-  private double arbFF = 0;
-  private double velFF = 0.0004;
-  private double maxVel = 3500; // Desired: 4600, Max: 5600
-  private double maxAcc = 10000; // Desired: Unknown
+  private double arbFF = 0.1;
+  private double velFF = 0.001;
+  private double accFF = 0.001;
+  private double maxVel = 4500; //3500; // Desired: 4600, Max: 5600
+  private double maxAcc = 15000; //10000; // Desired: Unknown
 
   private SparkBaseConfig m_motorconfig = Constants.LATERATOR.MOTOR_CONFIG;
 
@@ -59,6 +60,7 @@ public class LateratorTuningSubsystem implements Sendable {
     Preferences.initDouble("lateratorD", D);
     Preferences.initDouble("lateratorFF", arbFF);
     Preferences.initDouble("lateratorVelFF", velFF);
+    Preferences.initDouble("lateratorAccFF", accFF);
     Preferences.initDouble("lateratorMaxVel", maxVel);
     Preferences.initDouble("lateratorMaxAcc", maxAcc);
 
@@ -67,6 +69,7 @@ public class LateratorTuningSubsystem implements Sendable {
     D = Preferences.getDouble("lateratorD", D);
     arbFF = Preferences.getDouble("lateratorFF", arbFF);
     velFF = Preferences.getDouble("lateratorVelFF", velFF);
+    accFF = Preferences.getDouble("lateratorAccFF", accFF);
     maxVel = Preferences.getDouble("lateratorMaxVel", maxVel);
     maxAcc = Preferences.getDouble("lateratorMaxAcc", maxAcc);
 
@@ -80,6 +83,7 @@ public class LateratorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Laterator D", D);
     SmartDashboard.putNumber("Laterator arbFF", arbFF);
     SmartDashboard.putNumber("Laterator velFF", velFF);
+    SmartDashboard.putNumber("Laterator accFF", accFF);
     SmartDashboard.putNumber("Laterator MaxVel", maxVel);
     SmartDashboard.putNumber("Laterator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -95,7 +99,7 @@ public class LateratorTuningSubsystem implements Sendable {
 
   public void updatePIDs() {
     m_motorconfig.closedLoop.pid(P, I, D);
-    m_motorconfig.closedLoop.feedForward.kV(velFF).kS(arbFF);
+    m_motorconfig.closedLoop.feedForward.kV(velFF).kS(arbFF).kA(accFF);
 
     m_motorconfig.closedLoop.maxMotion
       .maxAcceleration(maxAcc)
@@ -114,6 +118,7 @@ public class LateratorTuningSubsystem implements Sendable {
     double newD = SmartDashboard.getNumber("Laterator D", D);
     double newFF = SmartDashboard.getNumber("Laterator arbFF", arbFF);
     double newVelFF = SmartDashboard.getNumber("Laterator velFF", velFF);
+    double newAccFF = SmartDashboard.getNumber("Laterator accFF", accFF);
     double newMaxVel = SmartDashboard.getNumber("Laterator MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Laterator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -133,6 +138,7 @@ public class LateratorTuningSubsystem implements Sendable {
       newD != D ||
       newFF != arbFF ||
       newVelFF != velFF ||
+      newAccFF != accFF ||
       newMaxVel != maxVel ||
       newMaxAcc != maxAcc
     ) {
@@ -141,6 +147,7 @@ public class LateratorTuningSubsystem implements Sendable {
       D = newD;
       arbFF = newFF;
       velFF = newVelFF;
+      accFF = newAccFF;
       maxVel = newMaxVel;
       maxAcc = newMaxAcc;
       updatePIDs();
@@ -217,7 +224,7 @@ public class LateratorTuningSubsystem implements Sendable {
   private boolean isAtTargetRotations() {
     return m_targetRotations.isNear(
       getRotations(),
-      LATERATOR.SMART_MOTION_ALLOWED_ERROR_PERCENT
+      LATERATOR.SMART_MOTION_ALLOWED_ERROR_ROTATIONS
     );
   }
 
@@ -234,6 +241,7 @@ public class LateratorTuningSubsystem implements Sendable {
         Preferences.setDouble("lateratorD", D);
         Preferences.setDouble("lateratorFF", arbFF);
         Preferences.setDouble("lateratorVelFF", velFF);
+        Preferences.setDouble("lateratorAccFF", accFF);
         Preferences.setDouble("lateratorMaxVel", maxVel);
         Preferences.setDouble("lateratorMaxAcc", maxAcc);
       }

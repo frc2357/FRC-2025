@@ -36,6 +36,7 @@ public class ElevatorTuningSubsystem implements Sendable {
   private double D = 0;
   private double arbFF = 0.15;
   private double velFF = 0.0003;
+  private double accFF = 0.0003;
   private double maxVel = 4600; // Desired: 4600, Max: 5600
   private double maxAcc = 10000; // Desired: 18400
 
@@ -71,6 +72,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     Preferences.initDouble("elevatorD", D);
     Preferences.initDouble("elevatorFF", arbFF);
     Preferences.initDouble("elevatorVelFF", velFF);
+    Preferences.initDouble("elevatorAccFF", accFF);
     Preferences.initDouble("elevatorMaxVel", maxVel);
     Preferences.initDouble("elevatorMaxAcc", maxAcc);
 
@@ -79,6 +81,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     D = Preferences.getDouble("elevatorD", D);
     arbFF = Preferences.getDouble("elevatorFF", arbFF);
     velFF = Preferences.getDouble("elevatorVelFF", velFF);
+    accFF = Preferences.getDouble("elevatorAccFF", accFF);
     maxVel = Preferences.getDouble("elevatorMaxVel", maxVel);
     maxAcc = Preferences.getDouble("elevatorMaxAcc", maxAcc);
 
@@ -92,6 +95,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     SmartDashboard.putNumber("Elevator D", D);
     SmartDashboard.putNumber("Elevator arbFF", arbFF);
     SmartDashboard.putNumber("Elevator velFF", velFF);
+    SmartDashboard.putNumber("Elevator accFF", accFF);
     SmartDashboard.putNumber("Elevator MaxVel", maxVel);
     SmartDashboard.putNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -108,7 +112,7 @@ public class ElevatorTuningSubsystem implements Sendable {
   public void updatePIDs() {
     // Rev recommends not using velocity feed forward for max motion positional control
     m_motorconfig.closedLoop.pid(P, I, D);
-    m_motorconfig.closedLoop.feedForward.kV(velFF).kS(arbFF);
+    m_motorconfig.closedLoop.feedForward.kV(velFF).kS(arbFF).kA(accFF);
 
     m_motorconfig.closedLoop.maxMotion
       .maxAcceleration(maxAcc)
@@ -128,6 +132,7 @@ public class ElevatorTuningSubsystem implements Sendable {
     double newD = SmartDashboard.getNumber("Elevator D", D);
     double newFF = SmartDashboard.getNumber("Elevator arbFF", arbFF);
     double newVelFF = SmartDashboard.getNumber("Elevator velFF", velFF);
+    double newAccFF = SmartDashboard.getNumber("Elevator accFF", accFF);
     double newMaxVel = SmartDashboard.getNumber("Elevator MaxVel", maxVel);
     double newMaxAcc = SmartDashboard.getNumber("Elevator MaxAcc", maxAcc);
     SmartDashboard.putNumber("Motor Rotations", m_encoder.getPosition());
@@ -147,6 +152,7 @@ public class ElevatorTuningSubsystem implements Sendable {
       newD != D ||
       newFF != arbFF ||
       newVelFF != velFF ||
+      newAccFF != accFF ||
       newMaxVel != maxVel ||
       newMaxAcc != maxAcc
     ) {
@@ -155,6 +161,7 @@ public class ElevatorTuningSubsystem implements Sendable {
       D = newD;
       arbFF = newFF;
       velFF = newVelFF;
+      accFF = newAccFF;
       maxVel = newMaxVel;
       maxAcc = newMaxAcc;
       updatePIDs();
@@ -250,6 +257,7 @@ public class ElevatorTuningSubsystem implements Sendable {
         Preferences.setDouble("elevatorD", D);
         Preferences.setDouble("elevatorFF", arbFF);
         Preferences.setDouble("elevatorVelFF", velFF);
+        Preferences.setDouble("elevatorAccFF", accFF);
         Preferences.setDouble("elevatorMaxVel", maxVel);
         Preferences.setDouble("elevatorMaxAcc", maxAcc);
       }

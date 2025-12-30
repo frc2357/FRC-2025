@@ -64,13 +64,13 @@ public final class Constants {
     public static final ClosedLoopConfig CLOSED_LOOP_CONFIG =
       MOTOR_CONFIG.closedLoop.outputRange(-1, 1);
 
-    public static final double SMART_MOTION_ALLOWED_ERROR_PERCENT = 0.01;
+    public static final double SMART_MOTION_ALLOWED_ERROR_ROTATIONS = 1;
 
     public static final double AXIS_MAX_SPEED = 0.75;
 
     public static final MAXMotionConfig SMART_MOTION_CONFIG =
       CLOSED_LOOP_CONFIG.maxMotion
-        .allowedProfileError(SMART_MOTION_ALLOWED_ERROR_PERCENT)
+        .allowedProfileError(SMART_MOTION_ALLOWED_ERROR_ROTATIONS)
         .maxAcceleration(0)
         .cruiseVelocity(0);
 
