@@ -574,8 +574,8 @@ public final class Constants {
     public static final double SWERVE_ROTATIONAL_DEADBAND = 0.0;
 
     public static final int DRIVE_CONTROLLER_PORT = 1;
-    public static final int CODRIVER_CONTROLLER_PORT = 0;
-    public static final int BUTTONBOARD_CONTROLLER_PORT = 2;
+    public static final int CODRIVER_CONTROLLER_PORT = 2;
+    public static final int BUTTONBOARD_CONTROLLER_PORT = 0;
 
     public static final double DRIVE_CONTROLLER_DEADBAND = 0.01;
     public static final double CODRIVE_CONTROLLER_DEADBAND = 0.025;
