@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Units;
 import edu.wpi.first.units.measure.Distance;
 import frc.robot.Constants.DRIVE_TO_POSE;
 import frc.robot.commands.drive.DriveToPoseHandler;
