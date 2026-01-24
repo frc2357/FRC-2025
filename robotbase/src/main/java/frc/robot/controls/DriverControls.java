@@ -9,15 +9,24 @@ import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ELEVATOR;
+import frc.robot.Constants.LATERATOR;
 import frc.robot.Robot;
+import frc.robot.commands.algaeKnocker.AlgaeKnockerSetSpeed;
+import frc.robot.commands.descoring.RemoveAlgaeHigh;
+import frc.robot.commands.descoring.RemoveAlgaeLow;
 import frc.robot.commands.drive.DriveToPoseHandler.RouteAroundReef;
 import frc.robot.commands.drive.DriveToReef;
+import frc.robot.commands.elevator.ElevatorSetDistance;
 import frc.robot.commands.intake.TeleopCoralIntake;
+import frc.robot.commands.laterator.LateratorHome;
+import frc.robot.commands.laterator.LateratorSetDistance;
 import frc.robot.commands.scoring.CoralHome;
 import frc.robot.commands.scoring.CoralZero;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL2;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL3;
 import frc.robot.commands.scoring.teleop.TeleopCoralScoreL4;
+import frc.robot.commands.util.PressToContinue;
 import frc.robot.controls.util.RumbleInterface;
 
 public class DriverControls implements RumbleInterface {
@@ -99,6 +108,9 @@ public class DriverControls implements RumbleInterface {
     m_controller
       .b()
       .whileTrue(new DriveToReef(RouteAroundReef.Fastest, BRANCH_F));
+
+    m_controller.a().onTrue(new RemoveAlgaeLow(m_controller.a()));
+    m_controller.y().onTrue(new RemoveAlgaeHigh(m_controller.y()));
   }
 
   public double getX() {
